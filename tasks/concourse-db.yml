@@ -1,0 +1,18 @@
+---
+
+- name: Concourse db
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    name: concourse-db
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{concourse_db_image}}"
+    container_ports:
+      - '5432:5432'
+    container_volumes:
+      - "{{concourse_db_path}}:/var/lib/postgresql/data"
+    container_env:
+      POSTGRES_USER: concourse
+      POSTGRES_DB: concourse
+      POSTGRES_PASSWORD: "{{concourse_db_password}}"
+  tags: docker-services

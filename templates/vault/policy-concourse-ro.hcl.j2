@@ -1,0 +1,11 @@
+path "cycloid/*" {
+policy = "read"
+}
+
+path "auth/token/create" {
+policy = "write"
+}
+
+path "auth/token/renew-self" {
+policy = "write"
+}

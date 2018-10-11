@@ -1,0 +1,85 @@
+---
+- name: host key | concourse
+  copy:
+    content: "{{ concourse_host_key }}"
+    dest: "{{ concourse_config_path }}/{{ concourse_host_key_path }}"
+  #  owner: "{{ concourse_user }}"
+  #  group: "{{ concourse_group }}"
+    mode: 0400
+  #become: yes
+  notify:
+  - restart concourse web
+
+- name: session signing key | concourse
+  copy:
+    content: "{{ concourse_session_signing_key }}"
+    dest: "{{ concourse_config_path }}/{{ concourse_session_signing_key_path }}"
+  #  owner: "{{ concourse_user }}"
+  #  group: "{{ concourse_group }}"
+    mode: 0400
+  #become: yes
+  notify:
+  - restart concourse web
+
+- name: authorized worker keys | concourse
+  copy:
+  #template:
+    #src: authorized_worker_keys.j2
+    content: "{% for key in concourse_authorized_worker_keys %}{{key}}\n{% endfor %}"
+    dest: "{{ concourse_config_path }}/{{ concourse_authorized_worker_keys_path }}"
+    mode: 0400
+
+- name: Concourse web
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    name: concourse-web
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{concourse_web_image}}"
+    container_ports:
+      - '2222:2222'
+      - '8080:8080'
+      - '8443:8443'
+    container_volumes:
+      # concourse-authorized-keys
+      - "{{ concourse_config_path }}:/opt/concourse"
+    container_cmd: "web"
+    container_links: [ 'vault', 'concourse-db' ]
+    # Additionnal env file for approle
+    container_args: "--env-file={{ concourse_config_path }}/approle-concourse-ro"
+    container_env:
+      CONCOURSE_SESSION_SIGNING_KEY: "/opt/concourse/{{ concourse_session_signing_key_path }}"
+      CONCOURSE_TSA_HOST_KEY: "/opt/concourse/{{ concourse_host_key_path }}"
+      CONCOURSE_TSA_AUTHORIZED_KEYS: "/opt/concourse/{{ concourse_authorized_worker_keys_path }}"
+      CONCOURSE_BASIC_AUTH_USERNAME: "{{ concourse_auth_user }}"
+      CONCOURSE_BASIC_AUTH_PASSWORD: "{{ concourse_auth_password }}"
+      # Vault integration
+      CONCOURSE_VAULT_URL: "{{ vault_url }}"
+      CONCOURSE_VAULT_AUTH_BACKEND: approle
+      CONCOURSE_VAULT_PATH_PREFIX: /cycloid
+      CONCOURSE_TLS_CERT: /opt/concourse/ssl.crt
+      CONCOURSE_TLS_KEY: /opt/concourse/ssl.key
+      CONCOURSE_TLS_BIND_PORT: 8443
+      #CONCOURSE_VAULT_INSECURE_SKIP_VERIFY: true
+      # Defined in vault
+      #CONCOURSE_VAULT_APPROLE_SECRET_ID: "VAULT SECRET IDs"
+      #CONCOURSE_VAULT_APPROLE_ROLE_ID: "VAULT APPROLE ID"
+      #CONCOURSE_VAULT_AUTH_PARAM: "role_id=$(CONCOURSE_VAULT_APPROLE_ROLE_ID),secret_id=$(CONCOURSE_VAULT_APPROLE_SECRET_ID)"
+      #CONCOURSE_LOG_LEVEL: error
+      #CONCOURSE_TSA_LOG_LEVEL: error
+      CONCOURSE_DEFAULT_BUILD_LOGS_TO_RETAIN: "10"
+      CONCOURSE_MAX_BUILD_LOGS_TO_RETAIN: "10"
+      CONCOURSE_OLD_RESOURCE_GRACE_PERIOD: 5m
+      CONCOURSE_RESOURCE_CACHE_CLEANUP_INTERVAL: 30s
+      CONCOURSE_PEER_URL: "{{ concourse_peer_url }}"
+      CONCOURSE_EXTERNAL_URL: "{{ concourse_external_url }}"
+      POSTGRESQL_HOST: concourse-db
+      POSTGRESQL_PORT: "5432"
+      POSTGRES_USERNAME: concourse
+      POSTGRES_PASSWORD: "{{concourse_db_password}}"
+      CONCOURSE_POSTGRES_DATA_SOURCE: "postgres://concourse:{{ concourse_db_password }}@concourse-db:5432/concourse?sslmode=disable"
+      #CONCOURSE_INFLUXDB_URL: http://localhost:9122
+  notify:
+  - restart concourse web
+
+  tags: docker-services

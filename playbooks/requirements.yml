@@ -1,0 +1,39 @@
+---
+#- src: https://github.com/cycloidio/ansible-prometheus.git
+#  version: master
+#  name: cycloid.prometheus
+#  scm: git
+#
+#- src: https://github.com/cycloidio/ansible-telegraf.git
+#  version: master
+#  name: cycloid.telegraf
+#  scm: git
+#
+#- src: https://github.com/dj-wasabi/ansible-telegraf
+#  version: master
+#  name: dj-wasabi.telegraf
+#  scm: git
+
+- src: https://github.com/geerlingguy/ansible-cycloid-onprem
+  version: master
+  name: ansible-cycloid-onprem
+  scm: git
+
+- src: https://github.com/geerlingguy/ansible-role-docker
+  version: master
+  name: geerlingguy.docker
+  scm: git
+
+- src: https://github.com/jdauphant/ansible-role-nginx
+  name: jdauphant.nginx
+  scm: git
+
+# PR in progress
+- src: https://github.com/cycloidio/ansible-docker-systemd-service
+  version: master
+  name: mhutter.docker-systemd-service
+  scm: git
+#- src: https://github.com/mhutter/ansible-docker-systemd-service
+#  version: master
+#  name: mhutter.docker-systemd-service
+#  scm: git

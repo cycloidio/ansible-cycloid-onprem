@@ -1,0 +1,40 @@
+---
+
+- name: Install depends
+  hosts: instance
+  gather_facts: no
+  tasks:
+
+    # Ensure we use vfs storage (not aufs)
+    - name: ensure /etc/docker exist
+      file:
+        path: "/etc/docker"
+        state: directory
+        mode: 0750
+        recurse: yes
+    - name: for docker to use vfs storage
+      copy:
+        content: '{"storage-driver": "vfs"}'
+        dest: "/etc/docker/daemon.json"
+
+    - name: install apt depends
+      apt:
+        name: "{{item}}"
+        state: present
+      with_items:
+        - net-tools
+        - lsb-release
+        - curl
+        - procps
+        - python-setuptools
+
+    - easy_install:
+        name: pip
+        state: present
+
+    - name: install pip depends
+      pip:
+         name: "{{item}}"
+         state: latest
+      with_items:
+        - docker

@@ -1,0 +1,6 @@
+- name: restart concourse web
+  service:
+    name: concourse-web_container
+    state: restarted
+#  become: yes
+#  become_user: root

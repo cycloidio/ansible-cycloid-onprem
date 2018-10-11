@@ -1,0 +1,142 @@
+---
+dependency:
+  name: galaxy
+  options:
+    # vvv: True
+    role-file: playbooks/test-requirements.yml
+driver:
+  name: docker
+lint:
+  name: yamllint
+platforms:
+  - name: instance
+    #image: debian
+    image: debian:stretch
+    # Because we added systemd in Dockerfile.j2
+    # We can start with it and test ansible with systemd.
+    # https://medium.com/@tklo/testing-ansible-role-of-a-systemd-based-service-using-molecule-and-docker-4b3608a10ef0
+    command: "/bin/systemd"
+    published_ports:
+      - "3306:3306"
+      - "8080:8080"
+      - "8888:8888"
+      - "8200:8200"
+      - "3001:3001"
+      - "80:80"
+      - "443:443"
+    privileged: yes
+    #volume_mounts:
+    #volumes:
+    #  - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
+    #env: { container: docker }
+    #capabilities: ["SYS_ADMIN"]
+    networks:
+    - name: molecule
+      aliases:
+        - instance
+    groups:
+     - cycloid
+  - name: concourse-worker
+    #image: debian
+    image: concourse/concourse:3.14.1
+    privileged: yes
+    #volume_mounts:
+    volumes:
+      - "/tmp/molecule_test:/opt:ro"
+    networks:
+    - name: molecule
+      aliases:
+        - cc_worker
+      links:
+         - "instance:instance"
+    command: "worker"
+    env:
+      CONCOURSE_TSA_HOST: instance:2222
+      CONCOURSE_TSA_PUBLIC_KEY: /opt/id_rsa.pub
+      CONCOURSE_TSA_WORKER_PRIVATE_KEY: /opt/id_rsa
+#      CONCOURSE_GARDEN_LOG_LEVEL: error
+#      CONCOURSE_BAGGAGECLAIM_LOG_LEVEL: error
+      CONCOURSE_BAGGAGECLAIM_DRIVER: overlay
+
+          #--baggageclaim-driver=[detect|naive|btrfs|overlay] Driver to use for
+
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ../../playbooks/playbook.yml
+  options:
+    extra-vars:
+      env=test
+    #vvv: "True"
+  env:
+   MOLECULE_DEBUG: "true"
+   #ANSIBLE_ROLES_PATH: ../../roles
+#     $project_root/../:$ephemeral_directory/roles/
+#   ANSIBLE_LIBRARY:
+#     $project_root/library/:$ephemeral_directory/library/
+#   ANSIBLE_FILTER_PLUGINS:
+#     $project_root/filter/plugins/:$ephemeral_directory/plugins/filters/
+  lint:
+    name: ansible-lint
+  # Config to pass to ansible.cfg
+  # molecule will merge default one, ansible.cfg file found and those one into the .molecule/ansible.cfg
+#  config_options:
+#    defaults:
+#        roles_path: ../../../roles
+scenario:
+  name: default
+  # Override the sequance of a command
+  # https://molecule.readthedocs.io/en/latest/configuration.html#scenario
+  test_sequence:
+    #- lint
+    - destroy
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - side_effect
+    - verify
+    - destroy
+
+verifier:
+  name: testinfra
+  lint:
+    name: flake8
+
+
+#        provisioner:
+#          name: ansible
+#          inventory:
+#            group_vars:
+#              foo1:
+#                foo: bar
+#              foo2:
+#                foo: bar
+#                baz:
+#                  qux: zzyzx
+#            host_vars:
+#              foo1-01:
+#                foo: bar
+#
+#        provisioner:
+#          name: ansible
+#          inventory:
+#            links:
+#              group_vars: ../../../inventory/group_vars/
+#              host_vars: ../../../inventory/host_vars/
+#
+#
+#        ANSIBLE_ROLES_PATH:
+#          $project_root/../:$ephemeral_directory/roles/
+#        ANSIBLE_LIBRARY:
+#          $project_root/library/:$ephemeral_directory/library/
+#        ANSIBLE_FILTER_PLUGINS:
+#          $project_root/filter/plugins/:$ephemeral_directory/plugins/filters/
+#
+#        provisioner:
+#          name: ansible
+#          env:
+#            FOO: bar
+#

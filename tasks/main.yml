@@ -1,0 +1,34 @@
+---
+
+- include: pre-setup.yml
+  when: not validate_only
+
+- include: gen-ssl.yml
+  when: not validate_only
+
+- include: vault.yml
+  when: not validate_only and setup_vault
+
+- include: cycloid-db.yml
+  when: not validate_only and setup_cycloid_db
+
+- include: concourse-db.yml
+  when: not validate_only and setup_concourse_db
+
+- include: concourse-web.yml
+  when: not validate_only
+
+- include: cycloid-api.yml
+  when: not validate_only
+
+- include: cycloid-frontend.yml
+  when: not validate_only
+
+- include: nginx.yml
+  when: not validate_only
+
+#- include: prometheus.yml
+
+# Wait and validate running services
+- include: validate.yml
+  when: validate or validate_only

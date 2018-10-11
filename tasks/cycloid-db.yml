@@ -1,0 +1,19 @@
+---
+
+- name: Cycloid db
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    name: cycloid-db
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: mariadb:latest
+    container_ports:
+      - '{{ cycloid_db_port }}:3306'
+    container_volumes:
+      - "{{cycloid_db_path}}:/var/lib/mysql"
+    container_env:
+      MYSQL_USER: cycloid
+      MYSQL_DATABASE: cycloid
+      MYSQL_PASSWORD: "{{cycloid_db_password}}"
+      MYSQL_ROOT_PASSWORD: "{{cycloid_db_password}}"
+  tags: docker-services

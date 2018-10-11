@@ -1,0 +1,107 @@
+---
+
+- name: Force flush handlers before validate that everything is working
+  meta: flush_handlers
+
+#
+# Vault
+#
+- name: Check if vault is initialised | validate
+  uri:
+    url: https://127.0.0.1:8200/v1/sys/init
+    validate_certs: no
+    status_code: 200
+    return_content: yes
+  register: vault_init
+  until: '"initialized" in vault_init.content'
+  retries: 30
+  delay: 10
+  ignore_errors: True
+
+- fail: msg='Vault service unvailable or not initialized'
+  when: vault_init is failed or vault_init.json.initialized == false
+
+- name: Check if vault is unseal | validate
+  uri:
+    url: https://127.0.0.1:8200/v1/cycloid?list=true
+    validate_certs: no
+    status_code: 400 # "missing client token"
+    return_content: yes
+  register: unseal
+  #until: '"Vault is sealed" not in unseal.content'
+  retries: 2
+  delay: 2
+  ignore_errors: True
+
+- fail: msg='Vault service is sealed, you should unseal it'
+  when: unseal is failed or unseal.json.errors == "Vault is sealed"
+
+#
+# Concourse
+#
+- name: Check Concourse | validate
+  uri:
+    url: "{{ concourse_peer_url }}/api/v1/info"
+    validate_certs: no
+    status_code: 200
+    return_content: yes
+  register: concourse_info
+  until: '"version" in concourse_info.content'
+  retries: 30
+  delay: 10
+  ignore_errors: True
+
+- fail: msg='Concourse service unvailable'
+  when: concourse_info is failed
+
+#
+# Cycloid api
+#
+- name: Check Cycloid api | validate
+  uri:
+    url: "http://localhost:3001"
+    validate_certs: no
+    status_code: 404
+    return_content: yes
+  register: cycloid_api_status
+  until: '"entity not found" in cycloid_api_status.content'
+  retries: 30
+  delay: 10
+  ignore_errors: True
+
+- fail: msg='Cycloid api service unvailable'
+  when: cycloid_api_status is failed
+
+- name: Check Cycloid api throught nginx ssl | validate
+  uri:
+    url: "https://localhost:443"
+    validate_certs: no
+    status_code: 404
+    return_content: yes
+    headers:
+      Host: "{{ cycloid_api_dns }}"
+  register: cycloid_api_status_nginx
+  until: '"entity not found" in cycloid_api_status_nginx.content'
+  retries: 30
+  delay: 10
+  ignore_errors: True
+
+- fail: msg='Cycloid api throught nginx ssl unvailable'
+  when: cycloid_api_status_nginx is failed
+
+#
+# Nginx force https
+#
+- name: Check nginx proxy http | validate
+  uri:
+    url: "http://localhost"
+    status_code: 301
+    follow_redirects: none
+  register: nginx_http_curl
+  until: 'nginx_http_curl.location == "https://localhost/"'
+  retries: 30
+  delay: 10
+  ignore_errors: True
+
+- fail: msg='Nginx http listener unvailable'
+  when: nginx_http_curl is failed

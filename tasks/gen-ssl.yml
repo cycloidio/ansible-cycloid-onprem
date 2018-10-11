@@ -1,0 +1,32 @@
+---
+
+- name: Generate a OpenSSL private key | ssl
+  openssl_privatekey:
+    path: "{{ cycloid_install_path }}/ssl.key"
+
+- name: Generate a OpenSSL certificate request | ssl
+  openssl_csr:
+    path: "{{ cycloid_install_path }}/ssl.csr"
+    privatekey_path: "{{ cycloid_install_path }}/ssl.key"
+    common_name: 127.0.0.1
+    subject_alt_name: 'DNS:cycloid,DNS:localhost,DNS:vault,DNS:concourse'
+
+
+- name: Generate a Self Signed OpenSSL certificate | ssl
+  openssl_certificate:
+    path: "{{ cycloid_install_path }}/ssl.crt"
+    privatekey_path: "{{ cycloid_install_path }}/ssl.key"
+    csr_path: "{{ cycloid_install_path }}/ssl.csr"
+    provider: selfsigned
+
+- name: Copy the ssl in service directories | ssl
+  copy:
+    src: "{{ cycloid_install_path }}/ssl.{{item.0}}"
+    dest: "{{item.1}}/ssl.{{item.0}}"
+    remote_src: yes
+    mode: 0400
+  with_nested:
+    - [ 'key', 'crt' ]
+    -
+      - "{{ concourse_config_path }}"
+      - "{{ vault_config_path }}/config"

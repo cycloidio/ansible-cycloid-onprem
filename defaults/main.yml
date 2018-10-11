@@ -1,0 +1,85 @@
+---
+
+validate: True
+validate_only: False
+docker_pull: true
+#docker_pull: false
+
+setup_cycloid_db: true
+setup_concourse_db: true
+setup_vault: true
+
+cycloid_install_path: /opt/cycloid
+
+#
+# Docker
+#
+
+cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod
+cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:latest
+concourse_db_image: postgres:latest
+concourse_web_image: concourse/concourse:3.14.1
+vault_image: vault:latest
+
+#
+# Concourse
+#
+# concourse_peer_url: must be specified as a URL used to reach the individual web node, from other web nodes. So this just has to be a URL reachable within their private network, e.g. a 10.x.x.x address
+concourse_peer_url: https://localhost:8443
+concourse_external_url: https://localhost
+concourse_config_path: "{{ cycloid_install_path }}/concourse"
+concourse_db_path: "{{ cycloid_install_path }}/concourse-db"
+concourse_authorized_worker_keys_path: "authorized_worker_keys"
+concourse_host_key_path: "host_key"
+concourse_session_signing_key_path: "session_signing_key"
+concourse_db_password: "Deraephoh9aay4Aide4phoS7xej1xi5m"
+concourse_auth_user: admin
+concourse_auth_password: admin
+
+#concourse_session_signing_key:
+#concourse_host_key:
+#concourse_authorized_worker_keys:
+#  - name: foo
+#    key: ssh-rsa ...
+
+#
+# Vault
+#
+vault_config_path: "{{ cycloid_install_path }}/vault"
+vault_config:
+  storage:
+    file:
+       path: /vault/file
+  listener:
+    tcp:
+      address: "0.0.0.0:8200"
+      tls_disable: "0"
+      tls_cert_file: "/vault/config/ssl.crt"
+      tls_key_file:  "/vault/config/ssl.key"
+  default_lease_ttl: "168h"
+  max_lease_ttl: "720h"
+vault_url: https://vault:8200
+
+#
+# Cycloid
+#
+
+cycloid_initial_user:
+  username: "admin"
+  email: "disabled@no-email.cycloid"
+  password: "Ch4ngm3pls"
+
+cycloid_db_password: "chovoh6gahti5ohP0AiF6eex6evoonie"
+cycloid_db_host: cycloid-db
+cycloid_db_port: 3306
+cycloid_db_user: cycloid
+cycloid_db_name: cycloid
+cycloid_db_path: "{{ cycloid_install_path }}/cycloid-db"
+
+# iam credential to get ecr images
+cycloid_ecr_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') | default(omit)}}"
+cycloid_ecr_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') | default(omit)}}"
+
+concourse_url: https://concourse-web
+cycloid_console_dns: cycloid-console
+cycloid_api_dns: cycloid-api
