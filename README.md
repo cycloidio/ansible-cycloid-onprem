@@ -3,6 +3,8 @@ ansible-cycloid-onprem
 
 Provide a way to setup Cycloid platforme and dependencies on one or several servers using Docker.
 
+![Schema](https://github.com/cycloidio/ansible-cycloid-onprem/raw/master/onprem.png)
+
 After a default run of this playbook on a server, you will find those different services :
 
 | **Service**        | **Port**                                |
