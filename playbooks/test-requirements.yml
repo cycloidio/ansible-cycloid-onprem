@@ -9,12 +9,7 @@
   name: jdauphant.nginx
   scm: git
 
-# PR in progress
-- src: https://github.com/cycloidio/ansible-docker-systemd-service
+- src: https://github.com/mhutter/ansible-docker-systemd-service
   version: master
   name: mhutter.docker-systemd-service
   scm: git
-#- src: https://github.com/mhutter/ansible-docker-systemd-service
-#  version: master
-#  name: mhutter.docker-systemd-service
-#  scm: git

@@ -12,6 +12,7 @@ After a default run of this playbook on a server, you will find those different 
 | `vault`            | `8200`                                  |
 | `Cycloid frontend` | `8888`                                  |
 | `Cycloid api`      | `3001`                                  |
+| `Cycloid db `      | `3306`                                  |
 | `Nginx proxy`      | HTTP `80`, HTTPS `443`                  |
 
 Role Variables
