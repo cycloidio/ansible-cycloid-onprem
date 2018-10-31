@@ -66,7 +66,7 @@ provisioner:
     converge: ../../playbooks/playbook.yml
   options:
     extra-vars:
-      env=test
+      env: test
     #vvv: "True"
   env:
    MOLECULE_DEBUG: "true"
