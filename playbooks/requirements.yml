@@ -14,7 +14,7 @@
 #  name: dj-wasabi.telegraf
 #  scm: git
 
-- src: https://github.com/geerlingguy/ansible-cycloid-onprem
+- src: https://github.com/cycloidio/ansible-cycloid-onprem
   version: master
   name: ansible-cycloid-onprem
   scm: git
