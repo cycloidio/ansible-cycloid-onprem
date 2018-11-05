@@ -25,7 +25,8 @@ vault_image: vault:latest
 # Concourse
 #
 # concourse_peer_url: must be specified as a URL used to reach the individual web node, from other web nodes. So this just has to be a URL reachable within their private network, e.g. a 10.x.x.x address
-concourse_peer_url: https://localhost:8443
+concourse_peer_url: http://localhost:8080
+#concourse_peer_url: https://localhost:8443
 concourse_external_url: https://localhost
 concourse_config_path: "{{ cycloid_install_path }}/concourse"
 concourse_db_path: "{{ cycloid_install_path }}/concourse-db"
@@ -83,3 +84,4 @@ cycloid_ecr_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') | default(omit
 concourse_url: https://concourse-web
 cycloid_console_dns: cycloid-console
 cycloid_api_dns: cycloid-api
+cycloid_use_api_via_console: False

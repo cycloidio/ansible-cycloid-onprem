@@ -11,6 +11,5 @@
     container_ports:
       - '8888:80'
     container_env:
-      CYCLOID_API_URL: "https://{{cycloid_api_dns}}"
-
+      CYCLOID_API_URL: "{%- if cycloid_use_api_via_console -%}https://{{cycloid_console_dns}}/api{%- else -%}https://{{cycloid_api_dns}}{%- endif -%}"
   tags: docker-services

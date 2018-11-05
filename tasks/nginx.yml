@@ -28,6 +28,12 @@
             proxy_set_header   X-FORWARDED_PROTO https;
             proxy_set_header   X-FORWARDED_PORT 443;
           }
+        - location /api {
+            proxy_set_header   X-FORWARDED_PROTO https;
+            proxy_set_header   X-FORWARDED_PORT 443;
+            proxy_set_header   Host              {{ cycloid_api_dns }};
+            proxy_pass https://127.0.0.1/;
+          }
       02-cycloid-api:
         - listen       443 ssl
         - server_name  "{{ cycloid_api_dns }}"
