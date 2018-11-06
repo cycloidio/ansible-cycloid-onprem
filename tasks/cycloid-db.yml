@@ -6,7 +6,7 @@
   vars:
     name: cycloid-db
     container_docker_pull: "{{ docker_pull }}"
-    container_image: mariadb:latest
+    container_image: "{{ cycloid_db_image }}"
     container_ports:
       - '{{ cycloid_db_port }}:3306'
     container_volumes:

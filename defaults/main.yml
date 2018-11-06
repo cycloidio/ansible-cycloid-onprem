@@ -16,8 +16,9 @@ cycloid_install_path: /opt/cycloid
 #
 
 cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod
-cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:latest
-concourse_db_image: postgres:latest
+cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod
+concourse_db_image: postgres:9.5
+cycloid_db_image: mariadb:10.2.11
 concourse_web_image: concourse/concourse:3.14.1
 vault_image: vault:latest
 
@@ -82,6 +83,6 @@ cycloid_ecr_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') | default(omit)}}"
 cycloid_ecr_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') | default(omit)}}"
 
 concourse_url: https://concourse-web
-cycloid_console_dns: cycloid-console
 cycloid_api_dns: cycloid-api
-cycloid_use_api_via_console: False
+cycloid_use_api_via_console: True
+cycloid_console_dns: cycloid-console
