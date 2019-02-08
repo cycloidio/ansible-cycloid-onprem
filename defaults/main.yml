@@ -70,6 +70,8 @@ cycloid_initial_user:
   username: "admin"
   email: "disabled@no-email.cycloid"
   password: "Ch4ngm3pls"
+  given_name: admin
+  family_name: cycloid
 
 cycloid_db_password: "chovoh6gahti5ohP0AiF6eex6evoonie"
 cycloid_db_host: cycloid-db
