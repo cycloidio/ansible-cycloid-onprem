@@ -59,12 +59,12 @@
 #
 - name: Check Cycloid api | validate
   uri:
-    url: "http://localhost:3001"
+    url: "http://localhost:3001/user"
     validate_certs: no
-    status_code: 404
+    status_code: 401
     return_content: yes
   register: cycloid_api_status
-  until: '"entity not found" in cycloid_api_status.content'
+  until: '"credentials are required" in cycloid_api_status.content'
   retries: 30
   delay: 10
   ignore_errors: True
@@ -74,14 +74,14 @@
 
 - name: Check Cycloid api throught nginx ssl | validate
   uri:
-    url: "https://localhost:443"
+    url: "https://localhost:443/user"
     validate_certs: no
-    status_code: 404
+    status_code: 401
     return_content: yes
     headers:
       Host: "{{ cycloid_api_dns }}"
   register: cycloid_api_status_nginx
-  until: '"entity not found" in cycloid_api_status_nginx.content'
+  until: '"credentials are required" in cycloid_api_status_nginx.content'
   retries: 30
   delay: 10
   ignore_errors: True

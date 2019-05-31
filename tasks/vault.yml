@@ -79,7 +79,7 @@
   - name: Set global configuration | vault
     shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault {{item}}"
     with_items:
-      - secrets move secret/ cycloid/
+      - secrets enable -path cycloid kv-v2
       - auth enable approle
     # Concourse tunning
       - secrets tune -max-lease-ttl=4380h cycloid/

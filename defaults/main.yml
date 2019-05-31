@@ -6,6 +6,7 @@ docker_pull: true
 #docker_pull: false
 
 setup_cycloid_db: true
+setup_cycloid_redis: true
 setup_concourse_db: true
 setup_vault: true
 
@@ -18,9 +19,10 @@ cycloid_install_path: /opt/cycloid
 cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod
 cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod
 concourse_db_image: postgres:9.5
+cycloid_redis_image: redis:5.0
 cycloid_db_image: mariadb:10.2.11
-concourse_web_image: concourse/concourse:3.14.1
-vault_image: vault:latest
+concourse_web_image: concourse/concourse:4.2.3
+vault_image: vault:1.1.2
 
 #
 # Concourse
@@ -31,6 +33,7 @@ concourse_peer_url: http://localhost:8080
 concourse_external_url: https://localhost
 concourse_config_path: "{{ cycloid_install_path }}/concourse"
 concourse_db_path: "{{ cycloid_install_path }}/concourse-db"
+cycloid_redis_path: "{{ cycloid_install_path }}/cycloid-redis"
 concourse_authorized_worker_keys_path: "authorized_worker_keys"
 concourse_host_key_path: "host_key"
 concourse_session_signing_key_path: "session_signing_key"
@@ -80,6 +83,17 @@ cycloid_db_port: 3306
 cycloid_db_user: cycloid
 cycloid_db_name: cycloid
 cycloid_db_path: "{{ cycloid_install_path }}/cycloid-db"
+cycloid_email_smtp_svr_addr: 172.17.0.1:1025
+cycloid_email_insecure: true
+cycloid_email_smtp_username: admin
+cycloid_email_smtp_password: admin
+cycloid_email_addr_from: noreply@cycloid.io
+cycloid_email_addr_return_path: admin+ydbounce@cycloid.io
+cycloid_email_redis_host: cycloid-redis
+cycloid_email_redis_port: 6379
+cycloid_email_redis_db: 0
+cycloid_jwt_key_1: 2f2122de-63f2-4eec-9c6f-c6abb3e1f007:7cdyHps2tYDp6e7VKPEstE5sDMQbK6WLyN3GmTsF7x7QpE6ZP5ra6yfVSkvXakbB
+cycloid_crypto_signing_key: totally-random-secret-key
 
 # iam credential to get ecr images
 cycloid_ecr_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') | default(omit)}}"
@@ -89,3 +103,4 @@ concourse_url: https://concourse-web
 cycloid_api_dns: cycloid-api
 cycloid_use_api_via_console: True
 cycloid_console_dns: cycloid-console
+cycloid_frontend_base_url: "https://{{ cycloid_console_dns }}"

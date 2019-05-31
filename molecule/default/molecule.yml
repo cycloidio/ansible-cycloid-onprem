@@ -9,8 +9,22 @@ driver:
 lint:
   name: yamllint
 platforms:
+  - name: smtp-server
+    image: mailhog/mailhog:v1.0.0
+    privileged: yes
+    volumes:
+      - ./mailhog:/opt/
+    published_ports:
+      - "1025:1025"
+      - "8025:8025"
+      #- "587:587"
+    networks:
+    - name: molecule
+      aliases:
+        - cycloid-smtp
+    env:
+      MH_AUTH_FILE: /opt/mailhog.auth
   - name: instance
-    #image: debian
     image: debian:stretch
     # Because we added systemd in Dockerfile.j2
     # We can start with it and test ansible with systemd.
@@ -24,21 +38,24 @@ platforms:
       - "3001:3001"
       - "80:80"
       - "443:443"
+    networks:
+    - name: molecule
+      aliases:
+        - instance
+      links:
+         - "smtp-server:smtp-server"
+         - "cycloid-smtp:cycloid-smtp"
     privileged: yes
     #volume_mounts:
     #volumes:
     #  - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
     #env: { container: docker }
     #capabilities: ["SYS_ADMIN"]
-    networks:
-    - name: molecule
-      aliases:
-        - instance
     groups:
      - cycloid
   - name: concourse-worker
     #image: debian
-    image: concourse/concourse:3.14.1
+    image: concourse/concourse:4.2.3
     privileged: yes
     #volume_mounts:
     volumes:
@@ -51,6 +68,7 @@ platforms:
          - "instance:instance"
     command: "worker"
     env:
+      CONCOURSE_EPHEMERAL: yes
       CONCOURSE_TSA_HOST: instance:2222
       CONCOURSE_TSA_PUBLIC_KEY: /opt/id_rsa.pub
       CONCOURSE_TSA_WORKER_PRIVATE_KEY: /opt/id_rsa
@@ -58,8 +76,7 @@ platforms:
 #      CONCOURSE_BAGGAGECLAIM_LOG_LEVEL: error
       CONCOURSE_BAGGAGECLAIM_DRIVER: overlay
 
-          #--baggageclaim-driver=[detect|naive|btrfs|overlay] Driver to use for
-
+    
 provisioner:
   name: ansible
   playbooks:
@@ -70,19 +87,8 @@ provisioner:
     #vvv: "True"
   env:
    MOLECULE_DEBUG: "true"
-   #ANSIBLE_ROLES_PATH: ../../roles
-#     $project_root/../:$ephemeral_directory/roles/
-#   ANSIBLE_LIBRARY:
-#     $project_root/library/:$ephemeral_directory/library/
-#   ANSIBLE_FILTER_PLUGINS:
-#     $project_root/filter/plugins/:$ephemeral_directory/plugins/filters/
   lint:
     name: ansible-lint
-  # Config to pass to ansible.cfg
-  # molecule will merge default one, ansible.cfg file found and those one into the .molecule/ansible.cfg
-#  config_options:
-#    defaults:
-#        roles_path: ../../../roles
 scenario:
   name: default
   # Override the sequance of a command
@@ -104,39 +110,3 @@ verifier:
   name: testinfra
   lint:
     name: flake8
-
-
-#        provisioner:
-#          name: ansible
-#          inventory:
-#            group_vars:
-#              foo1:
-#                foo: bar
-#              foo2:
-#                foo: bar
-#                baz:
-#                  qux: zzyzx
-#            host_vars:
-#              foo1-01:
-#                foo: bar
-#
-#        provisioner:
-#          name: ansible
-#          inventory:
-#            links:
-#              group_vars: ../../../inventory/group_vars/
-#              host_vars: ../../../inventory/host_vars/
-#
-#
-#        ANSIBLE_ROLES_PATH:
-#          $project_root/../:$ephemeral_directory/roles/
-#        ANSIBLE_LIBRARY:
-#          $project_root/library/:$ephemeral_directory/library/
-#        ANSIBLE_FILTER_PLUGINS:
-#          $project_root/filter/plugins/:$ephemeral_directory/plugins/filters/
-#
-#        provisioner:
-#          name: ansible
-#          env:
-#            FOO: bar
-#

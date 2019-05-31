@@ -12,6 +12,9 @@
 - include: cycloid-db.yml
   when: not validate_only and setup_cycloid_db
 
+- include: cycloid-redis.yml
+  when: not validate_only and setup_cycloid_redis
+
 - include: concourse-db.yml
   when: not validate_only and setup_concourse_db
 
