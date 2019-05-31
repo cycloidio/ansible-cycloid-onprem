@@ -12,6 +12,12 @@
 - include: cycloid-db.yml
   when: not validate_only and setup_cycloid_db
 
+- include: cycloid-smtp.yml
+  when: not validate_only and cycloid_email_smtp_svr_addr == "cycloid-smtp:1025"
+
+- include: cycloid-redis.yml
+  when: not validate_only and setup_cycloid_redis
+
 - include: concourse-db.yml
   when: not validate_only and setup_concourse_db
 

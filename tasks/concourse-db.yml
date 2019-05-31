@@ -1,5 +1,9 @@
 ---
 
+- name: Add this container to concourse web links
+  set_fact:
+   concourse_web_container_links: "{{ concourse_web_container_links + ['concourse-db'] }}"
+
 - name: Concourse db
   include_role:
     name: mhutter.docker-systemd-service

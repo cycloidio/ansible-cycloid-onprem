@@ -1,5 +1,13 @@
 ---
 
+- name: Add this container to api links
+  set_fact:
+   cycloid_api_container_links: "{{ cycloid_api_container_links + ['vault'] }}"
+
+- name: Add this container to concourse web links
+  set_fact:
+   concourse_web_container_links: "{{ concourse_web_container_links + ['vault'] }}"
+
 - name: Vault
   include_role:
     name: mhutter.docker-systemd-service
@@ -46,6 +54,7 @@
     module: copy
     content: "{{vault_tokens.stdout | from_json | to_nice_json}}"
     dest: "{{playbook_dir}}/vault.secret"
+  become: no
   when: vault_tokens is not skipped
 
 - name: Unseal vault | vault
@@ -79,7 +88,7 @@
   - name: Set global configuration | vault
     shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault {{item}}"
     with_items:
-      - secrets move secret/ cycloid/
+      - secrets enable -path cycloid kv
       - auth enable approle
     # Concourse tunning
       - secrets tune -max-lease-ttl=4380h cycloid/

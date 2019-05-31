@@ -1,0 +1,5 @@
+- src: https://github.com/cycloidio/ansible-concourse
+  version: master
+  name: cycloid.concourse
+  scm: git
+
