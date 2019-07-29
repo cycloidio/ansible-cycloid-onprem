@@ -91,6 +91,7 @@ Let's configure an environment called `prod`.
 export CYCLOID_ENV=prod
 ```
 
+```
 cat >> environments/${CYCLOID_ENV}-cycloid.yml <<EOF
 # Resolvable domain name from the instance and externally to use Cycloid console.
 cycloid_console_dns: console.mydomain.org
@@ -109,6 +110,7 @@ concourse_host_key: "{{lookup('file', 'keys/id_rsa')}}"
 concourse_authorized_worker_keys:
   - "{{lookup('file', 'keys/id_rsa.pub')}}"
 EOF
+```
 
 Run Ansible to setup Cycloid core
 
