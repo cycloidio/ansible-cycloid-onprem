@@ -1,5 +1,7 @@
 ---
 
+- name: Force flush handlers to ensure all other containers like concourse web is started before running the api | api
+  meta: flush_handlers
 
 - name: Cycloid api | api
   include_role:
@@ -8,31 +10,48 @@
     name: cycloid-api
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{cycloid_api_image}}"
-    container_links: [ 'cycloid-db', 'vault', 'concourse-web' ]
-    #container_volumes:
-    #  - '/data/uploads:/data/uploads'
+    container_links: "{{ cycloid_api_container_links }}"
+    container_volumes:
+      # concourse-authorized-keys
+      - "{{ concourse_config_path }}:/opt/concourse"
     container_ports:
       - '3001:3001'
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid"
     container_env:
+      CONCOURSE_SESSION_SIGNING_KEY: "/opt/concourse/{{ concourse_session_signing_key_path }}"
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
       MYSQL_USER: "{{ cycloid_db_user }}"
       MYSQL_PASSWORD: "{{ cycloid_db_password }}"
       YOUDEPLOY_MYSQL_SERVICE_HOST: "{{ cycloid_db_host }}"
       YOUDEPLOY_MYSQL_SERVICE_PORT: "{{ cycloid_db_port }}"
       CONCOURSE_URL: "{{ concourse_url }}"
-      CONCOURSE_PORT: "8443"
+      CONCOURSE_PORT: "{{ concourse_port }}"
       CONCOURSE_USER: "{{ concourse_auth_user }}"
       CONCOURSE_TEAM: main
-      CONCOURSE_PASSWORD: "{{ concourse_auth_password }}"
       VAULT_URL: "{{ vault_url }}"
       VAULT_SKIP_VERIFY: true
       # Defined by env-file
       #VAULT_ROLE_ID:
       #VAULT_SECRET_ID:
-      #TOOD: edit the entrypoint to make it optionnal
       JAEGER_COLLECTOR_SERVICE_HOST: localhost
       JAEGER_COLLECTOR_PORT_14268_TCP_PORT: 14268
+      EMAIL_SMTP_SVR_ADDR: "{{ cycloid_email_smtp_svr_addr }}"
+      EMAIL_SMTP_USERNAME: "{{ cycloid_email_smtp_username }}"
+      EMAIL_SMTP_PASSWORD: "{{ cycloid_email_smtp_password }}"
+      EMAIL_ADDR_FROM: "{{ cycloid_email_addr_from }}"
+      EMAIL_ADDR_RETURN_PATH: "{{ cycloid_email_addr_return_path }}"
+      EMAIL_REDIS_HOST: "{{ cycloid_email_redis_host }}"
+      EMAIL_REDIS_PORT: "{{ cycloid_email_redis_port }}"
+      EMAIL_REDIS_DB: "{{ cycloid_email_redis_db }}"
+      EMAIL_INSECURE: "{{ cycloid_email_insecure }}"
+      JWT_KEY_1: "{{ cycloid_jwt_key_1 }}"
+      FRONTEND_BASE_URL: "{{ cycloid_frontend_base_url }}"
+      CRYPTO_SIGNING_KEY: "{{ cycloid_crypto_signing_key }}"
+      LOG_LEVEL: "INFO"
+      LOG_SVC_LEVEL: "NONE"
+      #LOG_LEVEL: "DEBUG"
+      #LOG_DEV_MODE: true
+      #LOG_SVC_LEVEL: "DEBUG"
 
   tags: docker-services
 
@@ -77,7 +96,7 @@
     body: "{{cycloid_initial_user|to_json}}"
   retries: 30
   delay: 10
-  no_log: true
+  no_log: false
   register: init_of_api
   until: init_of_api.status == 204
   when: sql_query_rows|int == 0

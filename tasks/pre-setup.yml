@@ -5,6 +5,11 @@
   with_items:
     - python-openssl
     - mysql-client
+    - python-setuptools
+
+- easy_install:
+    name: pip
+    state: present
 
 # Depends for ECR login
 - name: install pip depends
@@ -13,6 +18,7 @@
      state: latest
   with_items:
     - awscli
+    - docker
   when: cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined
 
 - name: ECR login

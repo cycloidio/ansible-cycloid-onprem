@@ -1,0 +1,36 @@
+---
+
+- name: Add this container to api links
+  set_fact:
+   cycloid_api_container_links: "{{ cycloid_api_container_links + ['cycloid-smtp'] }}"
+
+- name: create config directory | cycloid-smtp
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+  with_items:
+    - "{{ cycloid_smtp_path }}"
+
+- name: Generate mailhog auth file | cycloid-smtp
+  copy:
+    content: "{{ cycloid_email_smtp_username }}:{{ cycloid_email_smtp_password | password_hash('bcrypt') }}"
+    dest: "{{ cycloid_smtp_path }}/mailhog.auth"
+
+# Because Cycloid need a smtp server in any case, provide a mailhog mail server
+
+- name: Cycloid smtp
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    name: cycloid-smtp
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "mailhog/mailhog:v1.0.0"
+    container_ports:
+      - '1025:1025'
+      - '8025:8025'
+    container_volumes:
+      - "{{cycloid_smtp_path}}:/opt"
+    container_env:
+      MYSQL_USER: /opt/mailhog.auth
+  tags: docker-services

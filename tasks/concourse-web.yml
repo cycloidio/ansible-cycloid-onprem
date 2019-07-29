@@ -1,4 +1,9 @@
 ---
+
+- name: Add this container to api links
+  set_fact:
+   cycloid_api_container_links: "{{ cycloid_api_container_links + ['concourse-web'] }}"
+
 - name: host key | concourse
   copy:
     content: "{{ concourse_host_key }}"
@@ -44,15 +49,15 @@
       # concourse-authorized-keys
       - "{{ concourse_config_path }}:/opt/concourse"
     container_cmd: "web"
-    container_links: [ 'vault', 'concourse-db' ]
+    container_links: "{{ concourse_web_container_links }}"
     # Additionnal env file for approle
     container_args: "--env-file={{ concourse_config_path }}/approle-concourse-ro"
     container_env:
       CONCOURSE_SESSION_SIGNING_KEY: "/opt/concourse/{{ concourse_session_signing_key_path }}"
       CONCOURSE_TSA_HOST_KEY: "/opt/concourse/{{ concourse_host_key_path }}"
       CONCOURSE_TSA_AUTHORIZED_KEYS: "/opt/concourse/{{ concourse_authorized_worker_keys_path }}"
-      CONCOURSE_BASIC_AUTH_USERNAME: "{{ concourse_auth_user }}"
-      CONCOURSE_BASIC_AUTH_PASSWORD: "{{ concourse_auth_password }}"
+      CONCOURSE_MAIN_TEAM_LOCAL_USER: "{{ concourse_auth_user }}"
+      CONCOURSE_ADD_LOCAL_USER: "{{ concourse_auth_user }}:{{ concourse_auth_password }}"
       # Vault integration
       CONCOURSE_VAULT_URL: "{{ vault_url }}"
       CONCOURSE_VAULT_AUTH_BACKEND: approle
@@ -73,13 +78,12 @@
       CONCOURSE_RESOURCE_CACHE_CLEANUP_INTERVAL: 30s
       CONCOURSE_PEER_URL: "{{ concourse_peer_url }}"
       CONCOURSE_EXTERNAL_URL: "{{ concourse_external_url }}"
-      POSTGRESQL_HOST: concourse-db
-      POSTGRESQL_PORT: "5432"
-      POSTGRES_USERNAME: concourse
-      POSTGRES_PASSWORD: "{{concourse_db_password}}"
-      CONCOURSE_POSTGRES_DATA_SOURCE: "postgres://concourse:{{ concourse_db_password }}@concourse-db:5432/concourse?sslmode=disable"
+      CONCOURSE_POSTGRES_HOST: concourse-db
+      CONCOURSE_POSTGRES_PORT: "5432"
+      CONCOURSE_POSTGRES_USER: concourse
+      CONCOURSE_POSTGRES_DATABASE: concourse
+      CONCOURSE_POSTGRES_SSLMODE: disable
+      CONCOURSE_POSTGRES_PASSWORD: "{{concourse_db_password}}"
       #CONCOURSE_INFLUXDB_URL: http://localhost:9122
-  notify:
-  - restart concourse web
 
   tags: docker-services

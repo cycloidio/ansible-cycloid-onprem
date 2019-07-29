@@ -1,0 +1,27 @@
+---
+- name: Converge
+  hosts: cycloid-worker
+
+  vars_files:
+    - [ "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
+
+  roles:
+    - role: cycloid.concourse
+      tags: cycloid
+
+  post_tasks:
+    # Ensure worker is started and configured at first boot
+    - name: configure worker service | concourse
+      service:
+        name: concourse-worker
+        enabled: yes
+      tags:
+       - notforbuild
+    - name: restart concourse worker
+      service:
+        name: concourse-worker
+        state: restarted
+        enabled: yes
+      tags:
+       - notforbuild
+
