@@ -42,9 +42,10 @@ Common tasks
 All playbooks sample and requirements are located under the `playbooks` directory. To start we will create a working directory then copy the files we will use in it.
 
 ```
+git clone git@github.com:cycloidio/ansible-cycloid-onprem.git
 mkdir cycloid-onprem
 cd cycloid-onprem
-cp -r <...>/ansible-cycloid-onprem/playbooks/* .
+cp -r ../ansible-cycloid-onprem/playbooks/* .
 
 ```
 
@@ -59,8 +60,8 @@ pip install molecule ansible==2.8.* docker-py passlib bcrypt
 Cycloid docker images are stored into an Amazon ECR, you will need to export Amazon access key for the playbook.
 
 ```
-export AWS_SECRET_ACCESS_KEY=$(vault read -field=secret_key secret/$CUSTOMER/aws)
-export AWS_ACCESS_KEY_ID=$(vault read -field=access_key secret/$CUSTOMER/aws)
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_ACCESS_KEY_ID=...
 ```
 
 Generate a ssh keypair which will be used to configure Cycloid pipeline engine based on Concourse.
