@@ -19,10 +19,10 @@ cycloid_install_path: /opt/cycloid
 cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod
 cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod
 #cycloid_api_image: gaell/debug
-concourse_db_image: postgres:9.5
+concourse_db_image: postgres:9.6
 cycloid_redis_image: redis:5.0
 cycloid_db_image: mariadb:10.2.11
-concourse_web_image: concourse/concourse:4.2.3
+concourse_web_image: concourse/concourse:5.7.2
 vault_image: vault:1.1.3
 
 #
@@ -30,8 +30,8 @@ vault_image: vault:1.1.3
 #
 concourse_url: https://concourse-web
 concourse_port: 8443
-# concourse_peer_url: must be specified as a URL used to reach the individual web node, from other web nodes. So this just has to be a URL reachable within their private network, e.g. a 10.x.x.x address
-concourse_peer_url: https://localhost:8443
+# concourse_peer_address: must be specified IP used to reach the individual web node, from other web nodes.
+concourse_peer_address: localhost
 # This by default is the container name. Cause only Cycloid-api need to access to it. And as it's a container
 # On the same host, it will resolve with the container name.
 concourse_external_url: "{{ concourse_url }}:{{ concourse_port }}"

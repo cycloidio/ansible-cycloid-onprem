@@ -108,7 +108,7 @@
     register: role_concourse_ro_secret
   - name: Save concourse-ro approle | vault
     copy:
-      content: "CONCOURSE_VAULT_AUTH_PARAM=role_id={{(role_concourse_ro_id.stdout | from_json)['data']['role_id']}},secret_id={{(role_concourse_ro_secret.stdout | from_json)['data']['secret_id']}}"
+      content: "CONCOURSE_VAULT_AUTH_PARAM=role_id:{{(role_concourse_ro_id.stdout | from_json)['data']['role_id']}},secret_id:{{(role_concourse_ro_secret.stdout | from_json)['data']['secret_id']}}"
       dest: "{{ concourse_config_path }}/approle-concourse-ro"
   # Cycloid approle
   - name: Create cycloid role | vault
