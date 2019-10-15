@@ -42,7 +42,7 @@
 #
 - name: Check Concourse | validate
   uri:
-    url: "{{ concourse_peer_url }}/api/v1/info"
+    url: "https://{{ concourse_peer_address }}:{{ concourse_port }}/api/v1/info"
     validate_certs: no
     status_code: 200
     return_content: yes

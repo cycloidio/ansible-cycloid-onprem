@@ -34,7 +34,7 @@ platforms:
     groups:
      - cycloid
   - name: concourse-worker
-    image: concourse/concourse:4.2.3
+    image: concourse/concourse:5.7.2
     privileged: yes
     volumes:
       - "/tmp/molecule_test:/opt:ro"

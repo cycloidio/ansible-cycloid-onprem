@@ -249,6 +249,13 @@ docker exec -it instance bash
 docker exec -e VAULT_SKIP_VERIFY=true -it vault vault read ...
 ```
 
+Access to the database :
+
+```
+source  /etc/default/cycloid-api
+mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD
+```
+
 TODO
 ====
 
