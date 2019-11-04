@@ -36,8 +36,10 @@ Role Variables
 Installation
 ============
 
-Requirement
+Requirements
 ------------
+
+>Note: Before running ansible playbook, ensure virtualenv, pip and dependencies are satisfied on your system.
 
 Debian
 ```
