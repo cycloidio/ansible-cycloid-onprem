@@ -36,6 +36,29 @@ Role Variables
 Installation
 ============
 
+Requirements
+------------
+
+>Note: Before running ansible playbook, ensure virtualenv, pip and dependencies are satisfied on your system.
+
+Debian
+```
+apt-get install python-setuptools git
+apt-get install build-essential libssl-dev libffi-dev python-dev
+```
+
+RHEL
+```
+yum install git gcc libffi-devel python-devel openssl-devel
+```
+
+Install virtualenv
+```
+sudo easy_install pip
+sudo pip install virtualenv
+```
+
+
 Common tasks
 ------------
 
@@ -81,7 +104,7 @@ Download required ansible roles to setup Cycloid core
 ansible-galaxy install -r requirements.yml --roles-path=roles -v
 ```
 
-Create an Ansible inventory file with the server on which install Cycloid core.
+Create an Ansible inventory file with the server ip on which install Cycloid core.
 
 ```
 echo -e "[cycloid]\n1.2.3.4" > inventory
@@ -113,7 +136,7 @@ concourse_authorized_worker_keys:
 EOF
 ```
 
-Run Ansible to setup Cycloid core
+Run Ansible to setup Cycloid core (`-c local` can be used if you run ansible directly on the server)
 
 ```
 ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory playbook.yml
@@ -125,6 +148,14 @@ This file will also be used to unseal Vault by the `vault_unseal.yml` playbook i
 
 >Note : Related to the implementation of onprem Admin console https://github.com/cycloidio/youdeploy/issues/158
 > orgs created will require to be payed. You can use the `mysql-force-pay-orgs.yml` playbook to mark them as payed.
+
+**Uninstall**
+
+If the install failed and you need to clean your server before to run it again, the `adhoc/uninstall.yml` playbook can be used.
+
+```
+ansible-playbook -u admin -b -i inventory adhoc/uninstall.yml
+```
 
 Cycloid worker installation
 ---------------------------
@@ -230,4 +261,3 @@ Author Information
 ==================
 
 Cycloid.io
-

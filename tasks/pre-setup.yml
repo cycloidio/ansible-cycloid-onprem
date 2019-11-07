@@ -1,11 +1,10 @@
 ---
-- apt:
-    name: "{{item}}"
+- package:
+    name:
+      - python-openssl
+      - mysql-client
+      - python-setuptools
     state: present
-  with_items:
-    - python-openssl
-    - mysql-client
-    - python-setuptools
 
 - easy_install:
     name: pip
