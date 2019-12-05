@@ -9,7 +9,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 def test_generated_approle_files(host):
     # Concourse
-    assert host.file("/opt/cycloid/concourse/approle-concourse-ro").contains('CONCOURSE_VAULT_AUTH_PARAM=role_id=...*,secret_id=...')
+    assert host.file("/opt/cycloid/concourse/approle-concourse-ro").contains('CONCOURSE_VAULT_AUTH_PARAM=role_id:...*,secret_id:...')
     # Cycloid
     assert host.file("/opt/cycloid/approle-cycloid").contains('VAULT_ROLE_ID=...')
     assert host.file("/opt/cycloid/approle-cycloid").contains('VAULT_SECRET_ID=...')
