@@ -188,14 +188,16 @@ cat >> environments/${CYCLOID_ENV}-cycloid.yml <<EOF
 concourse_worker: yes
 concourse_worker_name: "\$(hostname)"
 concourse_service_enabled: no
+concourse_worker_env:
+    CONCOURSE_GARDEN_ASSETS_DIR: "{{ concourse_work_dir }}/garden_assets/"
+    CONCOURSE_GARDEN_DEPOT: "{{ concourse_work_dir }}/garden_depot"
+    CONCOURSE_GARDEN_LOG_LEVEL: "error"
+    CONCOURSE_GARDEN_NETWORK_POOL: "10.254.0.0/16"
+    CONCOURSE_GARDEN_MAX_CONTAINERS: 1024
+    CONCOURSE_GARDEN_ADDITIONAL_DNS_SERVER: "1.1.1.1,1.0.0.1"
 concourse_worker_options: |
   --ephemeral \\
-  --garden-network-pool 10.254.0.0/16 \\
-  --garden-max-containers 1024 \\
-  --garden-log-level=error \\
   --baggageclaim-log-level=error \\
-  --garden-assets-dir={{ concourse_work_dir }}/garden_assets/ \\
-  --garden-depot={{ concourse_work_dir }}/garden_depot \\
   --baggageclaim-volumes={{ concourse_work_dir }}/baggageclaim_volumes \\
   --baggageclaim-driver=overlay 2>&1 | tee -a /var/log/concourse-worker.log ; exit \${PIPESTATUS[0]}
 
