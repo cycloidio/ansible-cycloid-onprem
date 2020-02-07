@@ -144,7 +144,13 @@ ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory playbook.yml
 
 This playbook at the end of the setup will create a local `vault.secret` file. Make sure you backup and secure it cause it will be the root token setup in Vault.
 
-This file will also be used to unseal Vault by the `vault_unseal.yml` playbook in case you restart the server.
+> Warning : If you restart the server, you might have to [unseal Vault](https://www.vaultproject.io/docs/concepts/seal/)
+
+To make the unseal easier, the file `vault.secret` created during the setup can be used with `vault_unseal.yml` playbook that way :
+
+```
+ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory vault_unseal.yml
+```
 
 >Note : Related to the implementation of onprem Admin console https://github.com/cycloidio/youdeploy/issues/158
 > orgs created will require to be payed. You can use the `mysql-force-pay-orgs.yml` playbook to mark them as payed.
