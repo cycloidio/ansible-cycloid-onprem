@@ -91,7 +91,10 @@ def write_yaml(path, datas):
         f.write(yaml.dump(datas, default_flow_style=False))
 
 def docker_image_repo(image):
-    return image.split(':')[0]
+    if type(image) == type(""):
+        return image.split(':')[0]
+    else:
+        return image['name'].split(':')[0]
 
 def docker_image_tag(image):
     try:
@@ -151,7 +154,7 @@ EOF
 
     # Load and start eventual others docker containers
     dind_run_svc_task = "%s\n" % '\n'.join(load_all_svc_commands)
-    
+
     # Run user's script into docker
     dind_run_task = """# Run user script
 docker run --name script -it %(vars)s %(links)s -v $PWD:$PWD --entrypoint=/bin/sh %(image)s -c "cd $PWD && ./script.sh"
@@ -286,7 +289,7 @@ def get_job_services(jobs):
             if service not in services:
                 services.append(service)
     return services
-    
+
 
 def main(gitlab_pipeline):
     # Gather gitlab datas
@@ -309,14 +312,14 @@ def main(gitlab_pipeline):
     generated_pipeline = base_pipeline
     generated_pipeline['resources'].append(base_resource_git_branch)
 
-    # s3 resource for each artefact
+    # s3 resource for each artifacts
     for job_name, job in jobs.items():
         artifacts = job.get('artifacts', {})
         if artifacts.get('paths'):
             artifacts_name = 'artifact_%s' % artifacts.get('name', job_name)
             resource_s3 = copy.deepcopy(base_resource_s3)
             resource_s3['name'] = artifacts_name
-            resource_s3['source']['regexp'] = "%s/artifact.tar.gz" % job_name
+            resource_s3['source']['regexp'] = "%s/artifact.tar.gz" % artifacts_name
             generated_pipeline['resources'].append(resource_s3)
             # Configure only one bucket for resources
             if '' not in base_variables:
@@ -366,8 +369,8 @@ def main(gitlab_pipeline):
             generated_task = copy.deepcopy(base_task)
 
         # before_script
-        before_script = job.get('before_script', default_before_script.copy())
-        after_script = job.get('after_script', default_after_script.copy())
+        before_script = job.get('before_script', copy.deepcopy(default_before_script))
+        after_script = job.get('after_script', copy.deepcopy(default_after_script))
         script = job.get('script')
         docker_image = job.get('image', default_image)
 
@@ -375,7 +378,7 @@ def main(gitlab_pipeline):
         artifacts = job.get('artifacts', {})
         artifacts_scripts = []
         if artifacts.get('paths'):
-            artifacts_name = 'artifact_%s' % job_name
+            artifacts_name = 'artifact_%s' % artifacts.get('name', job_name)
             generated_task['config']['outputs'].append({'name': artifacts_name, 'path': 'output_artifacts'})
             artifacts_scripts.append('\n# Creating artifacts')
             artifacts_scripts.append('tar -czvf output_artifacts/artifacts.tar.gz %s' % ' '.join(artifacts.get('paths')))
@@ -386,14 +389,20 @@ def main(gitlab_pipeline):
         # Dependencies inputs
         dependencies = job.get('dependencies', [])
         dependencies_script = []
-        for dependencie in dependencies:
-            dependencie_name = 'artifact_%s' % dependencie
-            generated_task['config']['inputs'].append({'name': dependencie_name})
 
-            dependencies_script.append('tar -xf %s/artifacts.tar.gz' % dependencie_name)
+        for dependencie in dependencies:
+            artifacts = jobs[dependencie].get('artifacts', {})
+            if artifacts.get('paths'):
+                dependencie_resource_name = 'artifact_%s' % artifacts.get('name', job_name)
+            else:
+                continue
+
+            generated_task['config']['inputs'].append({'name': dependencie_resource_name})
+
+            dependencies_script.append('tar -xf %s/artifacts.tar.gz' % dependencie_resource_name)
 
             get_s3 = copy.deepcopy(base_get_resource_s3)
-            get_s3['get'] = dependencie_name
+            get_s3['get'] = dependencie_resource_name
             get_s3['passed'] = [dependencie]
             generated_job['plan'].append(get_s3)
         # Adding some visual formatting
@@ -485,7 +494,6 @@ if __name__ == "__main__":
 # [ ] environment Name of an environment to which the job deploys. Also available: environment:name, environment:url, environment:on_stop, and environment:action.
 # [partial only push just push policy] cache List of files that should be cached between subsequent runs. Also available: cache:paths, cache:key, cache:untracked, and cache:policy.
 # [X] artifacts List of files and directories to attach to a job on success. Also available: artifacts:paths, artifacts:name, artifacts:untracked, artifacts:when, artifacts:expire_in, artifacts:reports, and artifacts:reports:junit.
-# [ ] 
 # [ ] In GitLab Enterprise Edition, these are available: artifacts:reports:codequality, artifacts:reports:sast, artifacts:reports:dependency_scanning, artifacts:reports:container_scanning, artifacts:reports:dast, artifacts:reports:license_management, artifacts:reports:performance and artifacts:reports:metrics.
 # [X] dependencies Other jobs that a job depends on so that you can pass artifacts between them.
 # [ ] coverage Code coverage settings for a given job.
@@ -496,4 +504,3 @@ if __name__ == "__main__":
 # [ ] extends Configuration entries that this job is going to inherit from.
 # [ ] pages Upload the result of a job to use with GitLab Pages.
 # [X] variables Define job variables on a job level.
-
