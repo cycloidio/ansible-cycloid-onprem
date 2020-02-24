@@ -1,0 +1,46 @@
+---
+- name: install minio container
+  become: true
+  block:
+    - name: create minio volume storage
+      docker_volume:
+        name: minio-storage
+        state: present
+        labels:
+          ansible.managed: "true"
+          cycloid.io: "true"
+
+    - name: create minio container
+      include_role:
+        name: mhutter.docker-systemd-service
+      vars:
+        container_name: minio
+        container_cmd: server /data
+        container_image: "minio/minio:{{ minio_version }}"
+        container_volumes:
+          - minio-storage:/data
+        container_ports:
+          - "{{ minio_port }}:9000"
+        container_env:
+          MINIO_ACCESS_KEY: "{{ minio_access_key }}"
+          MINIO_SECRET_KEY: "{{ minio_secret_key }}"
+          MINIO_BROWSER: "{{ minio_browser | default('off') }}"
+        container_labels:
+          - ansible.managed=true
+          - systemd.managed=true
+          - cycloid.io=true
+        # systemd
+        enable: true
+        masked: false
+        state: started
+      tags: docker-services
+
+    - name: wait for minio availability
+      uri:
+        url: "http://localhost:{{ minio_port }}/"
+        status_code:
+          - 200
+          - 403
+      register: resp
+      until: resp.status == 200 or resp.status == 403
+      delay: 5
