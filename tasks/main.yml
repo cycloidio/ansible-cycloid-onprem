@@ -38,3 +38,6 @@
 # Wait and validate running services
 - include: validate.yml
   when: validate or validate_only
+
+- include: minio.yml
+  when: not validate_only and setup_minio
