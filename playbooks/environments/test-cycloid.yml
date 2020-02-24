@@ -14,3 +14,5 @@ concourse_authorized_worker_keys:
 cycloid_db_password: "chovoh6gahti5ohP0AiF6eex6evoonie"
 cycloid_console_dns: cycloid-console
 cycloid_api_dns: cycloid-api
+
+setup_minio: true
