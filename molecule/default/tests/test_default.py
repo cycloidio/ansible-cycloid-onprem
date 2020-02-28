@@ -20,15 +20,24 @@ def test_services_running(host):
     assert len(docker) >= 1
 
 def test_containers_running(host):
-    for container in ['cycloid-db', 'cycloid-api', 'cycloid-frontend', 'vault', 'concourse-db', 'concourse-web', 'cycloid-smtp']:
-        command = 'docker ps -f name="%s$" --format "{{.ID}},{{.Image}},{{.Names}},{{.Status}},{{.RunningFor}}"' % container
-        #command = 'docker ps -f name="%s$" --format {%% raw %%}"{{.ID}},{{.Image}},{{.Names}},{{.Status}},{{.RunningFor}}"{%% endraw %%}' % container
+    for container in [
+        'cycloid-db',
+        'cycloid-api',
+        'cycloid-frontend',
+        'vault',
+        'concourse-db',
+        'concourse-web',
+        'cycloid-smtp',
+        'minio'
+    ]:
+        command = "docker ps --filter=status=running --filter=name=%s" \
+            % container
         c = host.run(command)
-        assert ",%s,Up " % container in c.stdout
+        assert container in c.stdout
 
 
 def test_listening_ports(host):
-    for port in [8080, 8888, 2222, 8200, 5432, 3306, 3001, 80, 443, 1025]:
+    for port in [8080, 8888, 2222, 8200, 5432, 3306, 3001, 80, 443, 1025, 9000]:
         assert host.socket("tcp://%s" % port).is_listening
 
 def test_force_ssl(host):

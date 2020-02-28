@@ -16,6 +16,7 @@ After a default run of this playbook on a server, you will find those different 
 | `Cycloid api`      | `3001`                                  |
 | `Cycloid db `      | `3306`                                  |
 | `Nginx proxy`      | HTTP `80`, HTTPS `443`                  |
+| `Min IO`           | HTTP `9000`                             |
 
 Role Variables
 ==============
@@ -161,6 +162,17 @@ If the install failed and you need to clean your server before to run it again, 
 
 ```
 ansible-playbook -u admin -b -i inventory adhoc/uninstall.yml
+```
+
+Storage information
+-------------------
+
+We are using Docker volumes in order to store data created by MinIO, a S3-like object storage. It's up to you to configure backup strategy for this volume, we will provide a support for most common volume [plugins](https://docs.docker.com/engine/extend/legacy_plugins/#volume-plugins).
+For now, you could mount a disk on `/var/lib/docker/volumes` and backup this disk as you need.
+
+Volumes installed by Cycloid will be tagged with `ansible.managed = true` and `cycloid.io = true`. If you want to `prune` your system or your volumes, do not forget to exclude this volumes: 
+```shell
+$ docker volume prune --filter=label!=cycloid.io
 ```
 
 Cycloid worker installation

@@ -9,6 +9,9 @@ setup_cycloid_db: true
 setup_cycloid_redis: true
 setup_concourse_db: true
 setup_vault: true
+#. setup_minio(optional): bool
+#+ install and configure minio, a s3-like remote storage
+setup_minio: false
 
 cycloid_install_path: /opt/cycloid
 
@@ -116,3 +119,27 @@ cycloid_api_dns: cycloid-api
 cycloid_use_api_via_console: True
 cycloid_console_dns: cycloid-console
 cycloid_frontend_base_url: "https://{{ cycloid_console_dns }}"
+
+#
+# minio
+#
+
+#. minio_version(optional, string): "latest"
+#+ docker tag image to use, default latest
+minio_version: latest
+
+#. minio_port(optional, int): 9000
+#+ MinIO port, default to 9000
+minio_port: 9000
+
+#. minio_access_key(required): str
+#+ the aws-like access key
+minio_access_key: AKIAIOSFODNN7EXAMPLE
+
+#. minio_secret_key(required): str
+#+ the aws-like secret key
+minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+#. minio_browser(optional, string): off
+#+ uncomment to enable browser interface
+# minio_browser: on
