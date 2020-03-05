@@ -15,6 +15,11 @@ setup_minio: false
 
 cycloid_install_path: /opt/cycloid
 
+# HTTP proxy
+http_proxy: ""
+https_proxy: ""
+no_proxy: "localhost,127.0.0.1,concourse-web,vault,{{ cycloid_api_dns }},{{ cycloid_console_dns }}"
+
 #
 # Docker
 #

@@ -52,6 +52,9 @@
       #LOG_LEVEL: "DEBUG"
       #LOG_DEV_MODE: true
       #LOG_SVC_LEVEL: "DEBUG"
+      http_proxy: "{{ http_proxy }}"
+      https_proxy: "{{ http_proxy }}"
+      no_proxy: "{{ no_proxy }}"
 
   tags: docker-services
 
