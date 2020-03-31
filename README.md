@@ -213,6 +213,10 @@ concourse_worker_env:
     CONCOURSE_GARDEN_NETWORK_POOL: "10.254.0.0/16"
     CONCOURSE_GARDEN_MAX_CONTAINERS: 1024
     CONCOURSE_GARDEN_ADDITIONAL_DNS_SERVER: "1.1.1.1,1.0.0.1"
+    # HTTP proxy configuration. Make sure to set the right url's into no_proxy
+    # http_proxy: http://mydomain:8080
+    # https_proxy: http://mydomain:8080
+    # no_proxy: "localhost,127.0.0.1,$SCHEDULER_API_ADDRESS,vault-address,cycloid_api_dns-address,cycloid_console_dns-address"
 concourse_worker_options: |
   --ephemeral \\
   --baggageclaim-log-level=error \\

@@ -85,5 +85,8 @@
       CONCOURSE_POSTGRES_SSLMODE: disable
       CONCOURSE_POSTGRES_PASSWORD: "{{concourse_db_password}}"
       #CONCOURSE_INFLUXDB_URL: http://localhost:9122
+      http_proxy: "{{ http_proxy }}"
+      https_proxy: "{{ http_proxy }}"
+      no_proxy: "{{ no_proxy }}"
 
   tags: docker-services
