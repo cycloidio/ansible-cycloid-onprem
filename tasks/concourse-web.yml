@@ -1,8 +1,8 @@
 ---
-
-- name: Add this container to api links
-  set_fact:
-   cycloid_api_container_links: "{{ cycloid_api_container_links + ['concourse-web'] }}"
+# 
+# - name: Add this container to api links
+#   set_fact:
+#    cycloid_api_container_links: "{{ cycloid_api_container_links + ['concourse-web'] }}"
 
 - name: host key | concourse
   copy:
@@ -26,12 +26,44 @@
   notify:
   - restart concourse web
 
+- name: Copy the ssl in service directories | scheduler
+  copy:
+    src: "{{ cycloid_scheduler_ssl[item] }}"
+    dest: "{{ concourse_config_path }}/ssl.{{item}}"
+    mode: 0400
+  with_items:
+    - key
+    - crt
+
+- name: Generate session_signing_key local directory | scheduler
+  file:
+    path: "{{ cycloid_local_datas_path }}/scheduler"
+    state: directory
+    mode: '0700'
+    recurse: true
+  delegate_to: 127.0.0.1
+
+- name: Copy session_signing_key in local data directory | scheduler
+  fetch:
+    src: "{{ concourse_config_path }}/{{ concourse_session_signing_key_path }}"
+    dest: "{{ cycloid_local_datas_path }}/scheduler/{{ concourse_session_signing_key_path }}"
+    mode: 0400
+    # remote_src: yes
+    flat: true
+  become: no
+
 - name: authorized worker keys | concourse
   copy:
   #template:
     #src: authorized_worker_keys.j2
     content: "{% for key in concourse_authorized_worker_keys %}{{key}}\n{% endfor %}"
     dest: "{{ concourse_config_path }}/{{ concourse_authorized_worker_keys_path }}"
+    mode: 0400
+
+- name: Copy vault approles in service directory | scheduler
+  copy:
+    src: "{{ cycloid_local_datas_path }}/approles/approle-concourse-ro"
+    dest: "{{ concourse_config_path }}/approle-concourse-ro"
     mode: 0400
 
 - name: Concourse web
@@ -51,7 +83,9 @@
     container_cmd: "web"
     container_links: "{{ concourse_web_container_links }}"
     # Additionnal env file for approle
-    container_args: "--env-file={{ concourse_config_path }}/approle-concourse-ro"
+    # Bind network host because of forwarded worker. CC need to know the IP of the web node cause it will use it to connect on local ssh tunnel created
+    # to access to the workers. As we run in docker we don't know the IP address, so we bind host to use the one from the host
+    container_args: "--network=host --env-file={{ concourse_config_path }}/approle-concourse-ro"
     container_env:
       CONCOURSE_SESSION_SIGNING_KEY: "/opt/concourse/{{ concourse_session_signing_key_path }}"
       CONCOURSE_TSA_HOST_KEY: "/opt/concourse/{{ concourse_host_key_path }}"
@@ -78,7 +112,7 @@
       CONCOURSE_RESOURCE_CACHE_CLEANUP_INTERVAL: 30s
       CONCOURSE_PEER_ADDRESS: "{{ concourse_peer_address }}"
       CONCOURSE_EXTERNAL_URL: "{{ concourse_external_url }}"
-      CONCOURSE_POSTGRES_HOST: concourse-db
+      CONCOURSE_POSTGRES_HOST: "{{ concourse_db_host }}"
       CONCOURSE_POSTGRES_PORT: "5432"
       CONCOURSE_POSTGRES_USER: concourse
       CONCOURSE_POSTGRES_DATABASE: concourse

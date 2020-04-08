@@ -5,15 +5,37 @@ validate_only: False
 docker_pull: true
 #docker_pull: false
 
-setup_cycloid_db: true
-setup_cycloid_redis: true
-setup_concourse_db: true
-setup_vault: true
+setup_cycloid_core: "{{ 'cycloid-core' in group_names }}"
+setup_cycloid_scheduler: "{{ 'cycloid-scheduler' in group_names }}"
+setup_cycloid_db: "{{ 'cycloid-db' in group_names }}"
+setup_cycloid_redis: "{{ 'cycloid-redis' in group_names }}"
+setup_scheduler_db: "{{ 'cycloid-scheduler-db' in group_names }}"
+setup_cycloid_creds: "{{ 'cycloid-creds' in group_names }}"
 #. setup_minio(optional): bool
 #+ install and configure minio, a s3-like remote storage
-setup_minio: false
+setup_minio: "{{ 'minio' in group_names }}"
+# If you let cycloid-smtp:1025, it will start a mailhog smtpd server to satisfy Cycloid requirements
+setup_smtp_server: "{{ 'smtp-server' in group_names }}"
+
 
 cycloid_install_path: /opt/cycloid
+cycloid_local_datas_path: "{{ playbook_dir }}/datas"
+
+#
+# SSL
+#
+ssl_generate_selfsigned: true
+cycloid_scheduler_ssl:
+  crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-scheduler.crt"
+  key: "{{ cycloid_local_datas_path }}/ssl/cycloid-scheduler.key"
+cycloid_creds_ssl:
+  crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-creds.crt"
+  key: "{{ cycloid_local_datas_path }}/ssl/cycloid-creds.key"
+cycloid_core_ssl:
+  crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-core.crt"
+  key: "{{ cycloid_local_datas_path }}/ssl/cycloid-core.key"
+
+
 
 # HTTP proxy
 http_proxy: ""
@@ -36,12 +58,10 @@ vault_image: vault:1.1.3
 #
 # Concourse
 #
-concourse_url: https://concourse-web
+concourse_url: "https://{{ hostvars[groups['cycloid-scheduler'][0]]['ansible_default_ipv4']['address'] }}"
 concourse_port: 8443
 # concourse_peer_address: must be specified IP used to reach the individual web node, from other web nodes.
-concourse_peer_address: localhost
-# This by default is the container name. Cause only Cycloid-api need to access to it. And as it's a container
-# On the same host, it will resolve with the container name.
+concourse_peer_address: "{{ ansible_default_ipv4.address }}"
 concourse_external_url: "{{ concourse_url }}:{{ concourse_port }}"
 concourse_config_path: "{{ cycloid_install_path }}/concourse"
 concourse_db_path: "{{ cycloid_install_path }}/concourse-db"
@@ -51,6 +71,7 @@ concourse_authorized_worker_keys_path: "authorized_worker_keys"
 concourse_host_key_path: "host_key"
 concourse_session_signing_key_path: "session_signing_key"
 concourse_db_password: "Deraephoh9aay4Aide4phoS7xej1xi5m"
+concourse_db_host:  "{{ hostvars[groups['cycloid-scheduler-db'][0]]['ansible_default_ipv4']['address'] }}"
 concourse_auth_user: admin
 concourse_auth_password: admin
 
@@ -68,7 +89,7 @@ vault_config:
   storage:
     file:
        path: /vault/file
-  ui: true     
+  ui: true
   listener:
     tcp:
       address: "0.0.0.0:8200"
@@ -77,7 +98,8 @@ vault_config:
       tls_key_file:  "/vault/config/ssl.key"
   default_lease_ttl: "168h"
   max_lease_ttl: "720h"
-vault_url: https://vault:8200
+# External vault url used by others services
+vault_url: https://{{ hostvars[groups['cycloid-creds'][0]]['ansible_default_ipv4']['address'] }}:8200
 
 #
 # Cycloid
@@ -90,15 +112,39 @@ cycloid_initial_user:
   given_name: admin
   family_name: cycloid
 
+cycloid_initial_organization:
+    name: Cycloid
+    canonical: cycloid
+
+cycloid_initial_catalog_cred:
+    name: Catalog credential
+    type: ssh
+    path: ssh_catalog
+    raw:
+        # use a dummy ssh key by default to provide a valid SSH private key format
+        ssh_key: |-
+            -----BEGIN RSA PRIVATE KEY-----
+            MIIJKAIBAAKCAgEAte2hmMB2CRt7oTBosgt/0mDOSpGKzq7G38OcU1BgyDykJ6ZV
+            9633x5zdC699DVfbtik6alSkMJO/2LEM3kXyM9CF8c6SNudo4GB+UonlVXHsM516
+            vkLesaRaq/GIFXSZm5Xy/UfX+jGeB+ofjktzg8G/lk0PxvGsNnsh7B1aK7o=
+            -----END RSA PRIVATE KEY-----
+
+cycloid_initial_service_catalog:
+    name: Cycloid stacks
+    url: git@github.com:cycloid-community-catalog/public-stacks.git
+    branch: master
+
 cycloid_db_password: "chovoh6gahti5ohP0AiF6eex6evoonie"
-cycloid_db_host: cycloid-db
+# cycloid_db_host: cycloid-db
+# Get the address of the first defined host in cycloid-db group
+cycloid_db_host: "{{ hostvars[groups['cycloid-db'][0]]['ansible_default_ipv4']['address'] }}"
+
 cycloid_db_port: 3306
 cycloid_db_user: cycloid
 cycloid_db_name: cycloid
 cycloid_db_path: "{{ cycloid_install_path }}/cycloid-db"
 
-# If you let cycloid-smtp:1025, it will start a mailhog smtpd server to satisfy Cycloid requirements
-cycloid_email_smtp_svr_addr: "cycloid-smtp:1025"
+cycloid_email_smtp_svr_addr: "{{ hostvars[groups['smtp-server'][0]]['ansible_default_ipv4']['address'] }}:1025"
 # The following example will rely on a smtp server installed locally on the host
 #cycloid_email_smtp_svr_addr: "{{ ansible_docker0['ipv4']['address'] }}:25"
 
@@ -107,7 +153,7 @@ cycloid_email_smtp_username: admin
 cycloid_email_smtp_password: admin
 cycloid_email_addr_from: noreply@cycloid.io
 cycloid_email_addr_return_path: admin+ydbounce@cycloid.io
-cycloid_email_redis_host: cycloid-redis
+cycloid_email_redis_host: "{{ hostvars[groups['cycloid-redis'][0]]['ansible_default_ipv4']['address'] }}"
 cycloid_email_redis_port: 6379
 cycloid_email_redis_db: 0
 cycloid_jwt_key_1: 2f2122de-63f2-4eec-9c6f-c6abb3e1f007:7cdyHps2tYDp6e7VKPEstE5sDMQbK6WLyN3GmTsF7x7QpE6ZP5ra6yfVSkvXakbB

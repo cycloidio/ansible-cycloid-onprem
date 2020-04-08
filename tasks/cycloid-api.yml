@@ -3,6 +3,18 @@
 - name: Force flush handlers to ensure all other containers like concourse web is started before running the api | api
   meta: flush_handlers
 
+- name: Copy vault approles in service directory | api
+  copy:
+    src: "{{ cycloid_local_datas_path }}/approles/approle-cycloid"
+    dest: "{{ cycloid_install_path }}/approle-cycloid"
+    mode: 0400
+
+- name: Copy session_signing_key in service directory | api
+  copy:
+    src: "{{ cycloid_local_datas_path }}/scheduler/{{ concourse_session_signing_key_path }}"
+    dest: "{{ concourse_config_path }}/{{ concourse_session_signing_key_path }}"
+    mode: 0400
+
 - name: Cycloid api | api
   include_role:
     name: mhutter.docker-systemd-service
@@ -83,25 +95,114 @@
 - set_fact: sql_query_rows="{{users.stdout_lines|length}}"
   when: not setup_cycloid_db
 
-- name: Create initial cycloid user | api
-  uri:
-    url: http://localhost:3001/user
-    method: POST
-    body_format: raw
-    validate_certs: no
-    status_code: 204
-    return_content: no
-    headers:
-      Accept: "*/*"
-      Connection: "keep-alive"
-      DNT: "1"
-      Content-type: "application/vnd.cycloid.io.v1+json"
-    body: "{{cycloid_initial_user|to_json}}"
-  retries: 30
-  delay: 10
-  no_log: false
-  register: init_of_api
-  until: init_of_api.status == 204
+- block:
+    - name: Create initial cycloid user | api
+      uri:
+        url: http://localhost:3001/user
+        method: POST
+        body_format: raw
+        validate_certs: no
+        status_code: 204
+        return_content: no
+        headers:
+          Accept: "*/*"
+          Connection: "keep-alive"
+          DNT: "1"
+          Content-type: "application/vnd.cycloid.io.v1+json"
+        body: "{{cycloid_initial_user|to_json}}"
+      retries: 30
+      delay: 10
+      no_log: false
+      register: init_of_api
+      until: init_of_api.status == 204
+    
+    - name: Login with cycloid user | api 
+      uri:
+        url: http://localhost:3001/user/login
+        method: POST
+        body_format: raw 
+        validate_certs: no
+        status_code: 200 
+        return_content: no
+        headers:
+          Accept: "*/*"
+          Connection: "keep-alive"
+          DNT: "1" 
+          Content-type: "application/vnd.cycloid.io.v1+json"
+        body: "{{cycloid_initial_user|to_json}}"
+      no_log: false
+      register: cy_user_token
+    
+    - name: Create initial cycloid organization | api
+      uri:
+        url: http://localhost:3001/organizations
+        method: POST
+        body_format: raw
+        validate_certs: no
+        status_code: 200
+        return_content: no
+        headers:
+          Accept: "*/*"
+          Authorization: "Bearer {{ cy_user_token.json.data.token }}"
+          Connection: "keep-alive"
+          DNT: "1"
+          Content-type: "application/vnd.cycloid.io.v1+json"
+        body: "{{cycloid_initial_organization|to_json}}"
+      no_log: false
+      register: init_of_api_org
+
+    - name: Login in cycloid org | api 
+      uri:
+        url: "http://localhost:3001/user/refresh_token?organization_canonical={{ cycloid_initial_organization.canonical }}"
+        method: GET 
+        validate_certs: no
+        status_code: 200 
+        return_content: no
+        headers:
+          Accept: "*/*"
+          Authorization: "Bearer {{ cy_user_token.json.data.token }}"
+          Connection: "keep-alive"
+          DNT: "1" 
+          Content-type: "application/vnd.cycloid.io.v1+json"
+      no_log: false
+      register: cy_org_token
+    
+    - name: Create initial cycloid creds | api
+      uri:
+        url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/credentials"
+        method: POST
+        body_format: raw
+        validate_certs: no
+        return_content: no
+        status_code: 200
+        headers:
+          Authorization: "Bearer {{ cy_org_token.json.data.token }}"
+          Accept: "*/*"
+          Connection: "keep-alive"
+          DNT: "1"
+          Content-type: "application/vnd.cycloid.io.v1+json"
+        body: "{{cycloid_initial_catalog_cred|to_json}}"
+      no_log: false
+      register: init_of_api_cred
+
+    # Adding the cred ID previously created
+    - set_fact: "cycloid_initial_service_catalog={{ cycloid_initial_service_catalog | combine({'credential_id': init_of_api_cred.json.data.id|int}) }}"
+
+    - name: Create initial cycloid service catalog | api
+      uri:
+        url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/service_catalog_sources"
+        method: POST
+        body_format: raw
+        validate_certs: no
+        return_content: no
+        status_code: 200
+        headers:
+          Authorization: "Bearer {{ cy_org_token.json.data.token }}"
+          Accept: "*/*"
+          Connection: "keep-alive"
+          DNT: "1"
+          Content-type: "application/vnd.cycloid.io.v1+json"
+        body: "{{cycloid_initial_service_catalog|to_json}}"
+      no_log: false
+
   when: sql_query_rows|int == 0
-
-

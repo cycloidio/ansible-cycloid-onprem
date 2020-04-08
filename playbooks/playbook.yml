@@ -1,18 +1,16 @@
 ---
-- name: Converge
-  hosts: cycloid
-
+- name: Setup cycloid
+  hosts: all:!concourse-worker
   vars_files:
     - [ "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
-
   roles:
-    # Install prometheus
     - role: geerlingguy.docker
       tags: docker
       when: not validate_only
 
     - role: ansible-cycloid-onprem
-      tags: cycloid
+      tags:
+        - cycloid
 
 #    - {role: cycloid.prometheus, path: /opt/prometheus, tags: prometheus}
 #    - {role: cycloid.telegraf, tags: telegraf}

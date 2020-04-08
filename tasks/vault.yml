@@ -1,12 +1,21 @@
 ---
+#
+# - name: Add this container to api links
+#   set_fact:
+#    cycloid_api_container_links: "{{ cycloid_api_container_links + ['vault'] }}"
+#
+# - name: Add this container to concourse web links
+#   set_fact:
+#    concourse_web_container_links: "{{ concourse_web_container_links + ['vault'] }}"
 
-- name: Add this container to api links
-  set_fact:
-   cycloid_api_container_links: "{{ cycloid_api_container_links + ['vault'] }}"
-
-- name: Add this container to concourse web links
-  set_fact:
-   concourse_web_container_links: "{{ concourse_web_container_links + ['vault'] }}"
+- name: Copy the ssl in service directories | vault
+  copy:
+    src: "{{ cycloid_creds_ssl[item] }}"
+    dest: "{{ vault_config_path }}/config/ssl.{{item}}"
+    mode: 0400
+  with_items:
+    - key
+    - crt
 
 - name: Vault
   include_role:
@@ -95,8 +104,16 @@
       - auth tune -max-lease-ttl=4380h approle/
   when: vault_tokens is not skipped
 
-- name: Create approle
+- name: Create approle | vault
   block:
+  - name: Create local approles data directory | vault
+    file:
+      path: "{{ cycloid_local_datas_path }}/approles"
+      state: directory
+      mode: '0700'
+      recurse: true
+    delegate_to: 127.0.0.1
+
   # Concourse-ro approle
   - name: Create concourse-ro role | vault
     shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault write auth/approle/role/concourse-ro period=30m token_max_ttl=0m policies=concourse-ro token_ttl=30m"
@@ -109,7 +126,7 @@
   - name: Save concourse-ro approle | vault
     copy:
       content: "CONCOURSE_VAULT_AUTH_PARAM=role_id:{{(role_concourse_ro_id.stdout | from_json)['data']['role_id']}},secret_id:{{(role_concourse_ro_secret.stdout | from_json)['data']['secret_id']}}"
-      dest: "{{ concourse_config_path }}/approle-concourse-ro"
+      dest: "{{ vault_config_path }}/approle-concourse-ro"
   # Cycloid approle
   - name: Create cycloid role | vault
     shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault write auth/approle/role/cycloid token_max_ttl=1h policies=cycloid token_ttl=20m"
@@ -122,6 +139,18 @@
   - name: Save cycloid approle | vault
     copy:
       content: "VAULT_ROLE_ID={{(role_cycloid_id.stdout | from_json)['data']['role_id']}}\nVAULT_SECRET_ID={{(role_cycloid_secret.stdout | from_json)['data']['secret_id']}}"
-      dest: "{{ cycloid_install_path }}/approle-cycloid"
+      dest: "{{ vault_config_path }}/approle-cycloid"
+
+  - name: Copy the approles in local data directory | ssl
+    fetch:
+      src: "{{ vault_config_path }}/{{ item }}"
+      dest: "{{ cycloid_local_datas_path }}/approles/{{ item }}"
+      mode: 0400
+      # remote_src: yes
+      flat: true
+    become: no
+    with_items:
+      - "approle-concourse-ro"
+      - "approle-cycloid"
 
   when: vault_tokens is not skipped
