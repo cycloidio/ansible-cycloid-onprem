@@ -81,7 +81,6 @@
       # concourse-authorized-keys
       - "{{ concourse_config_path }}:/opt/concourse"
     container_cmd: "web"
-    container_links: "{{ concourse_web_container_links }}"
     # Additionnal env file for approle
     # Bind network host because of forwarded worker. CC need to know the IP of the web node cause it will use it to connect on local ssh tunnel created
     # to access to the workers. As we run in docker we don't know the IP address, so we bind host to use the one from the host

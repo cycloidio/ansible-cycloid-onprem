@@ -22,7 +22,7 @@
     name: cycloid-api
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{cycloid_api_image}}"
-    container_links: "{{ cycloid_api_container_links }}"
+    #container_links: "{{ cycloid_api_container_links }}"
     container_volumes:
       # concourse-authorized-keys
       - "{{ concourse_config_path }}:/opt/concourse"

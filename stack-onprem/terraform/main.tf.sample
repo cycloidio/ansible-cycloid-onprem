@@ -1,0 +1,52 @@
+module "onprem" {
+  #####################################
+  # Do not modify the following lines #
+  source = "./module-onprem"
+
+  project            = var.project
+  env                = var.env
+  customer           = var.customer
+
+  #####################################
+  #. vpc_id (required):
+  #+ Amazon VPC id on which create each components.
+  vpc_id = "<vpc-id>"
+
+  #. public_subnets_ids (required, array):
+  #+ Amazon subnets IDs on which create each components.
+  public_subnets_ids = ["public-subnets"]
+
+  #. bastion_sg_allow (optional):
+  #+ Amazon source security group ID which will be allowed to connect on Fronts port 22 (SSH).
+  bastion_sg_allow = "<bastion-sg>"
+
+  #. keypair_name (requiredl): cycloid
+  #+ Name of an existing AWS SSH keypair to use to deploy EC2 instances.
+  keypair_name = "cycloid"
+
+  #. extra_tags (optional): {}
+  #+ Dict of extra tags to add on aws resources. format { "foo" = "bar" }.
+
+  ###
+  # cy_instances
+  ###
+
+  #. cy_instances (optional): 1
+  #+ Desired number of cy_instances servers.
+  cy_instances_count = "1"
+
+  #. cy_instances_type (optional): t3.small
+  #+ Type of instance to use for cy_instances servers.
+  cy_instances_type = "t3.small"
+
+  #. cy_instances_ebs_optimized (optional, bool): false
+  #+ Whether the Instance is EBS optimized or not, related to the instance type you choose.
+  cy_instances_ebs_optimized = false
+
+  #. cy_instances_disk_size (optional): 30
+  #+ Disk size of cy_instances servers.
+
+  #. cy_instances_cidr_blocks_allow (optional, bool): ["0.0.0.0/0"]
+  #+ Cird block allowed to connect on instances.
+  cy_instances_cidr_blocks_allow = ["0.0.0.0/0"]
+}
