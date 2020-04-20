@@ -5,33 +5,34 @@
 
 - include: gen-ssl.yml
   when: not validate_only
+  # when: not validate_only and setup_cycloid_core
 
 - include: vault.yml
-  when: not validate_only and setup_vault
+  when: not validate_only and setup_cycloid_creds
 
 - include: cycloid-db.yml
   when: not validate_only and setup_cycloid_db
 
 - include: cycloid-smtp.yml
-  when: not validate_only and cycloid_email_smtp_svr_addr == "cycloid-smtp:1025"
+  when: not validate_only and setup_smtp_server
 
 - include: cycloid-redis.yml
   when: not validate_only and setup_cycloid_redis
 
 - include: concourse-db.yml
-  when: not validate_only and setup_concourse_db
+  when: not validate_only and setup_scheduler_db
 
 - include: concourse-web.yml
-  when: not validate_only
+  when: not validate_only and setup_cycloid_scheduler
 
 - include: cycloid-api.yml
-  when: not validate_only
+  when: not validate_only and setup_cycloid_core
 
 - include: cycloid-frontend.yml
-  when: not validate_only
+  when: not validate_only and setup_cycloid_core
 
 - include: nginx.yml
-  when: not validate_only
+  when: not validate_only and setup_cycloid_core
 
 #- include: prometheus.yml
 

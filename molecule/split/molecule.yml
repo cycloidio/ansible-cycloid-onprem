@@ -9,30 +9,24 @@ driver:
 # lint:
 #   name: yamllint
 platforms:
-  - name: instance
+  - name: cy-core
     image: debian:stretch
     # Because we added systemd in Dockerfile.j2
     # We can start with it and test ansible with systemd.
     # https://medium.com/@tklo/testing-ansible-role-of-a-systemd-based-service-using-molecule-and-docker-4b3608a10ef0
     command: "/bin/systemd"
     published_ports:
-      - "3306:3306"
-      - "8080:8080"
       - "8888:8888"
-      - "8200:8200"
       - "3001:3001"
       - "80:80"
       - "443:443"
-      - "2222:2222"
-      - "8443:8443"
-      - "5432:5432"
       - "6379:6379"
       - '1025:1025'
       - '8025:8025'
     networks:
     - name: molecule
       aliases:
-        - instance
+        - cycloid-core
       # links:
       #    - "smtp-server:smtp-server"
       #    - "cycloid-smtp:cycloid-smtp"
@@ -45,15 +39,85 @@ platforms:
     # capabilities:
     #   - SYS_ADMIN
     groups:
-     - cycloid
      - cycloid-core
-     - cycloid-scheduler
-     - cycloid-db
-     - cycloid-scheduler-db
-     - cycloid-creds
-     - minio
      - smtp-server
+     - minio
      - cycloid-redis
+
+  - name: cy-db
+    image: debian:stretch
+    command: "/bin/systemd"
+    published_ports:
+      - "3306:3306"
+    networks:
+    - name: molecule
+      aliases:
+        - cycloid-db
+    privileged: yes
+    groups:
+     - cycloid-db
+
+  - name: cy-creds
+    image: debian:stretch
+    command: "/bin/systemd"
+    published_ports:
+      - "8200:8200"
+    networks:
+    - name: molecule
+      aliases:
+        - cycloid-creds
+    privileged: yes
+    # tmpfs:
+    #   - /run
+    #   - /tmp
+    # volumes:
+    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    # capabilities:
+    #   - SYS_ADMIN
+    groups:
+     - cycloid-creds
+
+  - name: cy-scheduler
+    image: debian:stretch
+    command: "/bin/systemd"
+    published_ports:
+      - "2222:2222"
+      - "8080:8080"
+      - "8443:8443"
+    networks:
+    - name: molecule
+      aliases:
+        - cycloid-scheduler
+    privileged: yes
+    # tmpfs:
+    #   - /run
+    #   - /tmp
+    # volumes:
+    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    # capabilities:
+    #   - SYS_ADMIN
+    groups:
+     - cycloid-scheduler
+
+  - name: cy-scheduler-db
+    image: debian:stretch
+    command: "/bin/systemd"
+    published_ports:
+      - "5432:5432"
+    networks:
+    - name: molecule
+      aliases:
+        - cycloid-scheduler-db
+    privileged: yes
+    # tmpfs:
+    #   - /run
+    #   - /tmp
+    # volumes:
+    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    # capabilities:
+    #   - SYS_ADMIN
+    groups:
+     - cycloid-scheduler-db
 
   - name: concourse-worker
     image: concourse/concourse:5.7.2
@@ -65,11 +129,11 @@ platforms:
       aliases:
         - cc_worker
       links:
-         - "instance:instance"
+         - "cycloid-scheduler:cycloid-scheduler"
     command: "worker"
     env:
       CONCOURSE_EPHEMERAL: "yes"
-      CONCOURSE_TSA_HOST: instance:2222
+      CONCOURSE_TSA_HOST: cycloid-scheduler:2222
       CONCOURSE_TSA_PUBLIC_KEY: /opt/id_rsa.pub
       CONCOURSE_TSA_WORKER_PRIVATE_KEY: /opt/id_rsa
       CONCOURSE_BAGGAGECLAIM_DRIVER: overlay
@@ -82,14 +146,11 @@ provisioner:
   options:
     extra-vars:
       env: test
-      setup_minio: true
     #vvv: "True"
   env:
    MOLECULE_DEBUG: "true"
-  # lint:
-  #   name: ansible-lint
 scenario:
-  name: default
+  name: split
   # Override the sequance of a command
   # https://molecule.readthedocs.io/en/latest/configuration.html#scenario
   test_sequence:

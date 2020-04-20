@@ -1,5 +1,12 @@
 ---
-
+- name: Copy the ssl in service directories | scheduler
+  copy:
+    src: "{{ cycloid_core_ssl[item] }}"
+    dest: "{{ cycloid_install_path }}/ssl.{{item}}"
+    mode: 0400
+  with_items:
+    - key
+    - crt
 
 - name: Cycloid api
   include_role:
@@ -21,8 +28,8 @@
         - server_name  "{{ cycloid_console_dns }}"
         - access_log /var/log/nginx/cycloid-console-access.log
         - error_log  /var/log/nginx/cycloid-console-error.log
-        - ssl_certificate /opt/cycloid/ssl.crt
-        - ssl_certificate_key /opt/cycloid/ssl.key
+        - ssl_certificate {{ cycloid_install_path }}/ssl.crt
+        - ssl_certificate_key {{ cycloid_install_path }}/ssl.key
         - location / {
             proxy_pass http://127.0.0.1:8888;
             proxy_set_header   X-FORWARDED_PROTO https;
@@ -44,8 +51,8 @@
       02-cycloid-api:
         - listen       443 ssl
         - server_name  "{{ cycloid_api_dns }}"
-        - ssl_certificate /opt/cycloid/ssl.crt
-        - ssl_certificate_key /opt/cycloid/ssl.key
+        - ssl_certificate {{ cycloid_install_path }}/ssl.crt
+        - ssl_certificate_key {{ cycloid_install_path }}/ssl.key
         - access_log /var/log/nginx/cycloid-api-access.log
         - error_log  /var/log/nginx/cycloid-api-error.log
         - |-

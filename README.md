@@ -105,15 +105,35 @@ Download required ansible roles to setup Cycloid core
 ansible-galaxy install -r requirements.yml --roles-path=roles -v
 ```
 
-Create an Ansible inventory file with the server ip on which install Cycloid core.
+Create an Ansible inventory file with the server ip (here `1.2.3.4`) on which install Cycloid.
 
 ```
-echo -e "[cycloid]\n1.2.3.4" > inventory
+cat >> inventory <<EOF
+[cycloid]
+1.2.3.4
+
+# Meta groups to setup all in one
+[cycloid-core:children]
+cycloid
+[cycloid-scheduler:children]
+cycloid
+[cycloid-redis:children]
+cycloid
+[cycloid-db:children]
+cycloid
+[cycloid-creds:children]
+cycloid
+[minio:children]
+cycloid
+[smtp-server:children]
+cycloid
+
+EOF
 ```
 
-Let's configure an environment called `prod`.
+Let's configure an environment called `poc`.
 ```
-export CYCLOID_ENV=prod
+export CYCLOID_ENV=poc
 ```
 
 ```
@@ -170,7 +190,7 @@ Storage information
 We are using Docker volumes in order to store data created by MinIO, a S3-like object storage. It's up to you to configure backup strategy for this volume, we will provide a support for most common volume [plugins](https://docs.docker.com/engine/extend/legacy_plugins/#volume-plugins).
 For now, you could mount a disk on `/var/lib/docker/volumes` and backup this disk as you need.
 
-Volumes installed by Cycloid will be tagged with `ansible.managed = true` and `cycloid.io = true`. If you want to `prune` your system or your volumes, do not forget to exclude this volumes: 
+Volumes installed by Cycloid will be tagged with `ansible.managed = true` and `cycloid.io = true`. If you want to `prune` your system or your volumes, do not forget to exclude this volumes:
 ```shell
 $ docker volume prune --filter=label!=cycloid.io
 ```
@@ -277,7 +297,7 @@ Access to the database :
 
 ```
 source  /etc/default/cycloid-api
-mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD
+mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST
 ```
 
 TODO

@@ -18,9 +18,10 @@
   retries: 30
   delay: 10
   ignore_errors: True
+  when: setup_cycloid_creds
 
 - fail: msg='Vault service unvailable or not initialized'
-  when: vault_init is failed or vault_init.json.initialized == false
+  when: setup_cycloid_creds and (vault_init is failed or vault_init.json.initialized == false)
 
 - name: Check if vault is unseal | validate
   uri:
@@ -33,9 +34,10 @@
   retries: 2
   delay: 2
   ignore_errors: True
+  when: setup_cycloid_creds
 
 - fail: msg='Vault service is sealed, you should unseal it'
-  when: unseal is failed or unseal.json.errors == "Vault is sealed"
+  when: setup_cycloid_creds and (unseal is failed or unseal.json.errors == "Vault is sealed")
 
 #
 # Concourse
@@ -51,9 +53,10 @@
   retries: 30
   delay: 10
   ignore_errors: True
+  when: setup_cycloid_scheduler
 
 - fail: msg='Concourse service unvailable'
-  when: concourse_info is failed
+  when: setup_cycloid_scheduler and concourse_info is failed
 
 #
 # Cycloid api
@@ -69,9 +72,10 @@
   retries: 30
   delay: 10
   ignore_errors: True
+  when: setup_cycloid_core
 
 - fail: msg='Cycloid api service unvailable'
-  when: cycloid_api_status is failed
+  when: cycloid_api_status is failed and setup_cycloid_core
 
 - name: Check Cycloid api throught nginx ssl | validate
   uri:
@@ -86,9 +90,10 @@
   retries: 30
   delay: 10
   ignore_errors: True
+  when: setup_cycloid_core
 
 - fail: msg='Cycloid api throught nginx ssl unvailable'
-  when: cycloid_api_status_nginx is failed
+  when: cycloid_api_status_nginx is failed and setup_cycloid_core
 
 #
 # Nginx force https
@@ -103,6 +108,7 @@
   retries: 30
   delay: 10
   ignore_errors: True
+  when: setup_cycloid_core
 
 - fail: msg='Nginx http listener unvailable'
-  when: nginx_http_curl is failed
+  when: nginx_http_curl is failed and setup_cycloid_core
