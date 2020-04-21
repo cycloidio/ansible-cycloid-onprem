@@ -1,8 +1,6 @@
 ---
-- name: Converge
-  hosts: cycloid
-  #hosts: localhost
-  #connection: local
+- name: vault unseal
+  hosts: cycloid-creds
   vars:
     vault_tokens: "{{ lookup('file', 'vault.secret') | from_json }}"
 
@@ -17,7 +15,7 @@
     retries: 2
     delay: 2
     ignore_errors: True
-  
+
   - name: Unseal vault
     uri:
       url: https://127.0.0.1:8200/v1/sys/unseal
@@ -30,5 +28,3 @@
     no_log: true
     with_items: "{{vault_tokens['unseal_keys_b64']}}"
     when: unseal is failed or unseal.json.errors == "Vault is sealed"
-
-

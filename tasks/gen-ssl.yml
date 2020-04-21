@@ -3,7 +3,7 @@
   file:
     path: "{{ cycloid_local_datas_path }}/ssl"
     state: directory
-    mode: '0700'
+    mode: '0777'
     recurse: true
   delegate_to: 127.0.0.1
 
@@ -63,6 +63,5 @@
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-scheduler"
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-creds"
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-core"
-    become: no
   run_once: true
   when: ssl_generate_selfsigned and not ssl_key.stat.exists

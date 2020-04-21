@@ -110,7 +110,7 @@
     file:
       path: "{{ cycloid_local_datas_path }}/approles"
       state: directory
-      mode: '0700'
+      mode: '0777'
       recurse: true
     delegate_to: 127.0.0.1
 
@@ -141,14 +141,13 @@
       content: "VAULT_ROLE_ID={{(role_cycloid_id.stdout | from_json)['data']['role_id']}}\nVAULT_SECRET_ID={{(role_cycloid_secret.stdout | from_json)['data']['secret_id']}}"
       dest: "{{ vault_config_path }}/approle-cycloid"
 
-  - name: Copy the approles in local data directory | ssl
+  - name: Copy the approles in local data directory | vault
     fetch:
       src: "{{ vault_config_path }}/{{ item }}"
       dest: "{{ cycloid_local_datas_path }}/approles/{{ item }}"
       mode: 0400
       # remote_src: yes
       flat: true
-    become: no
     with_items:
       - "approle-concourse-ro"
       - "approle-cycloid"
