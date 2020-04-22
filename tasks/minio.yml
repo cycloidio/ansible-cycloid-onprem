@@ -1,6 +1,5 @@
 ---
 - name: install minio container
-  become: true
   block:
     - name: create minio volume storage
       docker_volume:

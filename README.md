@@ -117,6 +117,8 @@ cat >> inventory <<EOF
 cycloid
 [cycloid-scheduler:children]
 cycloid
+[cycloid-scheduler-db:children]
+cycloid
 [cycloid-redis:children]
 cycloid
 [cycloid-db:children]

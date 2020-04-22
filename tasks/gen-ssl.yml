@@ -1,4 +1,12 @@
 ---
+- name: Ensure self signed certs local directory exist | ssl
+  file:
+    path: "{{ cycloid_local_datas_path }}/ssl"
+    state: directory
+    mode: '0777'
+    recurse: true
+  delegate_to: 127.0.0.1
+
 - name: check SSL exist
   stat:
     path: "{{ cycloid_local_datas_path }}/ssl/cycloid.key"
@@ -6,14 +14,6 @@
   delegate_to: 127.0.0.1
 
 - block:
-  - name: Generate self signed certs local directory | ssl
-    file:
-      path: "{{ cycloid_local_datas_path }}/ssl"
-      state: directory
-      mode: '0700'
-      recurse: true
-    delegate_to: 127.0.0.1
-
   - name: Generate a OpenSSL private key | ssl
     openssl_privatekey:
       # path: "{{ cycloid_local_datas_path }}/ssl/cycloid.key"
@@ -63,6 +63,5 @@
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-scheduler"
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-creds"
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-core"
-    become: no
   run_once: true
   when: ssl_generate_selfsigned and not ssl_key.stat.exists

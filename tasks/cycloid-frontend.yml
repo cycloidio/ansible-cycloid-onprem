@@ -7,7 +7,7 @@
     name: cycloid-frontend
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{cycloid_frontend_image}}"
-    container_links: [ 'cycloid-api' ]
+    #container_links: [ 'cycloid-api' ]
     container_ports:
       - '8888:80'
     container_env:

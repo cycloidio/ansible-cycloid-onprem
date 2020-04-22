@@ -1,5 +1,5 @@
 ---
-# 
+#
 # - name: Add this container to api links
 #   set_fact:
 #    cycloid_api_container_links: "{{ cycloid_api_container_links + ['concourse-web'] }}"
@@ -11,7 +11,6 @@
   #  owner: "{{ concourse_user }}"
   #  group: "{{ concourse_group }}"
     mode: 0400
-  #become: yes
   notify:
   - restart concourse web
 
@@ -22,7 +21,6 @@
   #  owner: "{{ concourse_user }}"
   #  group: "{{ concourse_group }}"
     mode: 0400
-  #become: yes
   notify:
   - restart concourse web
 
@@ -39,7 +37,7 @@
   file:
     path: "{{ cycloid_local_datas_path }}/scheduler"
     state: directory
-    mode: '0700'
+    mode: '0777'
     recurse: true
   delegate_to: 127.0.0.1
 
@@ -50,7 +48,6 @@
     mode: 0400
     # remote_src: yes
     flat: true
-  become: no
 
 - name: authorized worker keys | concourse
   copy:
@@ -81,7 +78,6 @@
       # concourse-authorized-keys
       - "{{ concourse_config_path }}:/opt/concourse"
     container_cmd: "web"
-    container_links: "{{ concourse_web_container_links }}"
     # Additionnal env file for approle
     # Bind network host because of forwarded worker. CC need to know the IP of the web node cause it will use it to connect on local ssh tunnel created
     # to access to the workers. As we run in docker we don't know the IP address, so we bind host to use the one from the host

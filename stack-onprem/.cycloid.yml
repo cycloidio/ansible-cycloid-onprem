@@ -1,0 +1,49 @@
+# Configuration of the CI pipeline
+version: '2'
+name: 'onprem'
+canonical: 'stack-onprem'
+status: 'private'
+description: 'Create onprem setup of cycloid.'
+keywords:
+  - 'cycloid'
+  - 'concourse'
+  - 'worker'
+  - 'minio'
+  - 'docker'
+  - 'ses'
+technologies:
+  - technology: cycloid-core
+    version: n/a
+  - technology: minio
+    version: n/a
+  - technology: redis
+    version: n/a
+  - technology: mysql
+    version: 5.7.x
+  - technology: vault
+    version: n/a
+  - technology: concourse
+    version: 5.7.2
+  - technology: postgres
+    version: n/a
+  - technology: concourse-worker
+    version: 5.7.2
+
+author: 'Cycloid'
+image: ''
+config:
+  # define the default pipeline here
+  default:
+    name: 'AWS ec2 instances'
+    description: 'Setup onprem on aws ec2 instances.'
+    pipeline:
+      pipeline:
+        path: 'pipeline/pipeline.yml'
+      variables:
+        path: 'pipeline/variables.sample.yml'
+
+    # Configuration of terraform to setup the infrastructure
+    terraform:
+      onprem:
+        path: 'terraform/main.tf.sample'
+        destination: '($ project $)/terraform/($ environment $)/main.tf'
