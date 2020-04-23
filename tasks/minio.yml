@@ -1,7 +1,7 @@
 ---
-- name: install minio container
+- name: Install minio container | minio
   block:
-    - name: create minio volume storage
+    - name: Create minio volume storage | minio
       docker_volume:
         name: minio-storage
         state: present
@@ -9,7 +9,7 @@
           ansible.managed: "true"
           cycloid.io: "true"
 
-    - name: create minio container
+    - name: Define service | minio
       include_role:
         name: mhutter.docker-systemd-service
       vars:
@@ -34,7 +34,7 @@
         state: started
       tags: docker-services
 
-    - name: wait for minio availability
+    - name: Wait for minio availability | minio
       uri:
         url: "http://localhost:{{ minio_port }}/"
         status_code:

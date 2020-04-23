@@ -1,0 +1,34 @@
+---
+- name: Stop services | cycloid-cache
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - cycloid-cache
+    - docker
+  failed_when: false
+
+- name: Remove packages | cycloid-cache
+  package:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - docker*
+
+- name: Remove files | cycloid-cache
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ cycloid_install_path }}"
+    - /etc/systemd/system/cycloid-cache_container.service
+    - /etc/systemd/system/docker.service
+    - /var/lib/docker
+    - /opt/containerd
+
+- name: Force systemd to reread configs | cycloid-cache
+  systemd:
+    daemon_reload: yes
+
+- name: systemctl reset-failed | cycloid-cache
+  shell: systemctl reset-failed

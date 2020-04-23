@@ -6,7 +6,7 @@
   roles:
     - role: geerlingguy.docker
       tags: docker
-      when: not validate_only
+      when: not validate_only and not uninstall
 
     - role: ansible-cycloid-onprem
       tags:

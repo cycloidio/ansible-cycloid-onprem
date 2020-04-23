@@ -8,7 +8,7 @@
 #   set_fact:
 #    concourse_web_container_links: "{{ concourse_web_container_links + ['vault'] }}"
 
-- name: Copy the ssl in service directories | vault
+- name: Copy the ssl in service directories | cycloid-creds
   copy:
     src: "{{ cycloid_creds_ssl[item] }}"
     dest: "{{ vault_config_path }}/config/ssl.{{item}}"
@@ -17,7 +17,7 @@
     - key
     - crt
 
-- name: Vault
+- name: Define service | cycloid-creds
   include_role:
     name: mhutter.docker-systemd-service
   vars:
@@ -36,10 +36,10 @@
       VAULT_DEV_LISTEN_ADDRESS: "127.0.0.1:8201"
   tags: docker-services
 
-- name: Force flush handlers to ensure vault is started and will not restart after this point (unseal) | vault
+- name: Force flush handlers to ensure vault is started and will not restart after this point (unseal) | cycloid-creds
   meta: flush_handlers
 
-- name: Check if vault is initialised | vault
+- name: Check if vault is initialised | cycloid-creds
   uri:
     url: https://127.0.0.1:8200/v1/sys/init
     validate_certs: no
@@ -50,7 +50,7 @@
   retries: 30
   delay: 10
 
-- name: Initiate vault | vault
+- name: Initiate vault | cycloid-creds
   # Http case
   #shell: docker exec -e VAULT_ADDR=http://127.0.0.1:8200 vault vault operator init -format=json
   # https case
@@ -58,7 +58,7 @@
   register: vault_tokens
   when: vault_init.json.initialized == false
 
-- name: Local save of vault creds | vault
+- name: Local save of vault creds | cycloid-creds
   local_action:
     module: copy
     content: "{{vault_tokens.stdout | from_json | to_nice_json}}"
@@ -66,15 +66,25 @@
   become: no
   when: vault_tokens is not skipped
 
-- name: Unseal vault | vault
+- name: Unseal vault | cycloid-creds
   shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault operator unseal {{item}}"
   no_log: true
   with_items: "{{(vault_tokens.stdout|default('{}')|from_json).get('unseal_keys_b64',[])}}"
   when: vault_tokens is not skipped
 
-- name: init vault config
+- name: Read local vault.secret | cycloid-creds
+  set_fact:
+     vault_local_token: "{{lookup('file', '{{playbook_dir}}/vault.secret') }}"
+
+- name: Auth into vault| cycloid-creds
+  shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault login {{ (vault_local_token|to_json|from_json)['root_token'] }}"
+  with_items:
+    - concourse-ro
+    - cycloid
+
+- name: Init vault config | cycloid-creds
   block:
-  - name: Copy policies | vault
+  - name: Copy policies | cycloid-creds
     template:
       src: "vault/{{item}}.j2"
       dest: "{{ vault_config_path }}/config/{{item}}"
@@ -82,19 +92,13 @@
       - policy-concourse-ro.hcl
       - policy-cycloid.hcl
 
-  - name: auth into vault| vault
-    shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault login {{(vault_tokens.stdout|from_json)['root_token']}}"
-    with_items:
-      - concourse-ro
-      - cycloid
-
-  - name: Create policies | vault
+  - name: Create policies | cycloid-creds
     shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault policy write {{item}} /vault/config/policy-{{item}}.hcl"
     with_items:
       - concourse-ro
       - cycloid
 
-  - name: Set global configuration | vault
+  - name: Set global configuration | cycloid-creds
     shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault {{item}}"
     with_items:
       - secrets enable -path cycloid kv
@@ -104,9 +108,13 @@
       - auth tune -max-lease-ttl=4380h approle/
   when: vault_tokens is not skipped
 
-- name: Create approle | vault
+- name: Check approles/approle-cycloid exists | cycloid-creds
+  local_action: stat path="{{ cycloid_local_datas_path }}/approles/approle-cycloid"
+  register: stat_approles
+
+- name: Create approle | cycloid-creds
   block:
-  - name: Create local approles data directory | vault
+  - name: Create local approles data directory | cycloid-creds
     file:
       path: "{{ cycloid_local_datas_path }}/approles"
       state: directory
@@ -115,33 +123,33 @@
     delegate_to: 127.0.0.1
 
   # Concourse-ro approle
-  - name: Create concourse-ro role | vault
+  - name: Create concourse-ro role | cycloid-creds
     shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault write auth/approle/role/concourse-ro period=30m token_max_ttl=0m policies=concourse-ro token_ttl=30m"
-  - name: Get concourse-ro role id | vault
+  - name: Get concourse-ro role id | cycloid-creds
     shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault read auth/approle/role/concourse-ro/role-id -format=json"
     register: role_concourse_ro_id
-  - name: Get concourse-ro role secret| vault
+  - name: Get concourse-ro role secret| cycloid-creds
     shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault write -f auth/approle/role/concourse-ro/secret-id -format=json"
     register: role_concourse_ro_secret
-  - name: Save concourse-ro approle | vault
+  - name: Save concourse-ro approle | cycloid-creds
     copy:
       content: "CONCOURSE_VAULT_AUTH_PARAM=role_id:{{(role_concourse_ro_id.stdout | from_json)['data']['role_id']}},secret_id:{{(role_concourse_ro_secret.stdout | from_json)['data']['secret_id']}}"
       dest: "{{ vault_config_path }}/approle-concourse-ro"
   # Cycloid approle
-  - name: Create cycloid role | vault
+  - name: Create cycloid role | cycloid-creds
     shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault write auth/approle/role/cycloid token_max_ttl=1h policies=cycloid token_ttl=20m"
-  - name: Get cycloid role id | vault
+  - name: Get cycloid role id | cycloid-creds
     shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault read auth/approle/role/cycloid/role-id -format=json"
     register: role_cycloid_id
-  - name: Get cycloid role secret| vault
+  - name: Get cycloid role secret| cycloid-creds
     shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault write -f auth/approle/role/cycloid/secret-id -format=json"
     register: role_cycloid_secret
-  - name: Save cycloid approle | vault
+  - name: Save cycloid approle | cycloid-creds
     copy:
       content: "VAULT_ROLE_ID={{(role_cycloid_id.stdout | from_json)['data']['role_id']}}\nVAULT_SECRET_ID={{(role_cycloid_secret.stdout | from_json)['data']['secret_id']}}"
       dest: "{{ vault_config_path }}/approle-cycloid"
 
-  - name: Copy the approles in local data directory | vault
+  - name: Copy the approles in local data directory | cycloid-creds
     fetch:
       src: "{{ vault_config_path }}/{{ item }}"
       dest: "{{ cycloid_local_datas_path }}/approles/{{ item }}"
@@ -152,4 +160,4 @@
       - "approle-concourse-ro"
       - "approle-cycloid"
 
-  when: vault_tokens is not skipped
+  when: not stat_approles.stat.exists

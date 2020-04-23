@@ -3,7 +3,7 @@ import functools
 import testinfra.utils.ansible_runner
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('cycloid-redis')
+    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('cycloid-cache')
 
 def print_host_on_fail(func):
     @functools.wraps(func)
@@ -19,7 +19,7 @@ def test_listening_ports(host):
 
 @print_host_on_fail
 def test_containers_running(host):
-    for container in ['cycloid-redis']:
+    for container in ['cycloid-cache']:
         command = "docker ps --filter=status=running --filter=name=%s" \
             % container
         c = host.run(command)

@@ -1,6 +1,6 @@
 ---
 
-- name: Cycloid Frontend | frontend
+- name: Define service | cycloid-core frontend
   include_role:
     name: mhutter.docker-systemd-service
   vars:

@@ -4,7 +4,7 @@
 #   set_fact:
 #    cycloid_api_container_links: "{{ cycloid_api_container_links + ['cycloid-db'] }}"
 
-- name: Cycloid db
+- name: Define service | cycloid-db
   include_role:
     name: mhutter.docker-systemd-service
   vars:

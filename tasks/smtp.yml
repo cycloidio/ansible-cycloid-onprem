@@ -4,7 +4,7 @@
 #   set_fact:
 #    cycloid_api_container_links: "{{ cycloid_api_container_links + ['cycloid-smtp'] }}"
 
-- name: create config directory | cycloid-smtp
+- name: Create config directory | smtp-server
   file:
     path: "{{ item }}"
     state: directory
@@ -12,14 +12,14 @@
   with_items:
     - "{{ cycloid_smtp_path }}"
 
-- name: Generate mailhog auth file | cycloid-smtp
+- name: Generate mailhog auth file | smtp-server
   copy:
     content: "{{ cycloid_email_smtp_username }}:{{ cycloid_email_smtp_password | password_hash('bcrypt') }}"
     dest: "{{ cycloid_smtp_path }}/mailhog.auth"
 
 # Because Cycloid need a smtp server in any case, provide a mailhog mail server
 
-- name: Cycloid smtp
+- name: Define service | smtp-server
   include_role:
     name: mhutter.docker-systemd-service
   vars:

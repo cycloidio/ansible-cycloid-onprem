@@ -2,17 +2,17 @@
 
 # - name: Add this container to api links
 #   set_fact:
-#    cycloid_api_container_links: "{{ cycloid_api_container_links + ['cycloid-redis'] }}"
+#    cycloid_api_container_links: "{{ cycloid_api_container_links + ['cycloid-cache'] }}"
 
-- name: Cycloid redis
+- name: Define service | cycloid-cache
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: cycloid-redis
+    name: cycloid-cache
     container_docker_pull: "{{ docker_pull }}"
-    container_image: "{{ cycloid_redis_image }}"
+    container_image: "{{ cycloid_cache_image }}"
     container_ports:
       - '{{ cycloid_email_redis_port }}:6379'
     container_volumes:
-      - "{{cycloid_redis_path}}:/data"
+      - "{{cycloid_cache_path}}:/data"
   tags: docker-services

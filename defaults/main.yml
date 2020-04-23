@@ -5,11 +5,14 @@ validate_only: False
 docker_pull: true
 #docker_pull: false
 
+# Set to true to uninstall cycloid
+uninstall: False
+
 setup_cycloid_core: "{{ 'cycloid-core' in group_names }}"
 setup_cycloid_scheduler: "{{ 'cycloid-scheduler' in group_names }}"
 setup_cycloid_db: "{{ 'cycloid-db' in group_names }}"
-setup_cycloid_redis: "{{ 'cycloid-redis' in group_names }}"
-setup_scheduler_db: "{{ 'cycloid-scheduler-db' in group_names }}"
+setup_cycloid_cache: "{{ 'cycloid-cache' in group_names }}"
+setup_cycloid_scheduler_db: "{{ 'cycloid-scheduler-db' in group_names }}"
 setup_cycloid_creds: "{{ 'cycloid-creds' in group_names }}"
 #. setup_minio(optional): bool
 #+ install and configure minio, a s3-like remote storage
@@ -50,7 +53,7 @@ cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-f
 cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod
 #cycloid_api_image: gaell/debug
 concourse_db_image: postgres:9.6
-cycloid_redis_image: redis:5.0
+cycloid_cache_image: redis:5.0
 cycloid_db_image: mariadb:10.2.11
 concourse_web_image: concourse/concourse:5.7.2
 vault_image: vault:1.1.3
@@ -66,7 +69,7 @@ concourse_external_url: "{{ concourse_url }}:{{ concourse_port }}"
 concourse_config_path: "{{ cycloid_install_path }}/concourse"
 concourse_db_path: "{{ cycloid_install_path }}/concourse-db"
 cycloid_smtp_path: "{{ cycloid_install_path }}/cycloid-smtp"
-cycloid_redis_path: "{{ cycloid_install_path }}/cycloid-redis"
+cycloid_cache_path: "{{ cycloid_install_path }}/cycloid-cache"
 concourse_authorized_worker_keys_path: "authorized_worker_keys"
 concourse_host_key_path: "host_key"
 concourse_session_signing_key_path: "session_signing_key"
@@ -175,7 +178,7 @@ cycloid_email_smtp_username: admin
 cycloid_email_smtp_password: admin
 cycloid_email_addr_from: noreply@cycloid.io
 cycloid_email_addr_return_path: admin+ydbounce@cycloid.io
-cycloid_email_redis_host: "{{ hostvars[groups['cycloid-redis'][0]]['ansible_default_ipv4']['address'] }}"
+cycloid_email_redis_host: "{{ hostvars[groups['cycloid-cache'][0]]['ansible_default_ipv4']['address'] }}"
 cycloid_email_redis_port: 6379
 cycloid_email_redis_db: 0
 cycloid_jwt_key_1: 2f2122de-63f2-4eec-9c6f-c6abb3e1f007:7cdyHps2tYDp6e7VKPEstE5sDMQbK6WLyN3GmTsF7x7QpE6ZP5ra6yfVSkvXakbB

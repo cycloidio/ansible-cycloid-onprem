@@ -1,21 +1,21 @@
 ---
 
-- name: Force flush handlers to ensure all other containers like concourse web is started before running the api | api
+- name: Force flush handlers to ensure all other containers like concourse web is started before running the api | cycloid-core api
   meta: flush_handlers
 
-- name: Copy vault approles in service directory | api
+- name: Copy vault approles in service directory | cycloid-core api
   copy:
     src: "{{ cycloid_local_datas_path }}/approles/approle-cycloid"
     dest: "{{ cycloid_install_path }}/approle-cycloid"
     mode: 0400
 
-- name: Copy session_signing_key in service directory | api
+- name: Copy session_signing_key in service directory | cycloid-core api
   copy:
     src: "{{ cycloid_local_datas_path }}/scheduler/{{ concourse_session_signing_key_path }}"
     dest: "{{ concourse_config_path }}/{{ concourse_session_signing_key_path }}"
     mode: 0400
 
-- name: Cycloid api | api
+- name: Define service | cycloid-core api
   include_role:
     name: mhutter.docker-systemd-service
   vars:
@@ -70,10 +70,10 @@
 
   tags: docker-services
 
-- name: Force flush handlers to ensure cycloid-api is started to create the first user | api
+- name: Force flush handlers to ensure cycloid-api is started to create the first user | cycloid-core api
   meta: flush_handlers
 
-- name: Wait and check if we have to create the first cycloid-api user | api
+- name: Wait and check if we have to create the first cycloid-api user | cycloid-core api
   command: "mysql --protocol TCP -h localhost -P {{ cycloid_db_port }} -u {{ cycloid_db_user }} -p{{ cycloid_db_password }} {{ cycloid_db_name }} -Ns -e 'SELECT * FROM users;'"
   register: users
   no_log: true
@@ -84,7 +84,7 @@
 - set_fact: sql_query_rows="{{users.stdout_lines|length}}"
   when: setup_cycloid_db
 
-- name: Wait and check if we have to create the first cycloid-api user | api
+- name: Wait and check if we have to create the first cycloid-api user | cycloid-core api
   command: "mysql --protocol TCP -h {{ cycloid_db_host }} -P {{ cycloid_db_port }} -u {{ cycloid_db_user }} -p{{ cycloid_db_password }} {{ cycloid_db_name }} -Ns -e 'SELECT * FROM users;'"
   register: users
   no_log: true
@@ -96,7 +96,7 @@
   when: not setup_cycloid_db
 
 - block:
-    - name: Create initial cycloid user | api
+    - name: Create initial cycloid user | cycloid-core api
       uri:
         url: http://localhost:3001/user
         method: POST
@@ -115,25 +115,25 @@
       no_log: false
       register: init_of_api
       until: init_of_api.status == 204
-    
-    - name: Login with cycloid user | api 
+
+    - name: Login with cycloid user | cycloid-core api
       uri:
         url: http://localhost:3001/user/login
         method: POST
-        body_format: raw 
+        body_format: raw
         validate_certs: no
-        status_code: 200 
+        status_code: 200
         return_content: no
         headers:
           Accept: "*/*"
           Connection: "keep-alive"
-          DNT: "1" 
+          DNT: "1"
           Content-type: "application/vnd.cycloid.io.v1+json"
         body: "{{cycloid_initial_user|to_json}}"
       no_log: false
       register: cy_user_token
-    
-    - name: Create initial cycloid organization | api
+
+    - name: Create initial cycloid organization | cycloid-core api
       uri:
         url: http://localhost:3001/organizations
         method: POST
@@ -151,23 +151,23 @@
       no_log: false
       register: init_of_api_org
 
-    - name: Login in cycloid org | api 
+    - name: Login in cycloid org | cycloid-core api
       uri:
         url: "http://localhost:3001/user/refresh_token?organization_canonical={{ cycloid_initial_organization.canonical }}"
-        method: GET 
+        method: GET
         validate_certs: no
-        status_code: 200 
+        status_code: 200
         return_content: no
         headers:
           Accept: "*/*"
           Authorization: "Bearer {{ cy_user_token.json.data.token }}"
           Connection: "keep-alive"
-          DNT: "1" 
+          DNT: "1"
           Content-type: "application/vnd.cycloid.io.v1+json"
       no_log: false
       register: cy_org_token
-    
-    - name: Create initial cycloid creds | api
+
+    - name: Create initial cycloid creds | cycloid-core api
       uri:
         url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/credentials"
         method: POST
@@ -188,7 +188,7 @@
     # Adding the cred ID previously created
     - set_fact: "cycloid_initial_service_catalog={{ cycloid_initial_service_catalog | combine({'credential_id': init_of_api_cred.json.data.id|int}) }}"
 
-    - name: Create initial cycloid service catalog | api
+    - name: Create initial cycloid service catalog | cycloid-core api
       uri:
         url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/service_catalog_sources"
         method: POST

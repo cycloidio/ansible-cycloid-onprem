@@ -42,7 +42,7 @@ platforms:
      - cycloid-core
      - smtp-server
      - minio
-     - cycloid-redis
+     - cycloid-cache
 
   - name: cy-db
     image: debian:stretch

@@ -53,7 +53,7 @@ platforms:
      - cycloid-creds
      - minio
      - smtp-server
-     - cycloid-redis
+     - cycloid-cache
 
   - name: concourse-worker
     image: concourse/concourse:5.7.2

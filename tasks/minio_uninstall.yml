@@ -1,0 +1,35 @@
+---
+
+- name: Stop services | minio
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - minio
+    - docker
+  failed_when: false
+
+- name: Remove packages | minio
+  package:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - docker*
+
+- name: Remove files | minio
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ cycloid_install_path }}"
+    - /etc/systemd/system/minio.service
+    - /etc/systemd/system/docker.service
+    - /var/lib/docker
+    - /opt/containerd
+
+- name: Force systemd to reread configs | minio
+  systemd:
+    daemon_reload: yes
+
+- name: systemctl reset-failed | minio
+  shell: systemctl reset-failed

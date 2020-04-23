@@ -78,7 +78,7 @@ Install ansible and required python library using virtualenv
 ```
 virtualenv --clear .env
 source .env/bin/activate
-pip install molecule ansible==2.8.* docker-py passlib bcrypt
+pip install ansible==2.8.* docker-py passlib bcrypt
 ```
 
 Cycloid docker images are stored into an Amazon ECR, you will need to export Amazon access key for the playbook.
@@ -119,7 +119,7 @@ cycloid
 cycloid
 [cycloid-scheduler-db:children]
 cycloid
-[cycloid-redis:children]
+[cycloid-cache:children]
 cycloid
 [cycloid-db:children]
 cycloid
@@ -180,10 +180,10 @@ ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory vault_unseal.yml
 
 **Uninstall**
 
-If the install failed and you need to clean your server before to run it again, the `adhoc/uninstall.yml` playbook can be used.
+If the install failed and you need to clean your servers before to run it again, uninstall can be done by running the `playbook.yml` with `-e uninstall=True`.
 
 ```
-ansible-playbook -u admin -b -i inventory adhoc/uninstall.yml
+ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory -e uninstall=True playbook.yml
 ```
 
 Storage information
@@ -275,7 +275,7 @@ This role is tested with molecule
 ```
 virtualenv --clear .env
 source .env/bin/activate
-pip install molecule ansible docker-py
+pip install molecule ansible docker-py passlib bcrypt
 
 export AWS_SECRET_ACCESS_KEY=$(vault read -field=secret_key secret/$CUSTOMER/aws)
 export AWS_ACCESS_KEY_ID=$(vault read -field=access_key secret/$CUSTOMER/aws)
