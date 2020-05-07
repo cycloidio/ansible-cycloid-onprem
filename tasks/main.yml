@@ -35,6 +35,9 @@
     - include: minio.yml
       when: setup_minio|bool
 
+    - include: elasticsearch.yml
+      when: setup_elasticsearch
+
   when: not uninstall|bool and not validate_only|bool
 
 # Wait and validate running services

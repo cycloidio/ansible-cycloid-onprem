@@ -17,6 +17,9 @@ setup_cycloid_creds: "{{ 'cycloid_creds' in group_names }}"
 #. setup_minio(optional): bool
 #+ install and configure minio, a s3-like remote storage
 setup_minio: "{{ 'minio' in group_names }}"
+#. setup_elasticsearch(optional): bool
+#+ install and configure elasticsearch to use it as cycloid external baclend
+setup_elasticsearch: "{{ 'elasticsearch' in group_names }}"
 # If you let cycloid-smtp:1025, it will start a mailhog smtpd server to satisfy Cycloid requirements
 setup_smtp_server: "{{ 'smtp_server' in group_names }}"
 
