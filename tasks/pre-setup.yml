@@ -2,7 +2,7 @@
 - package:
     name:
       - python-openssl
-      - mysql-client
+      - default-mysql-client
       - python-setuptools
     state: present
 
