@@ -4,6 +4,8 @@
       - python-openssl
       - default-mysql-client
       - python-setuptools
+      - gnupg2
+      - pass
     state: present
 
 - easy_install:
