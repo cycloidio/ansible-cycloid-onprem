@@ -68,4 +68,6 @@
 
     - include: minio_uninstall.yml
       when: setup_minio|bool
+    - include: elasticsearch_uninstall.yml
+      when: setup_elasticsearch|bool
   when: uninstall|bool
