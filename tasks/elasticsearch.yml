@@ -18,6 +18,11 @@
         - key
         - crt
 
+    - name: template elasticsearch config
+      template:
+        src: elasticsearch/elasticsearch.yml.j2
+        dest: "{{ elasticsearch_config_path }}/elasticsearch.yml"
+
     - name: create elasticsearch container
       include_role:
         name: mhutter.docker-systemd-service
@@ -26,7 +31,8 @@
         container_image: "elasticsearch:{{ elasticsearch_version }}"
         container_volumes:
           - elasticsearch-storage:/usr/share/elasticsearch/data
-          - "{{ elasticsearch_config_path }}/:/tmp:ro"
+          # we can't simply override config/elasticsearch since we loose some other cool files
+          - "{{ elasticsearch_config_path }}/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro"
           # SSL resources should be placed in the [/usr/share/elasticsearch/config] directory
           # this is the error message if you place ssl certs in another place
           - "{{ elasticsearch_config_path }}/ssl.key:/usr/share/elasticsearch/config/ssl.key:ro"
@@ -39,12 +45,7 @@
           - systemd.managed=true
           - cycloid.io=true
         container_env:
-          discovery.type: single-node
-          node.name: elasticsearch-cycloid
           ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-          xpack.security.http.ssl.enabled: "true"
-          xpack.security.http.ssl.key: "/tmp/ssl.key"
-          xpack.security.http.ssl.certificate: "/tmp/ssl.cert"
         # systemd
         enable: true
         masked: false
