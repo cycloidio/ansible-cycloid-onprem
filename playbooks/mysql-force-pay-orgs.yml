@@ -1,6 +1,6 @@
 
 - name: pay orgs
-  hosts: cycloid-db
+  hosts: cycloid_db
   #hosts: localhost
   #connection: local
   vars_files:

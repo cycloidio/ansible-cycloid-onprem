@@ -1,6 +1,6 @@
 ---
 - name: Setup cycloid
-  hosts: all:!concourse-worker
+  hosts: all:!concourse_worker
   vars_files:
     - [ "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
   roles:

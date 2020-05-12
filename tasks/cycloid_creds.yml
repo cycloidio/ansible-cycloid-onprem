@@ -109,7 +109,9 @@
   when: vault_tokens is not skipped
 
 - name: Check approles/approle-cycloid exists | cycloid-creds
-  local_action: stat path="{{ cycloid_local_datas_path }}/approles/approle-cycloid"
+  local_action:
+    module: stat
+    path: "{{ cycloid_local_datas_path }}/approles/approle-cycloid"
   register: stat_approles
 
 - name: Create approle | cycloid-creds

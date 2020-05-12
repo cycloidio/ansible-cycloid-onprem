@@ -1,6 +1,6 @@
 ---
 - name: Converge
-  hosts: cycloid-worker
+  hosts: cycloid_worker
 
   vars_files:
     - [ "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]

@@ -1,6 +1,6 @@
 ---
 - name: vault unseal
-  hosts: cycloid-creds
+  hosts: cycloid_creds
   vars:
     vault_tokens: "{{ lookup('file', 'vault.secret') | from_json }}"
 
