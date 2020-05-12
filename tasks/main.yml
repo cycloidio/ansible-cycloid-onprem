@@ -1,44 +1,68 @@
 ---
+- block:
+    - include: pre-setup.yml
 
-- include: pre-setup.yml
-  when: not validate_only
+    - include: gen-ssl.yml
+      # when: not validate_only and setup_cycloid_core
 
-- include: gen-ssl.yml
-  when: not validate_only
-  # when: not validate_only and setup_cycloid_core
+    - include: cycloid_creds.yml
+      when: setup_cycloid_creds
 
-- include: vault.yml
-  when: not validate_only and setup_cycloid_creds
+    - include: cycloid_db.yml
+      when: setup_cycloid_db
 
-- include: cycloid-db.yml
-  when: not validate_only and setup_cycloid_db
+    - include: smtp.yml
+      when: setup_smtp_server
 
-- include: cycloid-smtp.yml
-  when: not validate_only and setup_smtp_server
+    - include: cycloid_cache.yml
+      when: setup_cycloid_cache
 
-- include: cycloid-redis.yml
-  when: not validate_only and setup_cycloid_redis
+    - include: cycloid_scheduler_db.yml
+      when: setup_cycloid_scheduler_db
 
-- include: concourse-db.yml
-  when: not validate_only and setup_scheduler_db
+    - include: cycloid_scheduler.yml
+      when: setup_cycloid_scheduler
 
-- include: concourse-web.yml
-  when: not validate_only and setup_cycloid_scheduler
+    - include: cycloid_api.yml
+      when: setup_cycloid_core
+    - include: cycloid_frontend.yml
+      when: setup_cycloid_core
+    - include: nginx.yml
+      when: setup_cycloid_core
 
-- include: cycloid-api.yml
-  when: not validate_only and setup_cycloid_core
+    #- include: prometheus.yml
 
-- include: cycloid-frontend.yml
-  when: not validate_only and setup_cycloid_core
+    - include: minio.yml
+      when: setup_minio
 
-- include: nginx.yml
-  when: not validate_only and setup_cycloid_core
-
-#- include: prometheus.yml
+  when: not uninstall and not validate_only
 
 # Wait and validate running services
 - include: validate.yml
-  when: validate or validate_only
+  when: (validate or validate_only) and not uninstall
 
-- include: minio.yml
-  when: not validate_only and setup_minio
+- block:
+    - include: cycloid_creds_uninstall.yml
+      when: setup_cycloid_creds
+
+    - include: cycloid_db_uninstall.yml
+      when: setup_cycloid_db
+
+    - include: smtp_uninstall.yml
+      when: setup_smtp_server
+
+    - include: cycloid_cache_uninstall.yml
+      when: setup_cycloid_cache
+
+    - include: cycloid_scheduler_db_uninstall.yml
+      when: setup_cycloid_scheduler_db
+
+    - include: cycloid_scheduler_uninstall.yml
+      when: setup_cycloid_scheduler
+
+    - include: cycloid_core_uninstall.yml
+      when: setup_cycloid_core
+
+    - include: minio_uninstall.yml
+      when: setup_minio
+  when: uninstall

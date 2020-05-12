@@ -1,5 +1,5 @@
 ---
-- name: Copy the ssl in service directories | scheduler
+- name: Copy the ssl in service directories | cycloid-core nginx
   copy:
     src: "{{ cycloid_core_ssl[item] }}"
     dest: "{{ cycloid_install_path }}/ssl.{{item}}"
@@ -8,7 +8,7 @@
     - key
     - crt
 
-- name: Cycloid api
+- name: Define service | cycloid-core nginx
   include_role:
     name: jdauphant.nginx
   vars:

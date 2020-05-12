@@ -78,7 +78,7 @@ Install ansible and required python library using virtualenv
 ```
 virtualenv --clear .env
 source .env/bin/activate
-pip install molecule ansible==2.8.* docker-py passlib bcrypt
+pip install ansible==2.8.* docker-py passlib bcrypt
 ```
 
 Cycloid docker images are stored into an Amazon ECR, you will need to export Amazon access key for the playbook.
@@ -113,21 +113,21 @@ cat >> inventory <<EOF
 1.2.3.4
 
 # Meta groups to setup all in one
-[cycloid-core:children]
+[cycloid_core:children]
 cycloid
-[cycloid-scheduler:children]
+[cycloid_scheduler:children]
 cycloid
-[cycloid-scheduler-db:children]
+[cycloid_scheduler_db:children]
 cycloid
-[cycloid-redis:children]
+[cycloid_cache:children]
 cycloid
-[cycloid-db:children]
+[cycloid_db:children]
 cycloid
-[cycloid-creds:children]
+[cycloid_creds:children]
 cycloid
 [minio:children]
 cycloid
-[smtp-server:children]
+[smtp_server:children]
 cycloid
 
 EOF
@@ -172,7 +172,7 @@ This playbook at the end of the setup will create a local `vault.secret` file. M
 To make the unseal easier, the file `vault.secret` created during the setup can be used with `vault_unseal.yml` playbook that way :
 
 ```
-ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory vault_unseal.yml
+ansible-playbook -u admin -b -i inventory vault_unseal.yml
 ```
 
 >Note : Related to the implementation of onprem Admin console https://github.com/cycloidio/youdeploy/issues/158
@@ -180,10 +180,10 @@ ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory vault_unseal.yml
 
 **Uninstall**
 
-If the install failed and you need to clean your server before to run it again, the `adhoc/uninstall.yml` playbook can be used.
+If the install failed and you need to clean your servers before to run it again, uninstall can be done by running the `playbook.yml` with `-e uninstall=True`.
 
 ```
-ansible-playbook -u admin -b -i inventory adhoc/uninstall.yml
+ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory -e uninstall=True playbook.yml
 ```
 
 Storage information
@@ -275,7 +275,7 @@ This role is tested with molecule
 ```
 virtualenv --clear .env
 source .env/bin/activate
-pip install molecule ansible docker-py
+pip install molecule ansible docker-py passlib bcrypt
 
 export AWS_SECRET_ACCESS_KEY=$(vault read -field=secret_key secret/$CUSTOMER/aws)
 export AWS_ACCESS_KEY_ID=$(vault read -field=access_key secret/$CUSTOMER/aws)

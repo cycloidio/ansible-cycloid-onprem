@@ -4,7 +4,7 @@
 #   set_fact:
 #    cycloid_api_container_links: "{{ cycloid_api_container_links + ['concourse-web'] }}"
 
-- name: host key | concourse
+- name: Host key | cycloid-scheduler
   copy:
     content: "{{ concourse_host_key }}"
     dest: "{{ concourse_config_path }}/{{ concourse_host_key_path }}"
@@ -14,7 +14,7 @@
   notify:
   - restart concourse web
 
-- name: session signing key | concourse
+- name: Session signing key | cycloid-scheduler
   copy:
     content: "{{ concourse_session_signing_key }}"
     dest: "{{ concourse_config_path }}/{{ concourse_session_signing_key_path }}"
@@ -24,7 +24,7 @@
   notify:
   - restart concourse web
 
-- name: Copy the ssl in service directories | scheduler
+- name: Copy the ssl in service directories | cycloid-scheduler
   copy:
     src: "{{ cycloid_scheduler_ssl[item] }}"
     dest: "{{ concourse_config_path }}/ssl.{{item}}"
@@ -33,7 +33,7 @@
     - key
     - crt
 
-- name: Generate session_signing_key local directory | scheduler
+- name: Generate session_signing_key local directory | cycloid-scheduler
   file:
     path: "{{ cycloid_local_datas_path }}/scheduler"
     state: directory
@@ -41,7 +41,7 @@
     recurse: true
   delegate_to: 127.0.0.1
 
-- name: Copy session_signing_key in local data directory | scheduler
+- name: Copy session_signing_key in local data directory | cycloid-scheduler
   fetch:
     src: "{{ concourse_config_path }}/{{ concourse_session_signing_key_path }}"
     dest: "{{ cycloid_local_datas_path }}/scheduler/{{ concourse_session_signing_key_path }}"
@@ -49,7 +49,7 @@
     # remote_src: yes
     flat: true
 
-- name: authorized worker keys | concourse
+- name: Authorized worker keys | cycloid-scheduler
   copy:
   #template:
     #src: authorized_worker_keys.j2
@@ -57,13 +57,13 @@
     dest: "{{ concourse_config_path }}/{{ concourse_authorized_worker_keys_path }}"
     mode: 0400
 
-- name: Copy vault approles in service directory | scheduler
+- name: Copy vault approles in service directory | cycloid-scheduler
   copy:
     src: "{{ cycloid_local_datas_path }}/approles/approle-concourse-ro"
     dest: "{{ concourse_config_path }}/approle-concourse-ro"
     mode: 0400
 
-- name: Concourse web
+- name: Define service | cycloid-scheduler
   include_role:
     name: mhutter.docker-systemd-service
   vars:

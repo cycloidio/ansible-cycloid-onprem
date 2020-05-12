@@ -3,7 +3,7 @@ import functools
 import testinfra.utils.ansible_runner
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('cycloid-creds')
+    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('cycloid_creds')
 
 def print_host_on_fail(func):
     @functools.wraps(func)

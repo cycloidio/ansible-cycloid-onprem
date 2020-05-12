@@ -1,6 +1,6 @@
 
-- name: Converge
-  hosts: cycloid
+- name: pay orgs
+  hosts: cycloid_db
   #hosts: localhost
   #connection: local
   vars_files:
