@@ -23,6 +23,7 @@
     - "{{ vault_config_path }}"
     - "{{ cycloid_install_path }}"
     - /etc/systemd/system/vault_container.service
+    - /etc/default/vault
     - /etc/systemd/system/docker.service
     - /var/lib/docker
     - /opt/containerd

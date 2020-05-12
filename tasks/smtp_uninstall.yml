@@ -24,6 +24,7 @@
     - "{{ cycloid_smtp_path }}"
     - "{{ cycloid_install_path }}"
     - /etc/systemd/system/cycloid-smtp.service
+    - /etc/default/cycloid-smtp
     - /etc/systemd/system/docker.service
     - /var/lib/docker
     - /opt/containerd

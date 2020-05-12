@@ -24,6 +24,7 @@
     - "{{ cycloid_db_path }}"
     - "{{ cycloid_install_path }}"
     - /etc/systemd/system/cycloid-db_container.service
+    - /etc/default/cycloid-db
     - /etc/systemd/system/docker.service
     - /var/lib/docker
     - /opt/containerd

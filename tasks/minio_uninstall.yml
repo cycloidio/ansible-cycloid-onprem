@@ -23,6 +23,7 @@
   with_items:
     - "{{ cycloid_install_path }}"
     - /etc/systemd/system/minio.service
+    - /etc/default/minio
     - /etc/systemd/system/docker.service
     - /var/lib/docker
     - /opt/containerd

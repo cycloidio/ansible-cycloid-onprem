@@ -23,6 +23,7 @@
     - "{{ concourse_config_path }}"
     - "{{ cycloid_install_path }}"
     - /etc/systemd/system/concourse-web_container.service
+    - /etc/default/concourse-web
     - /etc/systemd/system/docker.service
     - /var/lib/docker
     - /opt/containerd

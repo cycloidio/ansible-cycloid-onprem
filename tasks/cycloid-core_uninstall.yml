@@ -20,6 +20,8 @@
     - "{{ cycloid_install_path }}"
     - /etc/systemd/system/cycloid-api_container.service
     - /etc/systemd/system/cycloid-frontend_container.service
+    - /etc/default/cycloid-api
+    - /etc/default/cycloid-frontend
     - /etc/systemd/system/nginx.service
     - /etc/systemd/system/docker.service
     - /var/lib/docker
