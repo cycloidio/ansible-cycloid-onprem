@@ -46,14 +46,14 @@ platforms:
     #   - SYS_ADMIN
     groups:
      - cycloid
-     - cycloid-core
-     - cycloid-scheduler
-     - cycloid-db
-     - cycloid-scheduler-db
-     - cycloid-creds
+     - cycloid_core
+     - cycloid_scheduler
+     - cycloid_db
+     - cycloid_scheduler_db
+     - cycloid_creds
      - minio
-     - smtp-server
-     - cycloid-cache
+     - smtp_server
+     - cycloid_cache
 
   - name: concourse-worker
     image: concourse/concourse:5.7.2

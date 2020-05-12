@@ -5,27 +5,27 @@
     - include: gen-ssl.yml
       # when: not validate_only and setup_cycloid_core
 
-    - include: cycloid-creds.yml
+    - include: cycloid_creds.yml
       when: setup_cycloid_creds
 
-    - include: cycloid-db.yml
+    - include: cycloid_db.yml
       when: setup_cycloid_db
 
     - include: smtp.yml
       when: setup_smtp_server
 
-    - include: cycloid-cache.yml
+    - include: cycloid_cache.yml
       when: setup_cycloid_cache
 
-    - include: cycloid-scheduler-db.yml
+    - include: cycloid_scheduler_db.yml
       when: setup_cycloid_scheduler_db
 
-    - include: cycloid-scheduler.yml
+    - include: cycloid_scheduler.yml
       when: setup_cycloid_scheduler
 
-    - include: cycloid-api.yml
+    - include: cycloid_api.yml
       when: setup_cycloid_core
-    - include: cycloid-frontend.yml
+    - include: cycloid_frontend.yml
       when: setup_cycloid_core
     - include: nginx.yml
       when: setup_cycloid_core
@@ -42,25 +42,25 @@
   when: (validate or validate_only) and not uninstall
 
 - block:
-    - include: cycloid-creds_uninstall.yml
+    - include: cycloid_creds_uninstall.yml
       when: setup_cycloid_creds
 
-    - include: cycloid-db_uninstall.yml
+    - include: cycloid_db_uninstall.yml
       when: setup_cycloid_db
 
     - include: smtp_uninstall.yml
       when: setup_smtp_server
 
-    - include: cycloid-cache_uninstall.yml
+    - include: cycloid_cache_uninstall.yml
       when: setup_cycloid_cache
 
-    - include: cycloid-scheduler-db_uninstall.yml
+    - include: cycloid_scheduler_db_uninstall.yml
       when: setup_cycloid_scheduler_db
 
-    - include: cycloid-scheduler_uninstall.yml
+    - include: cycloid_scheduler_uninstall.yml
       when: setup_cycloid_scheduler
 
-    - include: cycloid-core_uninstall.yml
+    - include: cycloid_core_uninstall.yml
       when: setup_cycloid_core
 
     - include: minio_uninstall.yml

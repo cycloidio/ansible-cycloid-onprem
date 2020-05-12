@@ -39,10 +39,10 @@ platforms:
     # capabilities:
     #   - SYS_ADMIN
     groups:
-     - cycloid-core
-     - smtp-server
+     - cycloid_core
+     - smtp_server
      - minio
-     - cycloid-cache
+     - cycloid_cache
 
   - name: cy-db
     image: debian:stretch
@@ -55,7 +55,7 @@ platforms:
         - cycloid-db
     privileged: yes
     groups:
-     - cycloid-db
+     - cycloid_db
 
   - name: cy-creds
     image: debian:stretch
@@ -75,7 +75,7 @@ platforms:
     # capabilities:
     #   - SYS_ADMIN
     groups:
-     - cycloid-creds
+     - cycloid_creds
 
   - name: cy-scheduler
     image: debian:stretch
@@ -97,7 +97,7 @@ platforms:
     # capabilities:
     #   - SYS_ADMIN
     groups:
-     - cycloid-scheduler
+     - cycloid_scheduler
 
   - name: cy-scheduler-db
     image: debian:stretch
@@ -117,7 +117,7 @@ platforms:
     # capabilities:
     #   - SYS_ADMIN
     groups:
-     - cycloid-scheduler-db
+     - cycloid_scheduler_db
 
   - name: concourse-worker
     image: concourse/concourse:5.7.2

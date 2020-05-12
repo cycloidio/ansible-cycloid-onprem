@@ -113,21 +113,21 @@ cat >> inventory <<EOF
 1.2.3.4
 
 # Meta groups to setup all in one
-[cycloid-core:children]
+[cycloid_core:children]
 cycloid
-[cycloid-scheduler:children]
+[cycloid_scheduler:children]
 cycloid
-[cycloid-scheduler-db:children]
+[cycloid_scheduler_db:children]
 cycloid
-[cycloid-cache:children]
+[cycloid_cache:children]
 cycloid
-[cycloid-db:children]
+[cycloid_db:children]
 cycloid
-[cycloid-creds:children]
+[cycloid_creds:children]
 cycloid
 [minio:children]
 cycloid
-[smtp-server:children]
+[smtp_server:children]
 cycloid
 
 EOF
