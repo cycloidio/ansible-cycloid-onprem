@@ -205,4 +205,23 @@
         body: "{{cycloid_initial_service_catalog|to_json}}"
       no_log: false
 
+    - name: Create elasticsearch credentials | cycloid-core api
+      with_file:
+        - "{{ cycloid_third_party['crt'] }}"
+      uri:
+        url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/credentials"
+        method: POST
+        body_format: raw
+        validate_certs: no
+        return_content: no
+        status_code: 200
+        headers:
+          Authorization: "Bearer {{ cy_org_token.json.data.token }}"
+          Accept: "*/*"
+          Connection: "keep-alive"
+          DNT: "1"
+          Content-type: "application/vnd.cycloid.io.v1+json"
+        body: "{{cycloid_elasticsearch_default | combine({'raw':{ 'ca_cert': item }}, recursive=True) | to_json}}"
+      no_log: false
+
   when: sql_query_rows|int == 0
