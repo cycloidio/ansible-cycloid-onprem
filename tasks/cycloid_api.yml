@@ -223,5 +223,6 @@
           Content-type: "application/vnd.cycloid.io.v1+json"
         body: "{{cycloid_elasticsearch_default | combine({'raw':{ 'ca_cert': item }}, recursive=True) | to_json}}"
       no_log: false
+      when: "{{ 'elasticsearch' in groups }}"
 
   when: sql_query_rows|int == 0
