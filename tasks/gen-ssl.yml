@@ -33,7 +33,7 @@
       path: "{{ cycloid_install_path }}/cycloid.csr"
       privatekey_path: "{{ cycloid_install_path }}/cycloid.key"
       common_name: 127.0.0.1
-      subject_alt_name: 'DNS:cycloid,DNS:localhost,DNS:vault,DNS:concourse'
+      subject_alt_name: 'DNS:cycloid,DNS:localhost,DNS:vault,DNS:concourse,DNS:elasticsearch'
 
   - name: Generate a Self Signed OpenSSL certificate | ssl
     openssl_certificate:
@@ -67,5 +67,6 @@
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-scheduler"
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-creds"
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-core"
+        - "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party"
   run_once: true
   when: ssl_generate_selfsigned and not ssl_key.stat.exists

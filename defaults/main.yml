@@ -40,7 +40,9 @@ cycloid_creds_ssl:
 cycloid_core_ssl:
   crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-core.crt"
   key: "{{ cycloid_local_datas_path }}/ssl/cycloid-core.key"
-
+cycloid_third_party:
+  crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party.crt"
+  key: "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party.key"
 
 
 # HTTP proxy
@@ -257,6 +259,9 @@ cycloid_oauth_replace_pattern_azure_tenant_id: ""
 cycloid_base_url: "https://{{ cycloid_console_dns }}/api"
 cycloid_base_pattern_url: ""
 
+#
+# elasticsearch
+#
 #. elasticsearch_port_node(optional, int): 9300
 #+ the node port of elasticsearch
 elasticsearch_port_node: 9300
@@ -268,3 +273,7 @@ elasticsearch_port_api: 9200
 #. elasticsearch_version(option, string): 7.6.2
 #+ elasticsearch version to pull from hub.docker.com
 elasticsearch_version: 7.6.2
+
+#. elasticsearch_config_path(optional, string): /opt/cycloid/elasticsearch
+#+ the path to store elasticsearch configuration
+elasticsearch_config_path: "{{ cycloid_install_path }}/elasticsearch"
