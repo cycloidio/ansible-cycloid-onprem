@@ -119,44 +119,19 @@ cycloid_initial_organization:
     name: Cycloid
     canonical: cycloid
 
-cycloid_initial_catalog_cred:
-    name: Catalog credential
-    type: ssh
-    path: ssh_catalog
-    raw:
-        # use a dummy ssh key by default to provide a valid SSH private key format
-        ssh_key: |-
-            -----BEGIN RSA PRIVATE KEY-----
-            MIIEogIBAAKCAQEAwiZDni/2CKWH63bOksu35Ds0/PvJsxmdP1QXqZdL3AThSwqQ
-            OoUBp1xGGiGbHmRlDJ91i1OWGMF7AZMIqqqe9jFegpAo2BqxyZONCMWkAIG4Scp4
-            33+dorjOUEyXYMAnbmd9sCqMikS7m5XA1v8VXKc6rUCHPQ7dhgW5i26+ZEH6hSrd
-            1WfJ4n3dPvbYK4gv/xkASuG84wMfPDMeIPyj4IOgdENpVmmjt+0WHSf1sdRNvzsE
-            U1igI2MRqWvVoAZNN9Egj9sYKSplYviIJhkmoNMhMpe4v922Uk/OtY5rJ0meUD5Q
-            +dNjyR56f+aumCXIYmigQtW7cJbqbd+yPQcAlwIDAQABAoIBAFZd80KRj191U6uZ
-            pHeFDH8JH59S2v1DbcJYRFZ7KZHs0dQyFMsTlBLBZ6YEQR8aBiHBZebe/ixxFakz
-            oW1ajXBzsdlfC+xmo6RKcTjvwu8+xZ595Zt3B8b1c0IhcE3n7SKeAzm1E+QGg3bI
-            /Yom23fmJKIhzIeK71zJeyrdzvCF6szVgQvjB3so1NMxtesA6q6hd/uqwStDAShD
-            vXzFG2dhz3lDC2YepZ+tLlzmIqdne1S3t1thnD+tA5qb7321y2ZpcqsBMvwLXK6f
-            isWt1CBAJfhhaC/zRA6w6/HVXSCHDCSc4XNTiBHB1mgiH+/o/zdpHqu3omWePyzo
-            5Pu82lECgYEA590j3Xk+VMS0SOQD3sRiN00udqgxPbCHaV+L5d9vlYsKtoIXIvs8
-            tfdDktFyjQxu7SWKkAtk4Anypjje0JpfTfHBIYeupfr76kAJ/Wni2ZcMH+8nB81q
-            qij0Bj5xp2VqkvXwmpYwec9lvMcZeFFCmld3cYe0Gi3HYrgkvycRNusCgYEA1lwW
-            Q4Wo+ua+4mrxfUBhwUYIMb7nq0cHduQt6/rt6I3M3q3sPQDEMRUFw+fCaJRyk9Oi
-            Z28E12SKVG/VuZ1FRd7p9xcIO8M+eTjq13hUfdeQwRZqu5PiIGSsj/HFVUI60SfS
-            Vuc8moOZ3aZSYiVw+374gVE6+IPfNLg9su0zSgUCgYB0is3VK3TuDLUFkj5zwUgQ
-            veWl1KJzfICDsXfTAjzG8M1gsQDKH3gDipZXfJlUVjSHVIBSKLf6eGWTsTAlsAJJ
-            XkOSA+4AFah7tNaQnqFcdzSr9Hwsys5bWxxU6xwbZLltxtq6CNWy1FEx0u11cXrF
-            s0MhOHGJWwtGDoLB5fQcIwKBgGI9M8rgL7BFHchAgMoJPoPIJ6s8tYmudMJNEqqq
-            hmvkyLZo+PKALmncG5dL2LH7DoOnIy/KFmrsXeUSl92IMR4zagBeotxYv4Hozt/O
-            +tHtgB6tul6bCLAV02vovqozPydp26EOOp0JoPOO7QSj6iKobxU8+Ay6ywmrQkOF
-            J9NNAoGAezuidwONQplwJEqwP8nb7CHs7F/psKqBGnLjQ2If7D2fiU9KoR4BITYZ
-            uAjwS2624w3PYXKUSMdy/q5s22wQ2JCcqXpdsnJCBQ39jsDXKar7H3zeXjAnBjmZ
-            Ihv2d4kQUY2fdnsYNE7Mmi8hzGuEtoSkpmHNzVI1IWMeoXDBnZ0=
-            -----END RSA PRIVATE KEY-----
+#cycloid_initial_catalog_cred:
+#    name: Catalog credential
+#    type: ssh
+#    path: ssh_catalog
+#    raw:
+#        # use a dummy ssh key by default to provide a valid SSH private key format
+#        ssh_key: |-
+#            -----BEGIN RSA PRIVATE KEY-----
+#            -----END RSA PRIVATE KEY-----
 
 cycloid_initial_service_catalog:
     name: Cycloid stacks
-    url: git@github.com:cycloid-community-catalog/public-stacks.git
+    url: https://github.com/cycloid-community-catalog/public-stacks
     branch: master
 
 cycloid_db_password: "chovoh6gahti5ohP0AiF6eex6evoonie"

@@ -167,26 +167,26 @@
       no_log: false
       register: cy_org_token
 
-    - name: Create initial cycloid creds | cycloid-core api
-      uri:
-        url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/credentials"
-        method: POST
-        body_format: raw
-        validate_certs: no
-        return_content: no
-        status_code: 200
-        headers:
-          Authorization: "Bearer {{ cy_org_token.json.data.token }}"
-          Accept: "*/*"
-          Connection: "keep-alive"
-          DNT: "1"
-          Content-type: "application/vnd.cycloid.io.v1+json"
-        body: "{{cycloid_initial_catalog_cred|to_json}}"
-      no_log: false
-      register: init_of_api_cred
+    #- name: Create initial cycloid creds | cycloid-core api
+    #  uri:
+    #    url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/credentials"
+    #    method: POST
+    #    body_format: raw
+    #    validate_certs: no
+    #    return_content: no
+    #    status_code: 200
+    #    headers:
+    #      Authorization: "Bearer {{ cy_org_token.json.data.token }}"
+    #      Accept: "*/*"
+    #      Connection: "keep-alive"
+    #      DNT: "1"
+    #      Content-type: "application/vnd.cycloid.io.v1+json"
+    #    body: "{{cycloid_initial_catalog_cred|to_json}}"
+    #  no_log: false
+    #  register: init_of_api_cred
 
     # Adding the cred ID previously created
-    - set_fact: "cycloid_initial_service_catalog={{ cycloid_initial_service_catalog | combine({'credential_id': init_of_api_cred.json.data.id|int}) }}"
+    #- set_fact: "cycloid_initial_service_catalog={{ cycloid_initial_service_catalog | combine({'credential_id': init_of_api_cred.json.data.id|int}) }}"
 
     - name: Create initial cycloid service catalog | cycloid-core api
       uri:
