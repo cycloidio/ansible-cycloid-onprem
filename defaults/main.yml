@@ -277,3 +277,13 @@ elasticsearch_version: 7.6.2
 #. elasticsearch_config_path(optional, string): /opt/cycloid/elasticsearch
 #+ the path to store elasticsearch configuration
 elasticsearch_config_path: "{{ cycloid_install_path }}/elasticsearch"
+
+#. cycloid_elasticsearch_default(optional, string):
+#+ the default credential to access elasticsearch with 'elastic' user
+cycloid_elasticsearch_default:
+    name: elasticsearch default
+    type: elasticsearch
+    path: elasticsearch_default
+    raw:
+      username: elastic
+      password: NmM5NmIwNmEwM2Q0NmYwNDYyMDgzZGFj
