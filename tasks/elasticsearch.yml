@@ -46,6 +46,8 @@
           - cycloid.io=true
         container_env:
           ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+          # password for the 'elastic' built-in user
+          ELASTIC_PASSWORD: "{{ cycloid_elasticsearch_default['raw']['password'] }}"
         # systemd
         enable: true
         masked: false
@@ -59,6 +61,9 @@
         validate_certs: false
         status_code:
           - 200
+        force_basic_auth: true
+        url_password: "{{ cycloid_elasticsearch_default['raw']['password'] }}"
+        url_username: elastic
       register: resp
       until: resp.status == 200
       delay: 10
