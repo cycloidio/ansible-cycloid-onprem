@@ -33,7 +33,7 @@
       path: "{{ cycloid_install_path }}/cycloid.csr"
       privatekey_path: "{{ cycloid_install_path }}/cycloid.key"
       common_name: 127.0.0.1
-      subject_alt_name: 'DNS:cycloid,DNS:localhost,DNS:vault,DNS:concourse,DNS:elasticsearch'
+      subject_alt_name: "{{default_ssl_subject_alt_name | join(',') }}{% if ssl_subject_alt_name | length > 0 %},{{ ssl_subject_alt_name | join(',') }}{% endif %}"
 
   - name: Generate a Self Signed OpenSSL certificate | ssl
     openssl_certificate:

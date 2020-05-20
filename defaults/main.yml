@@ -44,6 +44,20 @@ cycloid_third_party:
   crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party.crt"
   key: "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party.key"
 
+#. default_ssl_subject_alt_name(optional, dict)
+#+ a list of alternative common name to use for the self signed certs
+#+ use `DNS` for a domain name and `IP` for a raw IP address
+default_ssl_subject_alt_name:
+  - DNS:cycloid
+  - DNS:localhost
+  - DNS:vault
+  - DNS:concourse
+  - DNS:elasticsearch
+
+#. ssl_subject_alt_name(optional, dict)
+#+ a list of alternative common name to use in addition of the default ones for the self signed certs
+#+ use `DNS` for a domain name and `IP` for a raw IP address
+#ssl_subject_alt_name:
 
 # HTTP proxy
 http_proxy: ""
