@@ -204,7 +204,7 @@ Cycloid worker installation
 Create a new host section in Ansible inventory for workers
 
 ```
-echo -e "[cycloid-worker]\n4.3.2.1" >> inventory
+echo -e "[cycloid_worker]\n4.3.2.1" >> inventory
 ```
 
 Install required Ansible role to setup Cycloid worker
