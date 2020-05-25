@@ -6,63 +6,63 @@
       # when: not validate_only and setup_cycloid_core
 
     - include: cycloid_creds.yml
-      when: setup_cycloid_creds
+      when: setup_cycloid_creds|bool
 
     - include: cycloid_db.yml
-      when: setup_cycloid_db
+      when: setup_cycloid_db|bool
 
     - include: smtp.yml
-      when: setup_smtp_server
+      when: setup_smtp_server|bool
 
     - include: cycloid_cache.yml
-      when: setup_cycloid_cache
+      when: setup_cycloid_cache|bool
 
     - include: cycloid_scheduler_db.yml
-      when: setup_cycloid_scheduler_db
+      when: setup_cycloid_scheduler_db|bool
 
     - include: cycloid_scheduler.yml
-      when: setup_cycloid_scheduler
+      when: setup_cycloid_scheduler|bool
 
     - include: cycloid_api.yml
-      when: setup_cycloid_core
+      when: setup_cycloid_core|bool
     - include: cycloid_frontend.yml
-      when: setup_cycloid_core
+      when: setup_cycloid_core|bool
     - include: nginx.yml
-      when: setup_cycloid_core
+      when: setup_cycloid_core|bool
 
     #- include: prometheus.yml
 
     - include: minio.yml
-      when: setup_minio
+      when: setup_minio|bool
 
-  when: not uninstall and not validate_only
+  when: not uninstall|bool and not validate_only|bool
 
 # Wait and validate running services
 - include: validate.yml
-  when: (validate or validate_only) and not uninstall
+  when: (validate|bool or validate_only|bool) and not uninstall|bool
 
 - block:
     - include: cycloid_creds_uninstall.yml
-      when: setup_cycloid_creds
+      when: setup_cycloid_creds|bool
 
     - include: cycloid_db_uninstall.yml
-      when: setup_cycloid_db
+      when: setup_cycloid_db|bool
 
     - include: smtp_uninstall.yml
-      when: setup_smtp_server
+      when: setup_smtp_server|bool
 
     - include: cycloid_cache_uninstall.yml
-      when: setup_cycloid_cache
+      when: setup_cycloid_cache|bool
 
     - include: cycloid_scheduler_db_uninstall.yml
-      when: setup_cycloid_scheduler_db
+      when: setup_cycloid_scheduler_db|bool
 
     - include: cycloid_scheduler_uninstall.yml
-      when: setup_cycloid_scheduler
+      when: setup_cycloid_scheduler|bool
 
     - include: cycloid_core_uninstall.yml
-      when: setup_cycloid_core
+      when: setup_cycloid_core|bool
 
     - include: minio_uninstall.yml
-      when: setup_minio
-  when: uninstall
+      when: setup_minio|bool
+  when: uninstall|bool

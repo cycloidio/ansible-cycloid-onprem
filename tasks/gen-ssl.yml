@@ -1,5 +1,6 @@
 ---
 - name: Ensure self signed certs local directory exist | ssl
+  run_once: true
   file:
     path: "{{ cycloid_local_datas_path }}/ssl"
     state: directory
@@ -8,6 +9,7 @@
   delegate_to: 127.0.0.1
 
 - name: check SSL exist
+  run_once: true
   stat:
     path: "{{ cycloid_local_datas_path }}/ssl/cycloid.key"
   register: ssl_key
