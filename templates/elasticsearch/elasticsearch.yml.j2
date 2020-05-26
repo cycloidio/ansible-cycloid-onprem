@@ -5,12 +5,15 @@ network.host: 0.0.0.0
 discovery.type: "single-node"
 node.name: "{{ node_name | default('cycloid-elasticsearch') }}"
 
+{% if elasticsearch_basic_auth %}
 # enable authentication
 xpack.security.enabled: true
+{% endif %}
 
+
+{% if elasticsearch_tls %}
 # enable TLS
 xpack.security.http.ssl.enabled: true
 xpack.security.http.ssl.certificate: "{{ cert_path | default('/usr/share/elasticsearch/config/ssl.crt') }}"
 xpack.security.http.ssl.key: "{{ key_path | default('/usr/share/elasticsearch/config/ssl.key') }}"
-
-
+{% endif %}

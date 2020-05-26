@@ -276,6 +276,14 @@ cycloid_base_pattern_url: ""
 #
 # elasticsearch
 #
+#. elasticsearch_basic_auth(option, bool): true
+#. enable elasticsearch basic authentication
+elasticsearch_basic_auth: true
+
+#. elasticsearch_tls(optional, bool): true
+#+ enable TLS on REST interface
+elasticsearch_tls: true
+
 #. elasticsearch_port_node(optional, int): 9300
 #+ the node port of elasticsearch
 elasticsearch_port_node: 9300

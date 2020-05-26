@@ -47,6 +47,7 @@
         container_env:
           ES_JAVA_OPTS: "-Xms512m -Xmx512m"
           # password for the 'elastic' built-in user
+          # not an issue to set, even if basic auth is disabled
           ELASTIC_PASSWORD: "{{ cycloid_elasticsearch_default['raw']['password'] }}"
         # systemd
         enable: true
