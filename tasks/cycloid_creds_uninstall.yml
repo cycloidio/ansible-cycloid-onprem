@@ -28,6 +28,15 @@
     - /var/lib/docker
     - /opt/containerd
 
+- name: Remove local files | cycloid-creds
+  run_once: true
+  delegate_to: 127.0.0.1
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ cycloid_local_datas_path }}/approles"
+
 - name: Force systemd to reread configs | cycloid-creds
   systemd:
     daemon_reload: yes
