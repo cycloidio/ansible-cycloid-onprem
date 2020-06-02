@@ -123,8 +123,8 @@
 
     - name: curl | core-report
       shell: |
-          echo "curl {{ item.url }} -k -vL" >> {{ cycloid_report_path }}/core/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} -k -vL  >> {{ cycloid_report_path }}/core/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/core/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/core/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: false
@@ -222,8 +222,8 @@
 
     - name: curl | cache-report
       shell: |
-          echo "curl {{ item.url }} -k -vL" >> {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} -k -vL  >> {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: true
@@ -285,8 +285,8 @@
 
     - name: curl | scheduler-report
       shell: |
-          echo "curl {{ item.url }} -k -vL" >> {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} -k -vL  >> {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: false
@@ -355,8 +355,8 @@
 
     - name: curl | scheduler-db-report
       shell: |
-          echo "curl {{ item.url }} -k -vL" >> {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} -k -vL  >> {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: false
@@ -419,8 +419,8 @@
 
     - name: curl | cycloid-db-report
       shell: |
-          echo "curl {{ item.url }} -k -vL" >> {{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} -k -vL  >> {{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: false
@@ -482,8 +482,8 @@
 
     - name: curl | cycloid-creds-report
       shell: |
-          echo "curl {{ item.url }} -k -vL" >> {{ cycloid_report_path }}/cycloid-creds/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} -k -vL  >> {{ cycloid_report_path }}/cycloid-creds/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/cycloid-creds/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/cycloid-creds/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: false
@@ -547,8 +547,8 @@
 
     - name: curl | minio-report
       shell: |
-          echo "curl {{ item.url }} -k -vL" >> {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} -k -vL  >> {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: false
@@ -611,8 +611,8 @@
 
     - name: curl | smtp-report
       shell: |
-          echo "curl {{ item.url }} -k -vL" >> {{ cycloid_report_path }}/smtp/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} -k -vL  >> {{ cycloid_report_path }}/smtp/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/smtp/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/smtp/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: false
@@ -675,8 +675,8 @@
 
     - name: curl | elasticsearch-report
       shell: |
-          echo "curl {{ item.url }} -k -vL" >> {{ cycloid_report_path }}/elasticsearch/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} -k -vL  >> {{ cycloid_report_path }}/elasticsearch/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/elasticsearch/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/elasticsearch/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: false
@@ -734,7 +734,7 @@
       echo ""
       echo "Please share this url and secret to cycloid team: "
       echo ""
-      curl https://pastefile-owl.cycloid.io -F file=@${filename}.gpg
+      curl --connect-timeout 30 https://pastefile-owl.cycloid.io -F file=@${filename}.gpg
       echo "secret: $SECRET"
       rm /tmp/${filename} -rf
     args:
