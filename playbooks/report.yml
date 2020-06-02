@@ -33,6 +33,7 @@
       - "w > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/w_logged_users"
       - "uname -a  > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/uname"
       - "cat /etc/issue > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/etc_issue"
+      - "cat /proc/cmdline > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/proc_cmdline"
 
   - name: mounts | common-report
     shell: "{{ item }}"
