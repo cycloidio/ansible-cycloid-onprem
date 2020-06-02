@@ -12,7 +12,7 @@ After a default run of this playbook on a server, you will find those different 
 | `Concourse web`    | TSA `2222`, WEB `8080`, WEB SSL `8443`  |
 | `Concourse db`     | `5432`                                  |
 | `vault`            | `8200`                                  |
-| `Cycloid frontend` | `8888`                                  |
+| `Cycloid frontend` | `3000`                                  |
 | `Cycloid api`      | `3001`                                  |
 | `Cycloid db `      | `3306`                                  |
 | `Nginx proxy`      | HTTP `80`, HTTPS `443`                  |

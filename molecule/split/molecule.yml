@@ -16,7 +16,7 @@ platforms:
     # https://medium.com/@tklo/testing-ansible-role-of-a-systemd-based-service-using-molecule-and-docker-4b3608a10ef0
     command: "/bin/systemd"
     published_ports:
-      - "8888:8888"
+      - "3000:3000"
       - "3001:3001"
       - "80:80"
       - "443:443"
