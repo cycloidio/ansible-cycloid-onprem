@@ -1,8 +1,6 @@
 
 - name: Common
   hosts: all
-  #hosts: localhost
-  #connection: local
   vars_files:
     - roles/ansible-cycloid-onprem/defaults/main.yml
     - [ "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
