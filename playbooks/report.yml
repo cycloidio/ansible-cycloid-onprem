@@ -135,7 +135,7 @@
         - { name: "nginx-cycloid-api", url: "https://localhost/api"}
         - { name: "cycloid-api", url: "http://localhost:3001"}
         - { name: "nginx-cycloid-frontend", url: "https://localhost/ "}
-        - { name: "cycloid-frontend", url: "http://localhost:8888"}
+        - { name: "cycloid-frontend", url: "http://localhost:3000"}
         - { name: "concourse-web_http", url: "http://{{ hostvars[groups['cycloid_scheduler'][0]]['ansible_default_ipv4']['address'] }}:8080 "}
         - { name: "concourse-web_https", url: "{{ concourse_external_url }}"}
         - { name: "vault", url: "{{ vault_url }}/ui/ "}
