@@ -33,6 +33,15 @@
       - "cat /etc/issue > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/etc_issue"
       - "cat /proc/cmdline > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/proc_cmdline"
 
+  - name: systemctl | common-report
+    shell: |
+        systemctl list-units --state=failed > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/systemctl/list-units 2>&1
+        systemctl list-jobs > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/systemctl/list-jobs 2>&1
+    args:
+      executable: /bin/bash
+    no_log: true
+    ignore_errors: true
+
   - name: mounts | common-report
     shell: "{{ item }}"
     no_log: true
@@ -45,7 +54,7 @@
     no_log: true
     ignore_errors: true
     with_items:
-      - "cp /etc/resolv.conf {{ cycloid_report_path }}/common/{{ inventory_hostname }}/network/"
+      - "cp --dereference /etc/resolv.conf {{ cycloid_report_path }}/common/{{ inventory_hostname }}/network/"
       - "cp /etc/hosts {{ cycloid_report_path }}/common/{{ inventory_hostname }}/network/"
       - "ip a > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/network/ip_a 2>&1"
       - "ip r > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/network/ip_r 2>&1"
