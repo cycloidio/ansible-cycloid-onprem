@@ -92,7 +92,7 @@ Generate a ssh keypair which will be used to configure Cycloid pipeline engine b
 
 ```
 mkdir keys
-ssh-keygen -t rsa -b 2048 -N '' -f keys/id_rsa
+ssh-keygen -t rsa -b 2048 -N '' -C '' -f keys/id_rsa
 ```
 
 
@@ -261,6 +261,35 @@ Then run the playbook to setup Cycloid workers
 ```
 ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory worker.yml
 ```
+
+Cycloid local worker
+--------------------
+
+For testing or POC purpose, instead having a dedicated worker, you can run one from your laptop with docker.
+
+To do it You need to define few environment variables and use the `cycloid/local-worker` docker image.
+
+```bash
+export SCHEDULER_HOST="<cycloid_scheduler ip>"
+export SCHEDULER_PORT="2222"
+export TSA_PUBLIC_KEY="$(cat keys/id_rsa.pub)"
+export TEAM_ID="<from the console ci_team_member>"
+export WORKER_KEY="$(cat keys/id_rsa | base64 -w 0)"
+
+docker run -it --rm --privileged --name cycloid-worker -e SCHEDULER_HOST=$SCHEDULER_HOST \
+                                                       -e SCHEDULER_PORT=$SCHEDULER_PORT \
+                                                       -e TSA_PUBLIC_KEY="$TSA_PUBLIC_KEY" \
+                                                       -e TEAM_ID=$CYCLOID_WORKER_TEAM \
+                                                       -e WORKER_KEY=$CYCLOID_WORKER_KEY \
+                                                       cycloid/local-worker
+```
+
+* SCHEDULER_HOST: Is the url to access concourse web. By default it is your ip used in inventory `cycloid_scheduler` group
+* SCHEDULER_PORT: Port used for concourse web/tsa (default `2222`)
+* TSA_PUBLIC_KEY: public key used by concourse. By default generated in `keys/id_rsa.pub`
+* TEAM_ID: From the web interface, go on your Organization detail view and copy the `ci_team_member`.
+* WORKER_KEY: Worker key allowed on concourse TSA. By default generated in `keys/id_rsa`
+
 
 Example Playbook
 ================
