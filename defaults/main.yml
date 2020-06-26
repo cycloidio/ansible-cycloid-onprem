@@ -207,3 +207,18 @@ minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 cycloid_report_path: "/tmp/cycloid-report"
 cycloid_report_sensitive: false
 cycloid_report_curl_timeout: 4
+
+#
+# Azure AD integration
+#
+
+#. azure_ad_tenant_id(optional, string): "null"
+#+ the tenant ID of Azure AD
+azure_ad_tenant_id: "null"
+
+#. azure_ad_client_id(optional, string): "null"
+#+ the client ID of Azure AD
+azure_ad_client_id: "null"
+
+cycloid_oauth_replace_pattern_azure_client_id: ""
+cycloid_oauth_replace_pattern_azure_tenant_id: ""
