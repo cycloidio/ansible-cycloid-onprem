@@ -205,6 +205,7 @@ minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ###########################
 
 cycloid_report_path: "/tmp/cycloid-report"
+cycloid_report_local_path: "/tmp/cycloid-report-local"
 cycloid_report_sensitive: false
 cycloid_report_curl_timeout: 4
 
