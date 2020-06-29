@@ -719,7 +719,7 @@
   - name: Fetch report from the remote and save to local
     synchronize:
       src: "{{ cycloid_report_path }}/"
-      dest: "{{ cycloid_report_path }}"
+      dest: "{{ cycloid_report_local_path }}"
       mode: pull
 
   - name: delete remote reports
@@ -747,14 +747,14 @@
       rm /tmp/${filename} -rf
     args:
      executable: /bin/bash
-     chdir: "{{ cycloid_report_path }}"
+     chdir: "{{ cycloid_report_local_path }}"
     register: secret
 
   - name: delete report
     delegate_to: 127.0.0.1
     run_once: true
     file:
-      path: "{{ cycloid_report_path }}"
+      path: "{{ cycloid_report_local_path }}"
       state: absent
 
   - debug:
