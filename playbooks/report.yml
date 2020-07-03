@@ -98,27 +98,27 @@
         state: directory
         recurse: yes
       with_items:
-        - "{{ cycloid_report_path }}/core/{{ inventory_hostname }}/systemctl"
-        - "{{ cycloid_report_path }}/core/{{ inventory_hostname }}/curl"
-        - "{{ cycloid_report_path }}/core/{{ inventory_hostname }}/access_port"
-        - "{{ cycloid_report_path }}/core/{{ inventory_hostname }}/var_log"
-        - "{{ cycloid_report_path }}/core/{{ inventory_hostname }}/files"
+        - "{{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/systemctl"
+        - "{{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/curl"
+        - "{{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/access_port"
+        - "{{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/var_log"
+        - "{{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/files"
 
     - name: systemctl | core-report
       shell: |
-          systemctl cat {{ item }} > {{ cycloid_report_path }}/core/{{ inventory_hostname }}/systemctl/{{ item }} 2>&1
-          systemctl status {{ item }} > {{ cycloid_report_path }}/core/{{ inventory_hostname }}/systemctl/{{ item }}.status 2>&1
+          systemctl cat {{ item }} > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/systemctl/{{ item }} 2>&1
+          systemctl status {{ item }} > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/systemctl/{{ item }}.status 2>&1
 
           # Get the EnvironmentFile
-          EnvironmentFile=$(cat {{ cycloid_report_path }}/core/{{ inventory_hostname }}/systemctl/{{ item }} | grep EnvironmentFile | awk -F '[=]' '{print $2}')
+          EnvironmentFile=$(cat {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/systemctl/{{ item }} | grep EnvironmentFile | awk -F '[=]' '{print $2}')
           if [ ! -z "$EnvironmentFile" ]; then
-            cp $EnvironmentFile {{ cycloid_report_path }}/core/{{ inventory_hostname }}/systemctl/
+            cp $EnvironmentFile {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/systemctl/
             if [ "{{ cycloid_report_sensitive|bool }}" == "False" ]; then
-              sed -i 's/PASSWORD=.*/PASSWORD=XXXXXXXX/; s/JWT_KEY.*/JWT_KEY_XXXXX/' {{ cycloid_report_path }}/core/{{ inventory_hostname }}/systemctl/$(basename $EnvironmentFile)
+              sed -i 's/PASSWORD=.*/PASSWORD=XXXXXXXX/; s/JWT_KEY.*/JWT_KEY_XXXXX/' {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/systemctl/$(basename $EnvironmentFile)
             fi
           fi
 
-          journalctl -xel -u {{ item }} > {{ cycloid_report_path }}/core/{{ inventory_hostname }}/systemctl/{{ item }}.log 2>&1
+          journalctl -xel -u {{ item }} > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/systemctl/{{ item }}.log 2>&1
       args:
         executable: /bin/bash
       no_log: true
@@ -131,8 +131,8 @@
 
     - name: curl | core-report
       shell: |
-          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/core/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/core/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: false
@@ -149,8 +149,8 @@
 
     - name: access_port | core-report
       shell: |
-          echo "nc -zv -w 2 {{ item.url }} {{ item.port }}" > {{ cycloid_report_path }}/core/{{ inventory_hostname }}/access_port/{{ item.name }}.log
-          nc -zv -w 2 {{ item.url }} {{ item.port }} >> {{ cycloid_report_path }}/core/{{ inventory_hostname }}/access_port/{{ item.name }}.log 2>&1
+          echo "nc -zv -w 2 {{ item.url }} {{ item.port }}" > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/access_port/{{ item.name }}.log
+          nc -zv -w 2 {{ item.url }} {{ item.port }} >> {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/access_port/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: true
@@ -165,7 +165,7 @@
 
     - name: var_log | core-report
       shell: |
-          cp /var/log/{{ item }} {{ cycloid_report_path }}/core/{{ inventory_hostname }}/var_log/$(echo {{ item }} | sed 's/\//-/g');
+          cp /var/log/{{ item }} {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/var_log/$(echo {{ item }} | sed 's/\//-/g');
       args:
        executable: /bin/bash
       no_log: true
@@ -178,7 +178,7 @@
 
     - name: extra_files | core-report
       shell: |
-          cp {{ item }} {{ cycloid_report_path }}/core/{{ inventory_hostname }}/files/$(echo {{ item }} | sed 's/\//-/g');
+          cp {{ item }} {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/files/$(echo {{ item }} | sed 's/\//-/g');
       args:
        executable: /bin/bash
       no_log: true
@@ -201,25 +201,25 @@
         state: directory
         recurse: yes
       with_items:
-        - "{{ cycloid_report_path }}/cache/{{ inventory_hostname }}/systemctl"
-        - "{{ cycloid_report_path }}/cache/{{ inventory_hostname }}/curl"
-        - "{{ cycloid_report_path }}/cache/{{ inventory_hostname }}/access_port"
+        - "{{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/systemctl"
+        - "{{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/curl"
+        - "{{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/access_port"
 
     - name: systemctl | cache-report
       shell: |
-          systemctl cat {{ item }} > {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/systemctl/{{ item }} 2>&1
-          systemctl status {{ item }} > {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/systemctl/{{ item }}.status 2>&1
+          systemctl cat {{ item }} > {{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/systemctl/{{ item }} 2>&1
+          systemctl status {{ item }} > {{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/systemctl/{{ item }}.status 2>&1
 
           # Get the EnvironmentFile
-          EnvironmentFile=$(cat {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/systemctl/{{ item }} | grep EnvironmentFile | awk -F '[=]' '{print $2}')
+          EnvironmentFile=$(cat {{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/systemctl/{{ item }} | grep EnvironmentFile | awk -F '[=]' '{print $2}')
           if [ ! -z "$EnvironmentFile" ]; then
-            cp $EnvironmentFile {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/systemctl/
+            cp $EnvironmentFile {{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/systemctl/
             if [ "{{ cycloid_report_sensitive|bool }}" == "False" ]; then
-              sed -i 's/PASSWORD=.*/PASSWORD=XXXXXXXX/; s/JWT_KEY.*/JWT_KEY_XXXXX/' {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/systemctl/$(basename $EnvironmentFile)
+              sed -i 's/PASSWORD=.*/PASSWORD=XXXXXXXX/; s/JWT_KEY.*/JWT_KEY_XXXXX/' {{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/systemctl/$(basename $EnvironmentFile)
             fi
           fi
 
-          journalctl -xel -u {{ item }} > {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/systemctl/{{ item }}.log 2>&1
+          journalctl -xel -u {{ item }} > {{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/systemctl/{{ item }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: true
@@ -230,8 +230,8 @@
 
     - name: curl | cache-report
       shell: |
-          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: true
@@ -241,8 +241,8 @@
 
     - name: access_port | cache-report
       shell: |
-          echo "nc -zv -w 2 {{ item.url }} {{ item.port }}" > {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/access_port/{{ item.name }}.log
-          nc -zv -w 2 {{ item.url }} {{ item.port }} >> {{ cycloid_report_path }}/cache/{{ inventory_hostname }}/access_port/{{ item.name }}.log 2>&1
+          echo "nc -zv -w 2 {{ item.url }} {{ item.port }}" > {{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/access_port/{{ item.name }}.log
+          nc -zv -w 2 {{ item.url }} {{ item.port }} >> {{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/access_port/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: true
@@ -264,25 +264,25 @@
         state: directory
         recurse: yes
       with_items:
-        - "{{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/systemctl"
-        - "{{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/curl"
-        - "{{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/access_port"
+        - "{{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/systemctl"
+        - "{{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/curl"
+        - "{{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/access_port"
 
     - name: systemctl | scheduler-report
       shell: |
-          systemctl cat {{ item }} > {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/systemctl/{{ item }} 2>&1
-          systemctl status {{ item }} > {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/systemctl/{{ item }}.status 2>&1
+          systemctl cat {{ item }} > {{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/systemctl/{{ item }} 2>&1
+          systemctl status {{ item }} > {{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/systemctl/{{ item }}.status 2>&1
 
           # Get the EnvironmentFile
-          EnvironmentFile=$(cat {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/systemctl/{{ item }} | grep EnvironmentFile | awk -F '[=]' '{print $2}')
+          EnvironmentFile=$(cat {{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/systemctl/{{ item }} | grep EnvironmentFile | awk -F '[=]' '{print $2}')
           if [ ! -z "$EnvironmentFile" ]; then
-            cp $EnvironmentFile {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/systemctl/
+            cp $EnvironmentFile {{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/systemctl/
             if [ "{{ cycloid_report_sensitive|bool }}" == "False" ]; then
-              sed -i 's/PASSWORD=.*/PASSWORD=XXXXXXXX/; s/JWT_KEY.*/JWT_KEY_XXXXX/' {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/systemctl/$(basename $EnvironmentFile)
+              sed -i 's/PASSWORD=.*/PASSWORD=XXXXXXXX/; s/JWT_KEY.*/JWT_KEY_XXXXX/' {{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/systemctl/$(basename $EnvironmentFile)
             fi
           fi
 
-          journalctl -xel -u {{ item }} > {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/systemctl/{{ item }}.log 2>&1
+          journalctl -xel -u {{ item }} > {{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/systemctl/{{ item }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: true
@@ -293,8 +293,8 @@
 
     - name: curl | scheduler-report
       shell: |
-          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: false
@@ -307,8 +307,8 @@
 
     - name: access_port | scheduler-report
       shell: |
-          echo "nc -zv -w 2 {{ item.url }} {{ item.port }}" > {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/access_port/{{ item.name }}.log
-          nc -zv -w 2 {{ item.url }} {{ item.port }} >> {{ cycloid_report_path }}/scheduler/{{ inventory_hostname }}/access_port/{{ item.name }}.log 2>&1
+          echo "nc -zv -w 2 {{ item.url }} {{ item.port }}" > {{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/access_port/{{ item.name }}.log
+          nc -zv -w 2 {{ item.url }} {{ item.port }} >> {{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/access_port/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: true
@@ -334,25 +334,25 @@
         state: directory
         recurse: yes
       with_items:
-        - "{{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/systemctl"
-        - "{{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/curl"
-        - "{{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/access_port"
+        - "{{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/systemctl"
+        - "{{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/curl"
+        - "{{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/access_port"
 
     - name: systemctl | scheduler-db-report
       shell: |
-          systemctl cat {{ item }} > {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/systemctl/{{ item }} 2>&1
-          systemctl status {{ item }} > {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/systemctl/{{ item }}.status 2>&1
+          systemctl cat {{ item }} > {{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/systemctl/{{ item }} 2>&1
+          systemctl status {{ item }} > {{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/systemctl/{{ item }}.status 2>&1
 
           # Get the EnvironmentFile
-          EnvironmentFile=$(cat {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/systemctl/{{ item }} | grep EnvironmentFile | awk -F '[=]' '{print $2}')
+          EnvironmentFile=$(cat {{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/systemctl/{{ item }} | grep EnvironmentFile | awk -F '[=]' '{print $2}')
           if [ ! -z "$EnvironmentFile" ]; then
-            cp $EnvironmentFile {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/systemctl/
+            cp $EnvironmentFile {{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/systemctl/
             if [ "{{ cycloid_report_sensitive|bool }}" == "False" ]; then
-              sed -i 's/PASSWORD=.*/PASSWORD=XXXXXXXX/; s/JWT_KEY.*/JWT_KEY_XXXXX/' {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/systemctl/$(basename $EnvironmentFile)
+              sed -i 's/PASSWORD=.*/PASSWORD=XXXXXXXX/; s/JWT_KEY.*/JWT_KEY_XXXXX/' {{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/systemctl/$(basename $EnvironmentFile)
             fi
           fi
 
-          journalctl -xel -u {{ item }} > {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/systemctl/{{ item }}.log 2>&1
+          journalctl -xel -u {{ item }} > {{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/systemctl/{{ item }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: true
@@ -363,8 +363,8 @@
 
     - name: curl | scheduler-db-report
       shell: |
-          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/curl/{{ item.name }}.log
-          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: false
@@ -374,8 +374,8 @@
 
     - name: access_port | scheduler-db-report
       shell: |
-          echo "nc -zv -w 2 {{ item.url }} {{ item.port }}" > {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/access_port/{{ item.name }}.log
-          nc -zv -w 2 {{ item.url }} {{ item.port }} >> {{ cycloid_report_path }}/scheduler-db/{{ inventory_hostname }}/access_port/{{ item.name }}.log 2>&1
+          echo "nc -zv -w 2 {{ item.url }} {{ item.port }}" > {{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/access_port/{{ item.name }}.log
+          nc -zv -w 2 {{ item.url }} {{ item.port }} >> {{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/access_port/{{ item.name }}.log 2>&1
       args:
        executable: /bin/bash
       no_log: true
@@ -706,7 +706,7 @@
 
   - name: extra_files | elasticsearch-report
     shell: |
-        cp {{ item }} {{ cycloid_report_path }}/core/{{ inventory_hostname }}/files/;
+        cp {{ item }} {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/files/;
     args:
      executable: /bin/bash
     no_log: true
