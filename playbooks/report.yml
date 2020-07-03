@@ -757,7 +757,8 @@
       path: "{{ cycloid_report_local_path }}"
       state: absent
 
-  - debug:
+  - name: "Report created, please share the following output"
+    debug:
       var: secret.stdout_lines
     delegate_to: 127.0.0.1
     run_once: true
