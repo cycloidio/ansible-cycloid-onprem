@@ -331,6 +331,35 @@ source  /etc/default/cycloid-api
 mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST
 ```
 
+Troubleshooting / Report
+========================
+
+To solve issue on your onprem setup, a debug report can be created and sent to cycloid by running the `report.yml` playbook.
+The report will connect to the servers specified in your `inventory` file and collect system/network/services information.
+
+The report will be compressed with `tar`, encrypted with `gpg` then sent to *pastefile-owl.cycloid.io* url with `curl`. Please **make sure** `tar`, `gpg` and `curl` **installed**.
+
+**Create a report**
+```
+ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory report.yml
+```
+
+The last step should display a **pastefile-owl.cycloid.io url** and a **secret** to share with Cycloid team.
+```
+TASK [Report created, please share the following output] **********************************************************************************************************************************************************************************************************************************
+ok: [localhost -> 127.0.0.1] => {
+    "secret.stdout_lines": [
+        "Report have been saved under /tmp/debug-2020-07-03-16:47:35.tar.gz.gpg",
+        "",
+        "Please share this url and secret to cycloid team: ",
+        "",
+        "https://pastefile-owl.cycloid.io/746f14db69b52c418c9857d295d5cb5a",
+        "secret: HuxsQMc-gMaiYFA0SgwEp074-t7jTx0O"
+    ]
+}
+```
+
+
 TODO
 ====
 
