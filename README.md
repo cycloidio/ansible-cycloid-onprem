@@ -359,6 +359,63 @@ ok: [localhost -> 127.0.0.1] => {
 }
 ```
 
+In more specific case, cycloid might need database dump or sensitive information, to allow it `cycloid_report_sensitive` variable can be used when running the playbook.
+
+```
+ansible-playbook -u admin -b -e cycloid_report_sensitive=True -i inventory report.yml
+```
+
+**How to restart a service ?**
+
+If you have to manually restart a services, it can be done with ansible command.
+
+
+
+cycloid_core
+```
+ansible -u admin -b -i inventory  'cycloid_core:children' -a "systemctl restart cycloid-api_container cycloid-frontend_container nginx"
+```
+
+cycloid_scheduler
+```
+ansible -u admin -b -i inventory  'cycloid_scheduler:children' -a "systemctl restart concourse-web_container"
+```
+
+
+cycloid_scheduler_db
+```
+ansible -u admin -b -i inventory  'cycloid_scheduler_db:children' -a "systemctl restart concourse-db_container"
+```
+
+cycloid_cache
+```
+ansible -u admin -b -i inventory  'cycloid_cache:children' -a "systemctl restart cycloid-cache_container"
+```
+
+cycloid_db
+```
+ansible -u admin -b -i inventory  'cycloid_db:children' -a "systemctl restart cycloid-db_container"
+```
+
+cycloid_creds
+```
+ansible -u admin -b -i inventory  'cycloid_creds:children' -a "systemctl restart vault_container"
+```
+
+minio
+```
+ansible -u admin -b -i inventory  'minio:children' -a "systemctl restart minio_container"
+```
+
+smtp_server
+```
+ansible -u admin -b -i inventory  'smtp_server:children' -a "systemctl restart cycloid-smtp_container"
+```
+
+elasticsearch
+```
+ansible -u admin -b -i inventory  'elasticsearch:children' -a "systemctl restart elasticsearch_container"
+```
 
 TODO
 ====
