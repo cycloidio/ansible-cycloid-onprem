@@ -70,7 +70,6 @@ git clone git@github.com:cycloidio/ansible-cycloid-onprem.git
 mkdir cycloid-onprem
 cd cycloid-onprem
 cp -r ../ansible-cycloid-onprem/playbooks/* .
-
 ```
 
 Install ansible and required python library using virtualenv
@@ -133,13 +132,10 @@ cycloid
 EOF
 ```
 
-Let's configure an environment called `poc`.
-```
-export CYCLOID_ENV=poc
-```
+Let's configure the environment.
 
 ```
-cat >> environments/${CYCLOID_ENV}-cycloid.yml <<EOF
+cat >> environments/cycloid.yml <<EOF
 # Resolvable domain name from the instance and externally to use Cycloid console.
 cycloid_console_dns: console.mydomain.org
 
@@ -162,7 +158,7 @@ EOF
 Run Ansible to setup Cycloid core (`-c local` can be used if you run ansible directly on the server)
 
 ```
-ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory playbook.yml
+ansible-playbook -u admin -b -i inventory playbook.yml
 ```
 
 This playbook at the end of the setup will create a local `vault.secret` file. Make sure you backup and secure it cause it will be the root token setup in Vault.
@@ -183,7 +179,7 @@ ansible-playbook -u admin -b -i inventory vault_unseal.yml
 If the install failed and you need to clean your servers before to run it again, uninstall can be done by running the `playbook.yml` with `-e uninstall=True`.
 
 ```
-ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory -e uninstall=True playbook.yml
+ansible-playbook -u admin -b -i inventory -e uninstall=True playbook.yml
 ```
 
 Storage information
@@ -223,7 +219,7 @@ export VERSION=$(curl -sL "${SCHEDULER_API_ADDRESS}:8080/api/v1/info" | jq -r '.
 Configure Ansible playbook for Cycloid workers
 
 ```
-cat >> environments/${CYCLOID_ENV}-cycloid.yml <<EOF
+cat >> environments/cycloid.yml <<EOF
 # Cycloid workers section
 concourse_worker: yes
 concourse_worker_name: "\$(hostname)"
@@ -259,7 +255,7 @@ EOF
 Then run the playbook to setup Cycloid workers
 
 ```
-ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory worker.yml
+ansible-playbook -u admin -b -i inventory worker.yml
 ```
 
 Cycloid local worker
@@ -341,7 +337,7 @@ The report will be compressed with `tar`, encrypted with `gpg` then sent to *pas
 
 **Create a report**
 ```
-ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory report.yml
+ansible-playbook -u admin -b -i inventory report.yml
 ```
 
 The last step should display a **pastefile-owl.cycloid.io url** and a **secret** to share with Cycloid team.
