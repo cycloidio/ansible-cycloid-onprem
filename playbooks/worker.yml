@@ -3,7 +3,7 @@
   hosts: cycloid_worker
 
   vars_files:
-    - [ "environments/cycloid.yml", "environments/empty.yml" ]
+    - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
 
   roles:
     - role: cycloid.concourse

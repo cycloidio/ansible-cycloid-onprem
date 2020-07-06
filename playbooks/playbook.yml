@@ -2,7 +2,7 @@
 - name: Setup cycloid
   hosts: all:!concourse_worker
   vars_files:
-    - [ "environments/cycloid.yml", "environments/empty.yml" ]
+    - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
   roles:
     - role: geerlingguy.docker
       tags: docker

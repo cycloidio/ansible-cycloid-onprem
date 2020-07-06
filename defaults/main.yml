@@ -199,6 +199,8 @@ minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 #+ uncomment to enable browser interface
 # minio_browser: on
 
+# Keep env include var as legacy compatibility
+env: prod
 
 ###########################
 # report.yml playbook     #

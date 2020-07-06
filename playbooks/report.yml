@@ -3,7 +3,7 @@
   hosts: all
   vars_files:
     - roles/ansible-cycloid-onprem/defaults/main.yml
-    - [ "environments/cycloid.yml", "environments/empty.yml" ]
+    - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
   tasks:
   - name: create report directory | pre-report
     run_once: true
