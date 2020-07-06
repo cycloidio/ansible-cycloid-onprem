@@ -152,6 +152,10 @@ concourse_session_signing_key: "{{lookup('file', 'keys/id_rsa')}}"
 concourse_host_key: "{{lookup('file', 'keys/id_rsa')}}"
 concourse_authorized_worker_keys:
   - "{{lookup('file', 'keys/id_rsa.pub')}}"
+
+# Set random password for databses.
+cycloid_db_password: "$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)"
+concourse_db_password: "$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)"
 EOF
 ```
 

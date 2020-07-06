@@ -140,7 +140,8 @@
       with_items:
         - { name: "github.com", url: "https://github.com"}
         - { name: "nginx-cycloid-api", url: "https://localhost/api"}
-        - { name: "cycloid-api", url: "http://localhost:3001"}
+        - { name: "cycloid-api-status", url: "http://localhost:3001/status"}
+        - { name: "cycloid-api-version", url: "http://localhost:3001/version"}
         - { name: "nginx-cycloid-frontend", url: "https://localhost/ "}
         - { name: "cycloid-frontend", url: "http://localhost:3000"}
         - { name: "concourse-web_http", url: "http://{{ hostvars[groups['cycloid_scheduler'][0]]['ansible_default_ipv4']['address'] }}:8080 "}
@@ -401,6 +402,7 @@
         - "{{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/systemctl"
         - "{{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/curl"
         - "{{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/access_port"
+        - "{{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/mysql"
 
     - name: systemctl | cycloid-db-report
       shell: |
@@ -446,6 +448,17 @@
       ignore_errors: true
       with_items:
         - { name: "cycloid-db", url: "localhost", port: "{{ cycloid_db_port }}"}
+
+    - name: mysql dump | cycloid-db-report
+      run_once: true
+      shell: |
+          mysqldump -h "{{ cycloid_db_host }}" --port {{ cycloid_db_port }} -u "{{ cycloid_db_user }}" --databases "{{ cycloid_db_name }}" -p{{ cycloid_db_password }}  > {{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/mysql/dump.sql
+          gzip {{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/mysql/dump.sql
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+      when: cycloid_report_sensitive|bool
 
     when: setup_cycloid_db|bool
 
@@ -498,7 +511,8 @@
       ignore_errors: true
       with_items:
         - { name: "github.com", url: "https://github.com"}
-        - { name: "vault", url: "https://localhost:8200/ui/"}
+        - { name: "vault-initialised", url: "https://localhost:8200/v1/sys/init"}
+        - { name: "vault-seal", url: "https://localhost:8200/v1/cycloid?list=true"}
 
     - name: access_port | cycloid-creds-report
       shell: |
