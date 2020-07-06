@@ -70,7 +70,6 @@ git clone git@github.com:cycloidio/ansible-cycloid-onprem.git
 mkdir cycloid-onprem
 cd cycloid-onprem
 cp -r ../ansible-cycloid-onprem/playbooks/* .
-
 ```
 
 Install ansible and required python library using virtualenv
@@ -133,13 +132,10 @@ cycloid
 EOF
 ```
 
-Let's configure an environment called `poc`.
-```
-export CYCLOID_ENV=poc
-```
+Let's configure the environment.
 
 ```
-cat >> environments/${CYCLOID_ENV}-cycloid.yml <<EOF
+cat >> environments/cycloid.yml <<EOF
 # Resolvable domain name from the instance and externally to use Cycloid console.
 cycloid_console_dns: console.mydomain.org
 
@@ -156,13 +152,17 @@ concourse_session_signing_key: "{{lookup('file', 'keys/id_rsa')}}"
 concourse_host_key: "{{lookup('file', 'keys/id_rsa')}}"
 concourse_authorized_worker_keys:
   - "{{lookup('file', 'keys/id_rsa.pub')}}"
+
+# Set random password for databses.
+cycloid_db_password: "$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)"
+concourse_db_password: "$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)"
 EOF
 ```
 
 Run Ansible to setup Cycloid core (`-c local` can be used if you run ansible directly on the server)
 
 ```
-ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory playbook.yml
+ansible-playbook -u admin -b -i inventory playbook.yml
 ```
 
 This playbook at the end of the setup will create a local `vault.secret` file. Make sure you backup and secure it cause it will be the root token setup in Vault.
@@ -183,7 +183,7 @@ ansible-playbook -u admin -b -i inventory vault_unseal.yml
 If the install failed and you need to clean your servers before to run it again, uninstall can be done by running the `playbook.yml` with `-e uninstall=True`.
 
 ```
-ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory -e uninstall=True playbook.yml
+ansible-playbook -u admin -b -i inventory -e uninstall=True playbook.yml
 ```
 
 Storage information
@@ -223,7 +223,7 @@ export VERSION=$(curl -sL "${SCHEDULER_API_ADDRESS}:8080/api/v1/info" | jq -r '.
 Configure Ansible playbook for Cycloid workers
 
 ```
-cat >> environments/${CYCLOID_ENV}-cycloid.yml <<EOF
+cat >> environments/cycloid.yml <<EOF
 # Cycloid workers section
 concourse_worker: yes
 concourse_worker_name: "\$(hostname)"
@@ -259,7 +259,7 @@ EOF
 Then run the playbook to setup Cycloid workers
 
 ```
-ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory worker.yml
+ansible-playbook -u admin -b -i inventory worker.yml
 ```
 
 Cycloid local worker
@@ -341,7 +341,7 @@ The report will be compressed with `tar`, encrypted with `gpg` then sent to *pas
 
 **Create a report**
 ```
-ansible-playbook -e env=${CYCLOID_ENV} -u admin -b -i inventory report.yml
+ansible-playbook -u admin -b -i inventory report.yml
 ```
 
 The last step should display a **pastefile-owl.cycloid.io url** and a **secret** to share with Cycloid team.
@@ -359,6 +359,63 @@ ok: [localhost -> 127.0.0.1] => {
 }
 ```
 
+In more specific case, cycloid might need database dump or sensitive information, to allow it `cycloid_report_sensitive` variable can be used when running the playbook.
+
+```
+ansible-playbook -u admin -b -e cycloid_report_sensitive=True -i inventory report.yml
+```
+
+**How to restart a service ?**
+
+If you have to manually restart a services, it can be done with ansible command.
+
+
+
+cycloid_core
+```
+ansible -u admin -b -i inventory  'cycloid_core:children' -a "systemctl restart cycloid-api_container cycloid-frontend_container nginx"
+```
+
+cycloid_scheduler
+```
+ansible -u admin -b -i inventory  'cycloid_scheduler:children' -a "systemctl restart concourse-web_container"
+```
+
+
+cycloid_scheduler_db
+```
+ansible -u admin -b -i inventory  'cycloid_scheduler_db:children' -a "systemctl restart concourse-db_container"
+```
+
+cycloid_cache
+```
+ansible -u admin -b -i inventory  'cycloid_cache:children' -a "systemctl restart cycloid-cache_container"
+```
+
+cycloid_db
+```
+ansible -u admin -b -i inventory  'cycloid_db:children' -a "systemctl restart cycloid-db_container"
+```
+
+cycloid_creds
+```
+ansible -u admin -b -i inventory  'cycloid_creds:children' -a "systemctl restart vault_container"
+```
+
+minio
+```
+ansible -u admin -b -i inventory  'minio:children' -a "systemctl restart minio_container"
+```
+
+smtp_server
+```
+ansible -u admin -b -i inventory  'smtp_server:children' -a "systemctl restart cycloid-smtp_container"
+```
+
+elasticsearch
+```
+ansible -u admin -b -i inventory  'elasticsearch:children' -a "systemctl restart elasticsearch_container"
+```
 
 TODO
 ====
