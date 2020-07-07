@@ -43,7 +43,23 @@ cycloid_core_ssl:
 # HTTP proxy
 http_proxy: ""
 https_proxy: ""
-no_proxy: "localhost,127.0.0.1,concourse-web,vault,{{ cycloid_api_dns }},{{ cycloid_console_dns }}"
+
+extra_no_proxy: []
+
+default_no_proxy:
+  - "localhost"
+  - "127.0.0.1"
+  - "concourse-web"
+  - "vault"
+  - "{{ cycloid_api_dns | urlsplit('hostname') }}"
+  - "{{ cycloid_console_dns | urlsplit('hostname') }}"
+  - "{{ concourse_db_host }}"
+  - "{{ cycloid_db_host }}"
+  - "{{ cycloid_email_redis_host }}"
+  - "{{ vault_url | urlsplit('hostname') }}"
+  - "{{ concourse_url | urlsplit('hostname') }}"
+
+no_proxy: "{{ (default_no_proxy + extra_no_proxy) | join(',') }}"
 
 #
 # Docker
