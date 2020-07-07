@@ -238,7 +238,9 @@ concourse_worker_env:
     # HTTP proxy configuration. Make sure to set the right url's into no_proxy
     # http_proxy: http://mydomain:8080
     # https_proxy: http://mydomain:8080
-    # no_proxy: "localhost,127.0.0.1,$SCHEDULER_API_ADDRESS,vault-address,cycloid_api_dns-address,cycloid_console_dns-address"
+    # extra_no_proxy:
+    #  - miniphost
+    #  - elasticsearchhost
 concourse_worker_options: |
   --ephemeral \\
   --baggageclaim-log-level=error \\
