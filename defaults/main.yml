@@ -241,3 +241,6 @@ azure_ad_client_id: "null"
 
 cycloid_oauth_replace_pattern_azure_client_id: ""
 cycloid_oauth_replace_pattern_azure_tenant_id: ""
+
+cycloid_base_url: "https://{{ cycloid_console_dns }}/api"
+cycloid_base_pattern_url: ""
