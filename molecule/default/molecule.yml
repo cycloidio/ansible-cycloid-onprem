@@ -55,7 +55,7 @@ platforms:
      - smtp_server
      - cycloid_cache
 
-  - name: concourse-worker
+  - name: concourse_worker
     image: concourse/concourse:5.7.2
     privileged: yes
     volumes:
