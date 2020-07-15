@@ -81,6 +81,7 @@ provisioner:
     converge: ../../playbooks/playbook.yml
   options:
     extra-vars:
+      env: test
       setup_minio: true
     #vvv: "True"
   env:
