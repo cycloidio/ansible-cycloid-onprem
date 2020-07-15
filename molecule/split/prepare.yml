@@ -1,7 +1,6 @@
 ---
-
 - name: Install depends
-  hosts: instance,cycloid,cycloid_core,cycloid_db,cycloid_creds
+  hosts: cycloid_core,cycloid_db,cycloid_creds,cycloid_scheduler,cycloid_scheduler_db
   gather_facts: no
   tasks:
 
