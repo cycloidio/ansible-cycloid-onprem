@@ -2,8 +2,10 @@
 - package:
     name:
       - python-openssl
-      - mysql-client
+      - default-mysql-client
       - python-setuptools
+      - gnupg2
+      - pass
     state: present
 
 - easy_install:
