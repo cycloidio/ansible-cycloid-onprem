@@ -16,7 +16,7 @@
     container_volumes:
       - "{{concourse_db_path}}:/var/lib/postgresql/data"
     container_env:
-      POSTGRES_USER: concourse
-      POSTGRES_DB: concourse
+      POSTGRES_USER: "{{concourse_db_user}}"
+      POSTGRES_DB: "{{concourse_db_name}}"
       POSTGRES_PASSWORD: "{{concourse_db_password}}"
   tags: docker-services

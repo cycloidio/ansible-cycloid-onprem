@@ -91,14 +91,23 @@ concourse_host_key_path: "host_key"
 concourse_session_signing_key_path: "session_signing_key"
 concourse_db_password: "Deraephoh9aay4Aide4phoS7xej1xi5m"
 concourse_db_host:  "{{ hostvars[groups['cycloid_scheduler_db'][0]]['ansible_default_ipv4']['address'] }}"
+concourse_db_user: concourse
+concourse_db_name: concourse
 concourse_auth_user: admin
 concourse_auth_password: admin
 
+
+# Concourse keys
 #concourse_session_signing_key:
 #concourse_host_key:
 #concourse_authorized_worker_keys:
 #  - name: foo
 #    key: ssh-rsa ...
+# By default we will look for local files under keys directory
+concourse_session_signing_key: "{{lookup('file', 'keys/id_rsa')}}"
+concourse_host_key: "{{lookup('file', 'keys/id_rsa')}}"
+concourse_authorized_worker_keys:
+  - "{{lookup('file', 'keys/id_rsa.pub')}}"
 
 #
 # Vault
