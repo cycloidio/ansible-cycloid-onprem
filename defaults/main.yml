@@ -91,6 +91,8 @@ concourse_host_key_path: "host_key"
 concourse_session_signing_key_path: "session_signing_key"
 concourse_db_password: "Deraephoh9aay4Aide4phoS7xej1xi5m"
 concourse_db_host:  "{{ hostvars[groups['cycloid_scheduler_db'][0]]['ansible_default_ipv4']['address'] }}"
+concourse_db_user: concourse
+concourse_db_name: concourse
 concourse_auth_user: admin
 concourse_auth_password: admin
 
