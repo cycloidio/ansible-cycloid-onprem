@@ -42,3 +42,4 @@
     - "{{ concourse_config_path }}"
     - "{{ vault_config_path }}/config"
     - "{{ vault_config_path }}/file"
+    - "{{ elasticsearch_config_path }}"

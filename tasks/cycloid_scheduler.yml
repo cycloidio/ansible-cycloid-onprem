@@ -40,6 +40,7 @@
     mode: '0777'
     recurse: true
   delegate_to: 127.0.0.1
+  become: false
 
 - name: Copy session_signing_key in local data directory | cycloid-scheduler
   fetch:

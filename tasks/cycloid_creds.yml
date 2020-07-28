@@ -112,6 +112,7 @@
     module: stat
     path: "{{ cycloid_local_datas_path }}/approles/approle-cycloid"
   register: stat_approles
+  become: false
 
 - name: Create approle | cycloid-creds
   block:
@@ -122,6 +123,7 @@
       mode: '0777'
       recurse: true
     delegate_to: 127.0.0.1
+    become: false
 
   # Concourse-ro approle
   - name: Create concourse-ro role | cycloid-creds

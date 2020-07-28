@@ -17,6 +17,9 @@ setup_cycloid_creds: "{{ 'cycloid_creds' in group_names }}"
 #. setup_minio(optional): bool
 #+ install and configure minio, a s3-like remote storage
 setup_minio: "{{ 'minio' in group_names }}"
+#. setup_elasticsearch(optional): bool
+#+ install and configure elasticsearch to use it as cycloid external baclend
+setup_elasticsearch: "{{ 'elasticsearch' in group_names }}"
 # If you let cycloid-smtp:1025, it will start a mailhog smtpd server to satisfy Cycloid requirements
 setup_smtp_server: "{{ 'smtp_server' in group_names }}"
 
@@ -37,8 +40,24 @@ cycloid_creds_ssl:
 cycloid_core_ssl:
   crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-core.crt"
   key: "{{ cycloid_local_datas_path }}/ssl/cycloid-core.key"
+cycloid_third_party:
+  crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party.crt"
+  key: "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party.key"
 
+#. default_ssl_subject_alt_name(optional, dict)
+#+ a list of alternative common name to use for the self signed certs
+#+ use `DNS` for a domain name and `IP` for a raw IP address
+default_ssl_subject_alt_name:
+  - DNS:cycloid
+  - DNS:localhost
+  - DNS:vault
+  - DNS:concourse
+  - DNS:elasticsearch
 
+#. ssl_subject_alt_name(optional, dict)
+#+ a list of alternative common name to use in addition of the default ones for the self signed certs
+#+ use `DNS` for a domain name and `IP` for a raw IP address
+#ssl_subject_alt_name:
 
 # HTTP proxy
 http_proxy: ""
@@ -253,3 +272,40 @@ cycloid_oauth_replace_pattern_azure_tenant_id: ""
 
 cycloid_base_url: "https://{{ cycloid_console_dns }}/api"
 cycloid_base_pattern_url: ""
+
+#
+# elasticsearch
+#
+#. elasticsearch_basic_auth(option, bool): true
+#. enable elasticsearch basic authentication
+elasticsearch_basic_auth: true
+
+#. elasticsearch_tls(optional, bool): true
+#+ enable TLS on REST interface
+elasticsearch_tls: true
+
+#. elasticsearch_port_node(optional, int): 9300
+#+ the node port of elasticsearch
+elasticsearch_port_node: 9300
+
+#. elasticsearch_port_api(optional, int): 9200
+#+ the API port of elasticsearch
+elasticsearch_port_api: 9200
+
+#. elasticsearch_version(option, string): 7.6.2
+#+ elasticsearch version to pull from hub.docker.com
+elasticsearch_version: 7.6.2
+
+#. elasticsearch_config_path(optional, string): /opt/cycloid/elasticsearch
+#+ the path to store elasticsearch configuration
+elasticsearch_config_path: "{{ cycloid_install_path }}/elasticsearch"
+
+#. cycloid_elasticsearch_default(optional, string):
+#+ the default credential to access elasticsearch with 'elastic' user
+cycloid_elasticsearch_default:
+    name: elasticsearch default
+    type: elasticsearch
+    path: elasticsearch_default
+    raw:
+      username: elastic
+      password: NmM5NmIwNmEwM2Q0NmYwNDYyMDgzZGFj
