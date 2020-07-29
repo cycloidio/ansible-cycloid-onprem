@@ -137,6 +137,8 @@ platforms:
       CONCOURSE_TSA_PUBLIC_KEY: /opt/id_rsa.pub
       CONCOURSE_TSA_WORKER_PRIVATE_KEY: /opt/id_rsa
       CONCOURSE_BAGGAGECLAIM_DRIVER: overlay
+    groups:
+      - concourse_worker
 
 
 provisioner:
