@@ -57,7 +57,7 @@ default_ssl_subject_alt_name:
 #. ssl_subject_alt_name(optional, dict)
 #+ a list of alternative common name to use in addition of the default ones for the self signed certs
 #+ use `DNS` for a domain name and `IP` for a raw IP address
-#ssl_subject_alt_name:
+ssl_subject_alt_name: []
 
 # HTTP proxy
 http_proxy: ""
