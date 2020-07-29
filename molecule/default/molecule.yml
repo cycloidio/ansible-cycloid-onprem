@@ -55,7 +55,7 @@ platforms:
      - smtp_server
      - cycloid_cache
 
-  - name: concourse-worker
+  - name: concourse_worker
     image: concourse/concourse:5.7.2
     privileged: yes
     volumes:
@@ -73,7 +73,8 @@ platforms:
       CONCOURSE_TSA_PUBLIC_KEY: /opt/id_rsa.pub
       CONCOURSE_TSA_WORKER_PRIVATE_KEY: /opt/id_rsa
       CONCOURSE_BAGGAGECLAIM_DRIVER: overlay
-
+    groups:
+      - concourse_worker
 
 provisioner:
   name: ansible
@@ -81,6 +82,7 @@ provisioner:
     converge: ../../playbooks/playbook.yml
   options:
     extra-vars:
+      env: test
       setup_minio: true
     #vvv: "True"
   env:
