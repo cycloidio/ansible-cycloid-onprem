@@ -5,9 +5,17 @@
       - python-openssl
       - default-mysql-client
       - python-setuptools
+      - python-pip
       - gnupg2
       - pass
     state: present
+
+- name: Install package depends Debian 10 | pre-setup
+  package:
+    name:
+      - python-backports.ssl-match-hostname
+    state: present
+  when: ansible_distribution == 'Debian' and ansible_distribution_version == '10'
 
 - name: Upgrade pip | pre-setup
   pip:

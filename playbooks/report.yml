@@ -6,7 +6,6 @@
     - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
   tasks:
   - name: create report directory | pre-report
-    run_once: true
     file:
       path: "{{ item }}"
       state: directory
@@ -92,7 +91,6 @@
   ###############
   - block:
     - name: create report directory | core-report
-      run_once: true
       file:
         path: "{{ item }}"
         state: directory
@@ -196,7 +194,6 @@
 ########################
   - block:
     - name: create report directory | cache-report
-      run_once: true
       file:
         path: "{{ item }}"
         state: directory
@@ -259,7 +256,6 @@
   - block:
 
     - name: create report directory | scheduler-report
-      run_once: true
       file:
         path: "{{ item }}"
         state: directory
@@ -329,7 +325,6 @@
 ########################
   - block:
     - name: create report directory | scheduler-db-report
-      run_once: true
       file:
         path: "{{ item }}"
         state: directory
@@ -393,7 +388,6 @@
 ########################
   - block:
     - name: create report directory | cycloid-db-report
-      run_once: true
       file:
         path: "{{ item }}"
         state: directory
@@ -468,7 +462,6 @@
 ########################
   - block:
     - name: create report directory | cycloid-creds-report
-      run_once: true
       file:
         path: "{{ item }}"
         state: directory
@@ -534,7 +527,6 @@
 ########################
   - block:
     - name: create report directory | minio-report
-      run_once: true
       file:
         path: "{{ item }}"
         state: directory
@@ -598,7 +590,6 @@
 ########################
   - block:
     - name: create report directory | smtp-report
-      run_once: true
       file:
         path: "{{ item }}"
         state: directory
@@ -661,7 +652,6 @@
 ########################
   - block:
     - name: create report directory | elasticsearch-report
-      run_once: true
       file:
         path: "{{ item }}"
         state: directory
@@ -730,11 +720,18 @@
 
     when: setup_elasticsearch|bool
 
+  - name: Tar all remote reports
+    shell: |
+      tar zcf /tmp/{{ inventory_hostname }}.tar .
+    args:
+     executable: /bin/bash
+     chdir: "{{ cycloid_report_path }}"
+
   - name: Fetch report from the remote and save to local
-    synchronize:
-      src: "{{ cycloid_report_path }}/"
-      dest: "{{ cycloid_report_local_path }}"
-      mode: pull
+    fetch:
+      src: "/tmp/{{ inventory_hostname }}.tar"
+      dest: "{{ cycloid_report_local_path }}/"
+      flat: true
 
   - name: delete remote reports
     file:
@@ -743,6 +740,7 @@
 
   - name: send report
     delegate_to: 127.0.0.1
+    become: false
     run_once: true
     shell: |
       filename=debug-$(date +%Y-%m-%d-%H:%M:%S).tar.gz
@@ -766,6 +764,7 @@
 
   - name: delete report
     delegate_to: 127.0.0.1
+    become: false
     run_once: true
     file:
       path: "{{ cycloid_report_local_path }}"
@@ -775,4 +774,5 @@
     debug:
       var: secret.stdout_lines
     delegate_to: 127.0.0.1
+    become: false
     run_once: true
