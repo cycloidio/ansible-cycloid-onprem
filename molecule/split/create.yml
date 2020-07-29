@@ -1,4 +1,13 @@
 ---
+- name: Clean previous tests
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - file:
+        path: "{{ playbook_dir }}/../../playbooks/datas"
+        state: absent
+
 # Cycloid : create test key for Concourse
 - name: Generate local ssh key
   hosts: localhost
