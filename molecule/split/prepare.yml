@@ -24,13 +24,12 @@
         - curl
         - procps
         - python-setuptools
-        state: present
-
-    - easy_install:
-        name: pip
+        - python-pip
         state: present
 
     - name: install pip depends
       pip:
-         name: docker
+         name:
+           - pip
+           - docker
          state: latest
