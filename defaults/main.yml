@@ -159,9 +159,12 @@ cycloid_initial_user:
   given_name: admin
   family_name: cycloid
 
+cycloid_initial_organization_name: Cycloid
+cycloid_initial_organization_canonical: "{{ cycloid_initial_organization_name|lower|regex_replace('[^a-z0-9\\-_]') }}"
 cycloid_initial_organization:
-    name: Cycloid
-    canonical: cycloid
+    name: "{{ cycloid_initial_organization_name }}"
+    canonical: "{{ cycloid_initial_organization_canonical }}"
+
 
 #cycloid_initial_catalog_cred:
 #    name: Catalog credential
