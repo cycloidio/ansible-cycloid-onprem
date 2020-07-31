@@ -17,6 +17,17 @@
     state: present
   when: ansible_distribution == 'Debian' and ansible_distribution_version == '10'
 
+- block:
+  - name: switch to iptables-legacy (debian 10 issue)
+    alternatives:
+      name: iptables
+      path: /usr/sbin/iptables-legacy
+  - name: restart docker to apply network rules
+    service:
+      name: docker
+      state: restarted
+  when: use_iptables_legacy
+
 - name: Upgrade pip | pre-setup
   pip:
     name: pip
