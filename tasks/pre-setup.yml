@@ -8,6 +8,7 @@
       - python-pip
       - gnupg2
       - pass
+      - netcat
     state: present
 
 - name: Install package depends Debian 10 | pre-setup
