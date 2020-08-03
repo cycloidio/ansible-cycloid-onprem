@@ -11,7 +11,7 @@ This role is tested with molecule
 ```
 virtualenv --clear .env
 source .env/bin/activate
-pip install molecule ansible docker-py passlib bcrypt
+pip install ansible docker-py passlib bcrypt molecule==3.0a4 pytest==4.6.9
 
 export AWS_SECRET_ACCESS_KEY=$(vault read -field=secret_key secret/$CUSTOMER/aws)
 export AWS_ACCESS_KEY_ID=$(vault read -field=access_key secret/$CUSTOMER/aws)
