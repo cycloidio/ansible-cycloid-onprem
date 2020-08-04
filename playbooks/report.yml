@@ -5,20 +5,23 @@
     - roles/ansible-cycloid-onprem/defaults/main.yml
     - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
 
- # pre_tasks:
+  pre_tasks:
 
- # - name: "Check packages installed"
- #   package_facts:
- #     manager: "auto"
+  - name: "Check packages installed"
+    package_facts:
+      manager: "auto"
 
- # - name: "Check report dependencies package"
- #   fail:
- #     msg: "{{ item }} NOT found. Need to be installed"
- #   when: "item not in ansible_facts.packages"
- #   with_items:
- #     - tar
- #     - curl
- #     - gnupg
+  - name: "Check report dependencies package"
+    delegate_to: 127.0.0.1
+    become: false
+    fail:
+      msg: "{{ item }} NOT found. Need to be installed"
+    ignore_errors: yes
+    when: "item not in ansible_facts.packages"
+    with_items:
+      - tar
+      - curl
+      - gnupg
 
   tasks:
   - name: create report directory | pre-report
@@ -28,6 +31,7 @@
       recurse: yes
     with_items:
       - "{{ cycloid_report_path }}/common/{{ inventory_hostname }}/system"
+      - "{{ cycloid_report_path }}/common/{{ inventory_hostname }}/systemctl"
       - "{{ cycloid_report_path }}/common/{{ inventory_hostname }}/network"
       - "{{ cycloid_report_path }}/common/{{ inventory_hostname }}/var_log"
       - "{{ cycloid_report_path }}/common/{{ inventory_hostname }}/docker"
@@ -47,10 +51,12 @@
       - "uname -a  > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/uname"
       - "cat /etc/issue > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/etc_issue"
       - "cat /proc/cmdline > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/proc_cmdline"
+      - "dpkg -l > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/dpkg"
 
   - name: systemctl | common-report
     shell: |
-        systemctl list-units --state=failed > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/systemctl/list-units 2>&1
+        systemctl list-units > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/systemctl/list-units 2>&1
+        systemctl list-units --state=failed > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/systemctl/list-units-failed 2>&1
         systemctl list-jobs > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/systemctl/list-jobs 2>&1
     args:
       executable: /bin/bash
@@ -202,6 +208,17 @@
         - "/etc/nginx/sites-enabled/01-cycloid-console.conf"
         - "/etc/nginx/sites-enabled/02-cycloid-api.conf"
         - "/etc/nginx/conf.d/01-proxy.conf"
+
+
+    - name: mysql access | core-report
+      shell: |
+          source  /etc/default/cycloid-api
+          mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE -e "show tables;" > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/access_port/cycloid-db-tables.log
+          mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST -e "SHOW VARIABLES LIKE \"%version%\";" > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/access_port/cycloid-db-version.log
+      args:
+       executable: /bin/bash
+      no_log: false
+      ignore_errors: true
 
     when: setup_cycloid_core|bool
 
@@ -726,7 +743,7 @@
 
   - name: extra_files | elasticsearch-report
     shell: |
-        cp {{ item }} {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/files/;
+        cp {{ item }} {{ cycloid_report_path }}/elasticsearch/{{ inventory_hostname }}/files/;
     args:
      executable: /bin/bash
     no_log: true
