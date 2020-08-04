@@ -5,20 +5,20 @@
     - roles/ansible-cycloid-onprem/defaults/main.yml
     - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
 
-  pre_tasks:
+ # pre_tasks:
 
-  - name: "Check packages installed"
-    package_facts:
-      manager: "auto"
+ # - name: "Check packages installed"
+ #   package_facts:
+ #     manager: "auto"
 
-  - name: "Check report dependencies package"
-    fail:
-      msg: "{{ item }} NOT found. Need to be installed"
-    when: "item not in ansible_facts.packages"
-    with_items:
-      - tar
-      - curl
-      - gnupg
+ # - name: "Check report dependencies package"
+ #   fail:
+ #     msg: "{{ item }} NOT found. Need to be installed"
+ #   when: "item not in ansible_facts.packages"
+ #   with_items:
+ #     - tar
+ #     - curl
+ #     - gnupg
 
   tasks:
   - name: create report directory | pre-report
