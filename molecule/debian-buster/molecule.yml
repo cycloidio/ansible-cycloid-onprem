@@ -84,6 +84,7 @@ provisioner:
     extra-vars:
       env: test
       setup_minio: true
+      use_iptables_legacy: true
     #vvv: "True"
   env:
    MOLECULE_DEBUG: "true"

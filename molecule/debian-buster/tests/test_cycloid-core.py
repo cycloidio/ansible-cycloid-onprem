@@ -19,8 +19,8 @@ def test_force_ssl(host):
 
 @print_host_on_fail
 def test_listening_ports(host):
-    for port in [3001, 80, 443, 3000]:
-        assert host.socket("tcp://%s" % port).is_listening
+    for port in [80, 443, 3000, 3001]:
+        assert host.socket("tcp://0.0.0.0:%s" % port).is_listening
 
 @print_host_on_fail
 def test_containers_running(host):

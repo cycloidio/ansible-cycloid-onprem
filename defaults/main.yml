@@ -312,3 +312,8 @@ cycloid_elasticsearch_default:
     raw:
       username: elastic
       password: NmM5NmIwNmEwM2Q0NmYwNDYyMDgzZGFj
+
+# Docker has issues with Debain 10 Buster nftables that impact access from containers to external.
+# Workaround is to revert to iptables-legacy by setting use_iptables_legacy: true
+# https://github.com/geerlingguy/ansible-role-docker/issues/189
+use_iptables_legacy: false
