@@ -113,7 +113,7 @@
       CONCOURSE_POSTGRES_PORT: "5432"
       CONCOURSE_POSTGRES_USER: "{{concourse_db_user}}"
       CONCOURSE_POSTGRES_DATABASE: "{{concourse_db_name}}"
-      CONCOURSE_POSTGRES_SSLMODE: disable
+      CONCOURSE_POSTGRES_SSLMODE: "{{concourse_db_sslmode}}"
       CONCOURSE_POSTGRES_PASSWORD: "{{concourse_db_password}}"
       #CONCOURSE_INFLUXDB_URL: http://localhost:9122
       http_proxy: "{{ http_proxy }}"

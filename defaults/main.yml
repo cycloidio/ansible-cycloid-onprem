@@ -115,6 +115,9 @@ concourse_db_name: concourse
 concourse_auth_user: admin
 concourse_auth_password: admin
 
+# disable|require|verify-ca|verify-full
+concourse_db_sslmode: disable
+
 
 # Concourse keys
 #concourse_session_signing_key:
