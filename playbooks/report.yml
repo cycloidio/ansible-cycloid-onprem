@@ -771,6 +771,20 @@
       path: "{{ cycloid_report_path }}"
       state: absent
 
+  - name: Get ansible local files
+    delegate_to: 127.0.0.1
+    become: false
+    run_once: true
+    shell: |
+      mkdir -p {{ cycloid_report_local_path }}/ansible
+      cp inventory {{ cycloid_report_local_path }}/ansible/
+
+      if [ "{{ cycloid_report_sensitive|bool }}" != "False" ]; then
+        cp environments/cycloid.yml {{ cycloid_report_local_path }}/ansible/
+      fi
+    args:
+     executable: /bin/bash
+
   - name: send report
     delegate_to: 127.0.0.1
     become: false
