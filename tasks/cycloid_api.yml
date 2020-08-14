@@ -56,6 +56,8 @@
       EMAIL_REDIS_PORT: "{{ cycloid_email_redis_port }}"
       EMAIL_REDIS_DB: "{{ cycloid_email_redis_db }}"
       EMAIL_INSECURE: "{{ cycloid_email_insecure }}"
+      AZURE_TENANT_ID: "{{ azure_ad_tenant_id }}"
+      AZURE_CLIENT_ID: "{{ azure_ad_client_id }}"
       JWT_KEY_1: "{{ cycloid_jwt_key_1 }}"
       FRONTEND_BASE_URL: "{{ cycloid_frontend_base_url }}"
       CRYPTO_SIGNING_KEY: "{{ cycloid_crypto_signing_key }}"
