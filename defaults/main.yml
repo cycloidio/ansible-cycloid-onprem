@@ -216,13 +216,15 @@ cycloid_ecr_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') | default(omit
 #cycloid_api_container_links: []
 #concourse_web_container_links: []
 
-cycloid_api_dns: cycloid-api
 cycloid_use_api_via_console: True
+cycloid_api_dns: cycloid-api
+cycloid_api_base_url: "{%- if cycloid_use_api_via_console -%}{{cycloid_console_base_url}}/api{%- else -%}https://{{cycloid_api_dns}}{%- endif -%}"
 cycloid_console_dns: cycloid-console
-cycloid_frontend_base_url: "https://{{ cycloid_console_dns }}"
+cycloid_console_base_url: "https://{{ cycloid_console_dns }}"
 
 # Internal parameter that you need to specify if you want to use the staging version
 #cycloid_api_replace_pattern_url: https://http-api-staging.cycloid.io
+cycloid_console_base_pattern_url: ""
 cycloid_api_replace_pattern_url: ""
 
 #
@@ -275,9 +277,6 @@ azure_ad_client_id: "null"
 
 cycloid_oauth_replace_pattern_azure_client_id: ""
 cycloid_oauth_replace_pattern_azure_tenant_id: ""
-
-cycloid_base_url: "https://{{ cycloid_console_dns }}/api"
-cycloid_base_pattern_url: ""
 
 #
 # elasticsearch
