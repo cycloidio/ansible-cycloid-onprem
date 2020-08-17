@@ -31,6 +31,7 @@
 - name: Remove local files | cycloid-creds
   run_once: true
   delegate_to: 127.0.0.1
+  become: false
   file:
     path: "{{ item }}"
     state: absent

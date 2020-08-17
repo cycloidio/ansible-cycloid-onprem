@@ -52,6 +52,8 @@
       - "cat /etc/issue > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/etc_issue"
       - "cat /proc/cmdline > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/proc_cmdline"
       - "dpkg -l > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/dpkg"
+      - "free -m > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/free"
+      - "top -n1 > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/top"
 
   - name: systemctl | common-report
     shell: |
@@ -85,7 +87,7 @@
       - "netstat -lutpena > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/network/netstat.log 2>&1"
       - "echo \"ip_forward: $(cat /proc/sys/net/ipv4/ip_forward)\" > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/network/ip_forward"
 
-  - name: docker | core-report
+  - name: docker | common-report
     shell: |
         docker info > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/docker/docker_info.log 2>&1
         docker ps -a > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/docker/docker_ps.log 2>&1
@@ -123,6 +125,7 @@
         - "{{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/access_port"
         - "{{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/var_log"
         - "{{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/files"
+        - "{{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/docker"
 
     - name: systemctl | core-report
       shell: |
@@ -184,6 +187,19 @@
         - { name: "cycloid-smtp", url: "{{ hostvars[groups['smtp_server'][0]]['ansible_default_ipv4']['address'] }}", port: "1025"}
         - { name: "cycloid-smtps", url: "{{ hostvars[groups['smtp_server'][0]]['ansible_default_ipv4']['address'] }}", port: "8025"}
 
+    - name: docker | core-report
+      shell: |
+          docker inspect cycloid-api > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/docker/docker_inspect_api 2>&1
+          docker inspect cycloid-frontend > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/docker/docker_inspect_front 2>&1
+          docker exec -it cycloid-api curl --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL https://github.com > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/docker/docker_exec_api_curl_github 2>&1
+          docker exec -it cycloid-api curl --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL {{ concourse_external_url }} > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/docker/docker_exec_api_curl_cc_exturl 2>&1
+          docker exec -it cycloid-api curl --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL {{ vault_url }}/ui/ > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/docker/docker_exec_api_curl_vault 2>&1
+          docker exec -it cycloid-api nc -zv -w 2 {{ cycloid_db_host }} {{ cycloid_db_port }} > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/docker/docker_exec_api_nc_cycloiddb 2>&1
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+
     - name: var_log | core-report
       shell: |
           cp /var/log/{{ item }} {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/var_log/$(echo {{ item }} | sed 's/\//-/g');
@@ -235,6 +251,7 @@
         - "{{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/systemctl"
         - "{{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/curl"
         - "{{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/access_port"
+        - "{{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/docker"
 
     - name: systemctl | cache-report
       shell: |
@@ -281,6 +298,14 @@
       with_items:
         - { name: "cycloid-cache", url: "localhost", port: "{{ cycloid_email_redis_port }}"}
 
+    - name: docker | cache-report
+      shell: |
+          docker inspect cycloid-cache > {{ cycloid_report_path }}/cycloid-cache/{{ inventory_hostname }}/docker/docker_inspect 2>&1
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+
     when: setup_cycloid_cache|bool
 
 ########################
@@ -297,6 +322,7 @@
         - "{{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/systemctl"
         - "{{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/curl"
         - "{{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/access_port"
+        - "{{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/docker"
 
     - name: systemctl | scheduler-report
       shell: |
@@ -349,6 +375,14 @@
         - { name: "scheduler-web_tsa_ssh", url: "localhost", port: "2222"}
         - { name: "scheduler-db", url: "{{ concourse_db_host }}", port: "5432"}
 
+    - name: docker | scheduler-report
+      shell: |
+          docker inspect concourse-web > {{ cycloid_report_path }}/cycloid-scheduler/{{ inventory_hostname }}/docker/docker_inspect 2>&1
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+
     when: setup_cycloid_scheduler|bool
 
 
@@ -366,6 +400,7 @@
         - "{{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/systemctl"
         - "{{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/curl"
         - "{{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/access_port"
+        - "{{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/docker"
 
     - name: systemctl | scheduler-db-report
       shell: |
@@ -412,6 +447,14 @@
       with_items:
         - { name: "scheduler-db", url: "localhost", port: "5432"}
 
+    - name: docker | scheduler-db-report
+      shell: |
+          docker inspect concourse-db > {{ cycloid_report_path }}/cycloid-scheduler-db/{{ inventory_hostname }}/docker/docker_inspect 2>&1
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+
     when: setup_cycloid_scheduler_db|bool
 
 
@@ -430,6 +473,7 @@
         - "{{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/curl"
         - "{{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/access_port"
         - "{{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/mysql"
+        - "{{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/docker"
 
     - name: systemctl | cycloid-db-report
       shell: |
@@ -476,6 +520,14 @@
       with_items:
         - { name: "cycloid-db", url: "localhost", port: "{{ cycloid_db_port }}"}
 
+    - name: docker | cycloid-db-report
+      shell: |
+          docker inspect cycloid-db > {{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/docker/docker_inspect 2>&1
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+
     - name: mysql dump | cycloid-db-report
       run_once: true
       shell: |
@@ -503,6 +555,7 @@
         - "{{ cycloid_report_path }}/cycloid-creds/{{ inventory_hostname }}/systemctl"
         - "{{ cycloid_report_path }}/cycloid-creds/{{ inventory_hostname }}/curl"
         - "{{ cycloid_report_path }}/cycloid-creds/{{ inventory_hostname }}/access_port"
+        - "{{ cycloid_report_path }}/cycloid-creds/{{ inventory_hostname }}/docker"
 
     - name: systemctl | cycloid-creds-report
       shell: |
@@ -551,6 +604,14 @@
       with_items:
         - { name: "cycloid-creds", url: "localhost", port: "8200"}
 
+    - name: docker | cycloid-creds-report
+      shell: |
+          docker inspect vault > {{ cycloid_report_path }}/cycloid-creds/{{ inventory_hostname }}/docker/docker_inspect 2>&1
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+
     when: setup_cycloid_creds|bool
 
 
@@ -568,6 +629,7 @@
         - "{{ cycloid_report_path }}/minio/{{ inventory_hostname }}/systemctl"
         - "{{ cycloid_report_path }}/minio/{{ inventory_hostname }}/curl"
         - "{{ cycloid_report_path }}/minio/{{ inventory_hostname }}/access_port"
+        - "{{ cycloid_report_path }}/minio/{{ inventory_hostname }}/docker"
 
     - name: systemctl | minio-report
       shell: |
@@ -615,6 +677,14 @@
       with_items:
         - { name: "minio", url: "localhost", port: "{{ minio_port }}"}
 
+    - name: docker | minio-report
+      shell: |
+          docker inspect minio > {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/docker/docker_inspect 2>&1
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+
     when: setup_minio|bool
 
 
@@ -631,6 +701,7 @@
         - "{{ cycloid_report_path }}/smtp/{{ inventory_hostname }}/systemctl"
         - "{{ cycloid_report_path }}/smtp/{{ inventory_hostname }}/curl"
         - "{{ cycloid_report_path }}/smtp/{{ inventory_hostname }}/access_port"
+        - "{{ cycloid_report_path }}/smtp/{{ inventory_hostname }}/docker"
 
     - name: systemctl | smtp-report
       shell: |
@@ -694,6 +765,7 @@
         - "{{ cycloid_report_path }}/elasticsearch/{{ inventory_hostname }}/curl"
         - "{{ cycloid_report_path }}/elasticsearch/{{ inventory_hostname }}/access_port"
         - "{{ cycloid_report_path }}/elasticsearch/{{ inventory_hostname }}/files"
+        - "{{ cycloid_report_path }}/elasticsearch/{{ inventory_hostname }}/docker"
 
     - name: systemctl | elasticsearch-report
       shell: |
@@ -741,15 +813,23 @@
       with_items:
         - { name: "elasticsearch", url: "localhost", port: "{{ elasticsearch_port_api }}"}
 
-  - name: extra_files | elasticsearch-report
-    shell: |
-        cp {{ item }} {{ cycloid_report_path }}/elasticsearch/{{ inventory_hostname }}/files/;
-    args:
-     executable: /bin/bash
-    no_log: true
-    ignore_errors: true
-    with_items:
-      - "{{ cycloid_install_path }}/elasticsearch/*.yml"
+    - name: docker | elasticsearch-report
+      shell: |
+          docker inspect elasticsearch > {{ cycloid_report_path }}/elasticsearch/{{ inventory_hostname }}/docker/docker_inspect 2>&1
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+
+    - name: extra_files | elasticsearch-report
+      shell: |
+          cp {{ item }} {{ cycloid_report_path }}/elasticsearch/{{ inventory_hostname }}/files/;
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+      with_items:
+        - "{{ cycloid_install_path }}/elasticsearch/*.yml"
 
     when: setup_elasticsearch|bool
 
@@ -770,6 +850,21 @@
     file:
       path: "{{ cycloid_report_path }}"
       state: absent
+
+  - name: Get ansible local files
+    delegate_to: 127.0.0.1
+    become: false
+    run_once: true
+    shell: |
+      mkdir -p {{ cycloid_report_local_path }}/ansible
+      cp inventory {{ cycloid_report_local_path }}/ansible/
+
+      cp environments/cycloid.yml {{ cycloid_report_local_path }}/ansible/
+      if [ "{{ cycloid_report_sensitive|bool }}" == "False" ]; then
+        sed -i 's/password:.*/password: XXXXXXXX/; s/jwt_key.*/jwt_key_XXXXX/; s/access_key:.*/access_key: XXXXX/; s/secret_key:.*/secret_key: XXXXX/' {{ cycloid_report_local_path }}/ansible/cycloid.yml
+      fi
+    args:
+     executable: /bin/bash
 
   - name: send report
     delegate_to: 127.0.0.1
