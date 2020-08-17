@@ -8,12 +8,12 @@
     - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
 
   tasks:
-  - name: Wait and check if we have to create the first cycloid-api user | api
+  - name: Unlock all orgs
     command: "mysql --protocol TCP -h localhost -P {{ cycloid_db_port }} -u {{ cycloid_db_user }} -p{{ cycloid_db_password }} {{ cycloid_db_name }} -Ns -e 'update organizations set blocked=NULL;'"
     no_log: true
     when: setup_cycloid_db
 
-  - name: Wait and check if we have to create the first cycloid-api user | api
+  - name: Unlock all orgs
     command: "mysql --protocol TCP -h {{ cycloid_db_host }} -P {{ cycloid_db_port }} -u {{ cycloid_db_user }} -p{{ cycloid_db_password }} {{ cycloid_db_name }} -Ns -e 'update organizations set blocked=NULL;'"
     no_log: true
     when: not setup_cycloid_db
