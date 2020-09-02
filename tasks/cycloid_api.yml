@@ -118,10 +118,6 @@
       register: init_of_api
       until: init_of_api.status == 204
 
-    # Workaround https://github.com/cycloidio/youdeploy-http-api/issues/2261
-    - name: Force first user email validation
-      command: "mysql --protocol TCP -h {{ cycloid_db_host }} -P {{ cycloid_db_port }} -u {{ cycloid_db_user }} -p{{ cycloid_db_password }} {{ cycloid_db_name }} -Ns -e 'update user_emails set verification_token=NULL where email=\"{{cycloid_initial_user['email']}}\";'"
-
     - name: Login with cycloid user | cycloid-core api
       uri:
         url: http://localhost:3001/user/login
