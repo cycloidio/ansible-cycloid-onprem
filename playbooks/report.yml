@@ -54,6 +54,8 @@
       - "dpkg -l > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/dpkg"
       - "free -m > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/free"
       - "top -n1 > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/top"
+      - "df -ahT > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/df"
+      - "df -hi > {{ cycloid_report_path }}/common/{{ inventory_hostname }}/system/dfi"
 
   - name: systemctl | common-report
     shell: |
