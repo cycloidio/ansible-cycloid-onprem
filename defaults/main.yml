@@ -112,7 +112,7 @@ cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-a
 #cycloid_api_image: gaell/debug
 concourse_db_image: postgres:9.6
 cycloid_cache_image: redis:5.0
-cycloid_db_image: mariadb:10.2.11
+cycloid_db_image: mysql:8.0.21
 concourse_web_image: concourse/concourse:5.7.2
 vault_image: vault:1.1.3
 
