@@ -245,10 +245,11 @@ cycloid_api_base_url: "{%- if cycloid_use_api_via_console -%}{{cycloid_console_b
 cycloid_console_dns: cycloid-console
 cycloid_console_base_url: "https://{{ cycloid_console_dns }}"
 
-# Internal parameter that you need to specify if you want to use the staging version
+# Internal parameter if you use staging docker image from cycloid, please uncomment cycloid_api_replace_pattern_url and keep the value defined
 #cycloid_api_replace_pattern_url: https://http-api-staging.cycloid.io
-cycloid_console_base_pattern_url: ""
 cycloid_api_replace_pattern_url: ""
+cycloid_console_base_pattern_url: ""
+
 
 #
 # minio
