@@ -1,14 +1,6 @@
 ---
 - name: install elasticsearch container
   block:
-    - name: create elasticsearch volume storage
-      docker_volume:
-        name: elasticsearch-storage
-        state: present
-        labels:
-          ansible.managed: "true"
-          cycloid.io: "true"
-
     - name: Copy the ssl in service directories
       copy:
         src: "{{ cycloid_third_party[item] }}"
@@ -30,7 +22,7 @@
         container_name: elasticsearch
         container_image: "elasticsearch:{{ elasticsearch_version }}"
         container_volumes:
-          - elasticsearch-storage:/usr/share/elasticsearch/data
+          - "{{ elasticsearch_config_path }}/data:/usr/share/elasticsearch/data"
           # we can't simply override config/elasticsearch since we loose some other cool files
           - "{{ elasticsearch_config_path }}/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro"
           # SSL resources should be placed in the [/usr/share/elasticsearch/config] directory

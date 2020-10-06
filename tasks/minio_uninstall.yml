@@ -15,12 +15,14 @@
     state: absent
   with_items:
     - docker*
+  failed_when: false
 
 - name: Remove files | minio
   file:
     path: "{{ item }}"
     state: absent
   with_items:
+    - "{{ minio_config_path }}"
     - "{{ cycloid_install_path }}"
     - /etc/systemd/system/minio.service
     - /etc/default/minio

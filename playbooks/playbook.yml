@@ -1,8 +1,20 @@
 ---
 - name: Setup cycloid
   hosts: all:!concourse_worker
+  # centos root user don't have usr/local/bin in PATH. It need to be defined for pip+awscli
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   vars_files:
     - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
+  pre_tasks:
+    # Iptables is used by docker (not present on centos/redhat by default)
+    - name: Install extra packages | RedHat
+      package:
+        name:
+          - iptables
+        state: present
+      when: ansible_os_family == 'RedHat'
+
   roles:
     - role: geerlingguy.docker
       tags: docker
