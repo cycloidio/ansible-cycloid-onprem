@@ -75,7 +75,7 @@
   no_log: true
   with_items: "{{ vault_local_token['unseal_keys_b64'] }}"
 
-- name: Auth into vault| cycloid-creds
+- name: Auth into vault | cycloid-creds
   shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault login {{ vault_local_token['root_token'] }}"
   with_items:
     - concourse-ro

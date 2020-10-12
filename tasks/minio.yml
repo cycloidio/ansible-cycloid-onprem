@@ -1,14 +1,6 @@
 ---
 - name: Install minio container | minio
   block:
-    - name: Create minio volume storage | minio
-      docker_volume:
-        name: minio-storage
-        state: present
-        labels:
-          ansible.managed: "true"
-          cycloid.io: "true"
-
     - name: Define service | minio
       include_role:
         name: mhutter.docker-systemd-service
@@ -17,7 +9,8 @@
         container_cmd: server /data
         container_image: "minio/minio:{{ minio_version }}"
         container_volumes:
-          - minio-storage:/data
+        container_volumes:
+          - "{{ minio_config_path }}/data:/data"
         container_ports:
           - "{{ minio_port }}:9000"
         container_env:

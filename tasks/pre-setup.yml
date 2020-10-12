@@ -1,14 +1,7 @@
 ---
 - name: Install package depends | pre-setup
   package:
-    name:
-      - python-openssl
-      - default-mysql-client
-      - python-setuptools
-      - python-pip
-      - gnupg2
-      - pass
-      - netcat
+    name: "{{ cycloid_packages[ansible_os_family | lower] | default(cycloid_packages['debian']) }}"
     state: present
 
 - name: Install package depends Debian 10 | pre-setup

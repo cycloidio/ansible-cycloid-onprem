@@ -28,6 +28,29 @@ cycloid_install_path: /opt/cycloid
 cycloid_local_datas_path: "{{ playbook_dir }}/datas"
 
 #
+# Pre setup
+#
+
+# Install packages regarding OS (debian by default)
+cycloid_packages:
+  debian:
+        - python-openssl
+        - default-mysql-client
+        - python-setuptools
+        - python-pip
+        - gnupg2
+        - pass
+        - netcat
+
+  redhat:
+        - python3-pip
+        - python3-pyOpenSSL
+        - mysql
+        - platform-python-setuptools
+        - platform-python-pip
+        - gnupg2
+        - nmap-ncat
+
 # SSL
 #
 ssl_generate_selfsigned: true
@@ -250,6 +273,11 @@ minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 #. minio_browser(optional, string): off
 #+ uncomment to enable browser interface
 # minio_browser: on
+
+#. minio_config_path(optional, string): "{{ cycloid_install_path }}/minio"
+#+ host directory used to store config/datas used by the container
+minio_config_path: "{{ cycloid_install_path }}/minio"
+
 
 # Keep env include var as legacy compatibility
 env: prod
