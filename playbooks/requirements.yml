@@ -24,8 +24,8 @@
   name: geerlingguy.docker
   scm: git
 
-- src: https://github.com/jdauphant/ansible-role-nginx
-  name: jdauphant.nginx
+- src: https://github.com/cycloidio/ansible-role-nginx
+  name: cycloidio.nginx
   scm: git
 
 - src: https://github.com/mhutter/ansible-docker-systemd-service
