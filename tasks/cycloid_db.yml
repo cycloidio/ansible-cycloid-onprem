@@ -11,6 +11,8 @@
     name: cycloid-db
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ cycloid_db_image }}"
+    # needed for mysql 8.x
+    container_cmd: "{{ cycloid_db_container_cmd }}"
     container_ports:
       - '{{ cycloid_db_port }}:3306'
     container_volumes:
