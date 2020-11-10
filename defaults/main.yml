@@ -34,22 +34,30 @@ cycloid_local_datas_path: "{{ playbook_dir }}/datas"
 # Install packages regarding OS (debian by default)
 cycloid_packages:
   debian:
+        - python3-pip
         - python-openssl
         - default-mysql-client
         - python-setuptools
-        - python-pip
         - gnupg2
         - pass
         - netcat
+  debian-10:
+        - python3-pip
+        - python-openssl
+        - default-mysql-client
+        - python-setuptools
+        - gnupg2
+        - pass
+        - netcat
+        - python-backports.ssl-match-hostname
 
   redhat:
         - python3-pip
         - python3-pyOpenSSL
         - mysql
-        - platform-python-setuptools
-        - platform-python-pip
         - gnupg2
         - nmap-ncat
+
 
 # SSL
 #
