@@ -1,15 +1,8 @@
 ---
 - name: Install package depends | pre-setup
   package:
-    name: "{{ cycloid_packages[ansible_os_family | lower] | default(cycloid_packages['debian']) }}"
+    name: "{{ cycloid_packages[ansible_distribution | lower + '-' + ansible_distribution_major_version] | default(cycloid_packages[ansible_os_family | lower]) }}"
     state: present
-
-- name: Install package depends Debian 10 | pre-setup
-  package:
-    name:
-      - python-backports.ssl-match-hostname
-    state: present
-  when: ansible_distribution == 'Debian' and ansible_distribution_version == '10'
 
 - block:
   - name: switch to iptables-legacy (debian 10 issue)
