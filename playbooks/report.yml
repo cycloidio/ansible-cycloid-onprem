@@ -151,7 +151,7 @@
       with_items:
         - "cycloid-api_container.service"
         - "cycloid-frontend_container.service"
-        - "nginx.service"
+        - "nginx_container.service"
         - "docker.service"
 
     - name: curl | core-report
@@ -202,18 +202,18 @@
       no_log: true
       ignore_errors: true
 
-    - name: var_log | core-report
-      shell: |
-          cp /var/log/{{ item }} {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/var_log/$(echo {{ item }} | sed 's/\//-/g');
-      args:
-       executable: /bin/bash
-      no_log: true
-      ignore_errors: true
-      with_items:
-        - "nginx/cycloid-api-access.log"
-        - "nginx/cycloid-api-error.log"
-        - "nginx/cycloid-console-access.log"
-        - "nginx/cycloid-console-error.log"
+#    - name: var_log | core-report
+#      shell: |
+#          cp /var/log/{{ item }} {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/var_log/$(echo {{ item }} | sed 's/\//-/g');
+#      args:
+#       executable: /bin/bash
+#      no_log: true
+#      ignore_errors: true
+#      with_items:
+#        - "nginx/cycloid-api-access.log"
+#        - "nginx/cycloid-api-error.log"
+#        - "nginx/cycloid-console-access.log"
+#        - "nginx/cycloid-console-error.log"
 
     - name: extra_files | core-report
       shell: |
@@ -223,10 +223,7 @@
       no_log: true
       ignore_errors: true
       with_items:
-        - "/etc/nginx/sites-enabled/01-cycloid-console.conf"
-        - "/etc/nginx/sites-enabled/02-cycloid-api.conf"
-        - "/etc/nginx/conf.d/01-proxy.conf"
-
+        - "{{ cycloid_nginx_path }}/*.conf"
 
     - name: mysql access | core-report
       shell: |

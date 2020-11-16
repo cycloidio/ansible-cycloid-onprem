@@ -187,6 +187,13 @@ vault_config:
 vault_url: https://{{ hostvars[groups['cycloid_creds'][0]]['ansible_default_ipv4']['address'] }}:8200
 
 #
+# Nginx
+#
+
+cycloid_nginx_path: "{{ cycloid_install_path }}/nginx"
+cycloid_nginx_image: nginx:1.19.4
+
+#
 # Cycloid
 #
 
