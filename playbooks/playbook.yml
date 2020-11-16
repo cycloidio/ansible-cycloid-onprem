@@ -7,16 +7,37 @@
   vars_files:
     - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
   pre_tasks:
+
+    - name: "Requirements: Packages when Offline setup"
+      debug:
+        msg: "{{ [ 'iptables', 'docker' ] + cycloid_packages_list }}"
+      when: offline_setup
+
+    - name: "Requirements: Pip packages when Offline setup"
+      debug:
+        msg: "{{ [ 'pip', 'awscli', 'docker' ] }}"
+      when: offline_setup
+
+    - name: "Requirements: ECR login for cycloid docker images when Offline setup"
+      debug:
+        msg: "$(AWS_ACCESS_KEY_ID={{ cycloid_ecr_access_key }} AWS_SECRET_ACCESS_KEY={{ cycloid_ecr_secret_key }} aws ecr get-login --no-include-email --region eu-west-1)"
+      when: cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined and offline_setup
+
+    - name: "Requirements: Docker images when Offline setup"
+      debug:
+        msg: "{{ [ cycloid_frontend_image, cycloid_api_image, concourse_db_image, cycloid_cache_image, cycloid_db_image, concourse_web_image, vault_image, cycloid_nginx_image ] }}"
+      when: offline_setup
+
     - name: Update apt packages
       apt:
         update_cache: yes
-      when: ansible_os_family == 'Debian'
+      when: ansible_os_family == 'Debian' and setup_packages
       ignore_errors: yes
 
     - name: Update yum packages
       yum:
         update_cache: yes
-      when: ansible_os_family == 'RedHat'
+      when: ansible_os_family == 'RedHat' and setup_packages
       ignore_errors: yes
 
     # Iptables is used by docker (not present on centos/redhat by default)
@@ -25,12 +46,12 @@
         name:
           - iptables
         state: present
-      when: ansible_os_family == 'RedHat'
+      when: ansible_os_family == 'RedHat' and setup_packages
 
   roles:
     - role: geerlingguy.docker
       tags: docker
-      when: not validate_only and not uninstall
+      when: not validate_only and not uninstall and setup_docker
 
     - role: ansible-cycloid-onprem
       tags:

@@ -2,8 +2,6 @@
 
 validate: True
 validate_only: False
-docker_pull: true
-#docker_pull: false
 
 # Set to true to uninstall cycloid
 uninstall: False
@@ -58,6 +56,18 @@ cycloid_packages:
         - gnupg2
         - nmap-ncat
 
+cycloid_packages_list: "{{ cycloid_packages[ansible_distribution | lower + '-' + ansible_distribution_major_version] | default(cycloid_packages[ansible_os_family | lower]) }}"
+
+# If your server doesn't have internet access. Packages can't be install manually
+# Set offline_setup: true to not install packages automatically
+offline_setup: false
+
+# If offline false, setup packages and docker
+setup_packages: "{{ not offline_setup }}"
+setup_docker: "{{ not offline_setup }}"
+
+# Pull docker image when configuring the service
+docker_pull: "{{ not offline_setup }}"
 
 # SSL
 #
