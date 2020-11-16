@@ -25,7 +25,7 @@
         - curl
         - procps
         - python-setuptools
-        - python-pip
+        - python3-pip
         state: present
 
     - name: install pip depends

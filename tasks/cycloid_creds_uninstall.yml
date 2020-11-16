@@ -15,6 +15,7 @@
   with_items:
     - docker*
   failed_when: false
+  when: setup_packages
 
 - name: Remove files | cycloid-creds
   file:

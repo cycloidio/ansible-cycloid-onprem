@@ -34,6 +34,7 @@
   with_items:
     - docker*
   failed_when: false
+  when: setup_packages
 
 - name: Force systemd to reread configs | cycloid-core
   systemd:
