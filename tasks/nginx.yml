@@ -1,8 +1,38 @@
 ---
+
+- block:
+    - name: Check cycloid old nginx vhost config if exist | cycloid-core nginx
+      stat:
+        path: /etc/nginx/sites-enabled/01-cycloid-console.conf
+      register: vhost
+
+    - fail:
+        msg: Legacy, we detected Cycloid legacy vhost 01-cycloid-console.conf installed on your server. Nginx is not required anymore by Cycloid. We moved to a dedicated Docker container. Please remove legacy 01-cycloid-console.conf vhost or Nginx before running the installation again ...
+      when: vhost.stat.exists == True
+
+
+- name: Create config directory | cycloid-core nginx
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+  with_items:
+    - "{{ cycloid_nginx_path }}/vhosts"
+    - "{{ cycloid_nginx_path }}/ssl"
+
+- name: Copy nginx vhosts | cycloid-core nginx
+  template:
+    src: "nginx/{{item}}.j2"
+    dest: "{{ cycloid_nginx_path }}/vhosts/{{item}}.conf"
+  with_items:
+    - 00-default-force-ssl
+    - 01-cycloid-console
+    - 02-cycloid-api
+
 - name: Copy the ssl in service directories | cycloid-core nginx
   copy:
     src: "{{ cycloid_core_ssl[item] }}"
-    dest: "{{ cycloid_install_path }}/ssl.{{item}}"
+    dest: "{{ cycloid_nginx_path }}/ssl/ssl.{{item}}"
     mode: 0400
   with_items:
     - key
@@ -10,85 +40,33 @@
 
 - name: Define service | cycloid-core nginx
   include_role:
-    name: cycloidio.nginx
+    name: mhutter.docker-systemd-service
   vars:
-    nginx_remove_sites:
-      - default
-    nginx_configs:
-      01-proxy:
-        - proxy_set_header X-Real-IP  $remote_addr
-        - proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for
-    nginx_sites:
-      00-default-force-ssl:
-        - listen       80 default_server
-        - server_name  default
-        - rewrite     ^   https://$host$request_uri? permanent
-      01-cycloid-console:
-        - listen       443 ssl
-        - server_name  "{{ cycloid_console_dns }}"
-        - access_log /var/log/nginx/cycloid-console-access.log
-        - error_log  /var/log/nginx/cycloid-console-error.log
-        - ssl_certificate {{ cycloid_install_path }}/ssl.crt
-        - ssl_certificate_key {{ cycloid_install_path }}/ssl.key
-        - location / {
-            proxy_pass http://127.0.0.1:3000;
-            proxy_set_header   X-FORWARDED_PROTO https;
-            proxy_set_header   X-FORWARDED_PORT 443;
-          }
-        - location /api {
-            proxy_set_header   X-FORWARDED_PROTO https;
-            proxy_set_header   X-FORWARDED_PORT 443;
-            proxy_set_header   Host              {{ cycloid_api_dns }};
-            proxy_buffering  off;
-            proxy_cache      off;
-            proxy_connect_timeout 3600;
-            proxy_send_timeout    3600;
-            proxy_read_timeout    3600;
-            keepalive_timeout     3600;
-            proxy_set_header Connection keep-alive;
-            proxy_pass https://127.0.0.1/;
-          }
-      02-cycloid-api:
-        - listen       443 ssl
-        - server_name  "{{ cycloid_api_dns }}"
-        - ssl_certificate {{ cycloid_install_path }}/ssl.crt
-        - ssl_certificate_key {{ cycloid_install_path }}/ssl.key
-        - access_log /var/log/nginx/cycloid-api-access.log
-        - error_log  /var/log/nginx/cycloid-api-error.log
-        - |-
-          location / {
-              proxy_pass http://127.0.0.1:3001;
-              proxy_set_header   X-FORWARDED_PROTO https;
-              proxy_set_header   X-FORWARDED_PORT 443;
-              proxy_connect_timeout                   360s;
-              proxy_send_timeout                      360s;
-              proxy_read_timeout                      360s;
-              # Cors Preflight methods needs additional options and different Return Code
-              if ($request_method = 'OPTIONS') {
-                  add_header 'Access-Control-Allow-Origin' '*' always;
-                  add_header 'Access-Control-Allow-Credentials' 'true' always;
-                  add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, PATCH, OPTIONS' always;
-                  add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-Refresh-Token' always;
-                  add_header 'Access-Control-Max-Age' '1728000' always;
-                  add_header 'Content-Type' 'text/plain charset=UTF-8' always;
-                  add_header 'Content-Length' '0' always;
-                  return 204;
-              }
+    name: nginx
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{ cycloid_nginx_image }}"
+    #container_links: "{{ cycloid_api_container_links + ['cycloid-api', 'cycloid-frontend'] }}"
+    container_links:
+      - 'cycloid-api'
+      - 'cycloid-frontend'
+    container_volumes:
+      - "{{ cycloid_nginx_path }}/vhosts:/etc/nginx/conf.d"
+      - "{{ cycloid_nginx_path }}/ssl:/etc/nginx/ssl"
+    container_ports:
+      - '80:80'
+      - '443:443'
+    container_env:
+      NGINX_ENTRYPOINT_QUIET_LOGS: 1
+      http_proxy: "{{ http_proxy }}"
+      https_proxy: "{{ http_proxy }}"
+      no_proxy: "{{ no_proxy }}"
 
-              add_header 'Access-Control-Allow-Origin' '*' always;
-              add_header 'Access-Control-Allow-Credentials' 'true' always;
-              add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, PATCH, OPTIONS' always;
-              add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-Refresh-Token' always;
-              chunked_transfer_encoding off;
-              add_header 'Access-Control-Expose-Headers' 'X-Refresh-Token' always;
-          }
+  tags: docker-services
 
-  tags: nginx
-
-- name: Set SELinux boolean to allow nginx to set rlimit
-  seboolean:
-    name: httpd_can_network_connect
-    state: yes
-    persistent: yes
-  when: ansible_selinux and ansible_selinux.status == "enabled"
-  tags: nginx
+#- name: Set SELinux boolean to allow nginx to set rlimit
+#  seboolean:
+#    name: httpd_can_network_connect
+#    state: yes
+#    persistent: yes
+#  when: ansible_selinux and ansible_selinux.status == "enabled"
+#  tags: nginx

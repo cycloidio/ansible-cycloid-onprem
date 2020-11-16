@@ -1,0 +1,37 @@
+server {
+    listen       443 ssl;
+    server_name  "{{ cycloid_api_dns }}";
+
+    #access_log /var/log/nginx/cycloid-api-access.log;
+    #error_log  /var/log/nginx/cycloid-api-error.log;
+
+    ssl_certificate /etc/nginx/ssl/ssl.crt;
+    ssl_certificate_key /etc/nginx/ssl/ssl.key;
+
+    location / {
+      proxy_pass http://cycloid-api:3001;
+      proxy_set_header   X-FORWARDED_PROTO https;
+      proxy_set_header   X-FORWARDED_PORT 443;
+      proxy_connect_timeout                   360s;
+      proxy_send_timeout                      360s;
+      proxy_read_timeout                      360s;
+      # Cors Preflight methods needs additional options and different Return Code
+      if ($request_method = 'OPTIONS') {
+          add_header 'Access-Control-Allow-Origin' '*' always;
+          add_header 'Access-Control-Allow-Credentials' 'true' always;
+          add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, PATCH, OPTIONS' always;
+          add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-Refresh-Token' always;
+          add_header 'Access-Control-Max-Age' '1728000' always;
+          add_header 'Content-Type' 'text/plain charset=UTF-8' always;
+          add_header 'Content-Length' '0' always;
+          return 204;
+      }
+
+      add_header 'Access-Control-Allow-Origin' '*' always;
+      add_header 'Access-Control-Allow-Credentials' 'true' always;
+      add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, PATCH, OPTIONS' always;
+      add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-Refresh-Token' always;
+      chunked_transfer_encoding off;
+      add_header 'Access-Control-Expose-Headers' 'X-Refresh-Token' always;
+    }
+}
