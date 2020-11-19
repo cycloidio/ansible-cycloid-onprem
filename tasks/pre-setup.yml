@@ -26,6 +26,7 @@
 - name: Install pip depends | pre-setup
   pip:
      name:
+      - pyOpenSSL
       - awscli
       - docker
      state: latest

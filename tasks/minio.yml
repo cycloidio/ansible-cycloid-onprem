@@ -9,7 +9,6 @@
         container_cmd: server /data
         container_image: "minio/minio:{{ minio_version }}"
         container_volumes:
-        container_volumes:
           - "{{ minio_config_path }}/data:/data"
         container_ports:
           - "{{ minio_port }}:9000"
