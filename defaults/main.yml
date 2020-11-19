@@ -324,13 +324,13 @@ cycloid_report_curl_timeout: 4
 # Azure AD integration
 #
 
-#. azure_ad_tenant_id(optional, string): "null"
+#. azure_ad_tenant_id(optional, string): ""
 #+ the tenant ID of Azure AD
-azure_ad_tenant_id: "null"
+azure_ad_tenant_id: ""
 
-#. azure_ad_client_id(optional, string): "null"
+#. azure_ad_client_id(optional, string): ""
 #+ the client ID of Azure AD
-azure_ad_client_id: "null"
+azure_ad_client_id: ""
 
 cycloid_oauth_replace_pattern_azure_client_id: ""
 cycloid_oauth_replace_pattern_azure_tenant_id: ""
