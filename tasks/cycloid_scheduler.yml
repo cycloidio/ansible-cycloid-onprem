@@ -74,7 +74,7 @@
     container_ports:
       - '2222:2222'
       - '8080:8080'
-      - '8443:8443'
+      - "{{ concourse_port }}:{{ concourse_port }}"
     container_volumes:
       # concourse-authorized-keys
       - "{{ concourse_config_path }}:/opt/concourse"
@@ -95,7 +95,7 @@
       CONCOURSE_VAULT_PATH_PREFIX: /cycloid
       CONCOURSE_TLS_CERT: /opt/concourse/ssl.crt
       CONCOURSE_TLS_KEY: /opt/concourse/ssl.key
-      CONCOURSE_TLS_BIND_PORT: 8443
+      CONCOURSE_TLS_BIND_PORT: "{{ concourse_port }}"
       CONCOURSE_VAULT_INSECURE_SKIP_VERIFY: true
       # Defined in vault
       #CONCOURSE_VAULT_APPROLE_SECRET_ID: "VAULT SECRET IDs"
