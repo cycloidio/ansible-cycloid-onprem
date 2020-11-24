@@ -9,12 +9,6 @@
     dest: "{{ cycloid_install_path }}/approle-cycloid"
     mode: 0400
 
-- name: Copy session_signing_key in service directory | cycloid-core api
-  copy:
-    src: "{{ cycloid_local_datas_path }}/scheduler/{{ concourse_session_signing_key_path }}"
-    dest: "{{ concourse_config_path }}/{{ concourse_session_signing_key_path }}"
-    mode: 0400
-
 - name: Define service | cycloid-core api
   include_role:
     name: mhutter.docker-systemd-service
@@ -22,10 +16,6 @@
     name: cycloid-api
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{cycloid_api_image}}"
-    #container_links: "{{ cycloid_api_container_links }}"
-    container_volumes:
-      # concourse-authorized-keys
-      - "{{ concourse_config_path }}:/opt/concourse"
     container_ports:
       - '3001:3001'
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid"
@@ -39,6 +29,7 @@
       CONCOURSE_URL: "{{ concourse_url }}"
       CONCOURSE_PORT: "{{ concourse_port }}"
       CONCOURSE_USER: "{{ concourse_auth_user }}"
+      CONCOURSE_PASSWORD: "{{ concourse_auth_password }}"
       CONCOURSE_TEAM: main
       VAULT_URL: "{{ vault_url }}"
       VAULT_SKIP_VERIFY: true
