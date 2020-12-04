@@ -2,3 +2,5 @@ __pycache__/
 .env
 *.retry
 vault.secret
+roles/
+datas/

@@ -56,7 +56,7 @@ platforms:
      - cycloid_cache
 
   - name: concourse_worker
-    image: concourse/concourse:5.7.2
+    image: concourse/concourse:6.7.1
     privileged: yes
     volumes:
       - "/tmp/molecule_test:/opt:ro"
