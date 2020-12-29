@@ -70,6 +70,9 @@ setup_docker: "{{ not offline_setup }}"
 # Pull docker image when configuring the service
 docker_pull: "{{ not offline_setup }}"
 
+# Add cycloid public stack to the catalog repository
+cycloid_public_stacks: "{{ not offline_setup }}"
+
 # SSL
 #
 ssl_generate_selfsigned: true
