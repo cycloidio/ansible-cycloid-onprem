@@ -1,0 +1,13 @@
+#!/bin/bash
+while true; do
+      VAULT_KEYS=$(cat {{ vault_config_path }}/unseal_keys)
+      # expect 400 "missing client token"
+      if [ "$(curl -s -o /dev/null -w '%{http_code}' -k {{ vault_url }}/v1/cycloid?list=true)" -ne "400" ];  then
+            for k in $VAULT_KEYS;do
+              curl -k --request POST --data "{\"key\": \"${k}\"}" {{ vault_url }}/v1/sys/unseal;
+            done
+      else
+            break;
+      fi
+      sleep 1;
+done
