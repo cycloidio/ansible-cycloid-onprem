@@ -199,7 +199,7 @@ vault_config:
 # External vault url used by others services
 vault_url: https://{{ hostvars[groups['cycloid_creds'][0]]['ansible_default_ipv4']['address'] }}:8200
 
-# Copy the vault secret key on the vault server and update vault service to unseal
+# Copy the vault secret key on the vault server and update vault service to automatically unseal at startup
 vault_auto_unseal: true
 vault_unseal_cmd: "{{ vault_config_path }}/unseal.sh"
 vault_start_post: "{% if vault_auto_unseal|bool %}{{ vault_unseal_cmd }}{% endif %}"
