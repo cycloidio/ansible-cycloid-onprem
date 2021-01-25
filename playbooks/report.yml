@@ -881,7 +881,7 @@
       echo ""
       echo "Please share this url and secret to cycloid team: "
       echo ""
-      curl --connect-timeout 30 https://pastefile-owl.cycloid.io -F file=@${filename}.gpg
+      curl --connect-timeout 30 https://pastefile.owl.cycloid.io -F file=@${filename}.gpg
       echo "secret: $SECRET"
       rm /tmp/${filename} -rf
     args:
