@@ -2,3 +2,6 @@
   service:
     name: concourse-web_container
     state: restarted
+
+- name: update ca-certificates
+  command: "{{ ca_certificates_handler[ansible_os_family | lower] }}"

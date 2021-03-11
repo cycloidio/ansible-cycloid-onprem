@@ -3,7 +3,36 @@
   hosts: cycloid_worker
 
   vars_files:
+    - roles/ansible-cycloid-onprem/defaults/main.yml
     - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
+
+  pre_tasks:
+    # Copy a rootCa on the host servers
+    - name: Create root certificates directory | pre-setup
+      file:
+        path: "{{ ca_certificates_path[ansible_os_family | lower] }}"
+        state: directory
+        #mode: 0750
+        recurse: yes
+
+    - name: Copy root certificates | pre-setup
+      copy:
+        src: "{{ item }}"
+        dest: "{{ ca_certificates_path[ansible_os_family | lower] }}/"
+        owner: "root"
+        mode: 0644
+      with_fileglob:
+        - "{{ ca_certificates_local_path }}"
+      register: certificates
+
+    - name: update ca-certificates | pre-setup
+      command: "{{ ca_certificates_handler[ansible_os_family | lower] }}"
+      when: certificates.changed
+
+    - name: Set CONCOURSE_CERTS_DIR | concourse
+      set_fact:
+       concourse_worker_env: "{{ concourse_worker_env | combine({'CONCOURSE_CERTS_DIR': '/etc/ssl/certs/'}) }}"
+      when: ca_certificates_container_shared|bool
 
   roles:
     - role: cycloid.concourse
