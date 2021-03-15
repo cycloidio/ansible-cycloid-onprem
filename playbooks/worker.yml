@@ -7,6 +7,13 @@
     - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
 
   pre_tasks:
+
+    - name: Install extra packages | pre-setup
+      package:
+        name:
+          - gnupg2
+        state: present
+
     # Copy a rootCa on the host servers
     - name: Create root certificates directory | pre-setup
       file:
