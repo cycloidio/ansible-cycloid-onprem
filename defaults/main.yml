@@ -279,6 +279,7 @@ cycloid_initial_organization:
 
 cycloid_initial_service_catalog:
     name: Cycloid stacks
+    canonical: cycloid-stacks
     url: https://github.com/cycloid-community-catalog/public-stacks
     branch: master
 
