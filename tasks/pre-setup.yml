@@ -54,3 +54,22 @@
     - "{{ vault_config_path }}/config"
     - "{{ vault_config_path }}/file"
     - "{{ elasticsearch_config_path }}"
+
+
+# Copy a rootCa on the host servers
+- name: Create root certificates directory | pre-setup
+  file:
+    path: "{{ ca_certificates_path[ansible_os_family | lower] }}"
+    state: directory
+    #mode: 0750
+    recurse: yes
+
+- name: Copy root certificates | pre-setup
+  copy:
+    src: "{{ item }}"
+    dest: "{{ ca_certificates_path[ansible_os_family | lower] }}/"
+    owner: "root"
+    mode: 0644
+  with_fileglob:
+    - "{{ ca_certificates_local_path }}"
+  notify: "update ca-certificates"

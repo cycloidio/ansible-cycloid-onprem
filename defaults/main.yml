@@ -59,6 +59,44 @@ cycloid_packages:
 
 cycloid_packages_list: "{{ cycloid_packages[ansible_distribution | lower + '-' + ansible_distribution_major_version] | default(cycloid_packages[ansible_os_family | lower]) }}"
 
+#
+# Install your own rootCa on onprem servers
+#
+
+# where rootCA stored on serveurs depending of ansible_os_family
+ca_certificates_path:
+  debian: /usr/local/share/ca-certificates
+  redhat: /etc/pki/ca-trust/source/anchors
+
+# To containing your own root certificates to deploy on servers
+ca_certificates_local_path: "{{ cycloid_local_datas_path }}/rootca/*"
+
+# System command to update root certificates
+ca_certificates_handler:
+  debian: "/usr/sbin/update-ca-certificates"
+  redhat: "/usr/bin/update-ca-trust"
+
+# Share your rootCA from the host to containers
+ca_certificates_container_shared: false
+
+# Certificates volumes to share on containers depending of ansible_os_family
+container_volumes_ca_certificates_default:
+  debian:
+    - "/usr/local/share/ca-certificates:/usr/local/share/ca-certificates"
+  redhat:
+    - "/etc/pki/ca-trust/source/anchors:/usr/local/share/ca-certificates/anchors"
+
+# If ca_certificates_container_shared, share CA volumes with containers
+container_volumes_ca_certificates: "{% if ca_certificates_container_shared %}{{ container_volumes_ca_certificates_default[ansible_os_family | lower] }}{% endif %}"
+# If ca_certificates_container_shared, update-ca-certificates on containers
+#update_ca_start_post: "{% if ca_certificates_container_shared %}/usr/sbin/update-ca-certificates{% endif %}"
+container_args_update_ca: "{% if ca_certificates_container_shared %}--entrypoint /bin/bash{% endif %}"
+
+# If ca_certificates_container_shared, run update-ca before the /entrypoint
+cycloid_api_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint\"{% endif %}"
+
+# docker exec -it cycloid-api bash -c "ls -l /etc/ssl/certs/ | grep DigiCertSHA2HighAssuranceServerCA.crt"
+
 # If your server doesn't have internet access. Packages can't be install manually
 # Set offline_setup: true to not install packages automatically
 offline_setup: false

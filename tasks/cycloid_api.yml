@@ -18,7 +18,9 @@
     container_image: "{{cycloid_api_image}}"
     container_ports:
       - '3001:3001'
-    container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid"
+    container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }}"
+    container_cmd: "{{ cycloid_api_container_cmd }}"
+    container_volumes: "{{ container_volumes_ca_certificates }}"
     container_env:
       CONCOURSE_SESSION_SIGNING_KEY: "/opt/concourse/{{ concourse_session_signing_key_path }}"
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
