@@ -23,11 +23,11 @@ technologies:
   - technology: vault
     version: n/a
   - technology: concourse
-    version: 6.7.1
+    version: 6.7.6
   - technology: postgres
     version: n/a
   - technology: concourse-worker
-    version: 6.7.1
+    version: 6.7.6
 
 author: 'Cycloid'
 image: ''
