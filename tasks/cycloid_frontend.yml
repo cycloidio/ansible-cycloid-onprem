@@ -11,12 +11,8 @@
     container_ports:
       - '3000:80'
     container_env:
-      CYCLOID_OAUTH_AZURE_TENANT_ID: "{{ azure_ad_tenant_id }}"
-      CYCLOID_OAUTH_AZURE_CLIENT_ID: "{{ azure_ad_client_id }}"
       CYCLOID_API_URL: "{{cycloid_api_base_url}}"
       CYCLOID_API_REPLACE_PATTERN_URL: "{{ cycloid_api_replace_pattern_url }}"
       CYCLOID_BASE_URL: "{{ cycloid_console_base_url }}"
       CYCLOID_BASE_REPLACE_PATTERN_URL: "{{ cycloid_console_base_pattern_url }}"
-      CYCLOID_OAUTH_REPLACE_PATTERN_AZURE_TENANT_ID: "{{ cycloid_oauth_replace_pattern_azure_tenant_id }}"
-      CYCLOID_OAUTH_REPLACE_PATTERN_AZURE_CLIENT_ID: "{{ cycloid_oauth_replace_pattern_azure_client_id }}"
   tags: docker-services

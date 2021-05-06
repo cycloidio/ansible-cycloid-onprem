@@ -380,9 +380,6 @@ azure_ad_tenant_id: ""
 #+ the client ID of Azure AD
 azure_ad_client_id: ""
 
-cycloid_oauth_replace_pattern_azure_client_id: ""
-cycloid_oauth_replace_pattern_azure_tenant_id: ""
-
 #
 # elasticsearch
 #
