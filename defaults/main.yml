@@ -81,10 +81,8 @@ ca_certificates_container_shared: false
 
 # Certificates volumes to share on containers depending of ansible_os_family
 container_volumes_ca_certificates_default:
-  debian:
-    - "/usr/local/share/ca-certificates:/usr/local/share/ca-certificates"
-  redhat:
-    - "/etc/pki/ca-trust/source/anchors:/usr/local/share/ca-certificates/anchors"
+  debian: "/usr/local/share/ca-certificates:/usr/local/share/ca-certificates"
+  redhat: "/etc/pki/ca-trust/source/anchors:/usr/local/share/ca-certificates/anchors"
 
 # If ca_certificates_container_shared, share CA volumes with containers
 container_volumes_ca_certificates: "{% if ca_certificates_container_shared %}{{ container_volumes_ca_certificates_default[ansible_os_family | lower] }}{% endif %}"
@@ -131,10 +129,12 @@ cycloid_third_party:
 #+ a list of alternative common name to use for the self signed certs
 #+ use `DNS` for a domain name and `IP` for a raw IP address
 default_ssl_subject_alt_name:
+  - DNS:127.0.0.1
   - DNS:cycloid
   - DNS:localhost
   - DNS:vault
   - DNS:concourse
+  - DNS:minio
   - DNS:elasticsearch
 
 #. ssl_subject_alt_name(optional, dict)
@@ -249,6 +249,12 @@ vault_start_post: "{% if vault_auto_unseal|bool %}{{ vault_unseal_cmd }}{% endif
 cycloid_nginx_path: "{{ cycloid_install_path }}/nginx"
 cycloid_nginx_image: nginx:1.19.4
 
+# Proxy_pass url used for cycloid api. Most of the case it shouldn't be changed.
+cycloid_api_proxy_pass: "http://cycloid-api:3001"
+
+# Proxy_pass url used for cycloid console/frontend. Most of the case it shouldn't be changed.
+cycloid_console_proxy_pass: "http://cycloid-frontend"
+
 #
 # Cycloid
 #
@@ -320,12 +326,6 @@ cycloid_api_dns: cycloid-api
 cycloid_api_base_url: "{%- if cycloid_use_api_via_console -%}{{cycloid_console_base_url}}/api{%- else -%}https://{{cycloid_api_dns}}{%- endif -%}"
 cycloid_console_dns: cycloid-console
 cycloid_console_base_url: "https://{{ cycloid_console_dns }}"
-
-# Internal parameter if you use staging docker image from cycloid, please uncomment cycloid_api_replace_pattern_url and keep the value defined
-#cycloid_api_replace_pattern_url: https://http-api-staging.cycloid.io
-cycloid_api_replace_pattern_url: ""
-cycloid_console_base_pattern_url: ""
-
 
 #
 # minio
@@ -421,3 +421,34 @@ cycloid_elasticsearch_default:
 # Workaround is to revert to iptables-legacy by setting use_iptables_legacy: true
 # https://github.com/geerlingguy/ansible-role-docker/issues/189
 use_iptables_legacy: false
+
+
+###########################
+# SAML2 authentification
+###########################
+# Enabled SAML auth on Cyclid API.
+saml_auth_enabled: false
+
+# By default SAML3 files should be stored under saml/{cycloid-saml-sp.crt, ycloid-saml-sp.key, idp-metadata}
+
+# Ansible Local path where your saml certs/metadata are stored
+saml_local_path: "{{ cycloid_local_datas_path }}/saml"
+# Name of the Public certificate to use in cycloid
+saml_sp_certificate_file: "cycloid-saml-sp.crt"
+# Name of the certificate private key to use in cycloid
+saml_sp_private_key_file: "cycloid-saml-sp.key"
+# Name of your xml identity provider federation metadata file. It could also be provided as an url with saml_idp_metadata_url
+saml_idp_metadata_file: "idp-metadata"
+# Url to get your xml identity provider federation metadata file. If defined, do not provide saml_idp_metadata_file
+saml_idp_metadata_url: ""
+
+# Path where saml certs will be stored on the host
+saml_config_path: "{{ cycloid_install_path }}/saml"
+
+# SAML2 api internal path. It shouldn't be changed. Following path will be used when SAML enabled with saml_auth_enabled: true.
+saml_sp_certificate_path: "{%- if saml_auth_enabled -%}/secrets/saml/{{ saml_sp_certificate_file }}{%- endif -%}"
+saml_sp_private_key_path: "{%- if saml_auth_enabled -%}/secrets/saml/{{ saml_sp_private_key_file }}{%- endif -%}"
+saml_idp_metadata_path: "{%- if saml_auth_enabled and saml_idp_metadata_url == '' -%}/secrets/saml/{{ saml_idp_metadata_file }}{%- endif -%}"
+
+# Share host saml file with container. It shouldn't be changed.
+container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/secrets/saml{%- endif -%}"

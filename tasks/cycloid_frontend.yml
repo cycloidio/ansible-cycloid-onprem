@@ -12,7 +12,5 @@
       - '3000:80'
     container_env:
       CYCLOID_API_URL: "{{cycloid_api_base_url}}"
-      CYCLOID_API_REPLACE_PATTERN_URL: "{{ cycloid_api_replace_pattern_url }}"
       CYCLOID_BASE_URL: "{{ cycloid_console_base_url }}"
-      CYCLOID_BASE_REPLACE_PATTERN_URL: "{{ cycloid_console_base_pattern_url }}"
   tags: docker-services

@@ -20,7 +20,7 @@
       - '3001:3001'
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }}"
     container_cmd: "{{ cycloid_api_container_cmd }}"
-    container_volumes: "{{ container_volumes_ca_certificates }}"
+    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ]) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
       CONCOURSE_SESSION_SIGNING_KEY: "/opt/concourse/{{ concourse_session_signing_key_path }}"
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
@@ -53,7 +53,12 @@
       AZURE_CLIENT_ID: "{{ azure_ad_client_id }}"
       JWT_KEY_1: "{{ cycloid_jwt_key_1 }}"
       FRONTEND_BASE_URL: "{{ cycloid_console_base_url }}"
+      BACKEND_BASE_URL: "{{ cycloid_api_base_url }}"
       CRYPTO_SIGNING_KEY: "{{ cycloid_crypto_signing_key }}"
+      SAML_SP_CERTIFICATE_PATH: "{{ saml_sp_certificate_path }}"
+      SAML_SP_PRIVATE_KEY_PATH: "{{ saml_sp_private_key_path }}"
+      SAML_IDP_METADATA_URL: "{{ saml_idp_metadata_url }}"
+      SAML_IDP_METADATA_PATH: "{{ saml_idp_metadata_path }}"
       LOG_LEVEL: "INFO"
       LOG_SVC_LEVEL: "NONE"
       #LOG_LEVEL: "DEBUG"

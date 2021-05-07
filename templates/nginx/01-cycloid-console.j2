@@ -9,8 +9,7 @@ server {
     ssl_certificate_key /etc/nginx/ssl/ssl.key;
 
     location / {
-      proxy_pass http://cycloid-frontend;
-#      proxy_pass http://cycloid-frontend:3000;
+      proxy_pass {{ cycloid_console_proxy_pass }};
       proxy_set_header   X-FORWARDED_PROTO https;
       proxy_set_header   X-FORWARDED_PORT 443;
     }
