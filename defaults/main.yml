@@ -249,11 +249,11 @@ vault_start_post: "{% if vault_auto_unseal|bool %}{{ vault_unseal_cmd }}{% endif
 cycloid_nginx_path: "{{ cycloid_install_path }}/nginx"
 cycloid_nginx_image: nginx:1.19.4
 
-# Proxy_pass url used for cycloid api. Most of the case it shouldn't be changed.
-cycloid_api_proxy_pass: "http://cycloid-api:3001"
+# Nginx proxy_pass url used for cycloid api vhost. Most of the case it shouldn't be changed.
+cycloid_nginx_api_proxy_pass: "http://cycloid-api:3001"
 
-# Proxy_pass url used for cycloid console/frontend. Most of the case it shouldn't be changed.
-cycloid_console_proxy_pass: "http://cycloid-frontend"
+# Nginx proxy_pass url used for cycloid console/frontend vhost. Most of the case it shouldn't be changed.
+cycloid_nginx_console_proxy_pass: "http://cycloid-frontend"
 
 #
 # Cycloid
@@ -431,16 +431,19 @@ saml_auth_enabled: false
 
 # By default SAML3 files should be stored under saml/{cycloid-saml-sp.crt, ycloid-saml-sp.key, idp-metadata}
 
-# Ansible Local path where your saml certs/metadata are stored
-saml_local_path: "{{ cycloid_local_datas_path }}/saml"
+# Url to get your xml identity provider federation metadata file. If defined, do not provide saml_idp_metadata_file
+saml_idp_metadata_url: ""
 # Name of the Public certificate to use in cycloid
 saml_sp_certificate_file: "cycloid-saml-sp.crt"
 # Name of the certificate private key to use in cycloid
 saml_sp_private_key_file: "cycloid-saml-sp.key"
 # Name of your xml identity provider federation metadata file. It could also be provided as an url with saml_idp_metadata_url
 saml_idp_metadata_file: "idp-metadata"
-# Url to get your xml identity provider federation metadata file. If defined, do not provide saml_idp_metadata_file
-saml_idp_metadata_url: ""
+
+
+
+# Ansible Local path where your saml certs/metadata are stored
+saml_local_path: "{{ cycloid_local_datas_path }}/saml"
 
 # Path where saml certs will be stored on the host
 saml_config_path: "{{ cycloid_install_path }}/saml"
