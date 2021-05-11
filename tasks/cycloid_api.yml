@@ -193,7 +193,7 @@
       when: cycloid_public_stacks
 
     - name: Create elasticsearch credentials | cycloid-core api
-      with_file:
+      with_fileglob:
         - "{{ cycloid_third_party['crt'] }}"
       uri:
         url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/credentials"
