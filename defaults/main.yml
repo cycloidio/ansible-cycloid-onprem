@@ -106,8 +106,15 @@ setup_docker: "{{ not offline_setup }}"
 # Pull docker image when configuring the service
 docker_pull: "{{ not offline_setup }}"
 
-# Add cycloid public stack to the catalog repository
-cycloid_public_stacks: "{{ not offline_setup }}"
+# If provided, Set Cycloid licence
+cycloid_licence: ""
+
+# Body request to set Cycloid licence via the API
+cycloid_licence_body:
+  key: "{{ cycloid_licence }}"
+
+# Add cycloid public stack to the catalog repository. (can't create stack if licence is not activated)
+cycloid_public_stacks: "{% if cycloid_licence != '' %}{{ not offline_setup }}{% else %}false{% endif %}"
 
 # SSL
 #
