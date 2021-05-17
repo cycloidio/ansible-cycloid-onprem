@@ -10,10 +10,9 @@
 
 - name: Remove packages | cycloid-scheduler-db
   package:
-    name: "{{ item }}"
+    name:
+      - docker*
     state: absent
-  with_items:
-    - docker*
   failed_when: false
   when: setup_packages
 

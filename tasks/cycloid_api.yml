@@ -20,7 +20,7 @@
       - '3001:3001'
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }}"
     container_cmd: "{{ cycloid_api_container_cmd }}"
-    container_volumes: "{{ container_volumes_ca_certificates }}"
+    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ]) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
       CONCOURSE_SESSION_SIGNING_KEY: "/opt/concourse/{{ concourse_session_signing_key_path }}"
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
@@ -53,7 +53,12 @@
       AZURE_CLIENT_ID: "{{ azure_ad_client_id }}"
       JWT_KEY_1: "{{ cycloid_jwt_key_1 }}"
       FRONTEND_BASE_URL: "{{ cycloid_console_base_url }}"
+      BACKEND_BASE_URL: "{{ cycloid_api_base_url }}"
       CRYPTO_SIGNING_KEY: "{{ cycloid_crypto_signing_key }}"
+      SAML_SP_CERTIFICATE_PATH: "{{ saml_sp_certificate_path }}"
+      SAML_SP_PRIVATE_KEY_PATH: "{{ saml_sp_private_key_path }}"
+      SAML_IDP_METADATA_URL: "{{ saml_idp_metadata_url }}"
+      SAML_IDP_METADATA_PATH: "{{ saml_idp_metadata_path }}"
       LOG_LEVEL: "INFO"
       LOG_SVC_LEVEL: "NONE"
       #LOG_LEVEL: "DEBUG"
@@ -169,6 +174,41 @@
     # Adding the cred ID previously created
     #- set_fact: "cycloid_initial_service_catalog={{ cycloid_initial_service_catalog | combine({'credential_id': init_of_api_cred.json.data.id|int}) }}"
 
+    - name: Renew cycloid licence | cycloid-core api
+      uri:
+        url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/license"
+        method: POST
+        body_format: raw
+        validate_certs: no
+        return_content: no
+        status_code: 204
+        headers:
+          Authorization: "Bearer {{ cy_org_token.json.data.token }}"
+          Accept: "*/*"
+          Connection: "keep-alive"
+          DNT: "1"
+          Content-type: "application/vnd.cycloid.io.v1+json"
+        body:  "{{cycloid_licence_body|to_json}}"
+      no_log: false
+      when: cycloid_licence != ''
+
+    # This is a temporary refresh. The refresh is needed between 2 calls but it should change soon.
+    - name: Refresh user token | cycloid-core api
+      uri:
+        url: "http://localhost:3001/user/refresh_token?organization_canonical={{ cycloid_initial_organization.canonical }}"
+        method: GET
+        validate_certs: no
+        status_code: 200
+        return_content: no
+        headers:
+          Accept: "*/*"
+          Authorization: "Bearer {{ cy_user_token.json.data.token }}"
+          Connection: "keep-alive"
+          DNT: "1"
+          Content-type: "application/vnd.cycloid.io.v1+json"
+      no_log: false
+      register: cy_org_token
+
     - name: Create initial cycloid service catalog | cycloid-core api
       uri:
         url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/service_catalog_sources"
@@ -185,10 +225,28 @@
           Content-type: "application/vnd.cycloid.io.v1+json"
         body: "{{cycloid_initial_service_catalog|to_json}}"
       no_log: false
-      when: cycloid_public_stacks
+      when: cycloid_public_stacks and cycloid_licence != ''
+
+    # This is a temporary refresh. The refresh is needed between 2 calls but it should change soon.
+    - name: Refresh user token | cycloid-core api
+      uri:
+        url: "http://localhost:3001/user/refresh_token?organization_canonical={{ cycloid_initial_organization.canonical }}"
+        method: GET
+        validate_certs: no
+        status_code: 200
+        return_content: no
+        headers:
+          Accept: "*/*"
+          Authorization: "Bearer {{ cy_user_token.json.data.token }}"
+          Connection: "keep-alive"
+          DNT: "1"
+          Content-type: "application/vnd.cycloid.io.v1+json"
+      no_log: false
+      register: cy_org_token
+      when: "'elasticsearch' in groups and elasticsearch_basic_auth and cycloid_licence != ''"
 
     - name: Create elasticsearch credentials | cycloid-core api
-      with_file:
+      with_fileglob:
         - "{{ cycloid_third_party['crt'] }}"
       uri:
         url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/credentials"
@@ -205,6 +263,6 @@
           Content-type: "application/vnd.cycloid.io.v1+json"
         body: "{{cycloid_elasticsearch_default | combine({'raw':{ 'ca_cert': item }}, recursive=True) | to_json}}"
       no_log: false
-      when: "'elasticsearch' in groups and elasticsearch_basic_auth"
+      when: "'elasticsearch' in groups and elasticsearch_basic_auth and cycloid_licence != ''"
 
   when: sql_query_rows|int == 0

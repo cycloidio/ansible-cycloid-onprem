@@ -10,10 +10,9 @@
 
 - name: Remove packages | cycloid-cache
   package:
-    name: "{{ item }}"
-    state: absent
-  with_items:
-    - docker*
+    name:
+      - docker*
+    state: absent  
   failed_when: false
   when: setup_packages
 

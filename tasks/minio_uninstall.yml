@@ -11,10 +11,9 @@
 
 - name: Remove packages | minio
   package:
-    name: "{{ item }}"
+    name:
+      - docker*
     state: absent
-  with_items:
-    - docker*
   failed_when: false
   when: setup_packages
 
