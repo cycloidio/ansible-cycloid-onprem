@@ -1,4 +1,4 @@
-# Configuration of the CI pipeline
+---
 version: '2'
 name: 'onprem'
 canonical: 'stack-onprem'
@@ -11,6 +11,9 @@ keywords:
   - 'minio'
   - 'docker'
   - 'ses'
+  - 'provider:aws'
+author: 'Cycloid'
+image: ''
 technologies:
   - technology: cycloid-core
     version: n/a
@@ -28,9 +31,6 @@ technologies:
     version: n/a
   - technology: concourse-worker
     version: 6.7.6
-
-author: 'Cycloid'
-image: ''
 config:
   # define the default pipeline here
   default:
@@ -41,7 +41,7 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-
+        destination: '($ project $)/pipeline/variables-($ environment $).yml'
     # Configuration of terraform to setup the infrastructure
     terraform:
       onprem:
