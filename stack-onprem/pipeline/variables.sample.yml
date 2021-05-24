@@ -69,10 +69,11 @@ config_ansible_path: ($ project $)/ansible
 
 terraform_version: '0.15.1'
 
-#. debug_public_key (optional): ""
-#+ SSH pubkey injected by packer during the ec2 ami build. Used only to debug failure.
-debug_public_key: ""
+ansible_params_extravars: ""
 
-#. ansible_version (required): "a2.9"
-#+ Ansible version used in packer and cycloid-toolkit ansible runner
-ansible_version: "a2.9"
+instance_private_key_pair: ""
+
+install_concourse_worker: false
+install_minio: false
+install_elasticsearch: false
+cycloid_licence: ""

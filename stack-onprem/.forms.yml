@@ -26,7 +26,7 @@ default:
         key: terraform_storage_bucket_name
         widget: simple_text
         type: string
-        default: cycloid-terraform-remote-state
+        default: cycloid-sandbox-terraform-remote-state
     Repos:
       - name: "Config repository"
         key: config_git_repository
@@ -64,12 +64,48 @@ default:
         widget: simple_text
         type: string
         default: '0.15.1'
-      - name: "Debug SSH key"
-        description: "SSH pubkey injected by packer during the ec2 ami build. Used only to debug failure."
-        key: debug_public_key
-        widget: text_area
+      - name: "Private SSH KEY to connect on instances"
+        description: "Private SSH KEY to connect on instances."
+        key: instance_private_key_pair
         type: string
-        default: "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAsxJseuZAPIQetH6lZGYFHIW/uRKM6wgwVIUwZ+/EsrnUMcJA3GC+ILH4McQtWyv+goA6o7HX2IwXx61qHeT0Xxvh5+oOGAddwLoHERvOQxeZLeWqvbDzOLDr9xLNQri+WGP552kGnP/pDV2m7KRwAPFMwg+zRjAoHblLj1Ztrztb4tExEEFOfVngwu8BX493OowTYLC3BmbOOPVZjMLY81pN5FzRx+i8MB0JsHIxaWaNRY3Yx81o5kiNgMsf8S9mwET9TH2e3yfeNXmjXz5TL+KetimysYPr12QHJyX2J/jwpFCuIn3voNovAsF32Umb7BqHk9RhRF341py5Bi6d3Q=="
+        widget: cy_cred
+        default: "((git_ssh_bastion_cycloid.ssh_key))"
+        required: true
+
+    Service:
+      - name: "Concourse worker enabled"
+        description: "Install a concourse worker"
+        key: install_concourse_worker
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Minio (S3) enabled"
+        description: "Install MinIo (user as aws s3 external backend for tfstate)"
+        key: install_minio
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Elasticsearch (logs) enabled"
+        description: "Install Elasticsearch (used for centralized logs. Required dedicated instance or a bigger mutu)"
+        key: install_elasticsearch
+        widget: switch
+        type: boolean
+        default: false
+
+    Advanced:
+      - name: "Cycloid Licence"
+        description: "Cycloid Licence."
+        key: cycloid_licence
+        type: string
+        widget: cy_cred
+        default: "((custom_onprem_licence.prod))"
+      - name: "Ansible extra variables"
+        description: "Cycloid EXTRA_ANSIBLE_VARS"
+        key: ansible_params_extravars
+        widget: text_area
+        type: raw
+        default: |+
+            test: "foo"
 
   terraform:
     application:
@@ -78,7 +114,7 @@ default:
         key: cy_instances_count
         widget: simple_text
         type: string
-        default: "2"
+        default: "1"
       - name: "Instance type"
         description: "Type of Aws EC2 onprem servers."
         key: cy_instances_type
@@ -121,34 +157,13 @@ default:
         default: "cycloid"
         values:
             - "cycloid"
-            - "cycloid-dev"
-    network:
-      - name: "Aws VPC ID"
-        description: "Amazon VPC id on which create each components."
-        key: vpc_id
-        widget: simple_text
-        type: string
-        default: data.terraform_remote_state.infrastructure.outputs.prod_vpc_id
-        required: true
-      - name: "Public subnets IDs"
-        description: "Public subnet IDs to use for the public ELB load balancer."
-        key: public_subnets_ids
-        widget: simple_text
-        type: string
-        default: data.terraform_remote_state.infrastructure.outputs.prod_public_subnets_ids
-        required: true
-      - name: "Bastion allow security group"
-        description: "Amazon source security group ID which will be allowed to connect on fronts port 22 (ssh)."
-        key: bastion_sg_allow
-        widget: simple_text
-        type: string
-        default: "data.terraform_remote_state.infrastructure.outputs.prod_bastion_sg_allow"
+    OS:
       - name: "AMI search name pattern (or use Base ami ID directly)"
         description: "Type of Aws EC2 frontend servers."
         key: debian_ami_name
         widget: auto_complete
         type: string
-        default: "debian-10-amd64-"
+        default: "debian-10-amd64-*"
         values:
             - "debian-9-amd64-*"
             - "debian-10-amd64-*"
@@ -170,9 +185,104 @@ default:
             - "ami-01aa664a17515f5bb"
   ansible:
     configuration:
-      - name: "Licence"
-        description: "Cycloid Licence."
-        key: cycloid_licence
+      - name: "Initial Organization name"
+        description: "Initial Organization name."
+        key: cycloid_initial_organization_name
         widget: simple_text
         type: string
-        default: ""
+        default: "Cycloid"
+      - name: "Cycloid Database image"
+        description: "Cycloid Database image."
+        key: cycloid_db_image
+        widget: auto_complete
+        type: string
+        default: "mysql:8.0.21"
+        values:
+            - "mysql:8.0.21"
+            - "mysql:8.0.25"
+            - "mariadb:10.2.11"
+
+      - name: "Cycloid Database password"
+        description: "Cycloid Database password."
+        key: cycloid_db_password
+        widget: simple_text
+        type: string
+        default: "OZvQdTtdvP9yVZBwBxeQcELDSn8QKAG9"
+        required: true
+
+      - name: "Cycloid Database password"
+        description: "Cycloid Database password."
+        key: concourse_db_password
+        widget: simple_text
+        type: string
+        default: "JENJTtK8aVPQzxvSN39xCQaLl1dYt9eP"
+        required: true
+
+      - name: "Cycloid initial user information"
+        description: "Cycloid initial user information"
+        key: cycloid_initial_user
+        widget: text_area
+        type: raw
+        default: |+
+          username: "admin"
+          email: "disabled@email.cycloid"
+          password: "$$$$$$$$"
+          given_name: admin
+          family_name: cycloid
+
+      - name: "Cycloid API image"
+        description: "Cycloid API image."
+        key: cycloid_api_image
+        widget: auto_complete
+        type: string
+        default: "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod"
+        values:
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod"
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:staging"
+      - name: "Cycloid Frontend image"
+        description: "Cycloid Frontend image."
+        key: cycloid_frontend_image
+        widget: auto_complete
+        type: string
+        default: "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod"
+        values:
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod"
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:staging"
+
+      - name: "Create Public stacks catalog repository"
+        description: "Create Public stacks catalog repository. (need valide licence)"
+        key: cycloid_public_stacks
+        widget: switch
+        type: boolean
+        default: true
+
+      - name: "Create admin APIKEY"
+        description: "Create admin APIKEY and store it on disk. (need valide licence)"
+        key: cycloid_admin_apikey
+        widget: switch
+        type: boolean
+        default: true
+
+      - name: "Share host certificates in containers"
+        description: "Share host certificates in containers"
+        key: ca_certificates_container_shared
+        widget: switch
+        type: boolean
+        default: true
+
+    ext-auth:
+      - name: "SAML Auth enable"
+        description: "Enable SAML or not."
+        key: saml_auth_enabled
+        widget: switch
+        type: boolean
+        default: false
+      - name: "SAML IDP Metadata URL"
+        description: "SAML IDP Metadata URL. (if SAML enabled)"
+        key: saml_idp_metadata_url
+        widget: auto_complete
+        type: string
+        default: "https://samltest.id/saml/idp"
+        values:
+            - "https://samltest.id/saml/idp"
+

@@ -1,0 +1,21 @@
+#cycloid_console_dns: "" provided by terraform
+
+# Initial Cycloid user
+cycloid_initial_user:
+
+cycloid_initial_organization_name: Cycloid
+
+# Set random password for databses.
+cycloid_db_password: ""
+concourse_db_password: ""
+
+#cycloid_licence:
+
+saml_auth_enabled: false
+saml_idp_metadata_url: ""
+
+cycloid_public_stacks: false
+ca_certificates_container_shared: true
+
+cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod
+cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod
