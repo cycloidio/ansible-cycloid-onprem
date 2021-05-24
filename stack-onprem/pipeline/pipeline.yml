@@ -14,12 +14,33 @@ shared:
     outputs:
     - name: merged-stack
       path: "merged-stack"
+
+  - &run-ansible
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: cycloid/cycloid-toolkit
+          tag: "((ansible_version))"
+      run:
+        path: /usr/bin/ansible-runner
+      caches:
+        - path: ansible-playbook/roles
+      inputs:
+      - name: merged-stack
+        path: ansible-playbook
 groups:
 
 - name: overview
   jobs:
   - terraform-plan
   - terraform-apply
+  - install-ansible
+
+- name: setup
+  jobs:
+  - install-ansible
 
 - name: infra
   jobs:
@@ -36,7 +57,7 @@ resource_types:
   type: docker-image
   source:
     repository: ljfranklin/terraform-resource
-    tag: '0.15.1'
+    tag: ((terraform_version))
 
 resources:
 
@@ -72,9 +93,20 @@ resources:
   source:
     uri: git@github.com:cycloidio/ansible-cycloid-onprem.git
     branch: ((stack_git_branch))
-    private_key: ((stack_git_private_key))
+    private_key: ((config_git_private_key))
     paths:
       - stack-onprem/terraform/*
+
+- name: git_stack-ansible
+  icon: github-circle
+  type: git
+  source:
+    uri: git@github.com:cycloidio/ansible-cycloid-onprem.git
+    branch: ((stack_git_branch))
+    private_key: ((config_git_private_key))
+    ignore_paths:
+      - stack-onprem/terraform/*
+      - stack-onprem/pipeline/*
 
 # The Terraform config (will be merged with the stack)
 - name: git_config-terraform
@@ -86,6 +118,16 @@ resources:
     private_key: ((config_git_private_key))
     paths:
       - ((config_terraform_path))/*
+
+- name: git_config-ansible
+  type: git
+  icon: github-circle
+  source:
+    uri: ((config_git_repository))
+    branch: ((config_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - ((config_ansible_path))/environments/*
 
 jobs:
 
@@ -186,3 +228,77 @@ jobs:
             terraform_source: merged-stack/
           get_params:
             action: destroy
+
+
+
+- name: install-ansible
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: git_stack-ansible
+      params: {depth: 1}
+      trigger: true
+
+    - get: git_config-ansible
+      params: {depth: 1}
+      trigger: true
+
+    - get: tfstate
+      passed:
+        - terraform-apply
+      trigger: false
+
+    - task: merge-stack-and-config
+      config:
+        <<: *merge-stack-and-config
+        inputs:
+        - name: git_config-ansible
+          path: "config"
+        - name: git_stack-ansible
+          path: "stack"
+        - name: tfstate
+          path: "terraform"
+      params:
+        CONFIG_PATH: ((config_ansible_path))
+        STACK_PATH: ansible
+
+    - task: inventory
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: v2.9
+        run:
+          path: /bin/bash
+          args:
+          - -xc
+          - |
+            DIR=${PWD}
+            sleep 300
+            exit 1
+        inputs:
+          - name: merged-stack
+          - name: tfstate
+
+#    - task: run-ansible
+#      <<: *run-ansible-from-bastion
+#      params:
+#        SSH_PRIVATE_KEY: ((bastion_private_key_pair))
+#        ANSIBLE_VAULT_PASSWORD: ((ansible_vault_password))
+#        AWS_DEFAULT_REGION: ((aws_default_region))
+#        AWS_ACCESS_KEY_ID: ((aws_access_key))
+#        AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+#        ANSIBLE_PLAYBOOK_PATH: ansible-playbook
+#        ANSIBLE_PLAYBOOK_NAME: lemp.yml
+#        ANSIBLE_FORCE_GALAXY: false
+#        EXTRA_ANSIBLE_VARS:
+#          customer: ((customer))
+#          project: ((project))
+#          env: ((env))
+#          default_ec2_region: ((aws_default_region))
+#          aws_default_region: ((aws_default_region))
+#        TAGS:
+#          - deploy

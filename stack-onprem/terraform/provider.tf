@@ -24,3 +24,13 @@ variable "aws_region" {
   default     = "eu-west-1"
 }
 
+# Fixed value until we can add it into forms. Allow us to get output from infra project
+data "terraform_remote_state" "infrastructure" {
+  backend = "s3"
+
+  config = {
+    bucket = "cycloid-terraform-remote-state"
+    key    = "infrastructure/infra/infrastructure-infra.tfstate"
+    region = "eu-west-1"
+  }
+}

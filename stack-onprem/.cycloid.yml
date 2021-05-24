@@ -42,8 +42,11 @@ config:
       variables:
         path: 'pipeline/variables.sample.yml'
         destination: '($ project $)/pipeline/variables-($ environment $).yml'
-    # Configuration of terraform to setup the infrastructure
     terraform:
       onprem:
         path: 'terraform/main.tf.sample'
         destination: '($ project $)/terraform/($ environment $)/main.tf'
+    ansible:
+      onprem:
+        path: 'ansible/environments/cycloid.yml.sample'
+        destination: '($ project $)/ansible/environments/cycloid.yml'

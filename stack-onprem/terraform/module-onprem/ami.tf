@@ -1,4 +1,4 @@
-data "aws_ami" "debian" {
+data "aws_ami" "search" {
   most_recent = true
 
   filter {
@@ -21,10 +21,22 @@ data "aws_ami" "debian" {
     values = ["ebs"]
   }
 
-  owners = ["379101102735"] # Debian
+  owners = [
+    "379101102735",
+    "136693071363",
+    "101072000470",
+    "125523088429",
+    "099720109477",
+  ]
+
+  #"379101102735", # old debian
+  #"136693071363", # debian9
+  #"101072000470", # debian 10
+  #"125523088429", # centos
+  #"099720109477", # Ubuntu
 }
 
 
 locals {
-  image_id = var.base_ami_id != "" ? var.base_ami_id : element(data.aws_ami.debian.*.id, 0)
+  image_id = var.base_ami_id != "" ? var.base_ami_id : element(data.aws_ami.search.*.id, 0)
 }

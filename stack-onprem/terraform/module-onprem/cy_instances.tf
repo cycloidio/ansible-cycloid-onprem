@@ -22,10 +22,6 @@ variable "cy_instances_count" {
   default = 1
 }
 
-variable "cy_instances_associate_public_ip_address" {
-  default = true
-}
-
 variable "cy_instances_root_delete_on_termination" {
   default = true
 }
@@ -89,13 +85,13 @@ resource "aws_security_group" "cy_instances" {
 
 resource "aws_instance" "cy_instances" {
   ami                         = local.image_id
-  associate_public_ip_address = var.cy_instances_associate_public_ip_address
+  associate_public_ip_address = false
   count                       = var.cy_instances_count
   iam_instance_profile        = aws_iam_instance_profile.cy_instances.name
   ebs_optimized               = var.cy_instances_ebs_optimized
   instance_type               = var.cy_instances_type
   key_name                    = var.keypair_name
-  subnet_id                   = "${tolist(var.public_subnets_ids)[count.index % length(var.public_subnets_ids)]}"
+  subnet_id                   = tolist(var.public_subnets_ids)[count.index % length(var.public_subnets_ids)]
 
   vpc_security_group_ids = compact([
     var.bastion_sg_allow,
@@ -119,7 +115,23 @@ resource "aws_instance" "cy_instances" {
   })
 }
 
-output "cy_instances_ip" {
+resource "aws_eip" "cy_instances" {
+  count    = var.cy_instances_count
+  instance = aws_instance.cy_instances[count.index].id
+  vpc      = true
+}
+
+output "cy_instances_public_dns" {
+  description = "List of public DNS addresses assigned to the instances"
+  value       = aws_eip.cy_instances.*.public_dns
+}
+
+output "cy_instances_public_ip" {
   description = "List of public IP addresses assigned to the instances"
-  value       = aws_instance.cy_instances.*.public_ip
+  value       = aws_eip.cy_instances.*.public_ip
+}
+
+output "cy_instances_private_ip" {
+  description = "List of private IP addresses assigned to the instances"
+  value       = aws_eip.cy_instances.*.private_ip
 }

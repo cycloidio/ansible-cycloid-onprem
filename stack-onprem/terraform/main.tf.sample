@@ -10,7 +10,7 @@ module "onprem" {
   #####################################
   #. vpc_id (required):
   #+ Amazon VPC id on which create each components.
-  vpc_id = "<vpc-id>"
+  vpc_id = ""
 
   #. public_subnets_ids (required, array):
   #+ Amazon subnets IDs on which create each components.
@@ -18,7 +18,7 @@ module "onprem" {
 
   #. bastion_sg_allow (optional):
   #+ Amazon source security group ID which will be allowed to connect on Fronts port 22 (SSH).
-  bastion_sg_allow = "<bastion-sg>"
+  bastion_sg_allow = ""
 
   #. keypair_name (requiredl): cycloid
   #+ Name of an existing AWS SSH keypair to use to deploy EC2 instances.
@@ -26,6 +26,7 @@ module "onprem" {
 
   #. extra_tags (optional): {}
   #+ Dict of extra tags to add on aws resources. format { "foo" = "bar" }.
+  extra_tags = { "monitoring_discovery" = "false" }
 
   ###
   # cy_instances
@@ -45,8 +46,31 @@ module "onprem" {
 
   #. cy_instances_disk_size (optional): 30
   #+ Disk size of cy_instances servers.
+  cy_instances_disk_size = 50
 
   #. cy_instances_cidr_blocks_allow (optional, bool): ["0.0.0.0/0"]
   #+ Cird block allowed to connect on instances.
   cy_instances_cidr_blocks_allow = ["0.0.0.0/0"]
+
+  debian_ami_name = ""
+
+  base_ami_id = ""
+
+  # debian 10
+  # https://wiki.debian.org/Cloud/AmazonEC2Image/Buster
+  #base_ami_id = "ami-0874dad5025ca362c"
+
+  # Centos https://wiki.centos.org/Cloud/AWS
+  # centos 7
+  #base_ami_id = "ami-04f5641b0d178a27a"
+
+  # centos 8
+  #base_ami_id = "ami-0a75a5a43b05b4d5f"
+
+  # Ubuntu https://cloud-images.ubuntu.com/locator/ec2/
+  # ubuntu 18.04
+  #base_ami_id = "ami-0e9968d81cef18781"
+
+  # ubuntu 20.04
+  #base_ami_id = "ami-01aa664a17515f5bb"
 }
