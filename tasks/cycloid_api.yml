@@ -22,7 +22,6 @@
     container_cmd: "{{ cycloid_api_container_cmd }}"
     container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ]) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
-      CONCOURSE_SESSION_SIGNING_KEY: "/opt/concourse/{{ concourse_session_signing_key_path }}"
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
       MYSQL_USER: "{{ cycloid_db_user }}"
       MYSQL_PASSWORD: "{{ cycloid_db_password }}"
