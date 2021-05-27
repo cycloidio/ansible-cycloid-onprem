@@ -176,7 +176,7 @@
 
     - name: Renew cycloid licence | cycloid-core api
       uri:
-        url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/license"
+        url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/licence"
         method: POST
         body_format: raw
         validate_certs: no
