@@ -49,4 +49,4 @@ config:
     ansible:
       onprem:
         path: 'ansible/environments/cycloid.yml.sample'
-        destination: '($ project $)/ansible/environments/cycloid.yml'
+        destination: '($ project $)/ansible/environments/cycloid-($ environment $).yml'

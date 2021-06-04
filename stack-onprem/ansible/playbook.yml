@@ -24,6 +24,11 @@
           - python3-pip
         state: present
 
+    - name: Force update pip to latest
+      pip:
+        name: pip
+        state: latest
+
     - name: Install pip depends
       pip:
         requirements: "/home/{{ ansible_user }}/cycloid-onprem/pip-requirements.txt"
