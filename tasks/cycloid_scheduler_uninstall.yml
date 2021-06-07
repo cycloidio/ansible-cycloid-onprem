@@ -6,6 +6,7 @@
   with_items:
     - concourse-web
     - docker
+    - docker.socket
   failed_when: false
 
 - name: Remove packages | cycloid-scheduler

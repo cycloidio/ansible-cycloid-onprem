@@ -7,6 +7,7 @@
   with_items:
     - cycloid-smtp
     - docker
+    - docker.socket
   failed_when: false
 
 - name: Remove packages | smtp-server
