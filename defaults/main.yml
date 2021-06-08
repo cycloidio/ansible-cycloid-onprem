@@ -116,6 +116,10 @@ cycloid_licence_body:
 # Add cycloid public stack to the catalog repository. (can't create stack if licence is not activated)
 cycloid_public_stacks: "{% if cycloid_licence != '' %}{{ not offline_setup }}{% else %}false{% endif %}"
 
+# Create admin APIKEY on the first organization. (can't create stack if licence is not activated)
+# APIKEY will be stored localy under {{playbook_dir}}/admin.apikey
+cycloid_admin_apikey: "false"
+
 # SSL
 #
 ssl_generate_selfsigned: true

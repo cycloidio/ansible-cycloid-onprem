@@ -141,6 +141,7 @@
       no_log: false
       register: init_of_api_org
 
+    # Try if the login works
     - name: Login in cycloid org | cycloid-core api
       uri:
         url: "http://localhost:3001/user/refresh_token?organization_canonical={{ cycloid_initial_organization.canonical }}"
@@ -196,77 +197,122 @@
       no_log: false
       when: cycloid_licence != ''
 
-    # This is a temporary refresh. The refresh is needed between 2 calls but it should change soon.
-    - name: Refresh user token | cycloid-core api
-      uri:
-        url: "http://localhost:3001/user/refresh_token?organization_canonical={{ cycloid_initial_organization.canonical }}"
-        method: GET
-        validate_certs: no
-        status_code: 200
-        return_content: no
-        headers:
-          Accept: "*/*"
-          Authorization: "Bearer {{ cy_user_token.json.data.token }}"
-          Connection: "keep-alive"
-          DNT: "1"
-          Content-type: "application/vnd.cycloid.io.v1+json"
-      no_log: false
-      register: cy_org_token
+    - block:
+        # This is a temporary refresh. The refresh is needed between 2 calls but it should change soon.
+        - name: Refresh user token | cycloid-core api
+          uri:
+            url: "http://localhost:3001/user/refresh_token?organization_canonical={{ cycloid_initial_organization.canonical }}"
+            method: GET
+            validate_certs: no
+            status_code: 200
+            return_content: no
+            headers:
+              Accept: "*/*"
+              Authorization: "Bearer {{ cy_user_token.json.data.token }}"
+              Connection: "keep-alive"
+              DNT: "1"
+              Content-type: "application/vnd.cycloid.io.v1+json"
+          no_log: false
+          register: cy_org_token
 
-    - name: Create initial cycloid service catalog | cycloid-core api
-      uri:
-        url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/service_catalog_sources"
-        method: POST
-        body_format: raw
-        validate_certs: no
-        return_content: no
-        status_code: 200
-        headers:
-          Authorization: "Bearer {{ cy_org_token.json.data.token }}"
-          Accept: "*/*"
-          Connection: "keep-alive"
-          DNT: "1"
-          Content-type: "application/vnd.cycloid.io.v1+json"
-        body: "{{cycloid_initial_service_catalog|to_json}}"
-      no_log: false
+        - name: Create admin APIKEY on first organization | cycloid-core api
+          uri:
+            url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/api_keys"
+            method: POST
+            body_format: raw
+            validate_certs: no
+            return_content: yes
+            status_code: 200
+            headers:
+              Authorization: "Bearer {{ cy_org_token.json.data.token }}"
+              Accept: "*/*"
+              Connection: "keep-alive"
+              DNT: "1"
+              Content-type: "application/vnd.cycloid.io.v1+json"
+            body: '{"name":"admin","description":"full admin apikey created by onprem ansible playbook","canonical":"admin","rules":[{"action":"organization:**","effect":"allow","resources":[]}]}'
+          no_log: false
+          register: cy_admin_apikey
+
+        - name: Local save of apikey | cycloid-core api
+          local_action:
+            module: copy
+            content: "{{ cy_admin_apikey.json.data.token }}"
+            dest: "{{playbook_dir}}/admin.apikey"
+          become: no
+      when: cycloid_admin_apikey and cycloid_licence != ''
+
+    - block:
+        # This is a temporary refresh. The refresh is needed between 2 calls but it should change soon.
+        - name: Refresh user token | cycloid-core api
+          uri:
+            url: "http://localhost:3001/user/refresh_token?organization_canonical={{ cycloid_initial_organization.canonical }}"
+            method: GET
+            validate_certs: no
+            status_code: 200
+            return_content: no
+            headers:
+              Accept: "*/*"
+              Authorization: "Bearer {{ cy_user_token.json.data.token }}"
+              Connection: "keep-alive"
+              DNT: "1"
+              Content-type: "application/vnd.cycloid.io.v1+json"
+          no_log: false
+          register: cy_org_token
+
+        - name: Create initial cycloid service catalog | cycloid-core api
+          uri:
+            url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/service_catalog_sources"
+            method: POST
+            body_format: raw
+            validate_certs: no
+            return_content: no
+            status_code: 200
+            headers:
+              Authorization: "Bearer {{ cy_org_token.json.data.token }}"
+              Accept: "*/*"
+              Connection: "keep-alive"
+              DNT: "1"
+              Content-type: "application/vnd.cycloid.io.v1+json"
+            body: "{{cycloid_initial_service_catalog|to_json}}"
+          no_log: false
       when: cycloid_public_stacks and cycloid_licence != ''
 
-    # This is a temporary refresh. The refresh is needed between 2 calls but it should change soon.
-    - name: Refresh user token | cycloid-core api
-      uri:
-        url: "http://localhost:3001/user/refresh_token?organization_canonical={{ cycloid_initial_organization.canonical }}"
-        method: GET
-        validate_certs: no
-        status_code: 200
-        return_content: no
-        headers:
-          Accept: "*/*"
-          Authorization: "Bearer {{ cy_user_token.json.data.token }}"
-          Connection: "keep-alive"
-          DNT: "1"
-          Content-type: "application/vnd.cycloid.io.v1+json"
-      no_log: false
-      register: cy_org_token
-      when: "'elasticsearch' in groups and elasticsearch_basic_auth and cycloid_licence != ''"
+    - block:
+        # This is a temporary refresh. The refresh is needed between 2 calls but it should change soon.
+        - name: Refresh user token | cycloid-core api
+          uri:
+            url: "http://localhost:3001/user/refresh_token?organization_canonical={{ cycloid_initial_organization.canonical }}"
+            method: GET
+            validate_certs: no
+            status_code: 200
+            return_content: no
+            headers:
+              Accept: "*/*"
+              Authorization: "Bearer {{ cy_user_token.json.data.token }}"
+              Connection: "keep-alive"
+              DNT: "1"
+              Content-type: "application/vnd.cycloid.io.v1+json"
+          no_log: false
+          register: cy_org_token
 
-    - name: Create elasticsearch credentials | cycloid-core api
-      with_fileglob:
-        - "{{ cycloid_third_party['crt'] }}"
-      uri:
-        url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/credentials"
-        method: POST
-        body_format: raw
-        validate_certs: no
-        return_content: no
-        status_code: 200
-        headers:
-          Authorization: "Bearer {{ cy_org_token.json.data.token }}"
-          Accept: "*/*"
-          Connection: "keep-alive"
-          DNT: "1"
-          Content-type: "application/vnd.cycloid.io.v1+json"
-        body: "{{cycloid_elasticsearch_default | combine({'raw':{ 'ca_cert': item }}, recursive=True) | to_json}}"
-      no_log: false
+        - name: Create elasticsearch credentials | cycloid-core api
+          with_fileglob:
+            - "{{ cycloid_third_party['crt'] }}"
+          uri:
+            url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/credentials"
+            method: POST
+            body_format: raw
+            validate_certs: no
+            return_content: no
+            status_code: 200
+            headers:
+              Authorization: "Bearer {{ cy_org_token.json.data.token }}"
+              Accept: "*/*"
+              Connection: "keep-alive"
+              DNT: "1"
+              Content-type: "application/vnd.cycloid.io.v1+json"
+            body: "{{cycloid_elasticsearch_default | combine({'raw':{ 'ca_cert': item }}, recursive=True) | to_json}}"
+          no_log: false
       when: "'elasticsearch' in groups and elasticsearch_basic_auth and cycloid_licence != ''"
 
   when: sql_query_rows|int == 0
