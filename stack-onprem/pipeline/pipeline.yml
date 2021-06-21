@@ -22,18 +22,13 @@ groups:
   - terraform-apply
   - install-onprem
   - install-worker
-  - uninstall-onprem
 
-- name: setup
+- name: extra
   jobs:
-  - install-onprem
-  - install-worker
   - uninstall-onprem
-
-- name: infra
-  jobs:
-  - terraform-plan
-  - terraform-apply
+  - mysql-force-pay-orgs
+  - mysql-force-user-email-validation
+  - report
 
 - name: destroy
   jobs:
@@ -156,7 +151,7 @@ jobs:
   plan:
     - do:
       - get: git_stack-terraform
-        trigger: false
+        trigger: true
         passed:
           - terraform-plan
       - get: git_config-terraform
@@ -279,14 +274,16 @@ jobs:
             cp ${DIR}/config/${CONFIG_ANSIBLE_PATH}/environments/cycloid-${ENV}.yml environments/cycloid.yml
             ### Add more Ansible vars ###
             MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
-            echo "### Ansible and Cycloid console will be on https://${MAIN_INSTANCE}"
+
+            cat > environments/cycloid.yml <<EOF
+            ### Ansible and Cycloid console will be on https://${MAIN_INSTANCE}
             # Set additionnal ansible vars
-            echo "" >> environments/cycloid.yml
-            echo "# extra vars from pipeline job" >> environments/cycloid.yml
-            echo "cycloid_console_dns: \"${MAIN_INSTANCE}\"" >> environments/cycloid.yml
-            echo "cycloid_ecr_access_key: \"${AWS_ACCESS_KEY_ID}\"" >> environments/cycloid.yml
-            echo "cycloid_ecr_secret_key: \"${AWS_SECRET_ACCESS_KEY}\"" >> environments/cycloid.yml
-            echo "cycloid_licence: \"${CYCLOID_LICENCE}\"" >> environments/cycloid.yml
+            # extra vars from pipeline job
+            cycloid_console_dns: "${MAIN_INSTANCE}"
+            cycloid_ecr_access_key: "${AWS_ACCESS_KEY_ID}"
+            cycloid_ecr_secret_key: "${AWS_SECRET_ACCESS_KEY}"
+            cycloid_licence: "${CYCLOID_LICENCE}"
+            EOF
 
             # Galaxy install for onprem
             set -x
@@ -303,6 +300,8 @@ jobs:
 
             # generate extra vars files
             echo "${ANSIBLE_EXTRA_VARS}" | sed ':a;N;$!ba;s/\n/\\n/g' | jq -M . > extra_ansible_vars.json
+            echo "Extra vars in extra_ansible_vars.json"
+            cat extra_ansible_vars.json
             # need to be run with -e @extra_ansible_vars.json
 
             # Get the user by testing connexion (Ugly loop)
@@ -517,3 +516,185 @@ jobs:
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
 
+- name: mysql-force-pay-orgs
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: tfstate
+      passed:
+        - terraform-apply
+      trigger: false
+
+    - task: ansible
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+
+            # use to run galaxy
+            eval "$(ssh-agent -s)"
+            # ssh key to connect instances
+            echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+            chmod 600 /root/.ssh/id_rsa
+            ssh-add /root/.ssh/id_rsa
+
+            MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+            echo "### Ansible and Cycloid console is on $MAIN_INSTANCE"
+            # Get the user by testing connexion (Ugly loop)
+            # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
+            # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
+            REMOTE_USER=""
+            set +e
+            for user in admin centos ubuntu;do
+              ssh ${user}@${MAIN_INSTANCE} ls
+              if [ $? -eq 0 ]; then
+                REMOTE_USER=${user}
+                break
+              fi
+            done
+            set -e
+
+            echo "Ansible mysql-force-pay-orgs run"
+            set -x
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory mysql-force-pay-orgs.yml -e @extra_ansible_vars.json"
+
+        inputs:
+          - name: tfstate
+        outputs:
+          - name: cycloid-onprem
+        params:
+          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          ANSIBLE_EXTRA_VARS:
+             ((ansible_params_extravars))
+
+- name: mysql-force-user-email-validation
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: tfstate
+      passed:
+        - terraform-apply
+      trigger: false
+
+    - task: ansible
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+
+            # use to run galaxy
+            eval "$(ssh-agent -s)"
+            # ssh key to connect instances
+            echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+            chmod 600 /root/.ssh/id_rsa
+            ssh-add /root/.ssh/id_rsa
+
+            MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+            echo "### Ansible and Cycloid console is on $MAIN_INSTANCE"
+            # Get the user by testing connexion (Ugly loop)
+            # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
+            # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
+            REMOTE_USER=""
+            set +e
+            for user in admin centos ubuntu;do
+              ssh ${user}@${MAIN_INSTANCE} ls
+              if [ $? -eq 0 ]; then
+                REMOTE_USER=${user}
+                break
+              fi
+            done
+            set -e
+
+            echo "Ansible mysql-force-user-email-validation run"
+            set -x
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory mysql-force-user-email-validation.yml -e @extra_ansible_vars.json"
+
+        inputs:
+          - name: tfstate
+        outputs:
+          - name: cycloid-onprem
+        params:
+          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          ANSIBLE_EXTRA_VARS:
+             ((ansible_params_extravars))
+
+- name: report
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: tfstate
+      passed:
+        - terraform-apply
+      trigger: false
+
+    - task: ansible
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+
+            # use to run galaxy
+            eval "$(ssh-agent -s)"
+            # ssh key to connect instances
+            echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+            chmod 600 /root/.ssh/id_rsa
+            ssh-add /root/.ssh/id_rsa
+
+            MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+            echo "### Ansible and Cycloid console is on $MAIN_INSTANCE"
+            # Get the user by testing connexion (Ugly loop)
+            # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
+            # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
+            REMOTE_USER=""
+            set +e
+            for user in admin centos ubuntu;do
+              ssh ${user}@${MAIN_INSTANCE} ls
+              if [ $? -eq 0 ]; then
+                REMOTE_USER=${user}
+                break
+              fi
+            done
+            set -e
+
+            echo "Ansible report run"
+            set -x
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory report.yml -e @extra_ansible_vars.json"
+
+        inputs:
+          - name: tfstate
+        outputs:
+          - name: cycloid-onprem
+        params:
+          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          ANSIBLE_EXTRA_VARS:
+             ((ansible_params_extravars))
