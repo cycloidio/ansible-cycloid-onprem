@@ -275,7 +275,7 @@ jobs:
             ### Add more Ansible vars ###
             MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
 
-            cat > environments/cycloid.yml <<EOF
+            cat >> environments/cycloid.yml <<EOF
             ### Ansible and Cycloid console will be on https://${MAIN_INSTANCE}
             # Set additionnal ansible vars
             # extra vars from pipeline job
