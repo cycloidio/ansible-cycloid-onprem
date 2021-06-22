@@ -183,7 +183,7 @@ cycloid_db_image: mysql:8.0.21
 cycloid_db_container_cmd_mysql8: "--default-authentication-plugin=mysql_native_password"
 cycloid_db_container_cmd: "{% if cycloid_db_image.startswith('mysql:8') %}{{ cycloid_db_container_cmd_mysql8 }}{% endif %}"
 concourse_web_image: concourse/concourse:6.7.6
-vault_image: vault:1.1.3
+vault_image: vault:1.5.4
 
 
 #
