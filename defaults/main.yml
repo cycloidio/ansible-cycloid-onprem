@@ -116,6 +116,10 @@ cycloid_licence_body:
 # Add cycloid public stack to the catalog repository. (can't create stack if licence is not activated)
 cycloid_public_stacks: "{% if cycloid_licence != '' %}{{ not offline_setup }}{% else %}false{% endif %}"
 
+# Create admin APIKEY on the first organization. (can't create stack if licence is not activated)
+# APIKEY will be stored localy under {{playbook_dir}}/admin.apikey
+cycloid_admin_apikey: "false"
+
 # SSL
 #
 ssl_generate_selfsigned: true
@@ -388,8 +392,37 @@ azure_ad_tenant_id: ""
 azure_ad_client_id: ""
 
 #
+# Google Oauth integration
+#
+
+#. google_client_id(optional, string): ""
+#+ the client ID of Google
+google_client_id: ""
+
+#. google_client_secret(optional, string): ""
+#+ the client secret of Google
+google_client_secret: ""
+
+#
+# Github Oauth integration
+#
+
+#. github_client_secret(optional, string): "https://api.github.com"
+#+ Use api github by default when oauth enabled. Need to be changed if using GitHub Enterprise.
+github_host_address: "{%- if github_client_id != '' -%}https://api.github.com{%- endif -%}"
+
+#. github_client_id(optional, string): ""
+#+ the client ID of Github
+github_client_id: ""
+
+#. github_client_secret(optional, string): ""
+#+ the client secret of Github
+github_client_secret: ""
+
+#
 # elasticsearch
 #
+
 #. elasticsearch_basic_auth(option, bool): true
 #. enable elasticsearch basic authentication
 elasticsearch_basic_auth: true

@@ -1,0 +1,56 @@
+######################
+### Onprem Section ###
+######################
+
+#cycloid_console_dns: "" provided by terraform
+
+# Initial Cycloid user
+cycloid_initial_user:
+
+cycloid_initial_organization_name: Cycloid
+
+# Set random password for databses.
+cycloid_db_password: ""
+concourse_db_password: ""
+
+# given by the pipeline
+#cycloid_licence:
+
+saml_auth_enabled: false
+saml_idp_metadata_url: ""
+
+cycloid_public_stacks: true
+ca_certificates_container_shared: true
+cycloid_admin_apikey: true
+
+cycloid_db_image: mysql:8.0.21
+
+cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod
+cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod
+
+######################
+### Worker Section ###
+######################
+# Cycloid workers section
+concourse_worker: yes
+concourse_worker_name: "$(hostname)"
+concourse_service_enabled: no
+concourse_worker_env:
+    CONCOURSE_GARDEN_ASSETS_DIR: "{{ concourse_work_dir }}/garden_assets/"
+    CONCOURSE_GARDEN_DEPOT: "{{ concourse_work_dir }}/garden_depot"
+    CONCOURSE_GARDEN_LOG_LEVEL: "error"
+    CONCOURSE_GARDEN_NETWORK_POOL: "10.254.0.0/16"
+    CONCOURSE_GARDEN_MAX_CONTAINERS: 1024
+    CONCOURSE_GARDEN_ADDITIONAL_DNS_SERVER: "1.1.1.1,1.0.0.1"
+
+# define it as block due to https://github.com/cycloidio/youdeploy-http-api/issues/2935
+concourse_worker_options: "--ephemeral --baggageclaim-log-level=error --baggageclaim-volumes={{ concourse_work_dir }}/baggageclaim_volumes --baggageclaim-driver=overlay 2>&1 | tee -a /var/log/concourse-worker.log ; exit ${PIPESTATUS[0]}"
+
+concourse_install_dir: /var/lib/concourse
+concourse_work_dir: /var/lib/concourse/datas
+
+concourse_version: "{{ concourse_web_image.split(':').1 }}"
+concourse_tsa_port: "2222"
+concourse_tsa_host: "{{ groups['cycloid_scheduler'][0] }}"
+concourse_tsa_public_key: "{{lookup('file', 'keys/id_rsa.pub')}}"
+concourse_tsa_worker_key: "{{lookup('file', 'keys/id_rsa')}}"

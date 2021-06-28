@@ -82,6 +82,7 @@
   stat:
     path: "{{ saml_local_path }}/{{ saml_sp_certificate_file }}"
   register: stat_cert_saml
+  when: saml_auth_enabled|bool
 
 - name: Copy selfsigned sp SAML files if not present | ssl
   fetch:
@@ -107,12 +108,12 @@
       stat:
         path: "{{ saml_local_path }}/{{ saml_idp_metadata_file }}"
       register: stat_saml_idp
-      when: saml_idp_metadata_file != ''
+      when: saml_idp_metadata_path != ''
 
     - name: Check idp SAML prerequisites | ssl
       fail:
         msg: "SAML file {{saml_idp_metadata_file}} doesn't exists"
-      when: saml_idp_metadata_file != '' and stat_saml_idp.stat.exists == False
+      when: saml_idp_metadata_path != '' and stat_saml_idp.stat.exists == False
 
 - name: Copy SAML sp certificates and idp metadata | ssl
   copy:

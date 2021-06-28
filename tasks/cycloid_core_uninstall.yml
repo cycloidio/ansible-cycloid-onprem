@@ -9,7 +9,17 @@
     - cycloid-frontend_container
     - nginx_container
     - docker
+    - docker.socket
   failed_when: false
+# Stop docker.socket due to debian package issue (https://github.com/moby/moby/issues/41792#issuecomment-750863884)
+
+- name: Remove packages | cycloid-core
+  package:
+    name:
+      - docker*
+    state: absent
+  failed_when: false
+  when: setup_packages
 
 - name: Remove files | cycloid-core
   file:
@@ -26,14 +36,6 @@
     - /etc/systemd/system/docker.service
     - /var/lib/docker
     - /opt/containerd
-
-- name: Remove packages | cycloid-core
-  package:
-    name:
-      - docker*
-    state: absent
-  failed_when: false
-  when: setup_packages
 
 - name: Force systemd to reread configs | cycloid-core
   systemd:

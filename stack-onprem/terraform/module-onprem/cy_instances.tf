@@ -84,14 +84,13 @@ resource "aws_security_group" "cy_instances" {
 #
 
 resource "aws_instance" "cy_instances" {
-  ami                         = local.image_id
-  associate_public_ip_address = false
-  count                       = var.cy_instances_count
-  iam_instance_profile        = aws_iam_instance_profile.cy_instances.name
-  ebs_optimized               = var.cy_instances_ebs_optimized
-  instance_type               = var.cy_instances_type
-  key_name                    = var.keypair_name
-  subnet_id                   = tolist(var.public_subnets_ids)[count.index % length(var.public_subnets_ids)]
+  ami                  = local.image_id
+  count                = var.cy_instances_count
+  iam_instance_profile = aws_iam_instance_profile.cy_instances.name
+  ebs_optimized        = var.cy_instances_ebs_optimized
+  instance_type        = var.cy_instances_type
+  key_name             = var.keypair_name
+  subnet_id            = tolist(var.public_subnets_ids)[count.index % length(var.public_subnets_ids)]
 
   vpc_security_group_ids = compact([
     var.bastion_sg_allow,

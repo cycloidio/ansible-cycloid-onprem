@@ -10,15 +10,15 @@ module "onprem" {
   #####################################
   #. vpc_id (required):
   #+ Amazon VPC id on which create each components.
-  vpc_id = ""
+  vpc_id = data.terraform_remote_state.infrastructure.outputs.test_vpc_id
 
   #. public_subnets_ids (required, array):
   #+ Amazon subnets IDs on which create each components.
-  public_subnets_ids = ["public-subnets"]
+  public_subnets_ids = data.terraform_remote_state.infrastructure.outputs.test_public_subnets_ids
 
   #. bastion_sg_allow (optional):
   #+ Amazon source security group ID which will be allowed to connect on Fronts port 22 (SSH).
-  bastion_sg_allow = ""
+  bastion_sg_allow = data.terraform_remote_state.infrastructure.outputs.test_bastion_sg_allow
 
   #. keypair_name (requiredl): cycloid
   #+ Name of an existing AWS SSH keypair to use to deploy EC2 instances.

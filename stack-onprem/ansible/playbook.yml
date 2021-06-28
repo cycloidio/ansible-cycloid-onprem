@@ -1,0 +1,35 @@
+---
+- name: Pre-requisites to run stack
+  hosts: all
+  # centos root user don't have usr/local/bin in PATH. It need to be defined for pip+awscli
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+  tasks:
+
+    - name: Update apt packages
+      apt:
+        update_cache: yes
+      when: ansible_os_family == 'Debian'
+      ignore_errors: yes
+
+    - name: Update yum packages
+      yum:
+        update_cache: yes
+      when: ansible_os_family == 'RedHat'
+      ignore_errors: yes
+
+    - name: Install extra packages
+      package:
+        name:
+          - python3-pip
+        state: present
+
+    - name: Force update pip to latest
+      pip:
+        name: pip
+        state: latest
+
+    - name: Install pip depends
+      pip:
+        requirements: "/home/{{ ansible_user }}/cycloid-onprem/pip-requirements.txt"
+        state: latest

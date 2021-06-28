@@ -6,13 +6,14 @@
   with_items:
     - cycloid-cache
     - docker
+    - docker.socket
   failed_when: false
 
 - name: Remove packages | cycloid-cache
   package:
     name:
       - docker*
-    state: absent  
+    state: absent
   failed_when: false
   when: setup_packages
 

@@ -1,19 +1,22 @@
 ---
 version: '2'
-name: 'onprem'
-canonical: 'stack-onprem'
+name: 'On-premise'
+canonical: 'cycloid-onprem'
 status: 'private'
-description: 'Create onprem setup of cycloid.'
+description: 'Create On-premise setup of Cycloid.'
 keywords:
   - 'cycloid'
   - 'concourse'
   - 'worker'
   - 'minio'
+  - 'elasticsearch'
   - 'docker'
   - 'ses'
+  - 'vault'
+  - 'redis'
   - 'provider:aws'
 author: 'Cycloid'
-image: ''
+image: 'https://www.cycloid.io/themes/cycloid/images/owl_logo.png'
 technologies:
   - technology: cycloid-core
     version: n/a
@@ -49,4 +52,4 @@ config:
     ansible:
       onprem:
         path: 'ansible/environments/cycloid.yml.sample'
-        destination: '($ project $)/ansible/environments/cycloid.yml'
+        destination: '($ project $)/ansible/environments/cycloid-($ environment $).yml'
