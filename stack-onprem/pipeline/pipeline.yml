@@ -355,7 +355,8 @@ jobs:
             echo "export APIKEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')"
             echo "export CY_API_URL=https://${MAIN_INSTANCE}/api"
             echo ""
-            echo 'cy --insecure login --org cycloid --api-key $APIKEY'
+            echo 'export ORG=cycloid'
+            echo 'cy --insecure login --org $ORG --api-key $APIKEY'
 
         inputs:
           - name: git_config-ansible
