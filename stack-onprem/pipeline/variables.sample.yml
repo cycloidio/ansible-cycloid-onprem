@@ -5,13 +5,13 @@
 
 # Amazon access to use to run terraform. Usually admin account to be able to create Amazon services.
 
-#. aws_access_key (required): ((aws.access_key))
+#. aws_access_key (required): ((aws_admin.access_key))
 #+ Amazon AWS access key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
-aws_access_key: ((aws.access_key))
+aws_access_key: ((aws_admin.access_key))
 
-#. aws_secret_key (required): ((aws.secret_key))
+#. aws_secret_key (required): ((aws_admin.secret_key))
 #+ Amazon AWS secret key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
-aws_secret_key: ((aws.secret_key))
+aws_secret_key: ((aws_admin.secret_key))
 
 #. aws_default_region (required): eu-west-1
 #+ Amazon AWS region to use for Terraform.
@@ -42,6 +42,15 @@ config_git_private_key: ((git_config.ssh_key))
 # stack_git_private_key: ((git_stack.ssh_key))
 
 #
+# Extra
+#
+
+#. api_key (optionnal): ((custom_api-key-admin.key))
+#+ API key used to configure infra view / logs / start/stop ...
+api_key: ((custom_api-key-admin.key))
+external_backend_aws_cred_name: aws
+
+#
 # Default variables that shouldn't be changed except if needed
 #
 
@@ -67,7 +76,7 @@ config_terraform_path: ($ project $)/terraform/($ environment $)
 
 config_ansible_path: ($ project $)/ansible
 
-terraform_version: '0.15.1'
+terraform_version: '1.0.2'
 
 ansible_params_extravars: ""
 
