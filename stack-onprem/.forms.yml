@@ -63,7 +63,7 @@ default:
         key: terraform_version
         widget: simple_text
         type: string
-        default: '0.15.1'
+        default: '1.0.2'
       - name: "Private SSH KEY to connect on instances"
         description: "Private SSH KEY to connect on instances."
         key: instance_private_key_pair
@@ -217,8 +217,8 @@ default:
         default: "OZvQdTtdvP9yVZBwBxeQcELDSn8QKAG9"
         required: true
 
-      - name: "Cycloid Database password"
-        description: "Cycloid Database password."
+      - name: "Concourse Database password"
+        description: "Concourse Database password."
         key: concourse_db_password
         widget: simple_text
         type: string

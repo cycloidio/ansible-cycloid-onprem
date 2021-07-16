@@ -25,6 +25,7 @@ groups:
 
 - name: extra
   jobs:
+  - extra-configuration
   - uninstall-onprem
   - mysql-force-pay-orgs
   - mysql-force-user-email-validation
@@ -159,7 +160,7 @@ jobs:
         passed:
           - terraform-plan
       - get: tfstate
-        trigger: false
+        trigger: true
         passed:
           - terraform-plan
 
@@ -226,7 +227,7 @@ jobs:
     - get: tfstate
       passed:
         - terraform-apply
-      trigger: false
+      trigger: true
 
     - task: ansible
       config:
@@ -397,7 +398,7 @@ jobs:
     - get: tfstate
       passed:
         - install-onprem
-      trigger: false
+      trigger: true
 
     - task: ansible
       config:
@@ -455,6 +456,88 @@ jobs:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
+
+
+- name: extra-configuration
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: git_stack-terraform
+        trigger: true
+
+      - task: configure-backends
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cycloid/cycloid-toolkit
+              tag: latest
+          container_limits: {}
+          run:
+            path: /bin/bash
+            args:
+              - '-c'
+              - |
+
+                echo "Start Stop:"
+                sed "s/@@ENV@@/$ENV/g;s/@@ORG@@/$ORGANIZATION/g;s/@@PROJECT@@/$PROJECT/g;s/@@REGION@@/$AWS_DEFAULT_REGION/g;s/@@AWSSECRET@@/$AWS_SECRET_ACCESS_KEY/g;s/@@AWSKEY@@/$AWS_ACCESS_KEY_ID/g" -i stack/stack-onprem/pipeline/start-stop-req.json
+                return_code=$(curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines" --compressed \
+                -H "authorization: Bearer ${API_KEY}" \
+                -H 'content-type: application/vnd.cycloid.io.v1+json' \
+                -H 'Accept: */*' -H 'Connection: keep-alive' \
+                --data-binary "@stack/stack-onprem/pipeline/start-stop-req.json")
+                if [[ "$return_code" != "200" && "$return_code" != "422" ]]; then
+                   echo "error, return code $return_code"
+                   cat output
+                   exit 1
+                fi
+
+                curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines/start-stop-$PROJECT-$ENV/unpause" --compressed \
+                -H "authorization: Bearer ${API_KEY}" \
+                -H 'content-type: application/vnd.cycloid.io.v1+json' \
+                -H 'Accept: */*' -H 'Connection: keep-alive' \
+                -X PUT --data-raw ''
+
+                echo "Configuring infraView:"
+                return_code=$(curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/external_backends" --compressed \
+                -H "authorization: Bearer ${API_KEY}" \
+                -H 'content-type: application/vnd.cycloid.io.v1+json' \
+                -H 'Accept: */*' -H 'Connection: keep-alive' \
+                --data-raw '{"purpose":"remote_tfstate","project_canonical":"'"$PROJECT"'","environment_canonical":"'"$ENV"'","credential_canonical":"'"$EXTERNAL_BACKEND_AWS_CRED_NAME"'","configuration":{"region":"eu-west-1","bucket":"'"$BUCKET_NAME"'","key":"'"$BUCKET_PATH"'","engine":"AWSRemoteTFState"}}')
+                if [[ "$return_code" != "200" && "$return_code" != "422" ]]; then
+                    echo "error, return code $return_code"
+                    cat output
+                    exit 1
+                fi
+                echo "Configuring logs:"
+                return_code=$(curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/external_backends" --compressed \
+                -H "authorization: Bearer ${API_KEY}" \
+                -H 'content-type: application/vnd.cycloid.io.v1+json' \
+                -H 'Accept: */*' -H 'Connection: keep-alive' \
+                --data-binary '{"purpose":"logs","credential_canonical":"'"$EXTERNAL_BACKEND_AWS_CRED_NAME"'","project_canonical":"'"$PROJECT"'","configuration":{"region":"eu-west-1","engine":"AWSCloudWatchLogs"}}')
+                if [[ "$return_code" != "200" && "$return_code" != "422" ]]; then
+                    echo "error, return code $return_code"
+                    cat output
+                    exit 1
+                fi
+          inputs:
+            - name: git_stack-terraform
+              path: "stack"
+          params:
+            API_URL: 'https://http-api.cycloid.io'
+            ORGANIZATION: ((customer))
+            API_KEY: ((api_key))
+            ENV: ((env))
+            PROJECT: ((project))
+            BUCKET_PATH: ((project))/((env))/((project))-((env)).tfstate
+            BUCKET_NAME: ((terraform_storage_bucket_name))
+            EXTERNAL_BACKEND_AWS_CRED_NAME: ((external_backend_aws_cred_name))
+            AWS_ACCESS_KEY_ID: ((aws_access_key))
+            AWS_DEFAULT_REGION: ((aws_default_region))
+            AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+
 
 - name: uninstall-onprem
   serial: True
