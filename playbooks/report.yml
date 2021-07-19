@@ -217,13 +217,13 @@
 
     - name: extra_files | core-report
       shell: |
-          cp {{ item }} {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/files/$(echo {{ item }} | sed 's/\//-/g');
+          cp {{ item }} {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/files/;
       args:
        executable: /bin/bash
       no_log: true
       ignore_errors: true
       with_items:
-        - "{{ cycloid_nginx_path }}/*.conf"
+        - "{{ cycloid_nginx_path }}/vhosts/*.conf"
 
     - name: mysql access | core-report
       shell: |

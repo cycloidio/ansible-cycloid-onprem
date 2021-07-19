@@ -480,7 +480,7 @@ jobs:
             args:
               - '-c'
               - |
-
+                touch output
                 echo "Start Stop:"
                 sed "s/@@ENV@@/$ENV/g;s/@@ORG@@/$ORGANIZATION/g;s/@@PROJECT@@/$PROJECT/g;s/@@REGION@@/$AWS_DEFAULT_REGION/g;s/@@AWSSECRET@@/$AWS_SECRET_ACCESS_KEY/g;s/@@AWSKEY@@/$AWS_ACCESS_KEY_ID/g" -i stack/stack-onprem/pipeline/start-stop-req.json
                 return_code=$(curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines" --compressed \
