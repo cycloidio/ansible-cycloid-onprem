@@ -15,6 +15,7 @@
     container_cmd: "{{ cycloid_db_container_cmd }}"
     container_ports:
       - '{{ cycloid_db_port }}:3306'
+    container_args: "{{ container_args_extra }}"
     container_volumes:
       - "{{cycloid_db_path}}:/var/lib/mysql"
     container_env:

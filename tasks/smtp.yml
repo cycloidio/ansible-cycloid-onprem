@@ -29,6 +29,7 @@
     container_ports:
       - '1025:1025'
       - '8025:8025'
+    container_args: "{{ container_args_extra }}"
     container_volumes:
       - "{{cycloid_smtp_path}}:/opt"
     container_env:

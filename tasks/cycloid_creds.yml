@@ -35,7 +35,7 @@
     container_image: "{{vault_image}}"
     container_ports:
       - '8200:8200'
-    container_args: "--cap-add IPC_LOCK"
+    container_args: "--cap-add IPC_LOCK {{ container_args_extra }}"
     container_cmd: "vault server -config /vault/config/local.json"
     container_env:
       VAULT_LOCAL_CONFIG: "{{ vault_config|to_json}}"

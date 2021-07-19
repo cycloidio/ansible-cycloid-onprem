@@ -13,6 +13,7 @@
     container_image: "{{ cycloid_cache_image }}"
     container_ports:
       - '{{ cycloid_email_redis_port }}:6379'
+    container_args: "{{ container_args_extra }}"
     container_volumes:
       - "{{cycloid_cache_path}}:/data"
   tags: docker-services

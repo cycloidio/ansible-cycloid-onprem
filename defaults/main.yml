@@ -90,6 +90,10 @@ container_volumes_ca_certificates: "{% if ca_certificates_container_shared %}{{ 
 #update_ca_start_post: "{% if ca_certificates_container_shared %}/usr/sbin/update-ca-certificates{% endif %}"
 container_args_update_ca: "{% if ca_certificates_container_shared %}--entrypoint /bin/bash{% endif %}"
 
+# container_args_extra can be used to give extra argument when running all containers.
+# It can be used for example to override domain server "--dns 172.17.0.1"
+container_args_extra: ""
+
 # If ca_certificates_container_shared, run update-ca before the /entrypoint
 cycloid_api_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint\"{% endif %}"
 
