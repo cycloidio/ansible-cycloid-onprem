@@ -12,6 +12,7 @@
           - "{{ minio_config_path }}/data:/data"
         container_ports:
           - "{{ minio_port }}:9000"
+        container_args: "{{ container_args_extra }}"
         container_env:
           MINIO_ACCESS_KEY: "{{ minio_access_key }}"
           MINIO_SECRET_KEY: "{{ minio_secret_key }}"

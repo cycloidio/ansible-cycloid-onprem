@@ -32,6 +32,7 @@
         container_ports:
           - "{{ elasticsearch_port_node }}:9300"
           - "{{ elasticsearch_port_api }}:9200"
+        container_args: "{{ container_args_extra }}"
         container_labels:
           - ansible.managed=true
           - systemd.managed=true

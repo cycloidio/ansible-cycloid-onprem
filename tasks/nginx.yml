@@ -55,6 +55,7 @@
     container_ports:
       - '80:80'
       - '443:443'
+    container_args: "{{ container_args_extra }}"
     container_env:
       NGINX_ENTRYPOINT_QUIET_LOGS: 1
       http_proxy: "{{ http_proxy }}"

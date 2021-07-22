@@ -13,6 +13,7 @@
     container_image: "{{concourse_db_image}}"
     container_ports:
       - '5432:5432'
+    container_args: "{{ container_args_extra }}"
     container_volumes:
       - "{{concourse_db_path}}:/var/lib/postgresql/data"
     container_env:

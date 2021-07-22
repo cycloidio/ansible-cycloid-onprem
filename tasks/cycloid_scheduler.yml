@@ -82,7 +82,7 @@
     # Additionnal env file for approle
     # Bind network host because of forwarded worker. CC need to know the IP of the web node cause it will use it to connect on local ssh tunnel created
     # to access to the workers. As we run in docker we don't know the IP address, so we bind host to use the one from the host
-    container_args: "--network=host --env-file={{ concourse_config_path }}/approle-concourse-ro"
+    container_args: "--network=host --env-file={{ concourse_config_path }}/approle-concourse-ro {{ container_args_extra }}"
     container_env:
       CONCOURSE_SESSION_SIGNING_KEY: "/opt/concourse/{{ concourse_session_signing_key_path }}"
       CONCOURSE_TSA_HOST_KEY: "/opt/concourse/{{ concourse_host_key_path }}"
