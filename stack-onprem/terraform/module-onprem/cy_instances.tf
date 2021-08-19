@@ -10,6 +10,10 @@ variable "cy_instances_disk_type" {
   default = "gp2"
 }
 
+variable "cy_instances_disk_device_name" {
+  default = "/dev/xvdf"
+}
+
 variable "cy_instances_type" {
   default = "t3.small"
 }
@@ -20,6 +24,14 @@ variable "cy_instances_ebs_optimized" {
 
 variable "cy_instances_count" {
   default = 1
+}
+
+variable "cy_instances_root_disk_size" {
+  default = 20
+}
+
+variable "cy_instances_root_disk_type" {
+  default = "gp2"
 }
 
 variable "cy_instances_root_delete_on_termination" {
@@ -107,6 +119,23 @@ resource "aws_security_group" "cy_instances" {
 # instances
 #
 
+resource "random_shuffle" "cy_instances_az" {
+  input        = local.aws_availability_zones
+  result_count = var.cy_instances_count
+}
+
+resource "aws_ebs_volume" "cy_instances" {
+  count             = var.cy_instances_count
+  availability_zone = element(random_shuffle.cy_instances_az.result, count.index)
+  size              = var.cy_instances_disk_size
+  type              = var.cy_instances_disk_type
+
+  tags = merge(local.merged_tags, {
+    Name = "${var.project}-cy_instances-${count.index}-${var.env}"
+    role = "cy_instances"
+  })
+}
+
 resource "aws_instance" "cy_instances" {
   ami                  = local.image_id
   count                = var.cy_instances_count
@@ -115,6 +144,7 @@ resource "aws_instance" "cy_instances" {
   instance_type        = var.cy_instances_type
   key_name             = var.keypair_name
   subnet_id            = tolist(var.public_subnets_ids)[count.index % length(var.public_subnets_ids)]
+  availability_zone    = aws_ebs_volume.cy_instances[count.index].availability_zone
 
   vpc_security_group_ids = compact([
     var.bastion_sg_allow,
@@ -122,8 +152,8 @@ resource "aws_instance" "cy_instances" {
   ])
 
   root_block_device {
-    volume_size           = var.cy_instances_disk_size
-    volume_type           = var.cy_instances_disk_type
+    volume_size           = var.cy_instances_root_disk_size
+    volume_type           = var.cy_instances_root_disk_type
     delete_on_termination = var.cy_instances_root_delete_on_termination
   }
 
@@ -136,6 +166,13 @@ resource "aws_instance" "cy_instances" {
     Name = "${var.project}-cy_instances-${count.index}-${var.env}"
     role = "cy_instances"
   })
+}
+
+resource "aws_volume_attachment" "cy_instances" {
+  count       = var.cy_instances
+  device_name = var.cy_instances_disk_device_name
+  volume_id   = aws_ebs_volume.cy_instances[count.index].id
+  instance_id = aws_instance.cy_instances[count.index].id
 }
 
 resource "aws_eip" "cy_instances" {
