@@ -111,6 +111,27 @@ resources:
     paths:
       - ((config_ansible_path))/environments/*
 
+#- name: docker-backend-image
+#  type: registry-image
+#  source:
+#    aws_access_key_id: ((aws_access_key))
+#    aws_region: ((aws_default_region))
+#    aws_secret_access_key: ((aws_secret_key))
+#    repository: youdeploy-http-api
+#    tag: meta-2704
+#  icon: docker
+
+#- name: docker-frontend-image
+#  type: registry-image
+#  source:
+#    aws_access_key_id: ((aws_access_key))
+#    aws_region: ((aws_default_region))
+#    aws_secret_access_key: ((aws_secret_key))
+#    repository: youdeploy-frontend
+#    tag: staging
+#  icon: docker
+
+
 jobs:
 
 # Merge and trigger a plan whenever there is a commit in Terraform stack or config
@@ -223,6 +244,16 @@ jobs:
     - get: git_config-ansible
       params: {depth: 1}
       trigger: true
+
+#    - get: docker-backend-image
+#      params:
+#        skip_download: true
+#      trigger: true
+
+#    - get: docker-frontend-image
+#      params:
+#        skip_download: true
+#      trigger: true
 
     - get: tfstate
       passed:
