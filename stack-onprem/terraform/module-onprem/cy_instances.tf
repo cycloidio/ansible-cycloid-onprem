@@ -100,10 +100,19 @@ resource "aws_security_group" "cy_instances" {
     cidr_blocks = var.cy_instances_cidr_blocks_allow
   }
 
-  # Allow all port internaly (example for: concourse worker to concourse web ATC, is db splitted ...)
+  # concourse worker to concourse web ATC
+  ingress {
+    from_port   = 2222
+    to_port     = 2222
+    protocol    = "tcp"
+    self        = true
+    cidr_blocks = var.cy_instances_cidr_blocks_allow
+  }
+
+  # Allow all port internaly (example for: is db splitted ...)
   ingress {
     from_port = 0
-    to_port   = 65535
+    to_port   = 0
     protocol  = "tcp"
     self      = true
   }
