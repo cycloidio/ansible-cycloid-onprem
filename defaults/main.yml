@@ -225,6 +225,9 @@ concourse_auth_password: admin
 # disable|require|verify-ca|verify-full
 concourse_db_sslmode: disable
 
+# Extra env vars to pass to scheduler container
+cycloid_scheduler_extra_env: {}
+
 
 # Concourse keys
 #concourse_session_signing_key:
