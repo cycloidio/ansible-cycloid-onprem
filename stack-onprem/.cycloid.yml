@@ -29,11 +29,11 @@ technologies:
   - technology: vault
     version: n/a
   - technology: concourse
-    version: 6.7.6
+    version: 7.4.0
   - technology: postgres
     version: n/a
   - technology: concourse-worker
-    version: 6.7.6
+    version: 7.4.0
 config:
   # define the default pipeline here
   default:
