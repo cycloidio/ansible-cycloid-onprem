@@ -82,12 +82,39 @@ resource "aws_security_group" "cy_instances" {
     cidr_blocks = var.cy_instances_cidr_blocks_allow
   }
 
+  # mailhog
   ingress {
     from_port   = 8025
     to_port     = 8025
     protocol    = "tcp"
     self        = true
     cidr_blocks = var.cy_instances_cidr_blocks_allow
+  }
+
+  # minio
+  ingress {
+    from_port   = 9000
+    to_port     = 9000
+    protocol    = "tcp"
+    self        = true
+    cidr_blocks = var.cy_instances_cidr_blocks_allow
+  }
+
+  # concourse worker to concourse web ATC
+  ingress {
+    from_port   = 2222
+    to_port     = 2222
+    protocol    = "tcp"
+    self        = true
+    cidr_blocks = var.cy_instances_cidr_blocks_allow
+  }
+
+  # Allow all port internaly (example for: is db splitted ...)
+  ingress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "tcp"
+    self      = true
   }
 
   egress {
