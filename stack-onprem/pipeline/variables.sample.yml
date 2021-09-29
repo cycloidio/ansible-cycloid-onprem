@@ -78,7 +78,8 @@ config_ansible_path: ($ project $)/ansible
 
 terraform_version: '1.0.7'
 
-ansible_params_extravars: ""
+ansible_params_extravars:
+  test: "foo"
 
 instance_private_key_pair: ((git_ssh_bastion.ssh_key))
 
