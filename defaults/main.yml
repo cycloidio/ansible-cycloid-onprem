@@ -318,7 +318,6 @@ cycloid_email_smtp_svr_addr: "{{ hostvars[groups['smtp_server'][0]]['ansible_def
 # The following example will rely on a smtp server installed locally on the host
 #cycloid_email_smtp_svr_addr: "{{ ansible_docker0['ipv4']['address'] }}:25"
 
-cycloid_email_insecure: true
 cycloid_email_smtp_username: admin
 cycloid_email_smtp_password: admin
 cycloid_email_addr_from: noreply@cycloid.io
