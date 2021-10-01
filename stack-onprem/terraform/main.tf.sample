@@ -34,7 +34,7 @@ module "onprem" {
 
   #. cy_instances (optional): 1
   #+ Desired number of cy_instances servers.
-  cy_instances_count = "1"
+  cy_instances_count = "$INSTANCES_COUNT"
 
   #. cy_instances_type (optional): t3.small
   #+ Type of instance to use for cy_instances servers.
