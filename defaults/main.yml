@@ -325,6 +325,9 @@ cycloid_email_addr_return_path: admin+ydbounce@cycloid.io
 cycloid_email_redis_host: "{{ hostvars[groups['cycloid_cache'][0]]['ansible_default_ipv4']['address'] }}"
 cycloid_email_redis_port: 6379
 cycloid_email_redis_db: 0
+# Allow insecure TLS/SSL with email. Usefull when using local postfix as relayhost with selfsigned certs
+cycloid_email_skip_tls_check: false
+
 cycloid_jwt_key_1: 2f2122de-63f2-4eec-9c6f-c6abb3e1f007:7cdyHps2tYDp6e7VKPEstE5sDMQbK6WLyN3GmTsF7x7QpE6ZP5ra6yfVSkvXakbB
 cycloid_crypto_signing_key: totally-random-secret-key
 

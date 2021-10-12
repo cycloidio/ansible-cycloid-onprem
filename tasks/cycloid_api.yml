@@ -44,6 +44,7 @@
       EMAIL_SMTP_PASSWORD: "{{ cycloid_email_smtp_password }}"
       EMAIL_ADDR_FROM: "{{ cycloid_email_addr_from }}"
       EMAIL_ADDR_RETURN_PATH: "{{ cycloid_email_addr_return_path }}"
+      EMAIL_SKIP_TLS_CHECK: "{{ cycloid_email_skip_tls_check }}"
       REDIS_URI: "redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
       AZURE_TENANT_ID: "{{ azure_ad_tenant_id }}"
       AZURE_CLIENT_ID: "{{ azure_ad_client_id }}"
