@@ -378,11 +378,15 @@ jobs:
             set +x
 
             OUTPUT_FILE="${DIR}/access/output"
-            echo "### Onprem ready on: https://${MAIN_INSTANCE}" > ${OUTPUT_FILE}
+            cat inventory > ${OUTPUT_FILE}
+            echo "" >> ${OUTPUT_FILE}
+            echo "### Onprem ready on: https://${MAIN_INSTANCE}" >> ${OUTPUT_FILE}
             echo "### Admin user:" >> ${OUTPUT_FILE}
             grep "  email:" ${DIR}/cycloid-onprem/environments/cycloid.yml >> ${OUTPUT_FILE}
             grep "  password:" ${DIR}/cycloid-onprem/environments/cycloid.yml >> ${OUTPUT_FILE}
-
+            echo "" >> ${OUTPUT_FILE}
+            echo "### Resque-web on: http://$(grep inventory -A1 a | tail -n1):5678" >> ${OUTPUT_FILE}
+            echo "" >> ${OUTPUT_FILE}
             echo "### How to use CLI:" >> ${OUTPUT_FILE}
             echo "export APIKEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')" >> ${OUTPUT_FILE}
             echo "export CY_API_URL=https://${MAIN_INSTANCE}/api" >> ${OUTPUT_FILE}
