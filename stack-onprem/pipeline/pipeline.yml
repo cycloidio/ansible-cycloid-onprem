@@ -385,7 +385,7 @@ jobs:
             grep "  email:" ${DIR}/cycloid-onprem/environments/cycloid.yml >> ${OUTPUT_FILE}
             grep "  password:" ${DIR}/cycloid-onprem/environments/cycloid.yml >> ${OUTPUT_FILE}
             echo "" >> ${OUTPUT_FILE}
-            echo "### Resque-web on: http://$(grep inventory -A1 a | tail -n1):5678" >> ${OUTPUT_FILE}
+            echo "### Resque-web on: http://$(grep cycloid_cache -A1 inventory | tail -n1):5678" >> ${OUTPUT_FILE}
             echo "" >> ${OUTPUT_FILE}
             echo "### How to use CLI:" >> ${OUTPUT_FILE}
             echo "export APIKEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')" >> ${OUTPUT_FILE}
