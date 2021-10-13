@@ -111,26 +111,25 @@ resources:
     paths:
       - ((config_ansible_path))/environments/*
 
-#- name: docker-backend-image
-#  type: registry-image
-#  source:
-#    aws_access_key_id: ((aws_access_key))
-#    aws_region: ((aws_default_region))
-#    aws_secret_access_key: ((aws_secret_key))
-#    repository: youdeploy-http-api
-#    tag: meta-2704
-#  icon: docker
+- name: docker-backend-image
+  type: registry-image
+  source:
+    aws_access_key_id: ((aws_access_key))
+    aws_region: ((aws_default_region))
+    aws_secret_access_key: ((aws_secret_key))
+    repository: youdeploy-http-api
+    tag: ((cycloid_api_image))
+  icon: docker
 
-#- name: docker-frontend-image
-#  type: registry-image
-#  source:
-#    aws_access_key_id: ((aws_access_key))
-#    aws_region: ((aws_default_region))
-#    aws_secret_access_key: ((aws_secret_key))
-#    repository: youdeploy-frontend
-#    tag: staging
-#  icon: docker
-
+- name: docker-frontend-image
+  type: registry-image
+  source:
+    aws_access_key_id: ((aws_access_key))
+    aws_region: ((aws_default_region))
+    aws_secret_access_key: ((aws_secret_key))
+    repository: youdeploy-frontend
+    tag: ((cycloid_frontend_image))
+  icon: docker
 
 jobs:
 
@@ -245,15 +244,15 @@ jobs:
       params: {depth: 1}
       trigger: true
 
-#    - get: docker-backend-image
-#      params:
-#        skip_download: true
-#      trigger: true
+    - get: docker-backend-image
+      params:
+        skip_download: true
+      trigger: true
 
-#    - get: docker-frontend-image
-#      params:
-#        skip_download: true
-#      trigger: true
+    - get: docker-frontend-image
+      params:
+        skip_download: true
+      trigger: true
 
     - get: tfstate
       passed:
@@ -378,17 +377,18 @@ jobs:
             ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory playbook.yml -e @extra_ansible_vars.json"
             set +x
 
-            echo "### Onprem ready on: https://${MAIN_INSTANCE}"
-            echo "### Admin user:"
-            grep "  email:" ${DIR}/cycloid-onprem/environments/cycloid.yml
-            grep "  password:" ${DIR}/cycloid-onprem/environments/cycloid.yml
+            OUTPUT_FILE="${DIR}/access/output"
+            echo "### Onprem ready on: https://${MAIN_INSTANCE}" > ${OUTPUT_FILE}
+            echo "### Admin user:" >> ${OUTPUT_FILE}
+            grep "  email:" ${DIR}/cycloid-onprem/environments/cycloid.yml >> ${OUTPUT_FILE}
+            grep "  password:" ${DIR}/cycloid-onprem/environments/cycloid.yml >> ${OUTPUT_FILE}
 
-            echo "### How to use CLI:"
-            echo "export APIKEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')"
-            echo "export CY_API_URL=https://${MAIN_INSTANCE}/api"
-            echo ""
-            echo 'export ORG=cycloid'
-            echo 'cy --insecure login --org $ORG --api-key $APIKEY'
+            echo "### How to use CLI:" >> ${OUTPUT_FILE}
+            echo "export APIKEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')" >> ${OUTPUT_FILE}
+            echo "export CY_API_URL=https://${MAIN_INSTANCE}/api" >> ${OUTPUT_FILE}
+            echo "" >> ${OUTPUT_FILE}
+            echo 'export ORG=cycloid' >> ${OUTPUT_FILE}
+            echo 'cy --insecure login --org $ORG --api-key $APIKEY' >> ${OUTPUT_FILE}
 
         inputs:
           - name: git_config-ansible
@@ -398,6 +398,7 @@ jobs:
             path: "ansible-cycloid-onprem"
         outputs:
           - name: cycloid-onprem
+          - name: access
         params:
           ENV: ((env))
           CONFIG_ANSIBLE_PATH: ((config_ansible_path))
@@ -412,6 +413,25 @@ jobs:
           CYCLOID_LICENCE: ((cycloid_licence))
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
+
+    - task: access
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+            OUTPUT_FILE="access/output"
+            cat $OUTPUT_FILE
+        inputs:
+          - name: access
 
 - name: install-worker
   serial: True

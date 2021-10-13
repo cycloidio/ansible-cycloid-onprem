@@ -26,7 +26,7 @@ default:
         key: terraform_storage_bucket_name
         widget: simple_text
         type: string
-        default: cycloid-sandbox-terraform-remote-state
+        default: ($ organization_canonical $)-terraform-remote-state
     Repos:
       - name: "Config repository"
         key: config_git_repository

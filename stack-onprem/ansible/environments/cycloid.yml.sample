@@ -2,18 +2,24 @@
 ### Onprem Section ###
 ######################
 
-#cycloid_console_dns: "" provided by terraform
+# provided by terraform
+#cycloid_console_dns: ""
 
 # Initial Cycloid user
 cycloid_initial_user:
+  username: admin
+  email: admin+onprem_$ENV@cycloid.io
+  password: $CYCLOID_INITIAL_USER_PASSWORD
+  given_name: admin
+  family_name: cycloid
 
 cycloid_initial_organization_name: Cycloid
 
 # Set random password for databses.
-cycloid_db_password: ""
-concourse_db_password: ""
+cycloid_db_password: $CYCLOID_DB_PASSWORD
+concourse_db_password: $CONCOURSE_DB_PASSWORD
 
-# given by the pipeline
+# provided by the pipeline
 #cycloid_licence:
 
 saml_auth_enabled: false
@@ -25,8 +31,8 @@ cycloid_admin_apikey: true
 
 cycloid_db_image: mysql:8.0.21
 
-cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod
-cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod
+cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:$BACKEND_IMAGE_TAG
+cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:$FRONTEND_IMAGE_TAG
 
 ######################
 ### Worker Section ###
