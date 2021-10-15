@@ -1,0 +1,31 @@
+{{- if .Values.backend.enabled }}
+{{- if .Values.backend.serviceAccount.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "backend.serviceAccountName" . }}-k8s-reader
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    {{- include "backend.selectorLabels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.backend.serviceAccount.annotations .Values.commonAnnotations }}
+  annotations:
+    {{- with .Values.backend.serviceAccount.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.commonAnnotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "backend.fullname" . }}-k8s-reader
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "backend.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- end }}
