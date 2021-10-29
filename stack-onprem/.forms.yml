@@ -63,7 +63,7 @@ default:
         key: terraform_version
         widget: simple_text
         type: string
-        default: '1.0.2'
+        default: '1.0.7'
       - name: "Private SSH KEY to connect on instances"
         description: "Private SSH KEY to connect on instances."
         key: instance_private_key_pair

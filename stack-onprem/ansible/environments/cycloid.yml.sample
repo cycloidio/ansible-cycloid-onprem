@@ -34,6 +34,9 @@ cycloid_db_image: mysql:8.0.21
 cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:$BACKEND_IMAGE_TAG
 cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:$FRONTEND_IMAGE_TAG
 
+# resque-web is used to debug redis worker queue. Set true to install it
+cycloid_cache_resque_install: true
+
 ######################
 ### Worker Section ###
 ######################
