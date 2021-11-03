@@ -1,0 +1,89 @@
+{{- if .Values.frontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "frontend.fullname" . }}
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    {{- include "frontend.selectorLabels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.frontend.autoscaling.enabled }}
+  replicas: {{ .Values.frontend.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "frontend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.frontend.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "frontend.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "frontend.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.frontend.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.frontend.securityContext | nindent 12 }}
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.frontend.resources | nindent 12 }}
+          env:
+            - name: "CYCLOID_BASE_URL"
+              value: {{ .Values.frontend.url | quote }}
+            - name: "CYCLOID_API_URL"
+              value: {{ .Values.backend.url | quote }}
+            {{- include "cycloid.extraEnvVars" .Values.frontend | nindent 12 }}
+            {{- include "cycloid.extraSecretEnvVars" .Values.frontend | nindent 12 }}
+            {{- include "cycloid.extraConfigMapEnvVars" .Values.frontend | nindent 12 }}
+          {{- if or .Values.frontend.extraEnvVarsCM .Values.frontend.extraEnvVarsSecret }}
+          envFrom:
+            {{- if .Values.frontend.extraFullConfigMapEnvVars }}
+            - configMapRef:
+                name: {{ .Values.frontend.extraFullConfigMapEnvVars }}
+            {{- end }}
+            {{- if .Values.frontend.extraFullSecretEnvVars }}
+            - secretRef:
+                name: {{ .Values.frontend.extraFullSecretEnvVars }}
+            {{- end }}
+          {{- end }}
+      {{ template "frontend.affinity" . }}
+      {{ template "frontend.tolerations" . }}
+      {{ template "frontend.nodeselector" . }}
+{{- end }}

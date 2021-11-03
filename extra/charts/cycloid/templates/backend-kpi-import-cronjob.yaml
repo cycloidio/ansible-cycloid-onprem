@@ -1,0 +1,154 @@
+{{- if .Values.backend.enabled }}
+{{- if semverCompare ">=1.21-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: batch/v1
+{{- else -}}
+apiVersion: batch/v1beta1
+{{- end }}
+kind: CronJob
+metadata:
+  name: {{ include "backend.fullname" . }}-kpi-import
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    {{- include "backend.selectorLabels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  suspend: false
+  concurrencyPolicy: Replace 
+  schedule: "0 */1 * * *"
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      {{- with .Values.backend.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "backend.selectorLabels" . | nindent 8 }}
+    spec:
+      ttlSecondsAfterFinished: 10
+      template:
+        metadata:
+          {{- with .Values.backend.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          labels:
+            {{- include "backend.selectorLabels" . | nindent 12 }}
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          serviceAccountName: {{ include "backend.serviceAccountName" . }}
+          securityContext:
+            {{- toYaml .Values.backend.podSecurityContext | nindent 12 }}
+          restartPolicy: "Never"
+
+          containers:
+            - name: kpi-import
+              securityContext:
+                {{- toYaml .Values.backend.securityContext | nindent 16 }}
+              image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+              args:
+                - "/go/youdeploy-http-api"
+                - "kpi-import"
+                - "--config-file=/opt/config.yml"
+              resources:
+                {{- toYaml .Values.backend.cronJob.resources | nindent 16 }}
+              env:
+                - name: "RUN_MIGRATIONS"
+                  value: "0"
+                - name: "YOUDEPLOY_MYSQL_SERVICE_HOST"
+                  value: {{ include "cycloid.mysqlHost" . | quote }}
+                - name: "YOUDEPLOY_MYSQL_SERVICE_PORT"
+                  value: {{ include "cycloid.mysqlPort" . | quote }}
+                - name: "MYSQL_DATABASE"
+                  value: {{ include "cycloid.mysqlDatabase" . | quote }}
+                - name: "MYSQL_USER"
+                  value: {{ include "cycloid.mysqlUser" . | quote }}
+                - name: "MYSQL_PASSWORD"
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ template "cycloid.mysqlSecretName" . }}
+                      key: mysql-password
+                
+                - name: "REDIS_HOST"
+                  value: {{ include "cycloid.redisHost" . | quote }}
+                - name: "REDIS_PORT"
+                  value: {{ include "cycloid.redisPort" . | quote }}
+                - name: "REDIS_DB"
+                  value: {{ include "cycloid.redisDatabase" . | quote }}
+                - name: "REDIS_PASSWORD"
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ template "cycloid.redisSecretName" . }}
+                      key: redis-password
+                - name: "REDIS_URI"
+                  value: "redis://:$(REDIS_PASSWORD)@$(REDIS_HOST):$(REDIS_PORT)/$(REDIS_DB)"
+
+                - name: "CONCOURSE_URL"
+                  value: {{ .Values.concourse.url | quote }}
+                - name: "CONCOURSE_PORT"
+                  value: {{ .Values.concourse.port | quote }}
+                - name: "CONCOURSE_TEAM"
+                  value: {{ .Values.concourse.team | quote }}
+                - name: "CONCOURSE_USER"
+                  value: {{ .Values.concourse.user | quote }}
+                - name: "CONCOURSE_PASSWORD"
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ template "backend.backendSecretName" . }}
+                      key: concourse-password
+
+                - name: "VAULT_URL"
+                  value: {{ .Values.backend.vault.url | quote }}
+                - name: "VAULT_ROLE_ID"
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ template "backend.backendSecretName" . }}
+                      key: vault-role-id
+                - name: "VAULT_SECRET_ID"
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ template "backend.backendSecretName" . }}
+                      key: vault-secret-id
+
+                - name: "FRONTEND_BASE_URL"
+                  value: {{ .Values.frontend.url | quote }}
+                - name: "BACKEND_BASE_URL"
+                  value: {{ .Values.backend.url | quote }}
+                - name: "CRYPTO_SIGNING_KEY"
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ template "backend.backendSecretName" . }}
+                      key: crypto-signing-key
+                - name: "JWT_KEY_1"
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ template "backend.backendSecretName" . }}
+                      key: jwt-key-1
+                {{- include "cycloid.extraEnvVars" .Values.backend | nindent 16 }}
+                {{- include "cycloid.extraSecretEnvVars" .Values.backend | nindent 16 }}
+                {{- include "cycloid.extraConfigMapEnvVars" .Values.backend | nindent 16 }}
+              {{- if or .Values.backend.extraEnvVarsCM .Values.backend.extraEnvVarsSecret }}
+              envFrom:
+                {{- if .Values.backend.extraFullConfigMapEnvVars }}
+                - configMapRef:
+                    name: {{ .Values.backend.extraFullConfigMapEnvVars }}
+                {{- end }}
+                {{- if .Values.backend.extraFullSecretEnvVars }}
+                - secretRef:
+                    name: {{ .Values.backend.extraFullSecretEnvVars }}
+                {{- end }}
+              {{- end }}
+              {{ template "backend.cronjob.mounts" . }}
+          {{ template "backend.cronjob.volumes" . }}
+{{- end }}
