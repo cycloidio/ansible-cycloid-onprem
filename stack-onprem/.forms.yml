@@ -224,6 +224,13 @@ default:
         type: string
         default: "JENJTtK8aVPQzxvSN39xCQaLl1dYt9eP"
         required: true
+      - name: "Concourse admin user password"
+        description: "Concourse admin user password."
+        key: concourse_auth_password
+        widget: simple_text
+        type: string
+        default: "pooph4iek9OhqueeGhah3ooCheiKongo"
+        required: true
 
       - name: "Cycloid initial user information"
         description: "Cycloid initial user information"
