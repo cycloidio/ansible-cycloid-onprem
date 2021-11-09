@@ -35,9 +35,9 @@ OPEN_CMD=$(command -v open >/dev/null)
 set -e
 if [[ $OPEN_CMD -eq 0 ]]; then
   # macOS and linux alias compatibility
-  open "https://github.com/cycloidio/ansible-cycloid-onprem/compare/master...version_$VERSION"
+  open "https://github.com/cycloidio/ansible-cycloid-onprem/compare/master...$BRANCH"
 else
   # fallback on xdg-open
-  xdg-open "https://github.com/cycloidio/ansible-cycloid-onprem/compare/master...version_$VERSION"
+  xdg-open "https://github.com/cycloidio/ansible-cycloid-onprem/compare/master...$BRANCH"
 fi
 
