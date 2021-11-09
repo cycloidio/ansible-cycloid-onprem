@@ -22,4 +22,6 @@
 *.tmproj
 .vscode/
 scripts/.out/
+scripts/release/
 values.*.yaml
+changes/

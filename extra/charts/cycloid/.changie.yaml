@@ -1,0 +1,29 @@
+changesDir: changes
+unreleasedDir: unreleased
+headerPath: header.tpl.md
+versionHeaderPath: ""
+changelogPath: CHANGELOG.md
+versionExt: md
+versionFormat: '## {{.Version}} - {{.Time.Format "2006-01-02"}}'
+kindFormat: '### {{.Kind}}'
+changeFormat: '* {{.Body}} ([{{.Custom.Ref}} #{{.Custom.RefID}}](https://github.com/cycloidio/ansible-cycloid-onprem/issues/{{.Custom.RefID}}))'
+kinds:
+- label: Added
+- label: Changed
+- label: Deprecated
+- label: Removed
+- label: Fixed
+- label: Security
+custom:
+- key: Ref
+  type: enum
+  enumOptions:
+  - Pull
+  - Issue
+- key: RefID
+  type: int
+  minInt: 1
+replacements:
+- path: Chart.yaml
+  find: '^version: .*'
+  replace: 'version: {{.VersionNoPrefix}}'

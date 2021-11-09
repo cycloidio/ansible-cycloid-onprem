@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -e
+
+VERSION=$(changie latest)
+
+echo -e "\e[36m# $0 > switching to master brabnch and make sure it's up-to-date\e[0m"
+git checkout master && git pull --rebase=preserve
+
+echo -e "\e[36m# $0 > preparing the helm dependencies for the packaging process\e[0m"
+helm dependency build
+
+echo -e "\e[36m# $0 > packaging the local helm chart\e[0m"
+helm package .
+
+echo -e "\e[36m# $0 > making sure the S3 helm repo is added locally\e[0m"
+helm repo add cycloid-onprem s3://cycloid-onprem-helm-charts/stable/cycloid/
+
+echo -e "\e[36m# $0 > pushing the helm package to the S3 helm repo\e[0m"
+helm s3 push ./cycloid-$VERSION.tgz cycloid-onprem
+
+echo -e "\e[36m# $0 > removing the package locally\e[0m"
+rm -f ./cycloid-$VERSION.tgz
+
+echo -e "\e[36m# $0 > searching the S3 helm repo to make sure the package has been pushed and indexed\e[0m"
+helm search repo cycloid-onprem
