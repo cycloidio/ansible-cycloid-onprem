@@ -24,6 +24,9 @@ custom:
   type: int
   minInt: 1
 replacements:
+# changie replacement in Chart.yaml doesn't seem to work well with the ^
+# @see https://github.com/miniscruff/changie/discussions/179
+# temporary alternative set in the `scripts/release/prepare.sh` script
 - path: Chart.yaml
   find: '^version: .*'
   replace: 'version: {{.VersionNoPrefix}}'
