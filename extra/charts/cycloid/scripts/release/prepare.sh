@@ -17,6 +17,9 @@ changie batch $VERSION
 
 echo -e "\e[36m# $0 > merging it into the parent changelog"
 changie merge
+# changie replacement in Chart.yaml doesn't seem to work well with the ^
+# @see https://github.com/miniscruff/changie/discussions/179
+sed -i "s/^version: .*/version: $VERSION/" Chart.yaml
 
 echo -e "\e[36m# $0 > committing the changed files"
 git commit -m "Release $VERSION" Chart.yaml CHANGELOG.md changes/
