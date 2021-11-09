@@ -8,6 +8,8 @@ echo -e "\e[36m# $0 > switching to master brabnch and make sure it's up-to-date\
 git checkout master && git pull --rebase=preserve
 
 echo -e "\e[36m# $0 > preparing the helm dependencies for the packaging process\e[0m"
+# helm dep build requires to add the repository first
+helm dep list | tail -n+2 | head -n-1 | awk '{print $1","$3}' | while read repo; do helm repo add ${repo%%,*} ${repo##*,}; done < /dev/stdin
 helm dependency build
 
 echo -e "\e[36m# $0 > packaging the local helm chart\e[0m"
