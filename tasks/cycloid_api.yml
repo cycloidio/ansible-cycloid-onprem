@@ -316,3 +316,9 @@
       when: "'elasticsearch' in groups and elasticsearch_basic_auth and cycloid_licence != ''"
 
   when: sql_query_rows|int == 0
+
+- name: Copy cycloid-intercept script | cycloid-core api
+  copy:
+    src: scripts/cycloid-intercept.sh
+    dest: /usr/local/bin/cycloid-intercept
+    mode: '0755'
