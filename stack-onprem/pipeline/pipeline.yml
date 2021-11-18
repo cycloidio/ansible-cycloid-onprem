@@ -30,6 +30,7 @@ groups:
   - mysql-force-pay-orgs
   - mysql-force-user-email-validation
   - report
+  - populate-datas
 
 - name: destroy
   jobs:
@@ -110,6 +111,19 @@ resources:
     private_key: ((config_git_private_key))
     paths:
       - ((config_ansible_path))/environments/*
+
+# git_terracost used by populate-datas
+# Cost estimation feature use cloudprovider pricing datas.
+# To have initial pricing datas, we use the sql dump from terracost
+- name: git_terracost
+  type: git
+  icon: github-circle
+  source:
+    uri: git@github.com:cycloidio/terracost.git
+    branch: master
+    private_key: ((config_git_private_key))
+    paths:
+      - mysql/testdata/*
 
 - name: docker-backend-image
   type: registry-image
@@ -518,7 +532,7 @@ jobs:
   build_logs_to_retain: 10
   plan:
     - do:
-      - get: git_stack-terraform
+      - get: git_stack-ansible
         trigger: true
 
       - task: configure-backends
@@ -535,18 +549,20 @@ jobs:
             args:
               - '-c'
               - |
+                EXIT_STATUS=0
                 touch output
                 echo "Start Stop:"
-                sed "s/@@ENV@@/$ENV/g;s/@@ORG@@/$ORGANIZATION/g;s/@@PROJECT@@/$PROJECT/g;s/@@REGION@@/$AWS_DEFAULT_REGION/g;s/@@AWSSECRET@@/$AWS_SECRET_ACCESS_KEY/g;s/@@AWSKEY@@/$AWS_ACCESS_KEY_ID/g" -i stack/stack-onprem/pipeline/start-stop-req.json
+                envsubst '$ENV $ORGANIZATION $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < stack/stack-onprem/pipeline/start-stop-req.json > start-stop-req-generated.json
+
                 return_code=$(curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines" --compressed \
                 -H "authorization: Bearer ${API_KEY}" \
                 -H 'content-type: application/vnd.cycloid.io.v1+json' \
                 -H 'Accept: */*' -H 'Connection: keep-alive' \
-                --data-binary "@stack/stack-onprem/pipeline/start-stop-req.json")
-                if [[ "$return_code" != "200" && "$return_code" != "422" ]]; then
+                --data-binary "@start-stop-req-generated.json")
+                if [[ "$return_code" != "204" && "$return_code" != "422" ]]; then
                    echo "error, return code $return_code"
                    cat output
-                   exit 1
+                   EXIT_STATUS=1
                 fi
 
                 curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines/start-stop-$PROJECT-$ENV/unpause" --compressed \
@@ -555,6 +571,7 @@ jobs:
                 -H 'Accept: */*' -H 'Connection: keep-alive' \
                 -X PUT --data-raw ''
 
+                echo ""
                 echo "Configuring infraView:"
                 return_code=$(curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/external_backends" --compressed \
                 -H "authorization: Bearer ${API_KEY}" \
@@ -564,8 +581,10 @@ jobs:
                 if [[ "$return_code" != "200" && "$return_code" != "422" ]]; then
                     echo "error, return code $return_code"
                     cat output
-                    exit 1
+                    EXIT_STATUS=1
                 fi
+
+                echo ""
                 echo "Configuring logs:"
                 return_code=$(curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/external_backends" --compressed \
                 -H "authorization: Bearer ${API_KEY}" \
@@ -575,10 +594,11 @@ jobs:
                 if [[ "$return_code" != "200" && "$return_code" != "422" ]]; then
                     echo "error, return code $return_code"
                     cat output
-                    exit 1
+                    EXIT_STATUS=1
                 fi
+                exit $EXIT_STATUS
           inputs:
-            - name: git_stack-terraform
+            - name: git_stack-ansible
               path: "stack"
           params:
             API_URL: 'https://http-api.cycloid.io'
@@ -592,7 +612,6 @@ jobs:
             AWS_ACCESS_KEY_ID: ((aws_access_key))
             AWS_DEFAULT_REGION: ((aws_default_region))
             AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
-
 
 - name: uninstall-onprem
   serial: True
@@ -648,8 +667,6 @@ jobs:
 
         inputs:
           - name: tfstate
-        outputs:
-          - name: cycloid-onprem
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
@@ -706,11 +723,8 @@ jobs:
             echo "Ansible mysql-force-pay-orgs run"
             set -x
             ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory mysql-force-pay-orgs.yml -e @extra_ansible_vars.json"
-
         inputs:
           - name: tfstate
-        outputs:
-          - name: cycloid-onprem
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
@@ -770,8 +784,6 @@ jobs:
 
         inputs:
           - name: tfstate
-        outputs:
-          - name: cycloid-onprem
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
@@ -831,9 +843,137 @@ jobs:
 
         inputs:
           - name: tfstate
-        outputs:
-          - name: cycloid-onprem
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
+
+
+- name: populate-datas
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: tfstate
+      passed:
+        - terraform-apply
+      trigger: false
+
+    - get: git_terracost
+      trigger: false
+
+    - task: cli
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+
+            # use to run galaxy
+            eval "$(ssh-agent -s)"
+            # ssh key to connect instances
+            echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+            chmod 600 /root/.ssh/id_rsa
+            ssh-add /root/.ssh/id_rsa
+
+            MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+            echo "### Ansible and Cycloid console is on $MAIN_INSTANCE"
+            # Get the user by testing connexion (Ugly loop)
+            # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
+            # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
+            REMOTE_USER=""
+            set +e
+            for user in admin centos ubuntu;do
+              ssh ${user}@${MAIN_INSTANCE} ls
+              if [ $? -eq 0 ]; then
+                REMOTE_USER=${user}
+                break
+              fi
+            done
+            set -e
+
+            export APIKEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')
+            export CY_API_URL=https://${MAIN_INSTANCE}/api
+            export ORG=cycloid
+            cy --insecure login --org $ORG --api-key $APIKEY
+
+            echo "Adding credentials ..."
+            cy --insecure  --org $ORG  credential create ssh --name config --ssh-key /root/.ssh/id_rsa
+            CRED=$(cy --insecure  --org $ORG  credential list -o json | jq -r '.[] | select( .name | contains("config")) | .canonical')
+
+            cy --insecure  --org $ORG config-repo create --branch config --cred $CRED --url $CR_REPO --default  --name onprem-test
+            cy --insecure  --org $ORG catalog-repo create --branch stacks --cred $CRED --url $CR_REPO  --name onprem-test-stacks
+
+            # minio creds (default value used)
+            cy --insecure  --org $ORG  credential create aws --name minio --access-key ((onprem_minio_access_key)) --secret-key ((onprem_minio_secret_key))
+
+            # AWS
+            cy --insecure  --org $ORG  credential create aws --name admin_aws --access-key ((((onprem_aws_cred_name)).access_key)) --secret-key ((((onprem_aws_cred_name)).secret_key))
+
+            # GCP
+            echo '((((onprem_gcp_cred_name)).json_key))' > /tmp/sandbox
+            cy --insecure  --org $ORG  credential create gcp --name admin_gcp_cycloid-sandbox --json-key /tmp/sandbox
+            rm /tmp/sandbox
+
+            # Azure
+            cy --insecure  --org $ORG  credential create azure --name admin_azure --client-id ((((onprem_azure_cred_name)).client_id)) --client-secret ((((onprem_azure_cred_name)).client_secret)) --subscription-id ((((onprem_azure_cred_name)).subscription_id)) --tenant-id ((((onprem_azure_cred_name)).tenant_id))
+            cy --insecure  --org $ORG  credential create azure_storage --name azure-tfstate --account-name ((((onprem_azure_storage_cred_name)).account_name)) --access-key ((((onprem_azure_storage_cred_name)).access_key))
+
+            # create dummy project
+            echo "Creating dummy project ..."
+            wget https://raw.githubusercontent.com/cycloid-community-catalog/stack-dummy/master/pipeline/pipeline.yml
+            wget https://raw.githubusercontent.com/cycloid-community-catalog/stack-dummy/master/pipeline/variables.sample.yml
+            cy --insecure --org $ORG project create \
+              --name dummy \
+              --description "from dummy stack" \
+              --stack-ref cycloid:stack-dummy \
+              --config-repo onprem-test \
+              --env test \
+              --usecase default \
+              --pipeline "pipeline.yml" \
+              --vars "variables.sample.yml"
+
+            # InfraView for dummy/test
+            echo "Creating dummy project ..."
+            cy --insecure --org $ORG --project dummy --env test external-backend create infraview AWSRemoteTFState \
+              --bucket-name ${IV_BUCKET_NAME} \
+              --bucket-path ${IV_BUCKET_PATH} \
+              --cred admin_aws \
+              --region "eu-west-1"
+
+            # Logs for dummy/test
+            echo "Creating dummy project ..."
+            cy --insecure --org $ORG --project dummy external-backend create logs AWSCloudWatchLogs \
+              --cred admin_aws \
+              --region "eu-west-1"
+
+            ### Inject terracost price ###
+            # Get pricing data from terracost (used by cost estimation feature)
+            # upload files + run mysql import
+            # If needed to clean:
+            # SET FOREIGN_KEY_CHECKS = 0;
+            # TRUNCATE TABLE pricing_product_prices;
+            # TRUNCATE TABLE pricing_products;
+            # SET FOREIGN_KEY_CHECKS = 1;
+            echo "Injecting terracost pricing ..."
+            LATEST_PRICE=$(ls -1 git_terracost/mysql/testdata/*pricing.sql.gz | tail -n1)
+            echo "  Using ${LATEST_PRICE}"
+            scp -q ${LATEST_PRICE} ${REMOTE_USER}@${MAIN_INSTANCE}:/tmp/
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} 'gunzip -f /tmp/*-pricing.sql.gz && source <(sudo grep MYSQL /etc/default/cycloid-api) && mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE < /tmp/*pricing.sql'
+
+        inputs:
+          - name: tfstate
+          - name: git_terracost
+        params:
+          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          CR_REPO: ((onprem_cr_repository))
+          IV_BUCKET_NAME: cycloid-terraform-remote-state
+          IV_BUCKET_PATH: cycloidio-website/demo-hack/cycloid-demo.tfstate
