@@ -848,7 +848,6 @@ jobs:
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
 
-
 - name: populate-datas
   serial: True
   build_logs_to_retain: 10
@@ -857,6 +856,11 @@ jobs:
     - get: tfstate
       passed:
         - terraform-apply
+      trigger: false
+
+    - get: git_stack-ansible
+      passed:
+        - install-onprem
       trigger: false
 
     - get: git_terracost
