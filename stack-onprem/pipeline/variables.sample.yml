@@ -91,3 +91,14 @@ cycloid_licence: ((custom_cycloid-backend-$LICENCE_ENV.licence_key))
 # should be the same as cycloid_api_image. Need to be updated whith forms v2 (same variable between ansible and pipeline)
 cycloid_api_image: $BACKEND_IMAGE_TAG
 cycloid_frontend_image: $FRONTEND_IMAGE_TAG
+
+#### Datas populate on onprem setup ####
+onprem_cr_repository: git@github.com:cycloidio/onprem-test.git
+
+onprem_minio_access_key: AKIAIOSFODNN7EXAMPLE
+onprem_minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+# cred name need to exist on your org
+onprem_aws_cred_name: aws_admin
+onprem_gcp_cred_name: gcp_terraform
+onprem_azure_cred_name: azure_terraform
+onprem_azure_storage_cred_name: azure_storage_cycloidtfstate
