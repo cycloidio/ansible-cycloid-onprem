@@ -402,11 +402,11 @@ jobs:
             echo "### Resque-web on: http://$(grep cycloid_cache -A1 inventory | tail -n1):5678" >> ${OUTPUT_FILE}
             echo "" >> ${OUTPUT_FILE}
             echo "### How to use CLI:" >> ${OUTPUT_FILE}
-            echo "export APIKEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')" >> ${OUTPUT_FILE}
+            echo "export API_KEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')" >> ${OUTPUT_FILE}
             echo "export CY_API_URL=https://${MAIN_INSTANCE}/api" >> ${OUTPUT_FILE}
             echo "" >> ${OUTPUT_FILE}
             echo 'export ORG=cycloid' >> ${OUTPUT_FILE}
-            echo 'cy --insecure login --org $ORG --api-key $APIKEY' >> ${OUTPUT_FILE}
+            echo 'cy --insecure login --org $ORG --api-key $API_KEY' >> ${OUTPUT_FILE}
 
         inputs:
           - name: git_config-ansible
@@ -554,7 +554,7 @@ jobs:
                 echo "Start Stop:"
                 envsubst '$ENV $ORGANIZATION $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < stack/stack-onprem/pipeline/start-stop-req.json > start-stop-req-generated.json
 
-                return_code=$(curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines" --compressed \
+                return_code=$(curl -s -o output -w "%{http_code}" "${CY_API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines" --compressed \
                 -H "authorization: Bearer ${API_KEY}" \
                 -H 'content-type: application/vnd.cycloid.io.v1+json' \
                 -H 'Accept: */*' -H 'Connection: keep-alive' \
@@ -565,43 +565,42 @@ jobs:
                    EXIT_STATUS=1
                 fi
 
-                curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines/start-stop-$PROJECT-$ENV/unpause" --compressed \
+                curl -s -o output -w "%{http_code}" "${CY_API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines/start-stop-$PROJECT-$ENV/unpause" --compressed \
                 -H "authorization: Bearer ${API_KEY}" \
                 -H 'content-type: application/vnd.cycloid.io.v1+json' \
                 -H 'Accept: */*' -H 'Connection: keep-alive' \
                 -X PUT --data-raw ''
 
                 echo ""
-                echo "Configuring infraView:"
-                return_code=$(curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/external_backends" --compressed \
-                -H "authorization: Bearer ${API_KEY}" \
-                -H 'content-type: application/vnd.cycloid.io.v1+json' \
-                -H 'Accept: */*' -H 'Connection: keep-alive' \
-                --data-raw '{"purpose":"remote_tfstate","project_canonical":"'"$PROJECT"'","environment_canonical":"'"$ENV"'","credential_canonical":"'"$EXTERNAL_BACKEND_AWS_CRED_NAME"'","configuration":{"region":"eu-west-1","bucket":"'"$BUCKET_NAME"'","key":"'"$BUCKET_PATH"'","engine":"AWSRemoteTFState"}}')
-                if [[ "$return_code" != "200" && "$return_code" != "422" ]]; then
-                    echo "error, return code $return_code"
-                    cat output
-                    EXIT_STATUS=1
+                cy --insecure login --org ${ORGANIZATION} --api-key ${API_KEY}
+
+                # InfraView for dummy/test
+                echo "InfraView configuration"
+                cy --insecure --org ${ORGANIZATION} --project ${PROJECT} --env ${ENV} external-backend create infraview AWSRemoteTFState \
+                  --bucket-name ${BUCKET_NAME} \
+                  --bucket-path ${BUCKET_PATH} \
+                  --cred ${EXTERNAL_BACKEND_AWS_CRED_NAME} \
+                  --region "eu-west-1"
+                if [ $? -ne 0 ]; then
+                  EXIT_STATUS=$?
                 fi
 
-                echo ""
-                echo "Configuring logs:"
-                return_code=$(curl -s -o output -w "%{http_code}" "${API_URL}/organizations/$ORGANIZATION/external_backends" --compressed \
-                -H "authorization: Bearer ${API_KEY}" \
-                -H 'content-type: application/vnd.cycloid.io.v1+json' \
-                -H 'Accept: */*' -H 'Connection: keep-alive' \
-                --data-binary '{"purpose":"logs","credential_canonical":"'"$EXTERNAL_BACKEND_AWS_CRED_NAME"'","project_canonical":"'"$PROJECT"'","configuration":{"region":"eu-west-1","engine":"AWSCloudWatchLogs"}}')
-                if [[ "$return_code" != "200" && "$return_code" != "422" ]]; then
-                    echo "error, return code $return_code"
-                    cat output
-                    EXIT_STATUS=1
-                fi
+                # Logs for dummy/test
+                echo "Logs configuration"
+                cy --insecure --org ${ORGANIZATION} --project ${PROJECT} external-backend create logs AWSCloudWatchLogs \
+                  --cred ${EXTERNAL_BACKEND_AWS_CRED_NAME} \
+                  --region "eu-west-1"
+                # global project config, ignore if already exist
+                #if [ $? -ne 0 ]; then
+                #  EXIT_STATUS=$?
+                #fi
+
                 exit $EXIT_STATUS
           inputs:
             - name: git_stack-ansible
               path: "stack"
           params:
-            API_URL: 'https://http-api.cycloid.io'
+            CY_API_URL: 'https://http-api.cycloid.io'
             ORGANIZATION: ((customer))
             API_KEY: ((api_key))
             ENV: ((env))
@@ -904,10 +903,10 @@ jobs:
             done
             set -e
 
-            export APIKEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')
+            export API_KEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')
             export CY_API_URL=https://${MAIN_INSTANCE}/api
             export ORG=cycloid
-            cy --insecure login --org $ORG --api-key $APIKEY
+            cy --insecure login --org $ORG --api-key $API_KEY
 
             echo "Adding credentials ..."
             cy --insecure  --org $ORG  credential create ssh --name config --ssh-key /root/.ssh/id_rsa
@@ -946,7 +945,7 @@ jobs:
               --vars "variables.sample.yml"
 
             # InfraView for dummy/test
-            echo "Creating dummy project ..."
+            echo "InfraView for dummy/test project ..."
             cy --insecure --org $ORG --project dummy --env test external-backend create infraview AWSRemoteTFState \
               --bucket-name ${IV_BUCKET_NAME} \
               --bucket-path ${IV_BUCKET_PATH} \
@@ -954,7 +953,7 @@ jobs:
               --region "eu-west-1"
 
             # Logs for dummy/test
-            echo "Creating dummy project ..."
+            echo "Logs for dummy/test project ..."
             cy --insecure --org $ORG --project dummy external-backend create logs AWSCloudWatchLogs \
               --cred admin_aws \
               --region "eu-west-1"
