@@ -1,7 +1,7 @@
 dependencies:
 - name: mysql
   repository: https://charts.bitnami.com/bitnami
-  version: 8.8.12
+  version: 8.8.14
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 15.4.2
@@ -10,6 +10,6 @@ dependencies:
   version: 14.5.6
 - name: vault
   repository: https://helm.releases.hashicorp.com
-  version: 0.8.0
-digest: sha256:42e29744c1a5ad4b9a77e2bfa7cfa883bbf08f022bc85ce96e328d84f3ae184b
-generated: "2021-11-03T14:19:45.392791892+01:00"
+  version: 0.9.1
+digest: sha256:ecde7dbbbf2863f4c35f1db7e18fe5e908a15026f394f47f3008614e8a3ac897
+generated: "2021-12-02T16:42:54.355995245+01:00"
