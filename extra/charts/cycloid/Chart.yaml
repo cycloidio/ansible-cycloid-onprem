@@ -62,7 +62,7 @@ dependencies:
     repository: https://helm.releases.hashicorp.com
     tags:
       - hashicorp-vault
-    version: ~0.8.0
+    version: ~0.9.0
     condition: vault.enabled
 
 # annotations:
