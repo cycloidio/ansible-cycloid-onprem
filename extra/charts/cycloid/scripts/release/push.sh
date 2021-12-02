@@ -2,6 +2,10 @@
 
 set -e
 
+export AWS_ACCESS_KEY_ID=$(vault read -field=access_key secret/cycloid/aws)
+export AWS_SECRET_ACCESS_KEY=$(vault read -field=secret_key secret/cycloid/aws)
+export AWS_DEFAULT_REGION=eu-west-1
+
 VERSION=$(changie latest)
 
 echo -e "\e[36m# $0 > switching to master brabnch and make sure it's up-to-date\e[0m"
