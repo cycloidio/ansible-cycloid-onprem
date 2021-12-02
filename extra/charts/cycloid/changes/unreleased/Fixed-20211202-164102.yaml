@@ -1,7 +1,0 @@
-kind: Fixed
-body: Bump the Vault chart dependency to version 0.9.0 to fix the incompatibility
-  with Kubernetes 1.22
-time: 2021-12-02T16:41:02.127751324+01:00
-custom:
-  Ref: Issue
-  RefID: "92"
