@@ -552,7 +552,17 @@ jobs:
                 EXIT_STATUS=0
                 touch output
                 echo "Start Stop:"
-                envsubst '$ENV $ORGANIZATION $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < stack/stack-onprem/pipeline/start-stop-req.json > start-stop-req-generated.json
+                envsubst '$API_KEY $ENV $ORGANIZATION $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < stack/stack-onprem/pipeline/start-stop-req.json > start-stop-req-generated.json
+
+                # how to edit start-stop-req-generated.json
+                # cat start-stop-req.json | jq -r  .passed_config
+                # copy paste on https://www.json2yaml.com/
+                # make your change
+                # copy the json to https://jsoneditoronline.org/
+                # click on compact json
+                # get the oneline json and copy/paste on  https://www.freeformatter.com/json-escape.html#ad-output
+                # click on escape
+                # copy/paste the content inside: "passed_config": "HERE",
 
                 return_code=$(curl -s -o output -w "%{http_code}" "${CY_API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines" --compressed \
                 -H "authorization: Bearer ${API_KEY}" \
@@ -565,14 +575,9 @@ jobs:
                    EXIT_STATUS=1
                 fi
 
-                curl -s -o output -w "%{http_code}" "${CY_API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines/start-stop-$PROJECT-$ENV/unpause" --compressed \
-                -H "authorization: Bearer ${API_KEY}" \
-                -H 'content-type: application/vnd.cycloid.io.v1+json' \
-                -H 'Accept: */*' -H 'Connection: keep-alive' \
-                -X PUT --data-raw ''
-
-                echo ""
                 cy --insecure login --org ${ORGANIZATION} --api-key ${API_KEY}
+                cy --insecure --org ${ORGANIZATION} --project start-stop-${PROJECT} --env ${ENV} pipeline unpause
+                echo ""
 
                 # InfraView for dummy/test
                 echo "InfraView configuration"
@@ -909,8 +914,8 @@ jobs:
             cy --insecure login --org $ORG --api-key $API_KEY
 
             echo "Adding credentials ..."
-            cy --insecure  --org $ORG  credential create ssh --name config --ssh-key /root/.ssh/id_rsa
-            CRED=$(cy --insecure  --org $ORG  credential list -o json | jq -r '.[] | select( .name | contains("config")) | .canonical')
+            cy --insecure  --org $ORG  credential create ssh --name github --ssh-key /root/.ssh/id_rsa
+            CRED=$(cy --insecure  --org $ORG  credential list -o json | jq -r '.[] | select( .name | contains("github")) | .canonical')
 
             cy --insecure  --org $ORG config-repo create --branch config --cred $CRED --url $CR_REPO --default  --name onprem-test
             cy --insecure  --org $ORG catalog-repo create --branch stacks --cred $CRED --url $CR_REPO  --name onprem-test-stacks
