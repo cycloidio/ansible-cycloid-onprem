@@ -374,6 +374,24 @@ jobs:
             export ANSIBLE_HOST_KEY_CHECKING=false
             export ANSIBLE_FORCE_COLOR=true
 
+            # check if ssh open
+            echo "Waiting for server to boot up..."
+            # 30 retry = wait 240 sec
+            max_retry=30
+            for i in $(seq 1 $max_retry); do
+              echo "waiting... (${i}/${max_retry})"
+              if ( nc -z -w3 ${MAIN_INSTANCE} 22 < /dev/null  ); then
+                echo "port 22 open"
+                break
+              fi
+
+              if [ "$i" -eq "$max_retry" ]; then
+                echo "timeout: server down"
+                exit 1
+              fi
+              sleep 5
+            done
+
             # Ensure python install on all instances (usefull for centos)
             # python is not installed by default on centos AWS AMI.
             # Force install on all instance before to run ansible

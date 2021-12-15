@@ -6,8 +6,6 @@
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   tasks:
 
-    # TODO wait server up
-
     - name: Update apt packages
       apt:
         update_cache: yes
