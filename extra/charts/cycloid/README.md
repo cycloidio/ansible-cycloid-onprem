@@ -13,7 +13,7 @@ To access and run it, you will need to get from Cycloid AWS credentials to acces
 In order to make use of this setup, you will need the following:
 
 * Cluster
-  - Kubernetes cluster version: `>= 1.18.0 <= 1.22.0`.
+  - Kubernetes cluster version: `>= 1.19.0`.
   - Make sure your `kubectl` context is targeting the intended cluster and namespace for the Cycloid setup.
   - A working [Kubernetes Ingress Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) installed within the cluster to access the Cycloid Console.
   - Working DNS records pointing to your Kubernetes cluster for the Console and API domains you intend to use.
@@ -63,7 +63,7 @@ Because of that the chart installation will be achieve in two big steps:
 
 To achieve that, the Helm chart will need to be pull locally instead of installing it directly from the Helm repository and why we will ask you to make a copy of the default chart values to make the necessary modifications and add your custom ones.
 
-### Pull the Cycloid on-premises Helm chart locally 
+### Pull the Cycloid on-premises Helm chart locally
 
 ```bash
 # Pull the helm chart
