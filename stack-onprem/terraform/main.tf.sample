@@ -60,6 +60,10 @@ module "onprem" {
   # https://wiki.debian.org/Cloud/AmazonEC2Image/Buster
   #base_ami_id = "ami-0874dad5025ca362c"
 
+  # debian 11
+  # https://wiki.debian.org/Cloud/AmazonEC2Image/Bullseye
+  #base_ami_id = "ami-01ebd2b650c37e4d6"
+
   # Centos https://wiki.centos.org/Cloud/AWS
   # centos 7
   #base_ami_id = "ami-04f5641b0d178a27a"
