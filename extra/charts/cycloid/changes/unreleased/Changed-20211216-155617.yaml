@@ -1,7 +1,0 @@
-kind: Changed
-body: Remove the upper kubeVersion limit to avoid weird incompatibilities errors on
-  supported versions + bump the minimum to 1.19 as the 1.18 end-of-life is long gone.
-time: 2021-12-16T15:56:17.065748379+01:00
-custom:
-  Ref: Issue
-  RefID: "100"
