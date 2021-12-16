@@ -14,7 +14,7 @@ version: 0.3.1
 # It is recommended to use it with quotes.
 appVersion: "2.3.2"
 
-kubeVersion: ">= 1.18.0-0 <= 1.22.0-0"
+kubeVersion: ">= 1.19.0-0"
 
 home: https://cycloid.io
 
