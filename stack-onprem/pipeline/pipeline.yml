@@ -570,17 +570,13 @@ jobs:
                 EXIT_STATUS=0
                 touch output
                 echo "Start Stop:"
-                envsubst '$API_KEY $ENV $ORGANIZATION $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < stack/stack-onprem/pipeline/start-stop-req.json > start-stop-req-generated.json
 
-                # how to edit start-stop-req-generated.json
-                # cat start-stop-req.json | jq -r  .passed_config
-                # copy paste on https://www.json2yaml.com/
-                # make your change
-                # copy the json to https://jsoneditoronline.org/
-                # click on compact json
-                # get the oneline json and copy/paste on  https://www.freeformatter.com/json-escape.html#ad-output
-                # click on escape
-                # copy/paste the content inside: "passed_config": "HERE",
+                #generate start-stop-req.json
+                export STARTSTOP=$(cat stack/stack-onprem/pipeline/start-stop.yml | python -c 'import yaml; import json; import sys; print(json.dumps(json.dumps(yaml.safe_load(sys.stdin))));')
+                envsubst '$STARTSTOP' < stack/stack-onprem/pipeline/start-stop-req.yml  | python -c 'import yaml; import json; import sys; print(json.dumps(yaml.safe_load(sys.stdin)));' > start-stop-req.json
+
+                # set product variables
+                envsubst '$API_KEY $ENV $ORGANIZATION $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < start-stop-req.json > start-stop-req-generated.json
 
                 return_code=$(curl -s -o output -w "%{http_code}" "${CY_API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines" --compressed \
                 -H "authorization: Bearer ${API_KEY}" \
