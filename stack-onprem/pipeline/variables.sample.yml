@@ -99,6 +99,7 @@ onprem_minio_access_key: AKIAIOSFODNN7EXAMPLE
 onprem_minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 # cred name need to exist on your org
 onprem_aws_cred_name: aws_admin
+onprem_aws_sandbox_cred_name: aws_sandbox
 onprem_gcp_cred_name: gcp_terraform
 onprem_azure_cred_name: azure_terraform
 onprem_azure_storage_cred_name: azure_storage_cycloidtfstate
