@@ -939,6 +939,7 @@ jobs:
 
             # AWS
             cy --insecure  --org $ORG  credential create aws --name admin_aws --access-key ((((onprem_aws_cred_name)).access_key)) --secret-key ((((onprem_aws_cred_name)).secret_key))
+            cy --insecure  --org $ORG  credential create aws --name admin_aws-sandbox --access-key ((((onprem_aws_sandbox_cred_name)).access_key)) --secret-key ((((onprem_aws_sandbox_cred_name)).secret_key))
 
             # GCP
             echo '((((onprem_gcp_cred_name)).json_key))' > /tmp/sandbox
