@@ -174,6 +174,7 @@ default:
         values:
             - "debian-9-amd64-*"
             - "debian-10-amd64-*"
+            - "debian-11-arm64-*"
             - "CentOS 7.9.2009 x86_64*"
             - "CentOS 8.3.2011 x86_64*"
             - "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"
@@ -190,6 +191,7 @@ default:
             - "ami-0a75a5a43b05b4d5f"
             - "ami-0e9968d81cef18781"
             - "ami-01aa664a17515f5bb"
+            - "ami-01ebd2b650c37e4d6"
   ansible:
     configuration:
       - name: "Initial Organization name"

@@ -15,7 +15,7 @@ TF_OUTPUT=$1
 #  INVENTORY_OTHER: Optional services (Concourse + DB / ES / Minio ...)
 #  INVENTORY_WORKER: Concourse worker
 
-# How it is splited by IPs
+# How is it splited by IPs ?
 # 1: everything on the same instance
 # 2: split worker and onprem or cycloid service and others
 # 3: split worker, cycloid service and others or cycloid core, cycloid and others

@@ -374,6 +374,24 @@ jobs:
             export ANSIBLE_HOST_KEY_CHECKING=false
             export ANSIBLE_FORCE_COLOR=true
 
+            # check if ssh open
+            echo "Waiting for server to boot up..."
+            # 30 retry = wait 240 sec
+            max_retry=30
+            for i in $(seq 1 $max_retry); do
+              echo "waiting... (${i}/${max_retry})"
+              if ( nc -z -w3 ${MAIN_INSTANCE} 22 < /dev/null  ); then
+                echo "port 22 open"
+                break
+              fi
+
+              if [ "$i" -eq "$max_retry" ]; then
+                echo "timeout: server down"
+                exit 1
+              fi
+              sleep 5
+            done
+
             # Ensure python install on all instances (usefull for centos)
             # python is not installed by default on centos AWS AMI.
             # Force install on all instance before to run ansible
@@ -552,7 +570,13 @@ jobs:
                 EXIT_STATUS=0
                 touch output
                 echo "Start Stop:"
-                envsubst '$ENV $ORGANIZATION $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < stack/stack-onprem/pipeline/start-stop-req.json > start-stop-req-generated.json
+
+                #generate start-stop-req.json
+                export STARTSTOP=$(cat stack/stack-onprem/pipeline/start-stop.yml | python -c 'import yaml; import json; import sys; print(json.dumps(json.dumps(yaml.safe_load(sys.stdin))));')
+                envsubst '$STARTSTOP' < stack/stack-onprem/pipeline/start-stop-req.yml  | python -c 'import yaml; import json; import sys; print(json.dumps(yaml.safe_load(sys.stdin)));' > start-stop-req.json
+
+                # set product variables
+                envsubst '$API_KEY $ENV $ORGANIZATION $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < start-stop-req.json > start-stop-req-generated.json
 
                 return_code=$(curl -s -o output -w "%{http_code}" "${CY_API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines" --compressed \
                 -H "authorization: Bearer ${API_KEY}" \
@@ -565,14 +589,9 @@ jobs:
                    EXIT_STATUS=1
                 fi
 
-                curl -s -o output -w "%{http_code}" "${CY_API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines/start-stop-$PROJECT-$ENV/unpause" --compressed \
-                -H "authorization: Bearer ${API_KEY}" \
-                -H 'content-type: application/vnd.cycloid.io.v1+json' \
-                -H 'Accept: */*' -H 'Connection: keep-alive' \
-                -X PUT --data-raw ''
-
-                echo ""
                 cy --insecure login --org ${ORGANIZATION} --api-key ${API_KEY}
+                cy --insecure --org ${ORGANIZATION} --project start-stop-${PROJECT} --env ${ENV} pipeline unpause
+                echo ""
 
                 # InfraView for dummy/test
                 echo "InfraView configuration"
@@ -909,8 +928,8 @@ jobs:
             cy --insecure login --org $ORG --api-key $API_KEY
 
             echo "Adding credentials ..."
-            cy --insecure  --org $ORG  credential create ssh --name config --ssh-key /root/.ssh/id_rsa
-            CRED=$(cy --insecure  --org $ORG  credential list -o json | jq -r '.[] | select( .name | contains("config")) | .canonical')
+            cy --insecure  --org $ORG  credential create ssh --name github --ssh-key /root/.ssh/id_rsa
+            CRED=$(cy --insecure  --org $ORG  credential list -o json | jq -r '.[] | select( .name | contains("github")) | .canonical')
 
             cy --insecure  --org $ORG config-repo create --branch config --cred $CRED --url $CR_REPO --default  --name onprem-test
             cy --insecure  --org $ORG catalog-repo create --branch stacks --cred $CRED --url $CR_REPO  --name onprem-test-stacks

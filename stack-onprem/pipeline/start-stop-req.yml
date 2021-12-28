@@ -1,0 +1,5 @@
+---
+pipeline_name: start-stop-$PROJECT-$ENV
+passed_config: $STARTSTOP
+environment:
+          canonical: "$ENV"
