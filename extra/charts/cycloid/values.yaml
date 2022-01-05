@@ -36,7 +36,7 @@ frontend:
     pullPolicy: IfNotPresent
     # Cycloid Console frontend version to use.
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "v2.3.2"
+    tag: "v2.3.4"
 
   # extraEnvVars is a list of extra environment variables to set.
   extraEnvVars: {}
@@ -657,7 +657,7 @@ concourse:
         volumeMounts:
           - mountPath: /etc/concourse-teams
             name: concourse-teams
-    
+
     ## Array of extra initContainers to run alongside the Concourse Web
     ## container.
     ##
@@ -680,7 +680,7 @@ concourse:
         volumeMounts:
           - mountPath: /etc/concourse-teams
             name: concourse-teams
-    
+
     ## Enable or disable the process namespace sharing for the web nodes.
     ## This allows signaling the concourse process from a sidecar container.
     ## eg.: signal concourse web to reload the team authorized keys file.
@@ -699,7 +699,7 @@ concourse:
       limits:
         cpu: "1000m"
         memory: "1.5Gi"
-    
+
     ## Configure additional environment variables for the
     ## web containers.
     ## Example:
@@ -712,7 +712,7 @@ concourse:
     env:
       - name: CONCOURSE_TSA_TEAM_AUTHORIZED_KEYS_FILE
         value: /etc/concourse-teams/tsa-team-authorized-keys.yaml
-    
+
     ## Configure additional volumes for the
     ## web container(s).
     ##
@@ -727,7 +727,7 @@ concourse:
     additionalVolumes:
       - name: concourse-teams
         emptyDir: {}
-  
+
     ## Configure additional volumeMounts for the
     ## web container(s)
     ##
@@ -741,7 +741,7 @@ concourse:
     additionalVolumeMounts:
       - name: concourse-teams
         mountPath: /etc/concourse-teams
-  
+
     ## Ingress configuration.
     ## Ref: https://kubernetes.io/docs/user-guide/ingress/
     ##
@@ -779,7 +779,7 @@ concourse:
         #  - secretName: cycloid-local-tls
         #    hosts:
         #      - concourse.cycloid.local
-  
+
   ## Configuration values for Concourse Worker components.
   ## For more information regarding the characteristics of
   ## Concourse Workers, see https://concourse-ci.org/concourse-worker.html
@@ -879,7 +879,7 @@ concourse:
       ## Persistent Volume Storage Size.
       ##
       size: 8Gi
-  
+
   secrets:
     ## Secrets for DB access if bringing your own PostgreSQL
     ##
@@ -922,10 +922,10 @@ concourse:
       Occs+xkdEsI9w5phXzIEeOq2LqvWHDPxtdLpxOrrmx4AftAWdM8S1+OqTpzHihK1
       y1ZOrWfvON+XjWFFAEej/CpQZkNUkTzjTtSC0dnfAveZlasQHdI=
       -----END RSA PRIVATE KEY-----
-    
+
     hostKeyPub: |-
       ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDYBQ9fG6IML+qsFaMh1Pl+81wyUwRilHdfhItAiAsLVQsOwI5+V4pn5aLhHPBuRQqIqYmbkZ7I1VUIN1+90PVJ3X7l9qqanb85AHMtLujw1j9u0zDyH2XHgpUloknUQzUSLIZjjU3Hn3Uo/XikF+vT8104isO7Ym8Xp7sIcRuvOQ3nuRsFVCRogxpLTVHD/k57rwYVqWWLaKLwvx01ZVXOq4GHk/BVaKa9ODC/dNgbZMfwvVVXuf7/NFGmSMyXb49Si4aoP4Gn7jAX6GngBbm/bgKqO0skQy/ggQm/YVF+s5q4EhleMBLVJKD1VpM5LeLDFpiu/y4bVd8wUcgK+QQ9 Concourse
-  
+
     ## Concourse Session Signing Keys.
     ## Ref: https://concourse-ci.org/concourse-generate-key.html
     ##
@@ -957,7 +957,7 @@ concourse:
       L8x1+dp0q7czC8a/l1DUuiwDKl8OEpxLsGCq/J/wAfrSMPifu6EUlbUwlJOPdgha
       +p/KFAelHXJ2w/8yackAcarh35VP7ixhuvxswHNdgvfsBTFcjn30
       -----END RSA PRIVATE KEY-----
-    
+
     ## Concourse Worker Keys.
     ## Ref: https://concourse-ci.org/concourse-generate-key.html
     ##
@@ -989,7 +989,7 @@ concourse:
       Yi3cwo9fE3U3kSmpl5MQwUjWm/BZ7JyueoY/4ndwaFPgc34IKsgJ0wau9pZiQAB1
       DxpOSF+BR71Jx3sxvIdCODNTtm645j5yrZVnJAuMPofo5XFmunDoJA==
       -----END RSA PRIVATE KEY-----
-    
+
     workerKeyPub: |-
       ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC496FSYFcBAKgDtMsBAJiF/6/NxlXKP5UZecyEsedYuTt1GOgJTwaA1qZ1LmHsbfLDE68oDdiM4uvxfI4wtLhz57w3u0jOUxZ2JeF7SVwEf1nVqLn4Gh/f8GUNQGSyIp1zUD5Bx9fq0PAyQ47mt7Ufi84rcf8LKl7nzAIHTcdg2BvTkQN9bUGPaq/Pb1W2bKPAQy4OzXTSIyrAJ89TH2jFeaZfyxQFGbD9jVHH/yl0oiMrDeaRYgccE5II+KY7WoLjsBry/9Qf2ERELKTK4UeIGIqWci9lab1ti+GxFPPiC3krNFjo4jShV4eUs4cNIrjwNrxVaKPXmU6o7Y3Hpayx Concourse
 
@@ -1018,7 +1018,7 @@ vault:
 
   injector:
     enabled: false
-  
+
   server:
     image:
       tag: "1.5.4"
@@ -1065,7 +1065,7 @@ vault:
         storage "file" {
           path = "/vault/data"
         }
-    
+
     resources: {}
     # resources:
     #   requests:
