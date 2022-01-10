@@ -33,7 +33,7 @@ default:
         type: string
         widget: cy_crs
         description: "Git repository URL containing the config of the stack."
-        default: "git@github.com:cycloidio/cycloid-stacks-test.git"
+        default: "git@github.com:cycloidio/cycloid-stacks.git"
         required: true
       - name: "Config git key"
         description: "SSH key pair to fetch the config Git repository."
@@ -69,9 +69,8 @@ default:
         key: instance_private_key_pair
         type: string
         widget: cy_cred
-        default: "((git_ssh_bastion_cycloid.ssh_key))"
+        default: "((git_ssh_bastion.ssh_key))"
         required: true
-
     Service:
       - name: "Concourse worker enabled"
         description: "Install a concourse worker"
