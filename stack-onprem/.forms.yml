@@ -33,7 +33,7 @@ cycloid-cost-explorer-with-es-one-node:
         type: string
         widget: cy_crs
         description: "Git repository URL containing the config of the stack."
-        default: "git@github.com:cycloidio/cycloid-stacks-test.git"
+        default: "git@github.com:cycloidio/cycloid-stacks.git"
         required: true
       - name: "Config git key"
         description: "SSH key pair to fetch the config Git repository."
@@ -47,7 +47,6 @@ cycloid-cost-explorer-with-es-one-node:
         key: config_git_branch
         widget: cy_branch
         type: string
-        description: "The branch used by the config repository"
         source: config_git_repository
         default: "config"
         required: true
@@ -71,7 +70,6 @@ cycloid-cost-explorer-with-es-one-node:
         widget: cy_cred
         default: "((ssh_demo.ssh_key))"
         required: true
-
     Service:
       - name: "Concourse worker enabled"
         description: "Install a concourse worker"
