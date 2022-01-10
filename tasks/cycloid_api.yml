@@ -37,8 +37,7 @@
       # Defined by env-file
       #VAULT_ROLE_ID:
       #VAULT_SECRET_ID:
-      #JAEGER_COLLECTOR_SERVICE_HOST: localhost
-      #JAEGER_COLLECTOR_PORT_14268_TCP_PORT: 14268
+      #JAEGER_ENDPOINT: "localhost:14268"
       EMAIL_SMTP_SVR_ADDR: "{{ cycloid_email_smtp_svr_addr }}"
       EMAIL_SMTP_USERNAME: "{{ cycloid_email_smtp_username }}"
       EMAIL_SMTP_PASSWORD: "{{ cycloid_email_smtp_password }}"
