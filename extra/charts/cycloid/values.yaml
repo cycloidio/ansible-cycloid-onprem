@@ -507,6 +507,13 @@ redis:
   cluster:
     enabled: false
 
+  persistence:
+    enabled: true
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+
 #
 # External Redis Configuration
 # All of these values are only used if `redis.enabled=false`
