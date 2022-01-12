@@ -1,0 +1,6 @@
+kind: Fixed
+body: Add missing redis persistence settings in the values.yaml
+time: 2022-01-12T12:47:59.846586207+01:00
+custom:
+  Ref: Pull
+  RefID: "109"
