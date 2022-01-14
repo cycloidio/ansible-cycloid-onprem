@@ -1,0 +1,6 @@
+kind: Changed
+body: Bump Console to version 2.3.5
+time: 2022-01-14T12:54:36.021891851+01:00
+custom:
+  Ref: Pull
+  RefID: "110"
