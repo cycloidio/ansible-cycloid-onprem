@@ -1026,6 +1026,9 @@ vault:
   injector:
     enabled: false
 
+    leaderElector:
+      enabled: false
+
   server:
     image:
       tag: "1.5.4"
