@@ -1,0 +1,6 @@
+kind: Fixed
+body: Prevent potential vault injector error during the initial vault setup
+time: 2022-01-20T11:20:51.580876239+01:00
+custom:
+  Ref: Pull
+  RefID: "114"
