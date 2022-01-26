@@ -1,0 +1,6 @@
+kind: Added
+body: Add nginxinc/kubernetes-ingress controller annotations as a comment in values.yaml
+time: 2022-01-26T15:56:13.539638818+01:00
+custom:
+  Ref: Pull
+  RefID: "115"
