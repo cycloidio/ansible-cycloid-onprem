@@ -303,13 +303,45 @@ backend:
     annotations:
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
+      # If using the ingress-nginx controller from the kubernetes team: https://github.com/kubernetes/ingress-nginx/
       nginx.ingress.kubernetes.io/cors-allow-origin: "*"
       nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-Refresh-Token"
       nginx.ingress.kubernetes.io/enable-cors: "true"
       nginx.ingress.kubernetes.io/proxy-connect-timeout: "360"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "360"
       nginx.ingress.kubernetes.io/proxy-read-timeout: "360"
-      nginx.ingress.kubernetes.io/configuration-snippet: "chunked_transfer_encoding off; add_header 'Access-Control-Expose-Headers' 'X-Refresh-Token' always;"
+      nginx.ingress.kubernetes.io/configuration-snippet: "chunked_transfer_encoding off; more_set_headers 'Access-Control-Expose-Headers: X-Refresh-Token';"
+      # If using the nginx-ingress-controller from NGINXinc: https://github.com/nginxinc/kubernetes-ingress
+      # nginx.org/proxy-connect-timeout: "360s"
+      # nginx.org/proxy-send-timeout: "360s"
+      # nginx.org/proxy-read-timeout: "360s"
+      # nginx.org/location-snippets: |
+      #   chunked_transfer_encoding off;
+      #   # Cors Preflight methods needs additional options and different Return Code
+      #   set $http_origin *;
+      #   set $cors 'true';
+      #   if ($request_method = 'OPTIONS') {
+      #     set $cors ${cors}options;
+      #   }
+      #   if ($cors = "true") {
+      #     add_header 'Access-Control-Allow-Origin' '$http_origin' always;
+      #     add_header 'Access-Control-Allow-Credentials' 'true' always;
+      #     add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, PATCH, OPTIONS' always;
+      #     add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-Refresh-Token' always;
+      #     add_header 'Access-Control-Expose-Headers' 'X-Refresh-Token' always;
+      #     add_header 'Access-Control-Max-Age' '1728000' always;
+      #   }
+      #   if ($cors = "trueoptions") {
+      #     add_header 'Access-Control-Allow-Origin' '$http_origin' always;
+      #     add_header 'Access-Control-Allow-Credentials' 'true' always;
+      #     add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, PATCH, OPTIONS' always;
+      #     add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-Refresh-Token' always;
+      #     add_header 'Access-Control-Expose-Headers' 'X-Refresh-Token' always;
+      #     add_header 'Access-Control-Max-Age' '1728000' always;
+      #     add_header 'Content-Type' 'text/plain charset=UTF-8' always;
+      #     add_header 'Content-Length' '0' always;
+      #     return 204;
+      #   }
     hosts:
       - host: api.cycloid.local
         paths:
@@ -762,10 +794,7 @@ concourse:
       ##   kubernetes.io/ingress.class: nginx
       ##   kubernetes.io/tls-acme: 'true'
       ##
-      annotations:
-        nginx.ingress.kubernetes.io/cors-allow-headers: DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Last-Event-Id
-        nginx.ingress.kubernetes.io/cors-allow-origin: http://localhost:3000
-        nginx.ingress.kubernetes.io/enable-cors: "true"
+      annotations: {}
 
       ## Hostnames.
       ## Must be provided if Ingress is enabled.
