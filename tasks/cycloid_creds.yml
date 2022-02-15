@@ -125,9 +125,6 @@
     with_items:
       - secrets enable -path cycloid kv
       - auth enable approle
-    # Concourse tunning
-      - secrets tune -max-lease-ttl=4380h cycloid/
-      - auth tune -max-lease-ttl=4380h approle/
   when: vault_tokens is not skipped
 
 - name: Check approles/approle-cycloid exists | cycloid-creds
