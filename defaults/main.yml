@@ -510,7 +510,7 @@ saml_idp_metadata_path: "{%- if saml_auth_enabled and saml_idp_metadata_url == '
 ###########################
 
 # elasticsearch variable used for Cost Explorer access
-cost_explorer_es_url: https://54.155.239.89:9200
+cost_explorer_es_url: http://54.155.239.89:9200
 cost_explorer_es_max_bulk_bytes: 1000000
 cost_explorer_es_bulk_increase_factor: 1.5
 cost_explorer_es_bulk_decrease_factor: 0.7
