@@ -88,10 +88,6 @@ install_minio: true
 install_elasticsearch: false
 cycloid_licence: ((custom_cycloid-backend-$LICENCE_ENV.licence_key))
 
-cost_explorer_es_url: ((custom_cycloid-onprem.cost_explorer_es_url))
-cost_explorer_es_username: ((custom_cycloid-onprem.cost_explorer_es_username))
-cost_explorer_es_password: ((custom_cycloid-onprem.cost_explorer_es_password))
-
 # should be the same as cycloid_api_image. Need to be updated whith forms v2 (same variable between ansible and pipeline)
 cycloid_api_image: $BACKEND_IMAGE_TAG
 cycloid_frontend_image: $FRONTEND_IMAGE_TAG
