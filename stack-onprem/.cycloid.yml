@@ -1,7 +1,7 @@
 ---
 version: '2'
 name: 'On-premise'
-canonical: 'cycloid-onprem'
+canonical: 'cycloid-onprem-cs-ce'
 status: 'private'
 description: 'Create On-premise setup of Cycloid.'
 keywords:
