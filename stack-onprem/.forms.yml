@@ -299,14 +299,14 @@ default:
         widget: simple_text
         type: string
         default: ""
-        required: true
+        required: false
       - name: "Elasticsearch password"
         description: "Elasticsearch database password for Cost-Explorer"
         key: cost_explorer_es_password
         widget: simple_text
         type: string
         default: ""
-        required: true
+        required: false
 
     ext-auth:
       - name: "SAML Auth enable"
