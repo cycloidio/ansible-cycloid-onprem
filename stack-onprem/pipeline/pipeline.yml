@@ -330,6 +330,7 @@ jobs:
             cycloid_licence: "${CYCLOID_LICENCE}"
 
             # Cost Explorer ELASTICSEARCH
+            cost_explorer_es_url: "${CE_ES_URL}"
             cost_explorer_es_username: "${CE_ES_USERNAME}"
             cost_explorer_es_password: "${CE_ES_PASSWORD}"
             EOF
@@ -453,8 +454,9 @@ jobs:
           CYCLOID_LICENCE: ((cycloid_licence))
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
-          CE_ES_USERNAME: ((ce_es_username))
-          CE_ES_PASSWORD: ((ce_es_password))
+          CE_ES_URL: ((cost_explorer_es_url))
+          CE_ES_USERNAME: ((cost_explorer_es_username))
+          CE_ES_PASSWORD: ((cost_explorer_es_password)
 
     - task: access
       config:
