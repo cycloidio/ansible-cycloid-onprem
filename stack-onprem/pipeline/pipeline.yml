@@ -330,9 +330,9 @@ jobs:
             cycloid_licence: "${CYCLOID_LICENCE}"
 
             # Cost Explorer ELASTICSEARCH
-            cost_explorer_es_url: "${CE_ES_URL}"
-            cost_explorer_es_username: "${CE_ES_USERNAME}"
-            cost_explorer_es_password: "${CE_ES_PASSWORD}"
+            cost_explorer_es_url: "${COST_EXPLORER_ES_URL}"
+            cost_explorer_es_username: "${COST_EXPLORER_ES_URL}"
+            cost_explorer_es_password: "${COST_EXPLORER_ES_URL}"
             EOF
 
             # Galaxy install for onprem
@@ -454,9 +454,9 @@ jobs:
           CYCLOID_LICENCE: ((cycloid_licence))
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
-          CE_ES_URL: ((cost_explorer_es_url))
-          CE_ES_USERNAME: ((cost_explorer_es_username))
-          CE_ES_PASSWORD: ((cost_explorer_es_password)
+          COST_EXPLORER_ES_URL: ((cost_explorer_es_url))
+          COST_EXPLORER_ES_USERNAME: ((cost_explorer_es_username))
+          COST_EXPLORER_ES_PASSWORD: ((cost_explorer_es_password)
 
     - task: access
       config:
