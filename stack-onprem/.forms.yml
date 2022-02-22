@@ -285,6 +285,28 @@ default:
         widget: switch
         type: boolean
         default: true
+    Cost-Explorer:
+      - name: "Elasticsearch URL"
+        description: "Elasticsearch database URL for Cost-Explorer"
+        key: cost_explorer_es_url
+        widget: simple_text
+        type: string
+        default: "http://localhost:9200"
+        required: true
+      - name: "Elasticsearch username"
+        description: "Elasticsearch database username for Cost-Explorer"
+        key: cost_explorer_es_username
+        widget: simple_text
+        type: string
+        default: ""
+        required: true
+      - name: "Elasticsearch password"
+        description: "Elasticsearch database password for Cost-Explorer"
+        key: cost_explorer_es_password
+        widget: simple_text
+        type: string
+        default: ""
+        required: true
 
     ext-auth:
       - name: "SAML Auth enable"
