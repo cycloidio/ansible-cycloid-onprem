@@ -1,9 +1,9 @@
 ---
 version: '2'
-name: 'On-premise'
+name: 'On-premise Cham Cost-Explorer'
 canonical: 'cycloid-onprem-cs-ce'
 status: 'private'
-description: 'Create On-premise setup of Cycloid.'
+description: 'Create On-premise setup of Cycloid (with Cost-Explorer).'
 keywords:
   - 'cycloid'
   - 'concourse'
