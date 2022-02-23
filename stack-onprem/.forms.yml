@@ -1,5 +1,981 @@
 ---
-default:
+cycloid-cost-explorer-without-es:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws_admin.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws_admin.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:cycloidio/cycloid-stacks-test.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((git_github.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "config"
+        required: true
+    Cycloid:
+      - name: "Stack branch"
+        description: "Branch to use on the public stack Git repository."
+        key: stack_git_branch
+        widget: simple_text
+        type: string
+        default: master
+      - name: "Terraform version"
+        description: "Terraform version used."
+        key: terraform_version
+        widget: simple_text
+        type: string
+        default: '1.0.7'
+      - name: "Private SSH KEY to connect on instances"
+        description: "Private SSH KEY to connect on instances."
+        key: instance_private_key_pair
+        type: string
+        widget: cy_cred
+        default: "((git_ssh_bastion_cycloid.ssh_key))"
+        required: true
+
+    Service:
+      - name: "Concourse worker enabled"
+        description: "Install a concourse worker"
+        key: install_concourse_worker
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Minio (S3) enabled"
+        description: "Install MinIo (user as aws s3 external backend for tfstate)"
+        key: install_minio
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Elasticsearch (logs) enabled"
+        description: "Install Elasticsearch (used for centralized logs. Required dedicated instance or a bigger mutu)"
+        key: install_elasticsearch
+        widget: switch
+        type: boolean
+        default: false
+
+    Advanced:
+      - name: "Cycloid Licence"
+        description: "Cycloid Licence."
+        key: cycloid_licence
+        type: string
+        widget: cy_cred
+        default: "((custom_onprem_licence.prod))"
+      - name: "Ansible extra variables"
+        description: "Cycloid EXTRA_ANSIBLE_VARS"
+        key: ansible_params_extravars
+        widget: text_area
+        type: raw
+        default: |+
+            test: "foo"
+            #azure_ad_tenant_id: ""
+            #azure_ad_client_id: ""
+            #google_client_id: ""
+            #google_client_secret: ""
+            #github_host_address: "https://api.github.com"
+            #github_client_id: ""
+            #github_client_secret: ""
+
+  terraform:
+    application:
+      - name: "Instance count"
+        description: "Number of Aws EC2 onprem server to create."
+        key: cy_instances_count
+        widget: simple_text
+        type: string
+        default: "1"
+      - name: "Instance type"
+        description: "Type of Aws EC2 onprem servers."
+        key: cy_instances_type
+        widget: auto_complete
+        type: string
+        default: "t3.small"
+        values:
+            - "t3.micro"
+            - "t3.small"
+            - "t3.medium"
+            - "t3.large"
+      - name: "Instance disk size"
+        unit: Go
+        description: "Disk size of Aws EC2 onprem servers."
+        key: cy_instances_disk_size
+        widget: slider_range
+        type: integer
+        default: 50
+        values:
+            - 10
+            - 250
+      - name: "Instance EBS optimized"
+        description: "Whether the Instance is EBS optimized or not, related to the instance type you choose."
+        key: cy_instances_ebs_optimized
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Allowed Ips"
+        description: "Ip range allowed to connect on servers."
+        key: cy_instances_cidr_blocks_allow
+        widget: text_area
+        type: array
+        default:
+            - 0.0.0.0/0
+      - name: "SSH Keypair to access instances"
+        description: "Keypair to access instances."
+        key: keypair_name
+        widget: auto_complete
+        type: string
+        default: "cycloid"
+        values:
+            - "cycloid"
+    OS:
+      - name: "AMI search name pattern (or use Base ami ID directly)"
+        description: "Type of Aws EC2 frontend servers."
+        key: debian_ami_name
+        widget: auto_complete
+        type: string
+        default: "debian-10-amd64-*"
+        values:
+            - "debian-9-amd64-*"
+            - "debian-10-amd64-*"
+            - "debian-11-arm64-*"
+            - "CentOS 7.9.2009 x86_64*"
+            - "CentOS 8.3.2011 x86_64*"
+            - "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"
+            - "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+      - name: "Base ami ID"
+        description: "Type of Aws EC2 frontend servers."
+        key: base_ami_id
+        widget: auto_complete
+        type: string
+        default: ""
+        values:
+            - "ami-0874dad5025ca362c"
+            - "ami-04f5641b0d178a27a"
+            - "ami-0a75a5a43b05b4d5f"
+            - "ami-0e9968d81cef18781"
+            - "ami-01aa664a17515f5bb"
+            - "ami-01ebd2b650c37e4d6"
+  ansible:
+    configuration:
+      - name: "Initial Organization name"
+        description: "Initial Organization name."
+        key: cycloid_initial_organization_name
+        widget: simple_text
+        type: string
+        default: "Cycloid"
+      - name: "Cycloid Database image"
+        description: "Cycloid Database image."
+        key: cycloid_db_image
+        widget: auto_complete
+        type: string
+        default: "mysql:8.0.21"
+        values:
+            - "mysql:8.0.21"
+            - "mysql:8.0.25"
+            - "mariadb:10.2.11"
+
+      - name: "Cycloid Database password"
+        description: "Cycloid Database password."
+        key: cycloid_db_password
+        widget: simple_text
+        type: string
+        default: "OZvQdTtdvP9yVZBwBxeQcELDSn8QKAG9"
+        required: true
+
+      - name: "Concourse Database password"
+        description: "Concourse Database password."
+        key: concourse_db_password
+        widget: simple_text
+        type: string
+        default: "JENJTtK8aVPQzxvSN39xCQaLl1dYt9eP"
+        required: true
+      - name: "Concourse admin user password"
+        description: "Concourse admin user password."
+        key: concourse_auth_password
+        widget: simple_text
+        type: string
+        default: "pooph4iek9OhqueeGhah3ooCheiKongo"
+        required: true
+
+      - name: "Cycloid initial user information"
+        description: "Cycloid initial user information"
+        key: cycloid_initial_user
+        widget: text_area
+        type: raw
+        default: |+
+          username: "admin"
+          email: "disabled@email.cycloid"
+          password: "$$$$$$$$"
+          given_name: admin
+          family_name: cycloid
+
+      - name: "Cycloid API image"
+        description: "Cycloid API image."
+        key: cycloid_api_image
+        widget: auto_complete
+        type: string
+        default: "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod"
+        values:
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod"
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:staging"
+      - name: "Cycloid Frontend image"
+        description: "Cycloid Frontend image."
+        key: cycloid_frontend_image
+        widget: auto_complete
+        type: string
+        default: "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod"
+        values:
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod"
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:staging"
+
+      - name: "Create Public stacks catalog repository"
+        description: "Create Public stacks catalog repository. (need valide licence)"
+        key: cycloid_public_stacks
+        widget: switch
+        type: boolean
+        default: true
+
+      - name: "Create admin APIKEY"
+        description: "Create admin APIKEY and store it on disk. (need valide licence)"
+        key: cycloid_admin_apikey
+        widget: switch
+        type: boolean
+        default: true
+
+      - name: "Share host certificates in containers"
+        description: "Share host certificates in containers"
+        key: ca_certificates_container_shared
+        widget: switch
+        type: boolean
+        default: true
+    Cost-Explorer:
+      - name: "Elasticsearch URL"
+        description: "Elasticsearch database URL for Cost-Explorer"
+        key: cost_explorer_es_url
+        widget: simple_text
+        type: string
+        default: "http://localhost:9200"
+        required: true
+      - name: "Elasticsearch username"
+        description: "Elasticsearch database username for Cost-Explorer"
+        key: cost_explorer_es_username
+        widget: simple_text
+        type: string
+        default: ""
+        required: false
+      - name: "Elasticsearch password"
+        description: "Elasticsearch database password for Cost-Explorer"
+        key: cost_explorer_es_password
+        widget: simple_text
+        type: string
+        default: ""
+        required: false
+
+    ext-auth:
+      - name: "SAML Auth enable"
+        description: "Enable SAML or not."
+        key: saml_auth_enabled
+        widget: switch
+        type: boolean
+        default: false
+      - name: "SAML IDP Metadata URL"
+        description: "SAML IDP Metadata URL. (if SAML enabled)"
+        key: saml_idp_metadata_url
+        widget: auto_complete
+        type: string
+        default: "https://samltest.id/saml/idp"
+        values:
+            - "https://samltest.id/saml/idp"
+
+cycloid-cost-explorer-es-poc:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws_admin.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws_admin.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:cycloidio/cycloid-stacks-test.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((git_github.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "config"
+        required: true
+    Cycloid:
+      - name: "Stack branch"
+        description: "Branch to use on the public stack Git repository."
+        key: stack_git_branch
+        widget: simple_text
+        type: string
+        default: master
+      - name: "Terraform version"
+        description: "Terraform version used."
+        key: terraform_version
+        widget: simple_text
+        type: string
+        default: '1.0.7'
+      - name: "Private SSH KEY to connect on instances"
+        description: "Private SSH KEY to connect on instances."
+        key: instance_private_key_pair
+        type: string
+        widget: cy_cred
+        default: "((git_ssh_bastion_cycloid.ssh_key))"
+        required: true
+
+    Service:
+      - name: "Concourse worker enabled"
+        description: "Install a concourse worker"
+        key: install_concourse_worker
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Minio (S3) enabled"
+        description: "Install MinIo (user as aws s3 external backend for tfstate)"
+        key: install_minio
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Elasticsearch (logs) enabled"
+        description: "Install Elasticsearch (used for centralized logs. Required dedicated instance or a bigger mutu)"
+        key: install_elasticsearch
+        widget: switch
+        type: boolean
+        default: false
+
+    Advanced:
+      - name: "Cycloid Licence"
+        description: "Cycloid Licence."
+        key: cycloid_licence
+        type: string
+        widget: cy_cred
+        default: "((custom_onprem_licence.prod))"
+      - name: "Ansible extra variables"
+        description: "Cycloid EXTRA_ANSIBLE_VARS"
+        key: ansible_params_extravars
+        widget: text_area
+        type: raw
+        default: |+
+            test: "foo"
+            #azure_ad_tenant_id: ""
+            #azure_ad_client_id: ""
+            #google_client_id: ""
+            #google_client_secret: ""
+            #github_host_address: "https://api.github.com"
+            #github_client_id: ""
+            #github_client_secret: ""
+
+  terraform:
+    application:
+      - name: "Instance count"
+        description: "Number of Aws EC2 onprem server to create."
+        key: cy_instances_count
+        widget: simple_text
+        type: string
+        default: "1"
+      - name: "Instance type"
+        description: "Type of Aws EC2 onprem servers."
+        key: cy_instances_type
+        widget: auto_complete
+        type: string
+        default: "t3.small"
+        values:
+            - "t3.micro"
+            - "t3.small"
+            - "t3.medium"
+            - "t3.large"
+      - name: "Instance disk size"
+        unit: Go
+        description: "Disk size of Aws EC2 onprem servers."
+        key: cy_instances_disk_size
+        widget: slider_range
+        type: integer
+        default: 50
+        values:
+            - 10
+            - 250
+      - name: "Instance EBS optimized"
+        description: "Whether the Instance is EBS optimized or not, related to the instance type you choose."
+        key: cy_instances_ebs_optimized
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Allowed Ips"
+        description: "Ip range allowed to connect on servers."
+        key: cy_instances_cidr_blocks_allow
+        widget: text_area
+        type: array
+        default:
+            - 0.0.0.0/0
+      - name: "SSH Keypair to access instances"
+        description: "Keypair to access instances."
+        key: keypair_name
+        widget: auto_complete
+        type: string
+        default: "cycloid"
+        values:
+            - "cycloid"
+    OS:
+      - name: "AMI search name pattern (or use Base ami ID directly)"
+        description: "Type of Aws EC2 frontend servers."
+        key: debian_ami_name
+        widget: auto_complete
+        type: string
+        default: "debian-10-amd64-*"
+        values:
+            - "debian-9-amd64-*"
+            - "debian-10-amd64-*"
+            - "debian-11-arm64-*"
+            - "CentOS 7.9.2009 x86_64*"
+            - "CentOS 8.3.2011 x86_64*"
+            - "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"
+            - "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+      - name: "Base ami ID"
+        description: "Type of Aws EC2 frontend servers."
+        key: base_ami_id
+        widget: auto_complete
+        type: string
+        default: ""
+        values:
+            - "ami-0874dad5025ca362c"
+            - "ami-04f5641b0d178a27a"
+            - "ami-0a75a5a43b05b4d5f"
+            - "ami-0e9968d81cef18781"
+            - "ami-01aa664a17515f5bb"
+            - "ami-01ebd2b650c37e4d6"
+  ansible:
+    configuration:
+      - name: "Initial Organization name"
+        description: "Initial Organization name."
+        key: cycloid_initial_organization_name
+        widget: simple_text
+        type: string
+        default: "Cycloid"
+      - name: "Cycloid Database image"
+        description: "Cycloid Database image."
+        key: cycloid_db_image
+        widget: auto_complete
+        type: string
+        default: "mysql:8.0.21"
+        values:
+            - "mysql:8.0.21"
+            - "mysql:8.0.25"
+            - "mariadb:10.2.11"
+
+      - name: "Cycloid Database password"
+        description: "Cycloid Database password."
+        key: cycloid_db_password
+        widget: simple_text
+        type: string
+        default: "OZvQdTtdvP9yVZBwBxeQcELDSn8QKAG9"
+        required: true
+
+      - name: "Concourse Database password"
+        description: "Concourse Database password."
+        key: concourse_db_password
+        widget: simple_text
+        type: string
+        default: "JENJTtK8aVPQzxvSN39xCQaLl1dYt9eP"
+        required: true
+      - name: "Concourse admin user password"
+        description: "Concourse admin user password."
+        key: concourse_auth_password
+        widget: simple_text
+        type: string
+        default: "pooph4iek9OhqueeGhah3ooCheiKongo"
+        required: true
+
+      - name: "Cycloid initial user information"
+        description: "Cycloid initial user information"
+        key: cycloid_initial_user
+        widget: text_area
+        type: raw
+        default: |+
+          username: "admin"
+          email: "disabled@email.cycloid"
+          password: "$$$$$$$$"
+          given_name: admin
+          family_name: cycloid
+
+      - name: "Cycloid API image"
+        description: "Cycloid API image."
+        key: cycloid_api_image
+        widget: auto_complete
+        type: string
+        default: "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod"
+        values:
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod"
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:staging"
+      - name: "Cycloid Frontend image"
+        description: "Cycloid Frontend image."
+        key: cycloid_frontend_image
+        widget: auto_complete
+        type: string
+        default: "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod"
+        values:
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod"
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:staging"
+
+      - name: "Create Public stacks catalog repository"
+        description: "Create Public stacks catalog repository. (need valide licence)"
+        key: cycloid_public_stacks
+        widget: switch
+        type: boolean
+        default: true
+
+      - name: "Create admin APIKEY"
+        description: "Create admin APIKEY and store it on disk. (need valide licence)"
+        key: cycloid_admin_apikey
+        widget: switch
+        type: boolean
+        default: true
+
+      - name: "Share host certificates in containers"
+        description: "Share host certificates in containers"
+        key: ca_certificates_container_shared
+        widget: switch
+        type: boolean
+        default: true
+    Cost-Explorer:
+      - name: "Elasticsearch URL"
+        description: "Elasticsearch database URL for Cost-Explorer"
+        key: cost_explorer_es_url
+        widget: simple_text
+        type: string
+        default: "http://localhost:9200"
+        required: true
+      - name: "Elasticsearch username"
+        description: "Elasticsearch database username for Cost-Explorer"
+        key: cost_explorer_es_username
+        widget: simple_text
+        type: string
+        default: ""
+        required: false
+      - name: "Elasticsearch password"
+        description: "Elasticsearch database password for Cost-Explorer"
+        key: cost_explorer_es_password
+        widget: simple_text
+        type: string
+        default: ""
+        required: false
+
+    ext-auth:
+      - name: "SAML Auth enable"
+        description: "Enable SAML or not."
+        key: saml_auth_enabled
+        widget: switch
+        type: boolean
+        default: false
+      - name: "SAML IDP Metadata URL"
+        description: "SAML IDP Metadata URL. (if SAML enabled)"
+        key: saml_idp_metadata_url
+        widget: auto_complete
+        type: string
+        default: "https://samltest.id/saml/idp"
+        values:
+            - "https://samltest.id/saml/idp"
+
+
+cycloid-cost-explorer-with-es-cluster:
+  pipeline:
+    Terraform:
+      - name: "AWS access key"
+        description: "Amazon AWS access key for Terraform."
+        key: aws_access_key
+        widget: cy_cred
+        type: string
+        default: "((aws_admin.access_key))"
+      - name: "AWS secret key"
+        description: "Amazon AWS secret key for Terraform."
+        key: aws_secret_key
+        widget: cy_cred
+        type: string
+        default: "((aws_admin.secret_key))"
+      - name: "Amazon AWS region"
+        description: "Amazon AWS region to use for Terraform."
+        key: aws_default_region
+        widget: auto_complete
+        type: string
+        values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+        default: eu-west-1
+      - name: "Terraform storage bucket"
+        description: "AWS S3 bucket name to store terraform remote state file."
+        key: terraform_storage_bucket_name
+        widget: simple_text
+        type: string
+        default: ($ organization_canonical $)-terraform-remote-state
+    Repos:
+      - name: "Config repository"
+        key: config_git_repository
+        type: string
+        widget: cy_crs
+        description: "Git repository URL containing the config of the stack."
+        default: "git@github.com:cycloidio/cycloid-stacks-test.git"
+        required: true
+      - name: "Config git key"
+        description: "SSH key pair to fetch the config Git repository."
+        key: config_git_private_key
+        type: string
+        widget: cy_cred
+        default: "((git_github.ssh_key))"
+        required: true
+      - name: "Config branch"
+        description: "Branch of the config Git repository."
+        key: config_git_branch
+        widget: cy_branch
+        type: string
+        description: "The branch used by the config repository"
+        source: config_git_repository
+        default: "config"
+        required: true
+    Cycloid:
+      - name: "Stack branch"
+        description: "Branch to use on the public stack Git repository."
+        key: stack_git_branch
+        widget: simple_text
+        type: string
+        default: master
+      - name: "Terraform version"
+        description: "Terraform version used."
+        key: terraform_version
+        widget: simple_text
+        type: string
+        default: '1.0.7'
+      - name: "Private SSH KEY to connect on instances"
+        description: "Private SSH KEY to connect on instances."
+        key: instance_private_key_pair
+        type: string
+        widget: cy_cred
+        default: "((git_ssh_bastion_cycloid.ssh_key))"
+        required: true
+
+    Service:
+      - name: "Concourse worker enabled"
+        description: "Install a concourse worker"
+        key: install_concourse_worker
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Minio (S3) enabled"
+        description: "Install MinIo (user as aws s3 external backend for tfstate)"
+        key: install_minio
+        widget: switch
+        type: boolean
+        default: true
+      - name: "Elasticsearch (logs) enabled"
+        description: "Install Elasticsearch (used for centralized logs. Required dedicated instance or a bigger mutu)"
+        key: install_elasticsearch
+        widget: switch
+        type: boolean
+        default: false
+
+    Advanced:
+      - name: "Cycloid Licence"
+        description: "Cycloid Licence."
+        key: cycloid_licence
+        type: string
+        widget: cy_cred
+        default: "((custom_onprem_licence.prod))"
+      - name: "Ansible extra variables"
+        description: "Cycloid EXTRA_ANSIBLE_VARS"
+        key: ansible_params_extravars
+        widget: text_area
+        type: raw
+        default: |+
+            test: "foo"
+            #azure_ad_tenant_id: ""
+            #azure_ad_client_id: ""
+            #google_client_id: ""
+            #google_client_secret: ""
+            #github_host_address: "https://api.github.com"
+            #github_client_id: ""
+            #github_client_secret: ""
+
+  terraform:
+    application:
+      - name: "Instance count"
+        description: "Number of Aws EC2 onprem server to create."
+        key: cy_instances_count
+        widget: simple_text
+        type: string
+        default: "1"
+      - name: "Instance type"
+        description: "Type of Aws EC2 onprem servers."
+        key: cy_instances_type
+        widget: auto_complete
+        type: string
+        default: "t3.small"
+        values:
+            - "t3.micro"
+            - "t3.small"
+            - "t3.medium"
+            - "t3.large"
+      - name: "Instance disk size"
+        unit: Go
+        description: "Disk size of Aws EC2 onprem servers."
+        key: cy_instances_disk_size
+        widget: slider_range
+        type: integer
+        default: 50
+        values:
+            - 10
+            - 250
+      - name: "Instance EBS optimized"
+        description: "Whether the Instance is EBS optimized or not, related to the instance type you choose."
+        key: cy_instances_ebs_optimized
+        widget: switch
+        type: boolean
+        default: false
+      - name: "Allowed Ips"
+        description: "Ip range allowed to connect on servers."
+        key: cy_instances_cidr_blocks_allow
+        widget: text_area
+        type: array
+        default:
+            - 0.0.0.0/0
+      - name: "SSH Keypair to access instances"
+        description: "Keypair to access instances."
+        key: keypair_name
+        widget: auto_complete
+        type: string
+        default: "cycloid"
+        values:
+            - "cycloid"
+    OS:
+      - name: "AMI search name pattern (or use Base ami ID directly)"
+        description: "Type of Aws EC2 frontend servers."
+        key: debian_ami_name
+        widget: auto_complete
+        type: string
+        default: "debian-10-amd64-*"
+        values:
+            - "debian-9-amd64-*"
+            - "debian-10-amd64-*"
+            - "debian-11-arm64-*"
+            - "CentOS 7.9.2009 x86_64*"
+            - "CentOS 8.3.2011 x86_64*"
+            - "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"
+            - "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+      - name: "Base ami ID"
+        description: "Type of Aws EC2 frontend servers."
+        key: base_ami_id
+        widget: auto_complete
+        type: string
+        default: ""
+        values:
+            - "ami-0874dad5025ca362c"
+            - "ami-04f5641b0d178a27a"
+            - "ami-0a75a5a43b05b4d5f"
+            - "ami-0e9968d81cef18781"
+            - "ami-01aa664a17515f5bb"
+            - "ami-01ebd2b650c37e4d6"
+  ansible:
+    configuration:
+      - name: "Initial Organization name"
+        description: "Initial Organization name."
+        key: cycloid_initial_organization_name
+        widget: simple_text
+        type: string
+        default: "Cycloid"
+      - name: "Cycloid Database image"
+        description: "Cycloid Database image."
+        key: cycloid_db_image
+        widget: auto_complete
+        type: string
+        default: "mysql:8.0.21"
+        values:
+            - "mysql:8.0.21"
+            - "mysql:8.0.25"
+            - "mariadb:10.2.11"
+
+      - name: "Cycloid Database password"
+        description: "Cycloid Database password."
+        key: cycloid_db_password
+        widget: simple_text
+        type: string
+        default: "OZvQdTtdvP9yVZBwBxeQcELDSn8QKAG9"
+        required: true
+
+      - name: "Concourse Database password"
+        description: "Concourse Database password."
+        key: concourse_db_password
+        widget: simple_text
+        type: string
+        default: "JENJTtK8aVPQzxvSN39xCQaLl1dYt9eP"
+        required: true
+      - name: "Concourse admin user password"
+        description: "Concourse admin user password."
+        key: concourse_auth_password
+        widget: simple_text
+        type: string
+        default: "pooph4iek9OhqueeGhah3ooCheiKongo"
+        required: true
+
+      - name: "Cycloid initial user information"
+        description: "Cycloid initial user information"
+        key: cycloid_initial_user
+        widget: text_area
+        type: raw
+        default: |+
+          username: "admin"
+          email: "disabled@email.cycloid"
+          password: "$$$$$$$$"
+          given_name: admin
+          family_name: cycloid
+
+      - name: "Cycloid API image"
+        description: "Cycloid API image."
+        key: cycloid_api_image
+        widget: auto_complete
+        type: string
+        default: "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod"
+        values:
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod"
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:staging"
+      - name: "Cycloid Frontend image"
+        description: "Cycloid Frontend image."
+        key: cycloid_frontend_image
+        widget: auto_complete
+        type: string
+        default: "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod"
+        values:
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod"
+            - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:staging"
+
+      - name: "Create Public stacks catalog repository"
+        description: "Create Public stacks catalog repository. (need valide licence)"
+        key: cycloid_public_stacks
+        widget: switch
+        type: boolean
+        default: true
+
+      - name: "Create admin APIKEY"
+        description: "Create admin APIKEY and store it on disk. (need valide licence)"
+        key: cycloid_admin_apikey
+        widget: switch
+        type: boolean
+        default: true
+
+      - name: "Share host certificates in containers"
+        description: "Share host certificates in containers"
+        key: ca_certificates_container_shared
+        widget: switch
+        type: boolean
+        default: true
+    Cost-Explorer:
+      - name: "Elasticsearch URL"
+        description: "Elasticsearch database URL for Cost-Explorer"
+        key: cost_explorer_es_url
+        widget: simple_text
+        type: string
+        default: "http://localhost:9200"
+        required: true
+      - name: "Elasticsearch username"
+        description: "Elasticsearch database username for Cost-Explorer"
+        key: cost_explorer_es_username
+        widget: simple_text
+        type: string
+        default: ""
+        required: false
+      - name: "Elasticsearch password"
+        description: "Elasticsearch database password for Cost-Explorer"
+        key: cost_explorer_es_password
+        widget: simple_text
+        type: string
+        default: ""
+        required: false
+
+    ext-auth:
+      - name: "SAML Auth enable"
+        description: "Enable SAML or not."
+        key: saml_auth_enabled
+        widget: switch
+        type: boolean
+        default: false
+      - name: "SAML IDP Metadata URL"
+        description: "SAML IDP Metadata URL. (if SAML enabled)"
+        key: saml_idp_metadata_url
+        widget: auto_complete
+        type: string
+        default: "https://samltest.id/saml/idp"
+        values:
+            - "https://samltest.id/saml/idp"
+
+cycloid-cost-explorer-with-es-one-node:
   pipeline:
     Terraform:
       - name: "AWS access key"
