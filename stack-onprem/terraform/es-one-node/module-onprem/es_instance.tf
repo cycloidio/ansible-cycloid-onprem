@@ -66,8 +66,8 @@ resource "aws_instance" "es_instance" {
   key_name = var.key_name
 
   //network
-  vpc_security_group_ids      = module.onprem.cy_instances.vpc_security_group_ids
-  subnet_id                   = module.onprem.cy_instances.subnet_id
+  vpc_security_group_ids      = var.cy_instances.vpc_security_group_ids
+  subnet_id                   = var.cy_instances.subnet_id
   associate_public_ip_address = var.associate_public_ip_address
 
   //storage
@@ -80,5 +80,20 @@ resource "aws_instance" "es_instance" {
   volume_tags   = local.es_volume_tags
 
   //tags
-  tags = module.onprem.cy_instances.tags
+  tags = var.cy_instances.tags
+}
+
+resource "aws_eip" "es_instance" {
+  instance = aws_instance.es_instance.id
+  vpc      = true
+}
+
+output "es_instance_public_ip" {
+  description = "List of public IP addresse assigned to the instance"
+  value       = aws_eip.es_instance.public_ip
+}
+
+output "es_instance_private_ip" {
+  description = "List of private IP addresses assigned to the instance"
+  value       = aws_eip.es_instance.private_ip
 }

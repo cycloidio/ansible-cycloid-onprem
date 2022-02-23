@@ -14,6 +14,10 @@ output "cy_instances_private_ip" {
 }
 
 output "es_instance_public_ip" {
-  value       = module.es.ip_address
-  description = "Elasticsearch instance IP."
+  value       = module.onprem.es_instance_public_ip
+  description = "Elasticsearch instance public IP."
+}
+output "es_instance_private_ip" {
+  value       = module.onprem.es_instance_private_ip
+  description = "Elasticsearch instance private IP."
 }
