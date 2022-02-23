@@ -259,16 +259,6 @@ jobs:
       params: {depth: 1}
       trigger: true
 
-    - get: docker-backend-image
-      params:
-        skip_download: true
-      trigger: true
-
-    - get: docker-frontend-image
-      params:
-        skip_download: true
-      trigger: true
-
     - get: tfstate
       passed:
         - terraform-apply
@@ -302,17 +292,10 @@ jobs:
             ssh-add /root/.ssh/id_rsa
 
             ###  Generate cycloid-onprem directory (with all ansible/config ...) ###
-            cd ${DIR}/cycloid-onprem
-            # Use bastion key for concourse
-            mkdir keys
-            cp /root/.ssh/id_rsa keys/
-            # generate the pub from the private
-            ssh-keygen -y -f keys/id_rsa > keys/id_rsa.pub
-
-            cp -r ../ansible-cycloid-onprem/playbooks/* . -r
+            cd ${DIR}/ansible-cycloid-onprem
 
             # generate inventory
-            bash ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/es-one-node/generate_inventory.sh ${DIR}/tfstate/metadata > inventory
+            bash ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/es-one-node/generate_inventory_es.sh ${DIR}/tfstate/metadata > inventory
             echo "ansible inventory used is:"
             cat inventory
 
@@ -411,6 +394,7 @@ jobs:
           CONFIG_ANSIBLE_PATH: ((config_ansible_path))
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           GITHUB_KEY: ((config_git_private_key))
+          COST_EXPLORER_ES: true
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
 
