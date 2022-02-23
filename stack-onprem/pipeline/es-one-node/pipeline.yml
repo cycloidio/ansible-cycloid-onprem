@@ -79,7 +79,7 @@ resources:
     branch: ((stack_git_branch))
     private_key: ((config_git_private_key))
     paths:
-      - stack-onprem/terraform/*
+      - stack-onprem/terraform/es-one-node/*
 
 - name: git_stack-ansible
   icon: github-circle
@@ -89,8 +89,8 @@ resources:
     branch: ((stack_git_branch))
     private_key: ((config_git_private_key))
     ignore_paths:
-      - stack-onprem/terraform/*
-      - stack-onprem/pipeline/*
+      - stack-onprem/terraform/es-one-node/*
+      - stack-onprem/pipeline/es-one-node/*
 
 # The Terraform config (will be merged with the stack)
 - name: git_config-terraform
@@ -344,7 +344,7 @@ jobs:
             cp -r ../ansible-cycloid-onprem/playbooks/* . -r
 
             # generate inventory
-            bash ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/generate_inventory.sh ${DIR}/tfstate/metadata > inventory
+            bash ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/es-one-node/generate_inventory.sh ${DIR}/tfstate/metadata > inventory
             echo "ansible inventory used is:"
             cat inventory
 
@@ -532,7 +532,7 @@ jobs:
             cp -r ../ansible-cycloid-onprem/playbooks/* . -r
 
             # generate inventory
-            bash ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/generate_inventory.sh ${DIR}/tfstate/metadata > inventory
+            bash ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/es-one-node/generate_inventory.sh ${DIR}/tfstate/metadata > inventory
             echo "ansible inventory used is:"
             cat inventory
 
