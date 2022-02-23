@@ -47,8 +47,7 @@ resource "aws_instance" "es_instance" {
   instance_type = var.es_instance_type
   iam_instance_profile = aws_iam_instance_profile.es_instance.name
 
-  // keypair name - if enabled
-  key_name = var.key_name
+  key_name = aws_instance.cy_instances[0].key_name
 
   //network
   vpc_security_group_ids      = aws_instance.cy_instances[0].vpc_security_group_ids
@@ -68,7 +67,7 @@ resource "aws_instance" "es_instance" {
   tags = merge(local.merged_tags, {
     Name = "${var.project}-es_instance-${var.env}"
     role = "es_instance"
-  }
+  })
 }
 
 resource "aws_eip" "es_instance" {
