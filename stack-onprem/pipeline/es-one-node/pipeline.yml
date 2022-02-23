@@ -172,38 +172,6 @@ jobs:
             path: "stack"
         params:
           CONFIG_PATH: ((config_terraform_path))
-          STACK_PATH: stack-onprem/terraform
-
-      - put: tfstate
-        params:
-          plan_only: true
-          terraform_source: merged-stack/
-
-
-# Merge and trigger a plan whenever there is a commit in Terraform stack or config
-- name: terraform-plan
-  serial: True
-  max_in_flight: 1
-  build_logs_to_retain: 10
-  plan:
-    - do:
-      - get: git_stack-terraform
-        params: {depth: 1}
-        trigger: true
-      - get: git_config-terraform
-        params: {depth: 1}
-        trigger: true
-
-      - task: merge-stack-and-config
-        config:
-          <<: *merge-stack-and-config
-          inputs:
-          - name: git_config-terraform
-            path: "config"
-          - name: git_stack-terraform
-            path: "stack"
-        params:
-          CONFIG_PATH: ((config_terraform_path))
           STACK_PATH: stack-onprem/terraform/es-one-node
 
       - put: tfstate
