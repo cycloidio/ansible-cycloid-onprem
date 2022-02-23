@@ -87,9 +87,6 @@ config:
       onprem:
         path: 'terraform/es-one-node/main.tf.sample'
         destination: '($ project $)/terraform/($ environment $)/main.tf'
-      es:
-        path: 'terraform/es-one-node/es.tf.sample'
-        destination: '($ project $)/terraform/($ environment $)/es.tf'
     ansible:
       onprem:
         path: 'ansible/es-one-node/environments/cycloid.yml.sample'
