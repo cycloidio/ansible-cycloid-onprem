@@ -1,45 +1,42 @@
 ###
-# AMI DATA
+# variables
 ###
 
-data "aws_ami" "vm" {
-  most_recent = var.ami_most_recent
-
-  filter {
-    name   = "name"
-    values = [var.ami_name]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = [var.ami_virtualisation_type]
-  }
-
-  filter {
-    name   = "architecture"
-    values = [var.ami_architecture]
-  }
-
-  filter {
-    name   = "root-device-type"
-    values = [var.ami_root_device_type]
-  }
-
-  owners = [var.ami_owners]
+variable "es_instance_disk_size" {
+  default = 100
 }
 
-
-###
-# Cloud init template
-###
-
-data "template_file" "user_data" {
-  template = file("${path.module}/cloud-init.sh.tpl")
-  vars = {
-    file_content  = var.file_content
-  }
+variable "es_instance_disk_type" {
+  default = "gp2"
 }
 
+variable "es_instance_type" {
+  default = "t2.large"
+}
+
+variable "es_instance_ebs_optimized" {
+  default = false
+}
+
+variable "es_instance_root_delete_on_termination" {
+  default = true
+}
+
+###
+# Iam role profile
+###
+
+# Create IAM Role for es_instance
+resource "aws_iam_role" "es_instance" {
+  name               = "es_instances-${var.project}-${var.env}"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  path               = "/${var.project}/"
+}
+
+resource "aws_iam_instance_profile" "es_instance" {
+  name = "profile-es_instance-${var.project}-${var.env}"
+  role = aws_iam_role.es_instance.name
+}
 
 ###
 # Security Group
@@ -47,7 +44,7 @@ data "template_file" "user_data" {
 
 resource "aws_security_group" "ec2" {
   name        = local.security_group_name
-  description = "Security group for ec2  ${var.project}-${var.env}"
+  description = "es_instance ${var.env} for ${var.project}"
   vpc_id      = var.vpc_id
 
   ingress = var.sg_ingress_rules
@@ -60,32 +57,28 @@ resource "aws_security_group" "ec2" {
 # EC2
 ###
 
-resource "aws_instance" "vm" {
-  ami           = data.aws_ami.vm.id
-  instance_type = var.instance_type
-
-  // cloud init script - if enabled 
-  user_data_base64 = base64encode(data.template_file.user_data.rendered)
+resource "aws_instance" "es_instance" {
+  ami           = data.aws_ami.es.id
+  instance_type = var.es_instance_type
+    iam_instance_profile = aws_iam_instance_profile.es_instance.name
 
   // keypair name - if enabled
   key_name = var.key_name
 
   //network
-  vpc_security_group_ids      = [aws_security_group.ec2.id]
-  subnet_id                   = var.subnet_id
-  private_ip                  = var.private_ip
+  vpc_security_group_ids      = module.onprem.cy_instances.vpc_security_group_ids
+  subnet_id                   = module.onprem.cy_instances.subnet_id
   associate_public_ip_address = var.associate_public_ip_address
 
   //storage
   root_block_device {
-    delete_on_termination = var.enable_vm_disk_delete_on_termination
-    encrypted             = var.enable_vm_disk_encrypted
-    volume_size           = var.vm_disk_size
-    volume_type           = var.vm_disk_type
+    delete_on_termination = var.es_instance_root_delete_on_termination
+    volume_size           = var.es_instance_disk_size
+    volume_type           = var.es_instance_disk_type
   }
-  ebs_optimized = var.ebs_optimized
-  volume_tags   = local.vm_volume_tags
+  ebs_optimized = var.es_instance_ebs_optimized
+  volume_tags   = local.es_volume_tags
 
   //tags
-  tags = local.instance_tags
+  tags = module.onprem.cy_instances.tags
 }
