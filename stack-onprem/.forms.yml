@@ -1091,6 +1091,61 @@ cycloid-cost-explorer-with-es-one-node:
             #github_client_secret: ""
 
   terraform:
+    Cost-Explorer Elasticsearch:
+      - name: "Instance type"
+        description: "Type of AWS EC2 instance for the Elasticsearch node."
+        key: module.es.instances_type
+        widget: auto_complete
+        type: string
+        default: "t2.large"
+        values:
+            - "t2.large"
+            - "t3.large"
+        required: true
+      - name: "Security group ingress rules"
+        description: "Configuration block for ingress rules."
+        key: module.es.sg_ingress_rules 
+        widget: text_area
+        type: raw
+        default: |+
+          [
+            {
+                description      = "Accept ssh traffic"
+                from_port        = 22
+                to_port          = 22
+                protocol         = "tcp"
+                cidr_blocks      = ["0.0.0.0/0"]
+                ipv6_cidr_blocks = []
+                prefix_list_ids  = []
+                security_groups  = []
+                self             = true
+              }
+            ]
+      - name: "Security group egress rules"
+        description: "Configuration block for ingress rules."
+        key: module.es.sg_egress_rules 
+        widget: text_area
+        type: raw
+        default: |+
+          [
+            {
+                description      = "Accept all egress"
+                from_port        = 0
+                to_port          = 0
+                protocol         = "-1"
+                cidr_blocks      = ["0.0.0.0/0"]
+                ipv6_cidr_blocks = []
+                prefix_list_ids  = []
+                security_groups  = []
+                self             = true
+              }
+            ]
+      - name: "Security group extra tags"
+        description: "Dict of extra tags to add to security group resources"
+        key: module.es.sg_extra_tags
+        widget: text_area
+        type: raw
+        default: "{}"    
     application:
       - name: "Instance count"
         description: "Number of Aws EC2 onprem server to create."
@@ -1262,13 +1317,6 @@ cycloid-cost-explorer-with-es-one-node:
         type: boolean
         default: true
     Cost-Explorer:
-      - name: "Elasticsearch URL"
-        description: "Elasticsearch database URL for Cost-Explorer"
-        key: cost_explorer_es_url
-        widget: simple_text
-        type: string
-        default: "http://localhost:9200"
-        required: true
       - name: "Elasticsearch username"
         description: "Elasticsearch database username for Cost-Explorer"
         key: cost_explorer_es_username

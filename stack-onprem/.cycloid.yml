@@ -79,9 +79,9 @@ config:
     description: 'Elasticsearch + Kibana (optional) installed and configured for Cost-Explorer on a seperate machine of Cycloid Core'
     pipeline:
       pipeline:
-        path: 'pipeline/es-one-node/pipeline-es-one-node.yml'
+        path: 'pipeline/es-one-node/pipeline.yml'
       variables:
-        path: 'pipeline/es-one-node/variables.es-one-node.sample.yml'
+        path: 'pipeline/es-one-node/variables.sample.yml'
         destination: '($ project $)/pipeline/variables-($ environment $).yml'
     terraform:
       onprem:
