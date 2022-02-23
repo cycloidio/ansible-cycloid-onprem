@@ -51,8 +51,8 @@ resource "aws_instance" "es_instance" {
   key_name = var.key_name
 
   //network
-  vpc_security_group_ids      = var.cy_instances.vpc_security_group_ids
-  subnet_id                   = var.cy_instances.subnet_id
+  vpc_security_group_ids      = aws_instance.cy_instances[0].vpc_security_group_ids
+  subnet_id                   = aws_instance.cy_instances[0].subnet_id
   associate_public_ip_address = var.associate_public_ip_address
 
   //storage
@@ -62,10 +62,10 @@ resource "aws_instance" "es_instance" {
     volume_type           = var.es_instance_disk_type
   }
   ebs_optimized = var.es_instance_ebs_optimized
-  volume_tags   = local.es_volume_tags
+  volume_tags   = aws_instance.cy_instances[0].volume_tags
 
   //tags
-  tags = var.cy_instances.tags
+  tags = aws_instance.cy_instances[0].tags
 }
 
 resource "aws_eip" "es_instance" {
