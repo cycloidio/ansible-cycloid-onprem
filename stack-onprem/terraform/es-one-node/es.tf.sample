@@ -1,7 +1,7 @@
 module "es" {
   #####################################
   # Do not modify the following lines #
-  source = "./module-ec2"
+  source = "./module-es"
 
   project  = var.project
   env      = var.env
