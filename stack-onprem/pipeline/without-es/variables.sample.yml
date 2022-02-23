@@ -1,0 +1,105 @@
+
+#
+# Terraform
+#
+
+# Amazon access to use to run terraform. Usually admin account to be able to create Amazon services.
+
+#. aws_access_key (required): ((aws_admin.access_key))
+#+ Amazon AWS access key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
+aws_access_key: ((aws_admin.access_key))
+
+#. aws_secret_key (required): ((aws_admin.secret_key))
+#+ Amazon AWS secret key for Terraform. See value format [here](https://docs.cycloid.io/advanced-guide/integrate-and-use-cycloid-credentials-manager.html#vault-in-the-pipeline)
+aws_secret_key: ((aws_admin.secret_key))
+
+#. aws_default_region (required): eu-west-1
+#+ Amazon AWS region to use for Terraform.
+aws_default_region: eu-west-1
+
+#. terraform_storage_bucket_name (required): ($ organization_canonical $)-terraform-remote-state
+#+ AWS S3 bucket name to store terraform remote state file.
+terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state
+
+#
+# Repos
+#
+
+#. config_git_repository (required): git@github.com:cycloidio/cycloid-stacks.git
+#+ Git repository URL containing the config of the stack.
+config_git_repository: git@github.com:cycloidio/cycloid-stacks.git
+
+#. config_git_branch (required): config
+#+ Branch of the config Git repository.
+config_git_branch: config
+
+#. config_git_private_key (required): ((git_github.ssh_key))
+#+ SSH key pair to fetch the config Git repository.
+config_git_private_key: ((git_github.ssh_key))
+
+#. stack_git_private_key (required): ((git_stack.ssh_key))
+#+ SSH key pair to fetch the stack Git repository.
+# stack_git_private_key: ((git_stack.ssh_key))
+
+#
+# Extra
+#
+
+#. api_key (optionnal): ((custom_api-key-admin.key))
+#+ API key used to configure infra view / logs / start/stop ...
+api_key: ((custom_api-key-admin.key))
+external_backend_aws_cred_name: aws
+
+#
+# Default variables that shouldn't be changed except if needed
+#
+
+#. env (required): ($ environment $)
+#+ Name of the project's environment.
+env: ($ environment $)
+
+#. project (required): ($ project $)
+#+ Name of the project.
+project: ($ project $)
+
+#. customer (required): ($ organization_canonical $)
+#+ Name of the Cycloid Organization, used as customer variable name.
+customer: ($ organization_canonical $)
+
+#. stack_git_branch (required): master
+#+ Branch to use on the public stack Git repository
+stack_git_branch: $ONPREM_STACK_BRANCH
+
+#. config_terraform_path (required): ($ project $)/terraform/($ environment $)
+#+ Path of Terraform files in the config git repository
+config_terraform_path: ($ project $)/terraform/($ environment $)
+
+config_ansible_path: ($ project $)/ansible
+
+terraform_version: '1.0.7'
+
+ansible_params_extravars:
+  test: "foo"
+
+instance_private_key_pair: ((git_ssh_bastion.ssh_key))
+
+install_concourse_worker: true
+install_minio: true
+install_elasticsearch: false
+cycloid_licence: ((custom_cycloid-backend-$LICENCE_ENV.licence_key))
+
+# should be the same as cycloid_api_image. Need to be updated whith forms v2 (same variable between ansible and pipeline)
+cycloid_api_image: $BACKEND_IMAGE_TAG
+cycloid_frontend_image: $FRONTEND_IMAGE_TAG
+
+#### Datas populate on onprem setup ####
+onprem_cr_repository: git@github.com:cycloidio/onprem-test.git
+
+onprem_minio_access_key: AKIAIOSFODNN7EXAMPLE
+onprem_minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+# cred name need to exist on your org
+onprem_aws_cred_name: aws_admin
+onprem_aws_sandbox_cred_name: aws_sandbox
+onprem_gcp_cred_name: gcp_terraform
+onprem_azure_cred_name: azure_terraform
+onprem_azure_storage_cred_name: azure_storage_cycloidtfstate
