@@ -1119,6 +1119,17 @@ cycloid-cost-explorer-with-es-one-node:
                 prefix_list_ids  = []
                 security_groups  = []
                 self             = true
+              },
+              {
+                description      = "Accept Elasticsearch traffic"
+                from_port        = 9200
+                to_port          = 9200
+                protocol         = "tcp"
+                cidr_blocks      = ["0.0.0.0/0"]
+                ipv6_cidr_blocks = []
+                prefix_list_ids  = []
+                security_groups  = []
+                self             = true
               }
             ]
       - name: "Security group egress rules"

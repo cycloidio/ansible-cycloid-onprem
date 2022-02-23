@@ -21,6 +21,7 @@ groups:
   - terraform-plan
   - terraform-apply
   - install-onprem
+  - install-elasticsearch
   - install-worker
 
 - name: extra
@@ -277,6 +278,194 @@ jobs:
           get_params:
             action: destroy
 
+- name: install-elasticsearch
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: git_stack-ansible
+      params: {depth: 1}
+      trigger: true
+
+    - get: git_config-ansible
+      params: {depth: 1}
+      trigger: true
+
+    - get: docker-backend-image
+      params:
+        skip_download: true
+      trigger: true
+
+    - get: docker-frontend-image
+      params:
+        skip_download: true
+      trigger: true
+
+    - get: tfstate
+      passed:
+        - terraform-apply
+      trigger: true
+
+    - task: ansible
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+
+            # use to run galaxy
+            echo "Get github private key"
+            echo "${GITHUB_KEY}" > /root/.ssh/id_rsa_github
+            chmod 600 /root/.ssh/id_rsa_github
+            eval "$(ssh-agent -s)"
+            ssh-add /root/.ssh/id_rsa_github
+
+            # ssh key to connect instances
+            echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+            chmod 600 /root/.ssh/id_rsa
+            ssh-add /root/.ssh/id_rsa
+
+            ###  Generate cycloid-onprem directory (with all ansible/config ...) ###
+            cd ${DIR}/cycloid-onprem
+            # Use bastion key for concourse
+            mkdir keys
+            cp /root/.ssh/id_rsa keys/
+            # generate the pub from the private
+            ssh-keygen -y -f keys/id_rsa > keys/id_rsa.pub
+
+            cp -r ../ansible-cycloid-onprem/playbooks/* . -r
+
+            # generate inventory
+            bash ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/generate_inventory.sh ${DIR}/tfstate/metadata > inventory
+            echo "ansible inventory used is:"
+            cat inventory
+
+            # get the cycloid.yml variable from config
+            cp ${DIR}/config/${CONFIG_ANSIBLE_PATH}/environments/cycloid-${ENV}.yml environments/cycloid.yml
+            ### Add more Ansible vars ###
+            MAIN_INSTANCE=$(jq -r  .es_instance_public_ip[0] ${DIR}/tfstate/metadata)
+
+            # Galaxy install for Elasticsearch
+            set -x
+            ansible-galaxy install elastic.elasticsearch,v7.17.0
+            set +x
+
+            # generate extra vars files
+            echo "${ANSIBLE_EXTRA_VARS}" | sed ':a;N;$!ba;s/\n/\\n/g' | jq -M . > extra_ansible_vars.json
+            echo "Extra vars in extra_ansible_vars.json"
+            cat extra_ansible_vars.json
+            # need to be run with -e @extra_ansible_vars.json
+
+            # Get the user by testing connexion (Ugly loop)
+            # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
+            # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
+            REMOTE_USER=""
+            set +e
+            for user in admin centos ubuntu;do
+              ssh ${user}@${MAIN_INSTANCE} ls
+              if [ $? -eq 0 ]; then
+                REMOTE_USER=${user}
+                break
+              fi
+            done
+            set -e
+
+            echo "Remote user: ${REMOTE_USER}"
+
+            # upload files + inventory + vars
+            scp -q -r ${DIR}/cycloid-onprem ${REMOTE_USER}@${MAIN_INSTANCE}:~/
+
+            echo "ensure ansible installed"
+
+            export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3
+            export ANSIBLE_HOST_KEY_CHECKING=false
+            export ANSIBLE_FORCE_COLOR=true
+
+            # check if ssh open
+            echo "Waiting for server to boot up..."
+            # 30 retry = wait 240 sec
+            max_retry=30
+            for i in $(seq 1 $max_retry); do
+              echo "waiting... (${i}/${max_retry})"
+              if ( nc -z -w3 ${MAIN_INSTANCE} 22 < /dev/null  ); then
+                echo "port 22 open"
+                break
+              fi
+
+              if [ "$i" -eq "$max_retry" ]; then
+                echo "timeout: server down"
+                exit 1
+              fi
+              sleep 5
+            done
+
+            # Ensure python install on all instances (usefull for centos)
+            # python is not installed by default on centos AWS AMI.
+            # Force install on all instance before to run ansible
+            if [ "$REMOTE_USER" = "centos" ]; then
+              for cinstance in $(jq -r  .es_instance_public_ip[0] ${DIR}/tfstate/metadata);do
+                ssh ${REMOTE_USER}@${cinstance} "sudo yum install python3 -yq";
+              done
+            fi
+
+            # If centos sudo yum install python3 -y ?
+            ansible-playbook -u ${REMOTE_USER} --become -i ${MAIN_INSTANCE}, ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/es-one-node/playbook-es.yml
+
+            echo "Ansible run"
+            set -x
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory playbook-es.yml -e @extra_ansible_vars.json"
+            set +x
+
+            OUTPUT_FILE="${DIR}/access/output"
+            cat inventory > ${OUTPUT_FILE}
+            echo "" >> ${OUTPUT_FILE}
+            echo "### Elasticsearch ready on: http://${MAIN_INSTANCE}" >> ${OUTPUT_FILE}
+
+        inputs:
+          - name: git_config-ansible
+            path: "config"
+          - name: tfstate
+          - name: git_stack-ansible
+            path: "ansible-cycloid-onprem"
+        outputs:
+          - name: cycloid-onprem
+          - name: access
+        params:
+          ENV: ((env))
+          CONFIG_ANSIBLE_PATH: ((config_ansible_path))
+          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          GITHUB_KEY: ((config_git_private_key))
+          ANSIBLE_EXTRA_VARS:
+             ((ansible_params_extravars))
+
+    - task: access
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+            OUTPUT_FILE="access/output"
+            cat $OUTPUT_FILE
+        inputs:
+          - name: access
+
+
 - name: install-onprem
   serial: True
   build_logs_to_retain: 10
@@ -434,7 +623,7 @@ jobs:
             fi
 
             # If centos sudo yum install python3 -y ?
-            ansible-playbook -u ${REMOTE_USER} --become -i ${MAIN_INSTANCE}, ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/playbook.yml
+            ansible-playbook -u ${REMOTE_USER} --become -i ${MAIN_INSTANCE}, ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/es-one-node/playbook.yml
 
             echo "Ansible run"
             set -x
