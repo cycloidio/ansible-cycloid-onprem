@@ -209,7 +209,7 @@ jobs:
             path: "stack"
         params:
           CONFIG_PATH: ((config_terraform_path))
-          STACK_PATH: stack-onprem/terraform
+          STACK_PATH: stack-onprem/terraform/es-onenode
 
       - put: tfstate
         params:
@@ -237,7 +237,7 @@ jobs:
               path: "stack"
           params:
             CONFIG_PATH: ((config_terraform_path))
-            STACK_PATH: stack-onprem/terraform
+            STACK_PATH: stack-onprem/terraform/es-one-node
 
         - put: tfstate
           params:
