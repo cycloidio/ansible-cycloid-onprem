@@ -78,7 +78,7 @@ resources:
     branch: ((stack_git_branch))
     private_key: ((config_git_private_key))
     paths:
-      - stack-onprem/terraform/*
+      - stack-onprem/without-es/terraform/*
 
 - name: git_stack-ansible
   icon: github-circle
@@ -88,8 +88,8 @@ resources:
     branch: ((stack_git_branch))
     private_key: ((config_git_private_key))
     ignore_paths:
-      - stack-onprem/terraform/*
-      - stack-onprem/pipeline/*
+      - stack-onprem/without-es/terraform/*
+      - stack-onprem/without-es/pipeline/*
 
 # The Terraform config (will be merged with the stack)
 - name: git_config-terraform
@@ -171,7 +171,7 @@ jobs:
             path: "stack"
         params:
           CONFIG_PATH: ((config_terraform_path))
-          STACK_PATH: stack-onprem/terraform
+          STACK_PATH: stack-onprem/without-es/terraform
 
       - put: tfstate
         params:
@@ -208,7 +208,7 @@ jobs:
             path: "stack"
         params:
           CONFIG_PATH: ((config_terraform_path))
-          STACK_PATH: stack-onprem/terraform
+          STACK_PATH: stack-onprem/without-es/terraform
 
       - put: tfstate
         params:
@@ -236,7 +236,7 @@ jobs:
               path: "stack"
           params:
             CONFIG_PATH: ((config_terraform_path))
-            STACK_PATH: stack-onprem/terraform
+            STACK_PATH: stack-onprem/without-es/terraform
 
         - put: tfstate
           params:
@@ -311,7 +311,7 @@ jobs:
             cp -r ../ansible-cycloid-onprem/playbooks/* . -r
 
             # generate inventory
-            bash ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/generate_inventory.sh ${DIR}/tfstate/metadata > inventory
+            bash ${DIR}/ansible-cycloid-onprem/stack-onprem/without-es/ansible/generate_inventory.sh ${DIR}/tfstate/metadata > inventory
             echo "ansible inventory used is:"
             cat inventory
 
@@ -402,7 +402,7 @@ jobs:
             fi
 
             # If centos sudo yum install python3 -y ?
-            ansible-playbook -u ${REMOTE_USER} --become -i ${MAIN_INSTANCE}, ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/playbook.yml
+            ansible-playbook -u ${REMOTE_USER} --become -i ${MAIN_INSTANCE}, ${DIR}/ansible-cycloid-onprem/stack-onprem/without-es/ansible/playbook.yml
 
             echo "Ansible run"
             set -x
@@ -572,8 +572,8 @@ jobs:
                 echo "Start Stop:"
 
                 #generate start-stop-req.json
-                export STARTSTOP=$(cat stack/stack-onprem/pipeline/start-stop.yml | python -c 'import yaml; import json; import sys; print(json.dumps(json.dumps(yaml.safe_load(sys.stdin))));')
-                envsubst '$STARTSTOP' < stack/stack-onprem/pipeline/start-stop-req.yml  | python -c 'import yaml; import json; import sys; print(json.dumps(yaml.safe_load(sys.stdin)));' > start-stop-req.json
+                export STARTSTOP=$(cat stack/stack-onprem/without-es/pipeline/start-stop.yml | python -c 'import yaml; import json; import sys; print(json.dumps(json.dumps(yaml.safe_load(sys.stdin))));')
+                envsubst '$STARTSTOP' < stack/stack-onprem/without-es/pipeline/start-stop-req.yml  | python -c 'import yaml; import json; import sys; print(json.dumps(yaml.safe_load(sys.stdin)));' > start-stop-req.json
 
                 # set product variables
                 envsubst '$API_KEY $ENV $ORGANIZATION $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < start-stop-req.json > start-stop-req-generated.json
