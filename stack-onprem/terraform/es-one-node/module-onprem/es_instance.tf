@@ -39,26 +39,11 @@ resource "aws_iam_instance_profile" "es_instance" {
 }
 
 ###
-# Security Group
-###
-
-resource "aws_security_group" "ec2" {
-  name        = local.security_group_name
-  description = "es_instance ${var.env} for ${var.project}"
-  vpc_id      = var.vpc_id
-
-  ingress = var.sg_ingress_rules
-  egress  = var.sg_egress_rules
-
-  tags = local.sg_tags
-}
-
-###
 # EC2
 ###
 
 resource "aws_instance" "es_instance" {
-  ami           = data.aws_ami.es.id
+  ami           = local.image_id
   instance_type = var.es_instance_type
     iam_instance_profile = aws_iam_instance_profile.es_instance.name
 
