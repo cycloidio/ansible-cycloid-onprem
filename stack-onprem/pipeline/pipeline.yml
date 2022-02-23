@@ -906,6 +906,10 @@ jobs:
             chmod 600 /root/.ssh/id_rsa
             ssh-add /root/.ssh/id_rsa
 
+            echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa_git
+            chmod 600 /root/.ssh/id_rsa_git
+            # ssh-add /root/.ssh/id_rsa_git
+
             MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
             echo "### Ansible and Cycloid console is on $MAIN_INSTANCE"
             # Get the user by testing connexion (Ugly loop)
@@ -928,7 +932,7 @@ jobs:
             cy --insecure login --org $ORG --api-key $API_KEY
 
             echo "Adding credentials ..."
-            cy --insecure  --org $ORG  credential create ssh --name github --ssh-key /root/.ssh/id_rsa
+            cy --insecure  --org $ORG  credential create ssh --name github --ssh-key /root/.ssh/id_rsa_git
             CRED=$(cy --insecure  --org $ORG  credential list -o json | jq -r '.[] | select( .name | contains("github")) | .canonical')
 
             cy --insecure  --org $ORG config-repo create --branch config --cred $CRED --url $CR_REPO --default  --name onprem-test
@@ -997,6 +1001,7 @@ jobs:
           - name: git_terracost
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          GIT_PRIVATE_KEY: ((config_git_private_key))
           CR_REPO: ((onprem_cr_repository))
           IV_BUCKET_NAME: cycloid-terraform-remote-state
           IV_BUCKET_PATH: cycloidio-website/demo-hack/cycloid-demo.tfstate
