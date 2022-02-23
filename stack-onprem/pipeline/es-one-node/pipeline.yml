@@ -181,7 +181,7 @@ jobs:
 
 
 # Merge and trigger a plan whenever there is a commit in Terraform stack or config
-- name: elasticsearch-terraform-plan
+- name: terraform-plan
   serial: True
   max_in_flight: 1
   build_logs_to_retain: 10
