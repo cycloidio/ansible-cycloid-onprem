@@ -793,8 +793,8 @@ jobs:
                 echo "Start Stop:"
 
                 #generate start-stop-req.json
-                export STARTSTOP=$(cat stack/stack-onprem/pipeline/start-stop.yml | python -c 'import yaml; import json; import sys; print(json.dumps(json.dumps(yaml.safe_load(sys.stdin))));')
-                envsubst '$STARTSTOP' < stack/stack-onprem/pipeline/start-stop-req.yml  | python -c 'import yaml; import json; import sys; print(json.dumps(yaml.safe_load(sys.stdin)));' > start-stop-req.json
+                export STARTSTOP=$(cat stack/stack-onprem/pipeline/es-one-node/start-stop.yml | python -c 'import yaml; import json; import sys; print(json.dumps(json.dumps(yaml.safe_load(sys.stdin))));')
+                envsubst '$STARTSTOP' < stack/stack-onprem/pipeline/es-one-node/start-stop-req.yml  | python -c 'import yaml; import json; import sys; print(json.dumps(yaml.safe_load(sys.stdin)));' > start-stop-req.json
 
                 # set product variables
                 envsubst '$API_KEY $ENV $ORGANIZATION $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < start-stop-req.json > start-stop-req-generated.json
