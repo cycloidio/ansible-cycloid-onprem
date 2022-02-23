@@ -45,7 +45,7 @@ resource "aws_iam_instance_profile" "es_instance" {
 resource "aws_instance" "es_instance" {
   ami           = local.image_id
   instance_type = var.es_instance_type
-    iam_instance_profile = aws_iam_instance_profile.es_instance.name
+  iam_instance_profile = aws_iam_instance_profile.es_instance.name
 
   // keypair name - if enabled
   key_name = var.key_name
@@ -65,7 +65,10 @@ resource "aws_instance" "es_instance" {
   volume_tags   = aws_instance.cy_instances[0].volume_tags
 
   //tags
-  tags = aws_instance.cy_instances[0].tags
+  tags = merge(local.merged_tags, {
+    Name = "${var.project}-es_instance-${var.env}"
+    role = "es_instance"
+  }
 }
 
 resource "aws_eip" "es_instance" {
