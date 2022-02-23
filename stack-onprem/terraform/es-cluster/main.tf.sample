@@ -1,0 +1,80 @@
+module "onprem" {
+  #####################################
+  # Do not modify the following lines #
+  source = "./module-onprem"
+
+  project            = var.project
+  env                = var.env
+  customer           = var.customer
+
+  #####################################
+  #. vpc_id (required):
+  #+ Amazon VPC id on which create each components.
+  vpc_id = data.terraform_remote_state.infrastructure.outputs.test_vpc_id
+
+  #. public_subnets_ids (required, array):
+  #+ Amazon subnets IDs on which create each components.
+  public_subnets_ids = data.terraform_remote_state.infrastructure.outputs.test_public_subnets_ids
+
+  #. bastion_sg_allow (optional):
+  #+ Amazon source security group ID which will be allowed to connect on Fronts port 22 (SSH).
+  bastion_sg_allow = data.terraform_remote_state.infrastructure.outputs.test_bastion_sg_allow
+
+  #. keypair_name (requiredl): cycloid
+  #+ Name of an existing AWS SSH keypair to use to deploy EC2 instances.
+  keypair_name = "cycloid"
+
+  #. extra_tags (optional): {}
+  #+ Dict of extra tags to add on aws resources. format { "foo" = "bar" }.
+  extra_tags = { "monitoring_discovery" = "false" }
+
+  ###
+  # cy_instances
+  ###
+
+  #. cy_instances (optional): 1
+  #+ Desired number of cy_instances servers.
+  cy_instances_count = "$INSTANCES_COUNT"
+
+  #. cy_instances_type (optional): t3.small
+  #+ Type of instance to use for cy_instances servers.
+  cy_instances_type = "t3.small"
+
+  #. cy_instances_ebs_optimized (optional, bool): false
+  #+ Whether the Instance is EBS optimized or not, related to the instance type you choose.
+  cy_instances_ebs_optimized = false
+
+  #. cy_instances_disk_size (optional): 30
+  #+ Disk size of cy_instances servers.
+  cy_instances_disk_size = 50
+
+  #. cy_instances_cidr_blocks_allow (optional, bool): ["0.0.0.0/0"]
+  #+ Cird block allowed to connect on instances.
+  cy_instances_cidr_blocks_allow = ["0.0.0.0/0"]
+
+  debian_ami_name = "debian-10-amd64-*"
+
+  base_ami_id = ""
+
+  # debian 10
+  # https://wiki.debian.org/Cloud/AmazonEC2Image/Buster
+  #base_ami_id = "ami-0874dad5025ca362c"
+
+  # debian 11
+  # https://wiki.debian.org/Cloud/AmazonEC2Image/Bullseye
+  #base_ami_id = "ami-01ebd2b650c37e4d6"
+
+  # Centos https://wiki.centos.org/Cloud/AWS
+  # centos 7
+  #base_ami_id = "ami-04f5641b0d178a27a"
+
+  # centos 8
+  #base_ami_id = "ami-0a75a5a43b05b4d5f"
+
+  # Ubuntu https://cloud-images.ubuntu.com/locator/ec2/
+  # ubuntu 18.04
+  #base_ami_id = "ami-0e9968d81cef18781"
+
+  # ubuntu 20.04
+  #base_ami_id = "ami-01aa664a17515f5bb"
+}

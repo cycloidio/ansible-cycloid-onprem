@@ -1,0 +1,1002 @@
+# YAML anchors
+shared:
+
+  # Task : sync and merge with rsync 2 rep. Used to merge stack and config
+  - &merge-stack-and-config
+    platform: linux
+    image_resource:
+      type: docker-image
+      source:
+        repository: cycloid/cycloid-toolkit
+        tag: latest
+    run:
+      path: /usr/bin/merge-stack-and-config
+    outputs:
+    - name: merged-stack
+      path: "merged-stack"
+
+groups:
+- name: overview
+  jobs:
+  - terraform-plan
+  - terraform-apply
+  - install-onprem
+  - install-worker
+
+- name: extra
+  jobs:
+  - extra-configuration
+  - uninstall-onprem
+  - mysql-force-pay-orgs
+  - mysql-force-user-email-validation
+  - report
+  - populate-datas
+
+- name: destroy
+  jobs:
+  - terraform-destroy
+
+resource_types:
+- name: terraform
+  type: docker-image
+  source:
+    repository: ljfranklin/terraform-resource
+    tag: ((terraform_version))
+
+resources:
+- name: tfstate
+  type: terraform
+  icon: terraform
+  source:
+    env_name: ((env))
+    backend_type: s3
+    backend_config:
+      bucket: ((terraform_storage_bucket_name))
+      key: ((project))-((env)).tfstate
+      workspace_key_prefix: ((project))
+      region: ((aws_default_region))
+      access_key: ((aws_access_key))
+      secret_key: ((aws_secret_key))
+    vars:
+      access_key: ((aws_access_key))
+      secret_key: ((aws_secret_key))
+      env: ((env))
+      project: ((project))
+      customer: ((customer))
+      aws_region: ((aws_default_region))
+    env:
+      AWS_ACCESS_KEY_ID: ((aws_access_key))
+      AWS_DEFAULT_REGION: ((aws_default_region))
+      AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+
+# The Terraform stack (will be merged with the config)
+- name: git_stack-terraform
+  icon: github-circle
+  type: git
+  source:
+    uri: git@github.com:cycloidio/ansible-cycloid-onprem.git
+    branch: ((stack_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - stack-onprem/terraform/*
+
+- name: git_stack-ansible
+  icon: github-circle
+  type: git
+  source:
+    uri: git@github.com:cycloidio/ansible-cycloid-onprem.git
+    branch: ((stack_git_branch))
+    private_key: ((config_git_private_key))
+    ignore_paths:
+      - stack-onprem/terraform/*
+      - stack-onprem/pipeline/*
+
+# The Terraform config (will be merged with the stack)
+- name: git_config-terraform
+  type: git
+  icon: github-circle
+  source:
+    uri: ((config_git_repository))
+    branch: ((config_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - ((config_terraform_path))/*
+
+- name: git_config-ansible
+  type: git
+  icon: github-circle
+  source:
+    uri: ((config_git_repository))
+    branch: ((config_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - ((config_ansible_path))/environments/*
+
+# git_terracost used by populate-datas
+# Cost estimation feature use cloudprovider pricing datas.
+# To have initial pricing datas, we use the sql dump from terracost
+- name: git_terracost
+  type: git
+  icon: github-circle
+  source:
+    uri: git@github.com:cycloidio/terracost.git
+    branch: master
+    private_key: ((config_git_private_key))
+    paths:
+      - mysql/testdata/*
+
+- name: docker-backend-image
+  type: registry-image
+  source:
+    aws_access_key_id: ((aws_access_key))
+    aws_region: ((aws_default_region))
+    aws_secret_access_key: ((aws_secret_key))
+    repository: youdeploy-http-api
+    tag: ((cycloid_api_image))
+  icon: docker
+
+- name: docker-frontend-image
+  type: registry-image
+  source:
+    aws_access_key_id: ((aws_access_key))
+    aws_region: ((aws_default_region))
+    aws_secret_access_key: ((aws_secret_key))
+    repository: youdeploy-frontend
+    tag: ((cycloid_frontend_image))
+  icon: docker
+
+jobs:
+
+# Merge and trigger a plan whenever there is a commit in Terraform stack or config
+- name: terraform-plan
+  serial: True
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: git_stack-terraform
+        params: {depth: 1}
+        trigger: true
+      - get: git_config-terraform
+        params: {depth: 1}
+        trigger: true
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: stack-onprem/terraform
+
+      - put: tfstate
+        params:
+          plan_only: true
+          terraform_source: merged-stack/
+
+# Merge and trigger an apply manually (no autostart of this job)
+- name: terraform-apply
+  serial: True
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: git_stack-terraform
+        trigger: true
+        passed:
+          - terraform-plan
+      - get: git_config-terraform
+        trigger: false
+        passed:
+          - terraform-plan
+      - get: tfstate
+        trigger: true
+        passed:
+          - terraform-plan
+
+      - task: merge-stack-and-config
+        config:
+          <<: *merge-stack-and-config
+          inputs:
+          - name: git_config-terraform
+            path: "config"
+          - name: git_stack-terraform
+            path: "stack"
+        params:
+          CONFIG_PATH: ((config_terraform_path))
+          STACK_PATH: stack-onprem/terraform
+
+      - put: tfstate
+        params:
+          plan_run: true
+          terraform_source: merged-stack/
+
+- name: terraform-destroy
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+        - get: git_stack-terraform
+          params: {depth: 1}
+          trigger: false
+        - get: git_config-terraform
+          params: {depth: 1}
+          trigger: false
+        - task: merge-stack-and-config
+          config:
+            <<: *merge-stack-and-config
+            inputs:
+            - name: git_config-terraform
+              path: "config"
+            - name: git_stack-terraform
+              path: "stack"
+          params:
+            CONFIG_PATH: ((config_terraform_path))
+            STACK_PATH: stack-onprem/terraform
+
+        - put: tfstate
+          params:
+            action: destroy
+            terraform_source: merged-stack/
+          get_params:
+            action: destroy
+
+- name: install-onprem
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: git_stack-ansible
+      params: {depth: 1}
+      trigger: true
+
+    - get: git_config-ansible
+      params: {depth: 1}
+      trigger: true
+
+    - get: docker-backend-image
+      params:
+        skip_download: true
+      trigger: true
+
+    - get: docker-frontend-image
+      params:
+        skip_download: true
+      trigger: true
+
+    - get: tfstate
+      passed:
+        - terraform-apply
+      trigger: true
+
+    - task: ansible
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+
+            # use to run galaxy
+            echo "Get github private key"
+            echo "${GITHUB_KEY}" > /root/.ssh/id_rsa_github
+            chmod 600 /root/.ssh/id_rsa_github
+            eval "$(ssh-agent -s)"
+            ssh-add /root/.ssh/id_rsa_github
+
+            # ssh key to connect instances
+            echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+            chmod 600 /root/.ssh/id_rsa
+            ssh-add /root/.ssh/id_rsa
+
+            ###  Generate cycloid-onprem directory (with all ansible/config ...) ###
+            cd ${DIR}/cycloid-onprem
+            # Use bastion key for concourse
+            mkdir keys
+            cp /root/.ssh/id_rsa keys/
+            # generate the pub from the private
+            ssh-keygen -y -f keys/id_rsa > keys/id_rsa.pub
+
+            cp -r ../ansible-cycloid-onprem/playbooks/* . -r
+
+            # generate inventory
+            bash ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/generate_inventory.sh ${DIR}/tfstate/metadata > inventory
+            echo "ansible inventory used is:"
+            cat inventory
+
+            # get the cycloid.yml variable from config
+            cp ${DIR}/config/${CONFIG_ANSIBLE_PATH}/environments/cycloid-${ENV}.yml environments/cycloid.yml
+            ### Add more Ansible vars ###
+            MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+
+            cat >> environments/cycloid.yml <<EOF
+            ### Ansible and Cycloid console will be on https://${MAIN_INSTANCE}
+            # Set additionnal ansible vars
+            # extra vars from pipeline job
+            cycloid_console_dns: "${MAIN_INSTANCE}"
+            cycloid_ecr_access_key: "${AWS_ACCESS_KEY_ID}"
+            cycloid_ecr_secret_key: "${AWS_SECRET_ACCESS_KEY}"
+            cycloid_licence: "${CYCLOID_LICENCE}"
+            EOF
+
+            # Galaxy install for onprem
+            set -x
+            ansible-galaxy install -r requirements.yml --roles-path=roles -v
+            set +x
+
+            # If worker needed, generate config used by the next install-worker job
+            if [ "$CONCOURSE_WORKER" = "true" ]; then
+              ansible-galaxy install -r worker-requirement.yml --roles-path=roles -v --force
+            fi
+
+            # Update onprem ansible role with files from the selected branch
+            cp -r ${DIR}/ansible-cycloid-onprem/* roles/ansible-cycloid-onprem/
+
+            # generate extra vars files
+            echo "${ANSIBLE_EXTRA_VARS}" | sed ':a;N;$!ba;s/\n/\\n/g' | jq -M . > extra_ansible_vars.json
+            echo "Extra vars in extra_ansible_vars.json"
+            cat extra_ansible_vars.json
+            # need to be run with -e @extra_ansible_vars.json
+
+            # Get the user by testing connexion (Ugly loop)
+            # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
+            # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
+            REMOTE_USER=""
+            set +e
+            for user in admin centos ubuntu;do
+              ssh ${user}@${MAIN_INSTANCE} ls
+              if [ $? -eq 0 ]; then
+                REMOTE_USER=${user}
+                break
+              fi
+            done
+            set -e
+
+            echo "Remote user: ${REMOTE_USER}"
+
+            # upload files + inventory + vars
+            scp -q -r ${DIR}/cycloid-onprem ${REMOTE_USER}@${MAIN_INSTANCE}:~/
+
+            echo "ensure ansible installed"
+
+            export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3
+            export ANSIBLE_HOST_KEY_CHECKING=false
+            export ANSIBLE_FORCE_COLOR=true
+
+            # check if ssh open
+            echo "Waiting for server to boot up..."
+            # 30 retry = wait 240 sec
+            max_retry=30
+            for i in $(seq 1 $max_retry); do
+              echo "waiting... (${i}/${max_retry})"
+              if ( nc -z -w3 ${MAIN_INSTANCE} 22 < /dev/null  ); then
+                echo "port 22 open"
+                break
+              fi
+
+              if [ "$i" -eq "$max_retry" ]; then
+                echo "timeout: server down"
+                exit 1
+              fi
+              sleep 5
+            done
+
+            # Ensure python install on all instances (usefull for centos)
+            # python is not installed by default on centos AWS AMI.
+            # Force install on all instance before to run ansible
+            if [ "$REMOTE_USER" = "centos" ]; then
+              for cinstance in $(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata);do
+                ssh ${REMOTE_USER}@${cinstance} "sudo yum install python3 -yq";
+              done
+            fi
+
+            # If centos sudo yum install python3 -y ?
+            ansible-playbook -u ${REMOTE_USER} --become -i ${MAIN_INSTANCE}, ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/playbook.yml
+
+            echo "Ansible run"
+            set -x
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory playbook.yml -e @extra_ansible_vars.json"
+            set +x
+
+            OUTPUT_FILE="${DIR}/access/output"
+            cat inventory > ${OUTPUT_FILE}
+            echo "" >> ${OUTPUT_FILE}
+            echo "### Onprem ready on: https://${MAIN_INSTANCE}" >> ${OUTPUT_FILE}
+            echo "### Admin user:" >> ${OUTPUT_FILE}
+            grep "  email:" ${DIR}/cycloid-onprem/environments/cycloid.yml >> ${OUTPUT_FILE}
+            grep "  password:" ${DIR}/cycloid-onprem/environments/cycloid.yml >> ${OUTPUT_FILE}
+            echo "" >> ${OUTPUT_FILE}
+            echo "### Resque-web on: http://$(grep cycloid_cache -A1 inventory | tail -n1):5678" >> ${OUTPUT_FILE}
+            echo "" >> ${OUTPUT_FILE}
+            echo "### How to use CLI:" >> ${OUTPUT_FILE}
+            echo "export API_KEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')" >> ${OUTPUT_FILE}
+            echo "export CY_API_URL=https://${MAIN_INSTANCE}/api" >> ${OUTPUT_FILE}
+            echo "" >> ${OUTPUT_FILE}
+            echo 'export ORG=cycloid' >> ${OUTPUT_FILE}
+            echo 'cy --insecure login --org $ORG --api-key $API_KEY' >> ${OUTPUT_FILE}
+
+        inputs:
+          - name: git_config-ansible
+            path: "config"
+          - name: tfstate
+          - name: git_stack-ansible
+            path: "ansible-cycloid-onprem"
+        outputs:
+          - name: cycloid-onprem
+          - name: access
+        params:
+          ENV: ((env))
+          CONFIG_ANSIBLE_PATH: ((config_ansible_path))
+          CONCOURSE_WORKER: ((install_concourse_worker))
+          MINIO: ((install_minio))
+          ELASTICSEARCH: ((install_elasticsearch))
+          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          GITHUB_KEY: ((config_git_private_key))
+          AWS_ACCESS_KEY_ID: ((aws_access_key))
+          AWS_DEFAULT_REGION: ((aws_default_region))
+          AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+          CYCLOID_LICENCE: ((cycloid_licence))
+          ANSIBLE_EXTRA_VARS:
+             ((ansible_params_extravars))
+
+    - task: access
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+            OUTPUT_FILE="access/output"
+            cat $OUTPUT_FILE
+        inputs:
+          - name: access
+
+- name: install-worker
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: git_stack-ansible
+      params: {depth: 1}
+      trigger: true
+
+    - get: git_config-ansible
+      params: {depth: 1}
+      trigger: true
+
+    - get: tfstate
+      passed:
+        - install-onprem
+      trigger: true
+
+    - task: ansible
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+
+            # Galaxy install for worker
+            if [ "$CONCOURSE_WORKER" = "false" ]; then
+              echo "No worker needed"
+              exit 0
+            fi
+
+            # ssh key to connect instances
+            echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+            chmod 600 /root/.ssh/id_rsa
+            eval "$(ssh-agent -s)"
+            ssh-add /root/.ssh/id_rsa
+
+            MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+            echo "### Ansible and Cycloid console is on $MAIN_INSTANCE"
+
+            # Get the user by testing connexion (Ugly loop)
+            # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
+            # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
+            REMOTE_USER=""
+            set +e
+            for user in admin centos ubuntu;do
+              ssh ${user}@${MAIN_INSTANCE} ls
+              if [ $? -eq 0 ]; then
+                REMOTE_USER=${user}
+                break
+              fi
+            done
+            set -e
+
+            echo "Remote user: ${REMOTE_USER}"
+
+            echo "Ansible worker run"
+            set -x
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory worker.yml -e @extra_ansible_vars.json"
+        inputs:
+          - name: tfstate
+        params:
+          CONCOURSE_WORKER: ((install_concourse_worker))
+          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          ANSIBLE_EXTRA_VARS:
+             ((ansible_params_extravars))
+
+
+- name: extra-configuration
+  max_in_flight: 1
+  build_logs_to_retain: 10
+  plan:
+    - do:
+      - get: git_stack-ansible
+        trigger: true
+
+      - task: configure-backends
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cycloid/cycloid-toolkit
+              tag: latest
+          container_limits: {}
+          run:
+            path: /bin/bash
+            args:
+              - '-c'
+              - |
+                EXIT_STATUS=0
+                touch output
+                echo "Start Stop:"
+
+                #generate start-stop-req.json
+                export STARTSTOP=$(cat stack/stack-onprem/pipeline/start-stop.yml | python -c 'import yaml; import json; import sys; print(json.dumps(json.dumps(yaml.safe_load(sys.stdin))));')
+                envsubst '$STARTSTOP' < stack/stack-onprem/pipeline/start-stop-req.yml  | python -c 'import yaml; import json; import sys; print(json.dumps(yaml.safe_load(sys.stdin)));' > start-stop-req.json
+
+                # set product variables
+                envsubst '$API_KEY $ENV $ORGANIZATION $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < start-stop-req.json > start-stop-req-generated.json
+
+                return_code=$(curl -s -o output -w "%{http_code}" "${CY_API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines" --compressed \
+                -H "authorization: Bearer ${API_KEY}" \
+                -H 'content-type: application/vnd.cycloid.io.v1+json' \
+                -H 'Accept: */*' -H 'Connection: keep-alive' \
+                --data-binary "@start-stop-req-generated.json")
+                if [[ "$return_code" != "204" && "$return_code" != "422" ]]; then
+                   echo "error, return code $return_code"
+                   cat output
+                   EXIT_STATUS=1
+                fi
+
+                cy --insecure login --org ${ORGANIZATION} --api-key ${API_KEY}
+                cy --insecure --org ${ORGANIZATION} --project start-stop-${PROJECT} --env ${ENV} pipeline unpause
+                echo ""
+
+                # InfraView for dummy/test
+                echo "InfraView configuration"
+                cy --insecure --org ${ORGANIZATION} --project ${PROJECT} --env ${ENV} external-backend create infraview AWSRemoteTFState \
+                  --bucket-name ${BUCKET_NAME} \
+                  --bucket-path ${BUCKET_PATH} \
+                  --cred ${EXTERNAL_BACKEND_AWS_CRED_NAME} \
+                  --region "eu-west-1"
+                if [ $? -ne 0 ]; then
+                  EXIT_STATUS=$?
+                fi
+
+                # Logs for dummy/test
+                echo "Logs configuration"
+                cy --insecure --org ${ORGANIZATION} --project ${PROJECT} external-backend create logs AWSCloudWatchLogs \
+                  --cred ${EXTERNAL_BACKEND_AWS_CRED_NAME} \
+                  --region "eu-west-1"
+                # global project config, ignore if already exist
+                #if [ $? -ne 0 ]; then
+                #  EXIT_STATUS=$?
+                #fi
+
+                exit $EXIT_STATUS
+          inputs:
+            - name: git_stack-ansible
+              path: "stack"
+          params:
+            CY_API_URL: 'https://http-api.cycloid.io'
+            ORGANIZATION: ((customer))
+            API_KEY: ((api_key))
+            ENV: ((env))
+            PROJECT: ((project))
+            BUCKET_PATH: ((project))/((env))/((project))-((env)).tfstate
+            BUCKET_NAME: ((terraform_storage_bucket_name))
+            EXTERNAL_BACKEND_AWS_CRED_NAME: ((external_backend_aws_cred_name))
+            AWS_ACCESS_KEY_ID: ((aws_access_key))
+            AWS_DEFAULT_REGION: ((aws_default_region))
+            AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+
+- name: uninstall-onprem
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: tfstate
+      passed:
+        - terraform-apply
+      trigger: false
+
+    - task: ansible
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+
+            # use to run galaxy
+            eval "$(ssh-agent -s)"
+            # ssh key to connect instances
+            echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+            chmod 600 /root/.ssh/id_rsa
+            ssh-add /root/.ssh/id_rsa
+
+            MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+            echo "### Ansible and Cycloid console is on $MAIN_INSTANCE"
+            # Get the user by testing connexion (Ugly loop)
+            # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
+            # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
+            REMOTE_USER=""
+            set +e
+            for user in admin centos ubuntu;do
+              ssh ${user}@${MAIN_INSTANCE} ls
+              if [ $? -eq 0 ]; then
+                REMOTE_USER=${user}
+                break
+              fi
+            done
+            set -e
+
+            echo "Ansible Uninstall run"
+            set -x
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory playbook.yml -e uninstall=True -e @extra_ansible_vars.json"
+
+        inputs:
+          - name: tfstate
+        params:
+          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          ANSIBLE_EXTRA_VARS:
+             ((ansible_params_extravars))
+
+- name: mysql-force-pay-orgs
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: tfstate
+      passed:
+        - terraform-apply
+      trigger: false
+
+    - task: ansible
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+
+            # use to run galaxy
+            eval "$(ssh-agent -s)"
+            # ssh key to connect instances
+            echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+            chmod 600 /root/.ssh/id_rsa
+            ssh-add /root/.ssh/id_rsa
+
+            MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+            echo "### Ansible and Cycloid console is on $MAIN_INSTANCE"
+            # Get the user by testing connexion (Ugly loop)
+            # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
+            # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
+            REMOTE_USER=""
+            set +e
+            for user in admin centos ubuntu;do
+              ssh ${user}@${MAIN_INSTANCE} ls
+              if [ $? -eq 0 ]; then
+                REMOTE_USER=${user}
+                break
+              fi
+            done
+            set -e
+
+            echo "Ansible mysql-force-pay-orgs run"
+            set -x
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory mysql-force-pay-orgs.yml -e @extra_ansible_vars.json"
+        inputs:
+          - name: tfstate
+        params:
+          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          ANSIBLE_EXTRA_VARS:
+             ((ansible_params_extravars))
+
+- name: mysql-force-user-email-validation
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: tfstate
+      passed:
+        - terraform-apply
+      trigger: false
+
+    - task: ansible
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+
+            # use to run galaxy
+            eval "$(ssh-agent -s)"
+            # ssh key to connect instances
+            echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+            chmod 600 /root/.ssh/id_rsa
+            ssh-add /root/.ssh/id_rsa
+
+            MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+            echo "### Ansible and Cycloid console is on $MAIN_INSTANCE"
+            # Get the user by testing connexion (Ugly loop)
+            # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
+            # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
+            REMOTE_USER=""
+            set +e
+            for user in admin centos ubuntu;do
+              ssh ${user}@${MAIN_INSTANCE} ls
+              if [ $? -eq 0 ]; then
+                REMOTE_USER=${user}
+                break
+              fi
+            done
+            set -e
+
+            echo "Ansible mysql-force-user-email-validation run"
+            set -x
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory mysql-force-user-email-validation.yml -e @extra_ansible_vars.json"
+
+        inputs:
+          - name: tfstate
+        params:
+          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          ANSIBLE_EXTRA_VARS:
+             ((ansible_params_extravars))
+
+- name: report
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: tfstate
+      passed:
+        - terraform-apply
+      trigger: false
+
+    - task: ansible
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+
+            # use to run galaxy
+            eval "$(ssh-agent -s)"
+            # ssh key to connect instances
+            echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+            chmod 600 /root/.ssh/id_rsa
+            ssh-add /root/.ssh/id_rsa
+
+            MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+            echo "### Ansible and Cycloid console is on $MAIN_INSTANCE"
+            # Get the user by testing connexion (Ugly loop)
+            # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
+            # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
+            REMOTE_USER=""
+            set +e
+            for user in admin centos ubuntu;do
+              ssh ${user}@${MAIN_INSTANCE} ls
+              if [ $? -eq 0 ]; then
+                REMOTE_USER=${user}
+                break
+              fi
+            done
+            set -e
+
+            echo "Ansible report run"
+            set -x
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory report.yml -e @extra_ansible_vars.json"
+
+        inputs:
+          - name: tfstate
+        params:
+          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          ANSIBLE_EXTRA_VARS:
+             ((ansible_params_extravars))
+
+- name: populate-datas
+  serial: True
+  build_logs_to_retain: 10
+  plan:
+  - do:
+    - get: tfstate
+      passed:
+        - terraform-apply
+      trigger: false
+
+    - get: git_stack-ansible
+      passed:
+        - install-onprem
+      trigger: false
+
+    - get: git_terracost
+      trigger: false
+
+    - task: cli
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cycloid/cycloid-toolkit
+            tag: latest
+        run:
+          path: /bin/bash
+          args:
+          - -ec
+          - |
+            DIR=${PWD}
+
+            # use to run galaxy
+            eval "$(ssh-agent -s)"
+            # ssh key to connect instances
+            echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+            chmod 600 /root/.ssh/id_rsa
+            ssh-add /root/.ssh/id_rsa
+
+            MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+            echo "### Ansible and Cycloid console is on $MAIN_INSTANCE"
+            # Get the user by testing connexion (Ugly loop)
+            # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
+            # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
+            REMOTE_USER=""
+            set +e
+            for user in admin centos ubuntu;do
+              ssh ${user}@${MAIN_INSTANCE} ls
+              if [ $? -eq 0 ]; then
+                REMOTE_USER=${user}
+                break
+              fi
+            done
+            set -e
+
+            export API_KEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')
+            export CY_API_URL=https://${MAIN_INSTANCE}/api
+            export ORG=cycloid
+            cy --insecure login --org $ORG --api-key $API_KEY
+
+            echo "Adding credentials ..."
+            cy --insecure  --org $ORG  credential create ssh --name github --ssh-key /root/.ssh/id_rsa
+            CRED=$(cy --insecure  --org $ORG  credential list -o json | jq -r '.[] | select( .name | contains("github")) | .canonical')
+
+            cy --insecure  --org $ORG config-repo create --branch config --cred $CRED --url $CR_REPO --default  --name onprem-test
+            cy --insecure  --org $ORG catalog-repo create --branch stacks --cred $CRED --url $CR_REPO  --name onprem-test-stacks
+
+            # minio creds (default value used)
+            cy --insecure  --org $ORG  credential create aws --name minio --access-key ((onprem_minio_access_key)) --secret-key ((onprem_minio_secret_key))
+
+            # AWS
+            cy --insecure  --org $ORG  credential create aws --name admin_aws --access-key ((((onprem_aws_cred_name)).access_key)) --secret-key ((((onprem_aws_cred_name)).secret_key))
+            cy --insecure  --org $ORG  credential create aws --name admin_aws-sandbox --access-key ((((onprem_aws_sandbox_cred_name)).access_key)) --secret-key ((((onprem_aws_sandbox_cred_name)).secret_key))
+
+            # GCP
+            echo '((((onprem_gcp_cred_name)).json_key))' > /tmp/sandbox
+            cy --insecure  --org $ORG  credential create gcp --name admin_gcp_cycloid-sandbox --json-key /tmp/sandbox
+            rm /tmp/sandbox
+
+            # Azure
+            cy --insecure  --org $ORG  credential create azure --name admin_azure --client-id ((((onprem_azure_cred_name)).client_id)) --client-secret ((((onprem_azure_cred_name)).client_secret)) --subscription-id ((((onprem_azure_cred_name)).subscription_id)) --tenant-id ((((onprem_azure_cred_name)).tenant_id))
+            cy --insecure  --org $ORG  credential create azure_storage --name azure-tfstate --account-name ((((onprem_azure_storage_cred_name)).account_name)) --access-key ((((onprem_azure_storage_cred_name)).access_key))
+
+            # create dummy project
+            echo "Creating dummy project ..."
+            wget https://raw.githubusercontent.com/cycloid-community-catalog/stack-dummy/master/pipeline/pipeline.yml
+            wget https://raw.githubusercontent.com/cycloid-community-catalog/stack-dummy/master/pipeline/variables.sample.yml
+            cy --insecure --org $ORG project create \
+              --name dummy \
+              --description "from dummy stack" \
+              --stack-ref cycloid:stack-dummy \
+              --config-repo onprem-test \
+              --env test \
+              --usecase default \
+              --pipeline "pipeline.yml" \
+              --vars "variables.sample.yml"
+
+            # InfraView for dummy/test
+            echo "InfraView for dummy/test project ..."
+            cy --insecure --org $ORG --project dummy --env test external-backend create infraview AWSRemoteTFState \
+              --bucket-name ${IV_BUCKET_NAME} \
+              --bucket-path ${IV_BUCKET_PATH} \
+              --cred admin_aws \
+              --region "eu-west-1"
+
+            # Logs for dummy/test
+            echo "Logs for dummy/test project ..."
+            cy --insecure --org $ORG --project dummy external-backend create logs AWSCloudWatchLogs \
+              --cred admin_aws \
+              --region "eu-west-1"
+
+            ### Inject terracost price ###
+            # Get pricing data from terracost (used by cost estimation feature)
+            # upload files + run mysql import
+            # If needed to clean:
+            # SET FOREIGN_KEY_CHECKS = 0;
+            # TRUNCATE TABLE pricing_product_prices;
+            # TRUNCATE TABLE pricing_products;
+            # SET FOREIGN_KEY_CHECKS = 1;
+            echo "Injecting terracost pricing ..."
+            LATEST_PRICE=$(ls -1 git_terracost/mysql/testdata/*pricing.sql.gz | tail -n1)
+            echo "  Using ${LATEST_PRICE}"
+            scp -q ${LATEST_PRICE} ${REMOTE_USER}@${MAIN_INSTANCE}:/tmp/
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} 'gunzip -f /tmp/*-pricing.sql.gz && source <(sudo grep MYSQL /etc/default/cycloid-api) && mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE < /tmp/*pricing.sql'
+
+        inputs:
+          - name: tfstate
+          - name: git_terracost
+        params:
+          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          CR_REPO: ((onprem_cr_repository))
+          IV_BUCKET_NAME: cycloid-terraform-remote-state
+          IV_BUCKET_PATH: cycloidio-website/demo-hack/cycloid-demo.tfstate

@@ -61,17 +61,17 @@ config:
     description: 'Elasticsearch + Kibana (optional) installed and configured for Cost-Explorer on the same machine of Cycloid Core'
     pipeline:
       pipeline:
-        path: 'pipeline/pipeline.yml'
+        path: 'pipeline/es-poc/pipeline.yml'
       variables:
-        path: 'pipeline/variables.sample.yml'
+        path: 'pipeline/es-poc/variables.sample.yml'
         destination: '($ project $)/pipeline/variables-($ environment $).yml'
     terraform:
       onprem:
-        path: 'terraform/main.tf.sample'
+        path: 'terraform/es-poc/main.tf.sample'
         destination: '($ project $)/terraform/($ environment $)/main.tf'
     ansible:
       onprem:
-        path: 'ansible/environments/cycloid.yml.sample'
+        path: 'ansible/es-poc/environments/cycloid.yml.sample'
         destination: '($ project $)/ansible/environments/cycloid-($ environment $).yml'
 
   cycloid-cost-explorer-with-es-one-node:
@@ -97,15 +97,15 @@ config:
     description: 'Elasticsearch cluster + Kibana (optional) installed and configured for Cost-Explorer on multiple seperate machines of Cycloid Core'
     pipeline:
       pipeline:
-        path: 'pipeline/pipeline.yml'
+        path: 'pipeline/es-cluster/pipeline.yml'
       variables:
-        path: 'pipeline/variables.sample.yml'
+        path: 'pipeline/es-cluster/variables.sample.yml'
         destination: '($ project $)/pipeline/variables-($ environment $).yml'
     terraform:
       onprem:
-        path: 'terraform/main.tf.sample'
+        path: 'terraform/es-cluster/main.tf.sample'
         destination: '($ project $)/terraform/($ environment $)/main.tf'
     ansible:
       onprem:
-        path: 'ansible/environments/cycloid.yml.sample'
+        path: 'ansible/es-cluster/environments/cycloid.yml.sample'
         destination: '($ project $)/ansible/environments/cycloid-($ environment $).yml'
