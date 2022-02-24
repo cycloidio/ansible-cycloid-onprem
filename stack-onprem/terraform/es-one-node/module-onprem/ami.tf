@@ -37,4 +37,5 @@ data "aws_ami" "search" {
 
 locals {
   image_id = var.base_ami_id != "" ? var.base_ami_id : element(data.aws_ami.search.*.id, 0)
+  es_image_id = var.base_ami_id != "" ? var.base_ami_id : element(data.aws_ami.search..id, 0)
 }

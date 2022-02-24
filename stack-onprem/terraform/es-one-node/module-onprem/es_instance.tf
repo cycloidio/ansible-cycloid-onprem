@@ -2,6 +2,9 @@
 # variables
 ###
 
+variable "debian_ami_name" {
+  default = var.es_debian_ami_name
+}
 variable "es_instance_disk_size" {
   default = 100
 }

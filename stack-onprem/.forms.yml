@@ -1102,6 +1102,12 @@ cycloid-cost-explorer-with-es-one-node:
             - "t2.large"
             - "t3.large"
         required: true
+      - name: "AMI search name pattern"
+        description: "Type of AWS EC2"
+        key: es_debian_ami_name
+        widget: auto_complete
+        type: string
+        default: "debian-stretch-*"
       - name: "Security group ingress rules"
         description: "Configuration block for ingress rules."
         key: es_sg_ingress_rules 
