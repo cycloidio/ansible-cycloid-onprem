@@ -82,7 +82,7 @@ module "onprem" {
 module "es" {
   #####################################
   # Do not modify the following lines #
-  source = "./module-es"
+  source = "./module-onprem"
 
   project  = var.project
   env      = var.env
