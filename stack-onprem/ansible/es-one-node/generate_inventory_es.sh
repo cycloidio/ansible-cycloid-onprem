@@ -16,7 +16,7 @@ if [ "$COST_EXPLORER_ES" = "true" ]; then
   INVENTORY_COST_EXPLORER_ES="cost_explorer_elasticsearch"
 fi
 
-IPS=$(jq -r .es_instance_public_ip[] $TF_OUTPUT)
+IPS=$(jq -r .es_instance_public_ip $TF_OUTPUT)
 NUM_IPS=$(echo $IPS | wc -w)
 # transform it to array
 IFS=$'\n'

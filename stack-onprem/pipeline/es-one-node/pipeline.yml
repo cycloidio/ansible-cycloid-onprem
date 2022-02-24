@@ -292,22 +292,25 @@ jobs:
             ssh-add /root/.ssh/id_rsa
 
             ###  Generate cycloid-onprem directory (with all ansible/config ...) ###
-            cd ${DIR}/ansible-cycloid-onprem
+            cd ${DIR}/cycloid-onprem
+
+            cp -r ../ansible-cycloid-onprem/playbooks/* . -r
 
             # generate inventory
             bash ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/es-one-node/generate_inventory_es.sh ${DIR}/tfstate/metadata > inventory
             echo "ansible inventory used is:"
             cat inventory
 
-            # get the cycloid.yml variable from config
-            cp ${DIR}/config/${CONFIG_ANSIBLE_PATH}/environments/cycloid-${ENV}.yml environments/cycloid.yml
             ### Add more Ansible vars ###
-            MAIN_INSTANCE=$(jq -r  .es_instance_public_ip[0] ${DIR}/tfstate/metadata)
+            MAIN_INSTANCE=$(jq -r  .es_instance_public_ip ${DIR}/tfstate/metadata)
 
             # Galaxy install for Elasticsearch
             set -x
             ansible-galaxy install elastic.elasticsearch,v7.17.0
             set +x
+
+            # Update onprem ansible role with files from the selected branch
+            cp -r ${DIR}/ansible-cycloid-onprem/* roles/ansible-cycloid-onprem/
 
             # generate extra vars files
             echo "${ANSIBLE_EXTRA_VARS}" | sed ':a;N;$!ba;s/\n/\\n/g' | jq -M . > extra_ansible_vars.json
@@ -362,7 +365,7 @@ jobs:
             # python is not installed by default on centos AWS AMI.
             # Force install on all instance before to run ansible
             if [ "$REMOTE_USER" = "centos" ]; then
-              for cinstance in $(jq -r  .es_instance_public_ip[0] ${DIR}/tfstate/metadata);do
+              for cinstance in $(jq -r  .es_instance_public_ip ${DIR}/tfstate/metadata);do
                 ssh ${REMOTE_USER}@${cinstance} "sudo yum install python3 -yq";
               done
             fi
