@@ -36,7 +36,7 @@ frontend:
     pullPolicy: IfNotPresent
     # Cycloid Console frontend version to use.
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "v2.3.5"
+    tag: "v2.4.2"
 
   # extraEnvVars is a list of extra environment variables to set.
   extraEnvVars: {}
