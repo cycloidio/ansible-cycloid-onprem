@@ -577,7 +577,7 @@ concourse:
 
   fullnameOverride: cycloid-concourse
 
-  imageTag: "6.7.6"
+  imageTag: "6.7.8"
 
   ## Configuration values for the Concourse application (worker and web components).
   ## The values specified here are almost direct references to the flags under the
