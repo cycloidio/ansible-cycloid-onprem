@@ -40,7 +40,7 @@ data "aws_ami" "es_search" {
 
   filter {
     name   = "name"
-    values = [var.debian_ami_name]
+    values = [var.es_debian_ami_name]
   }
 
   filter {
