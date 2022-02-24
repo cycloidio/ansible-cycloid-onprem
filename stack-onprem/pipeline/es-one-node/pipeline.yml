@@ -499,6 +499,7 @@ jobs:
             cp ${DIR}/config/${CONFIG_ANSIBLE_PATH}/environments/cycloid-${ENV}.yml environments/cycloid.yml
             ### Add more Ansible vars ###
             MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+            COST_EXPLORER_ES=$(jq -r  .es_instance_private_ip ${DIR}/tfstate/metadata)
 
             cat >> environments/cycloid.yml <<EOF
             ### Ansible and Cycloid console will be on https://${MAIN_INSTANCE}
@@ -508,6 +509,7 @@ jobs:
             cycloid_ecr_access_key: "${AWS_ACCESS_KEY_ID}"
             cycloid_ecr_secret_key: "${AWS_SECRET_ACCESS_KEY}"
             cycloid_licence: "${CYCLOID_LICENCE}"
+            cost_explorer_es_url: "http://${COST_EXPLORER_ES}"
             EOF
 
             # Galaxy install for onprem

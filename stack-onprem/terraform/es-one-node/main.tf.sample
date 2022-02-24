@@ -77,4 +77,15 @@ module "onprem" {
 
   # ubuntu 20.04
   #base_ami_id = "ami-01aa664a17515f5bb"
+
+
+  ###
+  # es_instance
+  ###
+
+  #. es_instance_type (optional): t2.large
+  #+ Type of instance to use for es_instance.
+  es_instance_type = "t2.large"
+
+  es_debian_ami_name = "debian-stretch-*"
 }
