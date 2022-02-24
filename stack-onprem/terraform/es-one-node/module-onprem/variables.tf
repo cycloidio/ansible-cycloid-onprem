@@ -74,7 +74,7 @@ variable "ami_name" {
 }
 
 
-variable "sg_ingress_rules" {
+variable "es_sg_ingress_rules" {
   description = "Configuration block for ingress rules."
   default = [
     {
@@ -102,7 +102,7 @@ variable "sg_ingress_rules" {
   ]
 }
 
-variable "sg_egress_rules" {
+variable "es_sg_egress_rules" {
   description = "Configuration block for egress rules."
   default = [
     {
@@ -117,11 +117,6 @@ variable "sg_egress_rules" {
       self             = true
     }
   ]
-}
-
-variable "sg_extra_tags" {
-  description = "Map of extra tags to assign to the security group."
-  default     = {}
 }
 
 
