@@ -309,7 +309,7 @@ jobs:
 
             # Galaxy install for Elasticsearch
             set -x
-            ansible-galaxy install elastic.elasticsearch,v7.17.0 --roles-path=roles -v
+            ansible-galaxy install elastic.elasticsearch,v7.17.0 -v
             set +x
 
             # Update onprem ansible role with files from the selected branch
@@ -379,7 +379,7 @@ jobs:
 
             echo "Ansible run"
             set -x
-            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_ROLES_PATH=${DIR}/cycloid-onprem/roles/ ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory playbook-es.yml -e @extra_ansible_vars.json"
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory playbook-es.yml -e @extra_ansible_vars.json"
             set +x
 
             OUTPUT_FILE="${DIR}/access/output"
