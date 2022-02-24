@@ -301,12 +301,15 @@ jobs:
             echo "ansible inventory used is:"
             cat inventory
 
+             # get the cycloid.yml variable from config
+            cp ${DIR}/config/${CONFIG_ANSIBLE_PATH}/environments/cycloid-${ENV}.yml environments/cycloid.yml
+
             ### Add more Ansible vars ###
             MAIN_INSTANCE=$(jq -r  .es_instance_public_ip ${DIR}/tfstate/metadata)
 
             # Galaxy install for Elasticsearch
             set -x
-            ansible-galaxy install elastic.elasticsearch,v7.17.0
+            ansible-galaxy install elastic.elasticsearch,v7.17.0 --roles-path=roles -v
             set +x
 
             # Update onprem ansible role with files from the selected branch
