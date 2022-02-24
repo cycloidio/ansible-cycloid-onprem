@@ -313,6 +313,7 @@ jobs:
             set +x
 
             # Update onprem ansible role with files from the selected branch
+            mkdir roles/ansible-cycloid-onprem/
             cp -r ${DIR}/ansible-cycloid-onprem/* roles/ansible-cycloid-onprem/
 
             # generate extra vars files
