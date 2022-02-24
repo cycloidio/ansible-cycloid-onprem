@@ -1,6 +1,6 @@
 ---
 - name: Test
-  hosts: elasticsearch
+  hosts: all
   become: true
   roles:
     - role: elastic.elasticsearch
