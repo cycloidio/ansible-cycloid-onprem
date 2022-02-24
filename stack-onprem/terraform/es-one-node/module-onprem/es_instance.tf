@@ -1,10 +1,6 @@
 ###
 # variables
 ###
-
-variable "debian_ami_name" {
-  default = "${var.es_debian_ami_name}"
-}
 variable "es_instance_disk_size" {
   default = 100
 }
@@ -99,7 +95,7 @@ resource "aws_security_group" "es_instance" {
 ###
 
 resource "aws_instance" "es_instance" {
-  ami           = local.image_id
+  ami           = local.es_image_id
   instance_type = var.es_instance_type
   iam_instance_profile = aws_iam_instance_profile.es_instance.name
   key_name = aws_instance.cy_instances[0].key_name
