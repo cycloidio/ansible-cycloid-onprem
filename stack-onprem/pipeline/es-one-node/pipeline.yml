@@ -509,7 +509,7 @@ jobs:
             cycloid_ecr_access_key: "${AWS_ACCESS_KEY_ID}"
             cycloid_ecr_secret_key: "${AWS_SECRET_ACCESS_KEY}"
             cycloid_licence: "${CYCLOID_LICENCE}"
-            cost_explorer_es_url: "http://${COST_EXPLORER_ES}"
+            cost_explorer_es_url: "http://${COST_EXPLORER_ES}:9200"
             EOF
 
             # Galaxy install for onprem
