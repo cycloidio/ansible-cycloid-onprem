@@ -60,6 +60,11 @@ variable "debian_ami_name" {
   default = "debian-stretch-*"
 }
 
+
+variable "es_debian_ami_name" {
+  default = "debian-stretch-*"
+}
+
 ###
 # AMI DATA
 ###
