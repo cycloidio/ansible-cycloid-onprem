@@ -1,5 +1,5 @@
 ---
-- name: Test
+- name: Install Elasticsearch
   hosts: all
   become: true
   roles:
@@ -8,3 +8,12 @@
     es_version: 7.17.0
     es_config:
       http.host: 0.0.0.0
+
+- name: Install Kibana
+  hosts: all
+  become: true
+  roles:
+    - role: geerlingguy.kibana
+  vars:
+    kibana_version: "7.17.0"
+    kibana_elasticsearch_url: "http://localhost:9200"

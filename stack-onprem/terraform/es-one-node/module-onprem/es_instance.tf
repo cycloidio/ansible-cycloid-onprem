@@ -69,6 +69,14 @@ resource "aws_security_group" "es_instance" {
     cidr_blocks = var.cy_instances_cidr_blocks_allow
   }
 
+  ingress {
+    from_port   = 5601
+    to_port     = 5601
+    protocol    = "tcp"
+    self        = true
+    cidr_blocks = var.cy_instances_cidr_blocks_allow
+  }
+
   # Allow all port internaly (example for: is db splitted ...)
   ingress {
     from_port = 0

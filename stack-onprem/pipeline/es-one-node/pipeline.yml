@@ -307,9 +307,10 @@ jobs:
             ### Add more Ansible vars ###
             MAIN_INSTANCE=$(jq -r  .es_instance_public_ip ${DIR}/tfstate/metadata)
 
-            # Galaxy install for Elasticsearch
+            # Galaxy install for Elasticsearch & Kibana
             set -x
             ansible-galaxy install elastic.elasticsearch,v7.17.0 -v
+            ansible-galaxy install geerlingguy.kibana -v
             set +x
 
             # Update onprem ansible role with files from the selected branch
@@ -385,7 +386,8 @@ jobs:
             OUTPUT_FILE="${DIR}/access/output"
             cat inventory > ${OUTPUT_FILE}
             echo "" >> ${OUTPUT_FILE}
-            echo "### Elasticsearch ready on: http://${MAIN_INSTANCE}" >> ${OUTPUT_FILE}
+            echo "### Elasticsearch ready on: http://${MAIN_INSTANCE}:9200" >> ${OUTPUT_FILE}
+             cho "### Kibana ready on: http://${MAIN_INSTANCE}:5601" >> ${OUTPUT_FILE}
 
         inputs:
           - name: git_config-ansible
