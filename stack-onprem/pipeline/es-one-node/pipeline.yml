@@ -387,7 +387,7 @@ jobs:
             cat inventory > ${OUTPUT_FILE}
             echo "" >> ${OUTPUT_FILE}
             echo "### Elasticsearch ready on: http://${MAIN_INSTANCE}:9200" >> ${OUTPUT_FILE}
-             cho "### Kibana ready on: http://${MAIN_INSTANCE}:5601" >> ${OUTPUT_FILE}
+            echo "### Kibana ready on: http://${MAIN_INSTANCE}:5601" >> ${OUTPUT_FILE}
 
         inputs:
           - name: git_config-ansible
