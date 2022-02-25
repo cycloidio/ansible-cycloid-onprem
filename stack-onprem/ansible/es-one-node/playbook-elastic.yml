@@ -1,0 +1,3 @@
+---
+- import_playbook: playbook-elasticsearch.yml
+- import_playbook: playbook-kibana.yml

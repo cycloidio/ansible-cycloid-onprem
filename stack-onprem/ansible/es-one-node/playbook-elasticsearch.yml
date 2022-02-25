@@ -1,0 +1,10 @@
+---
+- name: Install Elasticsearch
+  hosts: all
+  become: true
+  roles:
+    - role: elastic.elasticsearch
+  vars:
+    es_version: 7.17.0
+    es_config:
+      http.host: 0.0.0.0
