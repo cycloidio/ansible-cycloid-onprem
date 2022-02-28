@@ -13,10 +13,6 @@
     es_enable_auto_ssl_configuration: true
     es_api_basic_auth_username: "elastic" # This is the default user created by the installation of elasticsearch
     es_api_basic_auth_password: "changeme" # This is the default password created by the installation of elasticsearch
-    es_users:
-    native:
-      elastic:
-        password: "Co$T-Exp10r€r" # New password
     es_ssl_keystore: "files/cy-ce-keystore.p12"
     es_ssl_truststore: "files/cy-ce-ca.p12"
     es_ssl_keystore_password: ""

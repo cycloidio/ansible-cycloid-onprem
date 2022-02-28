@@ -11,4 +11,4 @@
     kibana_server_host: "0.0.0.0"
     kibana_elasticsearch_url: "https://localhost:9200"
     kibana_elasticsearch_username: "elastic"
-    kibana_elasticsearch_password: "Co$T-Exp10r€r"
+    kibana_elasticsearch_password: "changeme"
