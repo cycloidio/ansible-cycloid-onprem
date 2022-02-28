@@ -1108,6 +1108,16 @@ cycloid-cost-explorer-with-es-one-node:
         widget: auto_complete
         type: string
         default: "debian-stretch-*"
+      - name: "Instance disk size"
+        unit: Go
+        description: "Disk size of the Elasticsearch node."
+        key: es_instance_disk_size
+        widget: slider_range
+        type: integer
+        default: 100
+        values:
+            - 50
+            - 500
     application:
       - name: "Instance count"
         description: "Number of Aws EC2 onprem server to create."
