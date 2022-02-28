@@ -1288,21 +1288,6 @@ cycloid-cost-explorer-with-es-one-node:
         widget: switch
         type: boolean
         default: true
-    Cost-Explorer:
-      - name: "Elasticsearch username"
-        description: "Elasticsearch database username for Cost-Explorer"
-        key: cost_explorer_es_username
-        widget: simple_text
-        type: string
-        default: ""
-        required: false
-      - name: "Elasticsearch password"
-        description: "Elasticsearch database password for Cost-Explorer"
-        key: cost_explorer_es_password
-        widget: simple_text
-        type: string
-        default: ""
-        required: false
 
     ext-auth:
       - name: "SAML Auth enable"

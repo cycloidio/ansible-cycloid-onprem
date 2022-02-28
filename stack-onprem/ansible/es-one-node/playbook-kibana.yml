@@ -9,4 +9,6 @@
     kibana_package: kibana=7.17.0
     kibana_server_port: 5601
     kibana_server_host: "0.0.0.0"
-    kibana_elasticsearch_url: "http://localhost:9200"
+    kibana_elasticsearch_url: "https://localhost:9200"
+    kibana_elasticsearch_username: "elastic"
+    kibana_elasticsearch_password: "Co$T-Exp10r€r"
