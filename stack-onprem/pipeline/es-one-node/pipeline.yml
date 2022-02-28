@@ -388,7 +388,7 @@ jobs:
             echo "" >> ${OUTPUT_FILE}
             echo "### Elasticsearch ready on: https://${MAIN_INSTANCE}:9200" >> ${OUTPUT_FILE}
             echo "### Kibana ready on: https://${MAIN_INSTANCE}:5601" >> ${OUTPUT_FILE}
-            echo "### Elasticsearch & Kibana IDs: elastic/Co$T-Exp10r€r"
+            echo "### Elasticsearch & Kibana IDs: elastic/changeme" >> ${OUTPUT_FILE}
 
         inputs:
           - name: git_config-ansible
