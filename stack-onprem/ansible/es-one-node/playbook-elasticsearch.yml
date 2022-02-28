@@ -17,4 +17,8 @@
     native:
       elastic:
         password: "Co$T-Exp10r€r" # New password
-    es_validate_certs: no 
+    es_ssl_keystore: "files/cy-ce-keystore.p12"
+    es_ssl_truststore: "files/cy-ce-ca.p12"
+    es_ssl_keystore_password: ""
+    es_ssl_truststore_password: ""
+    es_validate_certs: no
