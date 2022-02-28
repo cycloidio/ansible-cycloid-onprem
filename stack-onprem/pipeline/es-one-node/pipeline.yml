@@ -513,7 +513,7 @@ jobs:
             cycloid_ecr_secret_key: "${AWS_SECRET_ACCESS_KEY}"
             cycloid_licence: "${CYCLOID_LICENCE}"
             cost_explorer_es_url: "https://${COST_EXPLORER_ES}:9200"
-            cost-explorer-es-insecure-skip-tls: true
+            cost_explorer_es_insecure_skip_tls: "true"
             cost_explorer_es_username: "elastic"
             cost_explorer_es_password: "changeme"
             EOF
