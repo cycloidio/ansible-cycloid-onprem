@@ -7,8 +7,11 @@
   vars:
     kibana_version: "7.x"
     kibana_package: kibana=7.17.0
+    kibana_config_template: "files/kibana.yml.j2"
     kibana_server_port: 5601
     kibana_server_host: "0.0.0.0"
     kibana_elasticsearch_url: "https://localhost:9200"
+    kibana_xpack_security: "true"
+    kibana_elasticsearch_ssl_verif: "none"
     kibana_elasticsearch_username: "elastic"
     kibana_elasticsearch_password: "changeme"
