@@ -57,6 +57,7 @@
       JWT_KEY_1: "{{ cycloid_jwt_key_1 }}"
       FRONTEND_BASE_URL: "{{ cycloid_console_base_url }}"
       BACKEND_BASE_URL: "{{ cycloid_api_base_url }}"
+      CORS_ALLOWED_ORIGINS: "{{ cycloid_api_cors_allowed_origins }}"
       CRYPTO_SIGNING_KEY: "{{ cycloid_crypto_signing_key }}"
       SAML_SP_CERTIFICATE_PATH: "{{ saml_sp_certificate_path }}"
       SAML_SP_PRIVATE_KEY_PATH: "{{ saml_sp_private_key_path }}"
