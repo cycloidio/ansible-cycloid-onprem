@@ -1,9 +1,9 @@
 ---
 version: '2'
-name: 'On-premise Cham Cost-Explorer with ES'
-canonical: 'cycloid-onprem-cs-ce-es'
+name: 'On-premise Testing Cost-Explorer with ES'
+canonical: 'cycloid-onprem-test-ce-es'
 status: 'private'
-description: 'Create On-premise setup of Cycloid (with Cost-Explorer) & Elasticsearch implementation.'
+description: 'Create On-premise setup of Cycloid (with Cost-Explorer) & Elasticsearch implementation. For internal testing only.'
 keywords:
   - 'cycloid'
   - 'concourse'
