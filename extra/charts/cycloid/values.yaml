@@ -226,6 +226,11 @@ backend:
     # SAML_SP_PRIVATE_KEY_PATH: "/secrets/saml/sp_private_key"
     # SAML_IDP_METADATA_PATH: "/secrets/saml/idp_metadata"
 
+    # Allow additional Origins to request the API. Multiple Origins can be specified using a comma ','.
+    # e.g, CORS_ALLOWED_ORIGINS: "https://domain1.tld,http://domain2.tld"
+    # By default, the Frontend URL is already allowed.
+    # CORS_ALLOWED_ORIGINS: ""
+
   # extraSecretEnvVars is a list of extra environment variables to set.
   # These variables take value from existing Secret objects.
   extraSecretEnvVars: []
@@ -303,45 +308,15 @@ backend:
     annotations:
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
-      # If using the ingress-nginx controller from the kubernetes team: https://github.com/kubernetes/ingress-nginx/
-      nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-      nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-Refresh-Token"
-      nginx.ingress.kubernetes.io/enable-cors: "true"
       nginx.ingress.kubernetes.io/proxy-connect-timeout: "360"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "360"
       nginx.ingress.kubernetes.io/proxy-read-timeout: "360"
-      nginx.ingress.kubernetes.io/configuration-snippet: "chunked_transfer_encoding off; more_set_headers 'Access-Control-Expose-Headers: X-Refresh-Token';"
+      nginx.ingress.kubernetes.io/configuration-snippet: "chunked_transfer_encoding off;"
       # If using the nginx-ingress-controller from NGINXinc: https://github.com/nginxinc/kubernetes-ingress
       # nginx.org/proxy-connect-timeout: "360s"
       # nginx.org/proxy-send-timeout: "360s"
       # nginx.org/proxy-read-timeout: "360s"
-      # nginx.org/location-snippets: |
-      #   chunked_transfer_encoding off;
-      #   # Cors Preflight methods needs additional options and different Return Code
-      #   set $http_origin *;
-      #   set $cors 'true';
-      #   if ($request_method = 'OPTIONS') {
-      #     set $cors ${cors}options;
-      #   }
-      #   if ($cors = "true") {
-      #     add_header 'Access-Control-Allow-Origin' '$http_origin' always;
-      #     add_header 'Access-Control-Allow-Credentials' 'true' always;
-      #     add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, PATCH, OPTIONS' always;
-      #     add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-Refresh-Token' always;
-      #     add_header 'Access-Control-Expose-Headers' 'X-Refresh-Token' always;
-      #     add_header 'Access-Control-Max-Age' '1728000' always;
-      #   }
-      #   if ($cors = "trueoptions") {
-      #     add_header 'Access-Control-Allow-Origin' '$http_origin' always;
-      #     add_header 'Access-Control-Allow-Credentials' 'true' always;
-      #     add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, PATCH, OPTIONS' always;
-      #     add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-Refresh-Token' always;
-      #     add_header 'Access-Control-Expose-Headers' 'X-Refresh-Token' always;
-      #     add_header 'Access-Control-Max-Age' '1728000' always;
-      #     add_header 'Content-Type' 'text/plain charset=UTF-8' always;
-      #     add_header 'Content-Length' '0' always;
-      #     return 204;
-      #   }
+      # nginx.org/location-snippets: "chunked_transfer_encoding off;"
     hosts:
       - host: api.cycloid.local
         paths:
