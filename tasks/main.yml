@@ -29,6 +29,9 @@
       when: setup_cycloid_core|bool
     - include: nginx.yml
       when: setup_cycloid_core|bool
+    
+    - include: cycloid_cloud_cost_management.yml
+      when: setup_cycloid_core|bool
 
     - include: cycloid_scheduler_sync_worker_keys.yml
       when: setup_cycloid_scheduler|bool
