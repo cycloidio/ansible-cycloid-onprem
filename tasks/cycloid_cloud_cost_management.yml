@@ -1,0 +1,43 @@
+---
+
+- name: Define service | cycloid-cloud-cost-management
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    name: cycloid-ccm
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{cycloid_api_image}}"
+    container_ports:
+      - '3001'
+    container_cmd: "/go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml"
+    container_env:
+      MYSQL_DATABASE: "{{ cycloid_db_name }}"
+      MYSQL_USER: "{{ cycloid_db_user }}"
+      MYSQL_PASSWORD: "{{ cycloid_db_password }}"
+      YOUDEPLOY_MYSQL_SERVICE_HOST: "{{ cycloid_db_host }}"
+      YOUDEPLOY_MYSQL_SERVICE_PORT: "{{ cycloid_db_port }}"
+      REDIS_URI: "redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
+      LOG_LEVEL: "INFO"
+      LOG_SVC_LEVEL: "NONE"
+      RUN_MIGRATIONS: 0
+    service_systemd_options: [ {'key':'Restart','value':'no'}, {'key':'ExecStop','value':''}]
+    service_state: stopped # start or not the service after its creation
+
+  tags: docker-services
+
+- name: Define timer | cycloid-cloud-cost-management
+  template:
+    src: templates/cloud-cost-management/ccm.timer.j2
+    dest: /lib/systemd/system/cycloid-ccm_container.timer
+  vars:
+    schedule: "*-*-* 00:00:00"
+
+- name: Enable timer | cycloid-cloud-cost-management
+  ansible.builtin.systemd:
+    name: cycloid-ccm_container.timer
+    enabled: yes
+    state: started # start or not the timer after its creation
+
+- name: Force systemd to reread configs
+  ansible.builtin.systemd:
+    daemon_reload: yes
