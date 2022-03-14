@@ -20,6 +20,15 @@
       LOG_LEVEL: "INFO"
       LOG_SVC_LEVEL: "NONE"
       RUN_MIGRATIONS: 0
+      #Temporary
+      COST_EXPLORER_ES_URL: "{{ cost_explorer_es_url }}"
+      COST_EXPLORER_ES_MAX_BULK_BYTES: "{{ cost_explorer_es_max_bulk_bytes }}"
+      COST_EXPLORER_ES_BULK_INCREASE_FACTOR: "{{ cost_explorer_es_bulk_increase_factor }}"
+      COST_EXPLORER_ES_BULK_DECREASE_FACTOR: "{{ cost_explorer_es_bulk_decrease_factor }}"
+      COST_EXPLORER_ES_RETRY_PERIOD_SECONDS: "{{ cost_explorer_es_retry_period_seconds }}"
+      COST_EXPLORER_ES_USERNAME: "{{ cost_explorer_es_username }}"
+      COST_EXPLORER_ES_PASSWORD: "{{ cost_explorer_es_password }}"
+      COST_EXPLORER_ES_INSECURE_SKIP_TLS: "{{ cost_explorer_es_insecure_skip_tls }}"
     service_systemd_options: [ {'key':'Restart','value':'no'}, {'key':'ExecStop','value':''}]
     service_state: stopped # start or not the service after its creation
 
