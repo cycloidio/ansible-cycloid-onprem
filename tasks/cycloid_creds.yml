@@ -172,7 +172,7 @@
     register: role_cycloid_secret
   - name: Save cycloid approle | cycloid-creds
     copy:
-      content: "VAULT_ROLE_ID={{ vault_role_id }}\nVAULT_SECRET_ID={{ vault_secret_id }}"
+      content: "VAULT_ROLE_ID={{(role_cycloid_id.stdout | from_json)['data']['role_id']}}\nVAULT_SECRET_ID={{(role_cycloid_secret.stdout | from_json)['data']['secret_id']}}"
       dest: "{{ vault_config_path }}/approle-cycloid"
 
   - name: Copy the approles in local data directory | cycloid-creds
