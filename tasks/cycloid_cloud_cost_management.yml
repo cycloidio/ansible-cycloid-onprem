@@ -1,5 +1,14 @@
 ---
 
+# Temporary
+- name: Create vault_role_id var | cycloid-cloud-cost-management
+  shell: cat {{ cycloid_install_path }}/approle-cycloid | grep VAULT_ROLE_ID | awk -F "=" '{print $2}'
+  register: vault_role_id
+
+- name: Create vault_secret_id var | cycloid-cloud-cost-management
+  shell: cat {{ cycloid_install_path }}/approle-cycloid | grep VAULT_SECRET_ID | awk -F "=" '{print $2}'
+  register: vault_secret_id
+
 - name: Define service | cycloid-cloud-cost-management
   include_role:
     name: mhutter.docker-systemd-service
@@ -9,7 +18,6 @@
     container_image: "{{cycloid_api_image}}"
     container_ports:
       - '3001'
-    container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid"
     container_cmd: "/go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml --cost-explorer-skip-queue=true"
     container_env:
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
@@ -30,6 +38,8 @@
       LOG_LEVEL: "INFO"
       LOG_SVC_LEVEL: "NONE"
       RUN_MIGRATIONS: 0
+      VAULT_ROLE_ID: "{{ vault_role_id }}"
+      VAULT_SECRET_ID: "{{ vault_secret_id }}"
     service_systemd_options: [ {'key':'Restart','value':'no'}, {'key':'ExecStop','value':''}]
     service_state: stopped # start or not the service after its creation
 
