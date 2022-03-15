@@ -3,6 +3,7 @@
 - name: Define service | cycloid-cloud-cost-management
   include_role:
     name: mhutter.docker-systemd-service
+  include_vars: "{{ cycloid_install_path }}/approle-cycloid"
   vars:
     name: cycloid-ccm
     container_docker_pull: "{{ docker_pull }}"
@@ -22,17 +23,11 @@
       REDIS_URI: "redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
       VAULT_URL: "{{ vault_url }}"
       VAULT_SKIP_VERIFY: true
-      VAULT_ROLE_ID: "{{(role_cycloid_id.stdout | from_json)['data']['role_id']}}"
-      VAULT_SECRET_ID: "{{(role_cycloid_secret.stdout | from_json)['data']['secret_id']}}"
       LOG_LEVEL: "INFO"
       LOG_SVC_LEVEL: "NONE"
       RUN_MIGRATIONS: 0
       #Temporary
       COST_EXPLORER_ES_URL: "{{ cost_explorer_es_url }}"
-      COST_EXPLORER_ES_MAX_BULK_BYTES: "{{ cost_explorer_es_max_bulk_bytes }}"
-      COST_EXPLORER_ES_BULK_INCREASE_FACTOR: "{{ cost_explorer_es_bulk_increase_factor }}"
-      COST_EXPLORER_ES_BULK_DECREASE_FACTOR: "{{ cost_explorer_es_bulk_decrease_factor }}"
-      COST_EXPLORER_ES_RETRY_PERIOD_SECONDS: "{{ cost_explorer_es_retry_period_seconds }}"
       COST_EXPLORER_ES_USERNAME: "{{ cost_explorer_es_username }}"
       COST_EXPLORER_ES_PASSWORD: "{{ cost_explorer_es_password }}"
       COST_EXPLORER_ES_INSECURE_SKIP_TLS: "{{ cost_explorer_es_insecure_skip_tls }}"
