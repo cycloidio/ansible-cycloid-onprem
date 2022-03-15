@@ -9,6 +9,7 @@
     container_image: "{{cycloid_api_image}}"
     container_ports:
       - '3001'
+    container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
     container_cmd: "/go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml"
     container_env:
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
