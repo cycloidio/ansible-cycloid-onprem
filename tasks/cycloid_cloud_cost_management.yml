@@ -9,8 +9,7 @@
     container_image: "{{cycloid_api_image}}"
     container_ports:
       - '3001'
-    container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
-    container_cmd: "/go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml"
+    container_cmd: "/go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml --cost-explorer-skip-queue=true"
     container_env:
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
       MYSQL_USER: "{{ cycloid_db_user }}"
@@ -23,6 +22,8 @@
       REDIS_URI: "redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
       VAULT_URL: "{{ vault_url }}"
       VAULT_SKIP_VERIFY: true
+      VAULT_ROLE_ID: "{{(role_cycloid_id.stdout | from_json)['data']['role_id']}}"
+      VAULT_SECRET_ID: "{{(role_cycloid_secret.stdout | from_json)['data']['secret_id']}}"
       LOG_LEVEL: "INFO"
       LOG_SVC_LEVEL: "NONE"
       RUN_MIGRATIONS: 0
