@@ -20,6 +20,8 @@
       REDIS_PORT: "{{ cycloid_email_redis_port }}"
       REDIS_DB: "{{ cycloid_email_redis_db }}"
       REDIS_URI: "redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
+      VAULT_URL: "{{ vault_url }}"
+      VAULT_SKIP_VERIFY: true
       LOG_LEVEL: "INFO"
       LOG_SVC_LEVEL: "NONE"
       RUN_MIGRATIONS: 0
