@@ -22,8 +22,8 @@
       REDIS_URI: "redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
       VAULT_SKIP_VERIFY: true
       VAULT_URL: "{{ vault_url }}"
-      VAULT_ROLE_ID: "{{ vault_role_id }}"
-      VAULT_SECRET_ID: "{{ vault_secret_id }}"
+      VAULT_ROLE_ID: "{{ (role_cycloid_id.stdout | from_json)['data']['role_id'] }}"
+      VAULT_SECRET_ID: "{{ (role_cycloid_secret.stdout | from_json)['data']['secret_id'] }}"
       COST_EXPLORER_ES_URL: "{{ cost_explorer_es_url }}"
       COST_EXPLORER_ES_USERNAME: "{{ cost_explorer_es_username }}"
       COST_EXPLORER_ES_PASSWORD: "{{ cost_explorer_es_password }}"
