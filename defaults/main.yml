@@ -96,7 +96,7 @@ container_args_extra: ""
 
 # If ca_certificates_container_shared, run update-ca before the /entrypoint
 cycloid_api_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint\"{% endif %}"
-cycloid_ccm_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint /go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml --cost-explorer-skip-queue=true\"{% endif %}"
+cycloid_ccm_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint /go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml --cost-explorer-skip-queue=true\" {% else %} -c \"/entrypoint /go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml --cost-explorer-skip-queue=true {% endif %}\""
 
 # docker exec -it cycloid-api bash -c "ls -l /etc/ssl/certs/ | grep DigiCertSHA2HighAssuranceServerCA.crt"
 
