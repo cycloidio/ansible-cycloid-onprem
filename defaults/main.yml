@@ -77,7 +77,7 @@ ca_certificates_handler:
   redhat: "/usr/bin/update-ca-trust"
 
 # Share your rootCA from the host to containers
-#ca_certificates_container_shared: false
+ca_certificates_container_shared: false
 
 # Certificates volumes to share on containers depending of ansible_os_family
 container_volumes_ca_certificates_default:
