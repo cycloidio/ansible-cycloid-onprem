@@ -41,7 +41,7 @@
     src: templates/cloud-cost-management/ccm.timer.j2
     dest: /lib/systemd/system/cycloid-ccm_container.timer
   vars:
-    schedule: "*-*-* 00:00:00"
+    schedule: "*-*-* 05:00:00"
 
 - name: Enable timer | cycloid-cloud-cost-management
   ansible.builtin.systemd:
