@@ -1,14 +1,5 @@
 ---
 
-# Temporary
-- name: Create vault_role_id var | cycloid-cloud-cost-management
-  shell: cat {{ cycloid_install_path }}/approle-cycloid | grep VAULT_ROLE_ID | awk -F "=" '{print $2}'
-  register: vault_role_id
-
-- name: Create vault_secret_id var | cycloid-cloud-cost-management
-  shell: cat {{ cycloid_install_path }}/approle-cycloid | grep VAULT_SECRET_ID | awk -F "=" '{print $2}'
-  register: vault_secret_id
-
 - name: Define service | cycloid-cloud-cost-management
   include_role:
     name: mhutter.docker-systemd-service
@@ -19,10 +10,9 @@
     container_ports:
       - '3001'
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
-    container_cmd: "/go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml --cost-explorer-skip-queue=true"
+    container_cmd: "{{ cycloid_ccm_container_cmd }}"
+    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ]) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
-      VAULT_ROLE_ID: "{{ vault_role_id.stdout }}"
-      VAULT_SECRET_ID: "{{ vault_secret_id.stdout }}"
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
       MYSQL_USER: "{{ cycloid_db_user }}"
       MYSQL_PASSWORD: "{{ cycloid_db_password }}"
