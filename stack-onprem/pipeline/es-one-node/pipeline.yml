@@ -1126,7 +1126,7 @@ jobs:
             cy --insecure  --org $ORG  credential create aws --name minio --access-key ((onprem_minio_access_key)) --secret-key ((onprem_minio_secret_key))
 
             # AWS
-            cy --insecure  --org $ORG  credential create aws --name AWS CCM --access-key ((((onprem_aws_cred_name)).access_key)) --secret-key ((((onprem_aws_cred_name)).secret_key))
+            cy --insecure  --org $ORG  credential create aws --name aws_ccm --access-key ((((onprem_aws_cred_name)).access_key)) --secret-key ((((onprem_aws_cred_name)).secret_key))
             cy --insecure  --org $ORG  credential create aws --name admin_aws-sandbox --access-key ((((onprem_aws_sandbox_cred_name)).access_key)) --secret-key ((((onprem_aws_sandbox_cred_name)).secret_key))
 
             # GCP
@@ -1136,7 +1136,7 @@ jobs:
 
             # Azure
             cy --insecure  --org $ORG  credential create azure --name admin_azure --client-id ((((onprem_azure_cred_name)).client_id)) --client-secret ((((onprem_azure_cred_name)).client_secret)) --subscription-id ((((onprem_azure_cred_name)).subscription_id)) --tenant-id ((((onprem_azure_cred_name)).tenant_id))
-            cy --insecure  --org $ORG  credential create azure_storage --name Azure CCM --account-name ((((onprem_azure_storage_cred_name)).account_name)) --access-key ((((onprem_azure_storage_cred_name)).access_key))
+            cy --insecure  --org $ORG  credential create azure_storage --name azure_ccm --account-name ((((onprem_azure_storage_cred_name)).account_name)) --access-key ((((onprem_azure_storage_cred_name)).access_key))
 
             # create dummy project
             echo "Creating dummy project ..."
