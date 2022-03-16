@@ -102,4 +102,4 @@ onprem_aws_cred_name: aws_admin
 onprem_aws_sandbox_cred_name: aws_sandbox
 onprem_gcp_cred_name: gcp_terraform
 onprem_azure_cred_name: azure_terraform
-onprem_azure_storage_cred_name: azure_storage_cycloidtfstate
+onprem_azure_storage_cred_name: cycloidcostexplorer
