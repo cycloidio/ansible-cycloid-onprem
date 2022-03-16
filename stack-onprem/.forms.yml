@@ -64,13 +64,6 @@ cycloid-cost-explorer-with-es-one-node:
         widget: simple_text
         type: string
         default: '1.0.7'
-      - name: "Private SSH KEY to connect on instances"
-        description: "Private SSH KEY to connect on instances."
-        key: instance_private_key_pair
-        type: string
-        widget: cy_cred
-        default: "((git_ssh_bastion_cycloid.ssh_key))"
-        required: true
 
     Service:
       - name: "Concourse worker enabled"

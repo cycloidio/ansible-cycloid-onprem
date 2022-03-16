@@ -402,7 +402,7 @@ jobs:
         params:
           ENV: ((env))
           CONFIG_ANSIBLE_PATH: ((config_ansible_path))
-          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          SSH_PRIVATE_KEY: ((keypair_name))
           GITHUB_KEY: ((config_git_private_key))
           COST_EXPLORER_ES: true
           ANSIBLE_EXTRA_VARS:
@@ -629,7 +629,7 @@ jobs:
           CONCOURSE_WORKER: ((install_concourse_worker))
           MINIO: ((install_minio))
           ELASTICSEARCH: ((install_elasticsearch))
-          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          SSH_PRIVATE_KEY: ((keypair_name))
           GITHUB_KEY: ((config_git_private_key))
           AWS_ACCESS_KEY_ID: ((aws_access_key))
           AWS_DEFAULT_REGION: ((aws_default_region))
@@ -728,7 +728,7 @@ jobs:
           - name: tfstate
         params:
           CONCOURSE_WORKER: ((install_concourse_worker))
-          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          SSH_PRIVATE_KEY: ((keypair_name))
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
 
@@ -874,7 +874,7 @@ jobs:
         inputs:
           - name: tfstate
         params:
-          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          SSH_PRIVATE_KEY: ((keypair_name))
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
 
@@ -932,7 +932,7 @@ jobs:
         inputs:
           - name: tfstate
         params:
-          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          SSH_PRIVATE_KEY: ((keypair_name))
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
 
@@ -991,7 +991,7 @@ jobs:
         inputs:
           - name: tfstate
         params:
-          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          SSH_PRIVATE_KEY: ((keypair_name))
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
 
@@ -1050,7 +1050,7 @@ jobs:
         inputs:
           - name: tfstate
         params:
-          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          SSH_PRIVATE_KEY: ((keypair_name))
           ANSIBLE_EXTRA_VARS:
              ((ansible_params_extravars))
 
@@ -1184,7 +1184,7 @@ jobs:
           - name: tfstate
           - name: git_terracost
         params:
-          SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          SSH_PRIVATE_KEY: ((keypair_name))
           CR_REPO: ((onprem_cr_repository))
           IV_BUCKET_NAME: cycloid-terraform-remote-state
           IV_BUCKET_PATH: cycloidio-website/demo-hack/cycloid-demo.tfstate
