@@ -1126,7 +1126,7 @@ jobs:
             cy --insecure  --org $ORG  credential create aws --name minio --access-key ((onprem_minio_access_key)) --secret-key ((onprem_minio_secret_key))
 
             # AWS
-            cy --insecure  --org $ORG  credential create aws --name admin_aws --access-key ((((onprem_aws_cred_name)).access_key)) --secret-key ((((onprem_aws_cred_name)).secret_key))
+            cy --insecure  --org $ORG  credential create aws --name AWS CCM --access-key ((((onprem_aws_cred_name)).access_key)) --secret-key ((((onprem_aws_cred_name)).secret_key))
             cy --insecure  --org $ORG  credential create aws --name admin_aws-sandbox --access-key ((((onprem_aws_sandbox_cred_name)).access_key)) --secret-key ((((onprem_aws_sandbox_cred_name)).secret_key))
 
             # GCP
@@ -1136,7 +1136,7 @@ jobs:
 
             # Azure
             cy --insecure  --org $ORG  credential create azure --name admin_azure --client-id ((((onprem_azure_cred_name)).client_id)) --client-secret ((((onprem_azure_cred_name)).client_secret)) --subscription-id ((((onprem_azure_cred_name)).subscription_id)) --tenant-id ((((onprem_azure_cred_name)).tenant_id))
-            cy --insecure  --org $ORG  credential create azure_storage --name azure-tfstate --account-name ((((onprem_azure_storage_cred_name)).account_name)) --access-key ((((onprem_azure_storage_cred_name)).access_key))
+            cy --insecure  --org $ORG  credential create azure_storage --name Azure CCM --account-name ((((onprem_azure_storage_cred_name)).account_name)) --access-key ((((onprem_azure_storage_cred_name)).access_key))
 
             # create dummy project
             echo "Creating dummy project ..."
@@ -1153,18 +1153,18 @@ jobs:
               --vars "variables.sample.yml"
 
             # InfraView for dummy/test
-            echo "InfraView for dummy/test project ..."
-            cy --insecure --org $ORG --project dummy --env test external-backend create infraview AWSRemoteTFState \
-              --bucket-name ${IV_BUCKET_NAME} \
-              --bucket-path ${IV_BUCKET_PATH} \
-              --cred admin_aws \
-              --region "eu-west-1"
+            #echo "InfraView for dummy/test project ..."
+            #cy --insecure --org $ORG --project dummy --env test external-backend create infraview AWSRemoteTFState \
+            #  --bucket-name ${IV_BUCKET_NAME} \
+            #  --bucket-path ${IV_BUCKET_PATH} \
+            #  --cred admin_aws \
+            #  --region "eu-west-1"
 
             # Logs for dummy/test
-            echo "Logs for dummy/test project ..."
-            cy --insecure --org $ORG --project dummy external-backend create logs AWSCloudWatchLogs \
-              --cred admin_aws \
-              --region "eu-west-1"
+            #echo "Logs for dummy/test project ..."
+            #cy --insecure --org $ORG --project dummy external-backend create logs AWSCloudWatchLogs \
+            #  --cred admin_aws \
+            #  --region "eu-west-1"
 
             ### Inject terracost price ###
             # Get pricing data from terracost (used by cost estimation feature)
@@ -1174,11 +1174,11 @@ jobs:
             # TRUNCATE TABLE pricing_product_prices;
             # TRUNCATE TABLE pricing_products;
             # SET FOREIGN_KEY_CHECKS = 1;
-            echo "Injecting terracost pricing ..."
-            LATEST_PRICE=$(ls -1 git_terracost/mysql/testdata/*pricing.sql.gz | tail -n1)
-            echo "  Using ${LATEST_PRICE}"
-            scp -q ${LATEST_PRICE} ${REMOTE_USER}@${MAIN_INSTANCE}:/tmp/
-            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} 'gunzip -f /tmp/*-pricing.sql.gz && source <(sudo grep MYSQL /etc/default/cycloid-api) && mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE < /tmp/*pricing.sql'
+            #echo "Injecting terracost pricing ..."
+            #LATEST_PRICE=$(ls -1 git_terracost/mysql/testdata/*pricing.sql.gz | tail -n1)
+            #echo "  Using ${LATEST_PRICE}"
+            #scp -q ${LATEST_PRICE} ${REMOTE_USER}@${MAIN_INSTANCE}:/tmp/
+            #ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} 'gunzip -f /tmp/*-pricing.sql.gz && source <(sudo grep MYSQL /etc/default/cycloid-api) && mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE < /tmp/*pricing.sql'
 
         inputs:
           - name: tfstate
