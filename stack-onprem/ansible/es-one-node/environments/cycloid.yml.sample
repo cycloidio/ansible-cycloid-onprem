@@ -26,7 +26,7 @@ saml_auth_enabled: false
 saml_idp_metadata_url: ""
 
 cycloid_public_stacks: true
-#ca_certificates_container_shared: true
+ca_certificates_container_shared: true
 cycloid_admin_apikey: true
 
 cycloid_db_image: mysql:8.0.21
