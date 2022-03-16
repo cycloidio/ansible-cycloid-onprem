@@ -1,0 +1,6 @@
+kind: Changed
+body: Bump console to version 2.4.5
+time: 2022-03-16T17:04:37.493724456+01:00
+custom:
+  Ref: Pull
+  RefID: "124"
