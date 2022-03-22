@@ -514,13 +514,13 @@ saml_idp_metadata_path: "{%- if saml_auth_enabled and saml_idp_metadata_url == '
 ###########################
 
 # elasticsearch variable used for Cost Explorer access
-#cost_explorer_es_url: http://localhost:9200
+cost_explorer_es_url: ""
 #cost_explorer_es_max_bulk_bytes: 1000000
 #cost_explorer_es_bulk_increase_factor: 1.5
 #cost_explorer_es_bulk_decrease_factor: 0.7
 #cost_explorer_es_retry_period_seconds: 3
-#cost_explorer_es_username: ""
-#cost_explorer_es_password: ""
+cost_explorer_es_username: ""
+cost_explorer_es_password: ""
 
 # Share host saml file with container. It shouldn't be changed.
 container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/secrets/saml{%- endif -%}"

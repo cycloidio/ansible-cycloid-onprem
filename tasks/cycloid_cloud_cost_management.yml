@@ -24,10 +24,10 @@
       REDIS_URI: "redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
       VAULT_SKIP_VERIFY: true
       VAULT_URL: "{{ vault_url }}"
-      #COST_EXPLORER_ES_URL: "{{ cost_explorer_es_url }}"
-      #COST_EXPLORER_ES_USERNAME: "{{ cost_explorer_es_username }}"
-      #COST_EXPLORER_ES_PASSWORD: "{{ cost_explorer_es_password }}"
-      #COST_EXPLORER_ES_INSECURE_SKIP_TLS: "{{ cost_explorer_es_insecure_skip_tls }}"
+      COST_EXPLORER_ES_URL: "{{ cost_explorer_es_url }}"
+      COST_EXPLORER_ES_USERNAME: "{{ cost_explorer_es_username }}"
+      COST_EXPLORER_ES_PASSWORD: "{{ cost_explorer_es_password }}"
+      COST_EXPLORER_ES_INSECURE_SKIP_TLS: "{{ cost_explorer_es_insecure_skip_tls }}"
       LOG_LEVEL: "INFO"
       LOG_SVC_LEVEL: "NONE"
       RUN_MIGRATIONS: 0
