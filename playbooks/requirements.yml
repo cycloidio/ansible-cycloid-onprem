@@ -24,7 +24,8 @@
   name: geerlingguy.docker
   scm: git
 
+  # 2d3a96dc948c5c44228360fa22a58223bdc0b111 fixed until https://github.com/mhutter/ansible-docker-systemd-service/issues/42 solved
 - src: https://github.com/mhutter/ansible-docker-systemd-service
-  version: master
+  version: 2d3a96dc948c5c44228360fa22a58223bdc0b111
   name: mhutter.docker-systemd-service
   scm: git
