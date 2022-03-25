@@ -312,12 +312,7 @@ jobs:
             ansible-galaxy install elastic.elasticsearch,v7.17.0 -v
             ansible-galaxy install geerlingguy.kibana -v
             set +x
-
-            # Install the mapper-murmur3 plugin 
-
-            /usr/share/elasticsearch/bin/elasticsearch-plugin install mapper-murmur3
-            systemctl restart elasticsearch
-
+            
             # Update onprem ansible role with files from the selected branch
             mkdir -p roles/ansible-cycloid-onprem/
             cp -r ${DIR}/ansible-cycloid-onprem/* roles/ansible-cycloid-onprem/

@@ -1,3 +1,13 @@
 ---
 - import_playbook: playbook-elasticsearch.yml
 - import_playbook: playbook-kibana.yml
+
+- name: install the mapper-murmur3 plugin
+  community.general.elasticsearch_plugin:
+    name: mapper-murmur3
+    state: present
+
+- name: restart service elasticsearch
+  ansible.builtin.service:
+    name: elasticsearch
+    state: restarted
