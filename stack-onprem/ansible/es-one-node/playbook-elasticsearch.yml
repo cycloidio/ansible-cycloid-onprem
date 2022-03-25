@@ -18,3 +18,5 @@
     es_ssl_keystore_password: ""
     es_ssl_truststore_password: ""
     es_validate_certs: no
+    es_plugins:
+      - plugin: mapper-murmur3
