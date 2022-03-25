@@ -47,17 +47,7 @@
         masked: false
         state: started
       tags: docker-services
-
-    - name: install the mapper-murmur3 plugin
-      community.general.elasticsearch_plugin:
-        name: mapper-murmur3
-        state: present
-
-    - name: restart service elasticsearch
-      ansible.builtin.service:
-        name: elasticsearch
-        state: restarted
-
+      
     - name: wait for elasticsearch availability
       uri:
         url: "https://localhost:{{ elasticsearch_port_api }}/_cat/health"
