@@ -67,6 +67,7 @@
       COST_EXPLORER_ES_USERNAME: "{{ cost_explorer_es_username }}"
       COST_EXPLORER_ES_PASSWORD: "{{ cost_explorer_es_password }}"
       COST_EXPLORER_ES_INSECURE_SKIP_TLS: "{{ cost_explorer_es_insecure_skip_tls }}"
+      #COST_EXPLORER_ES_CA_CERT: "{{ cost_explorer_es_ca_cert }}"
       LOG_LEVEL: "INFO"
       LOG_SVC_LEVEL: "NONE"
       #LOG_LEVEL: "DEBUG"

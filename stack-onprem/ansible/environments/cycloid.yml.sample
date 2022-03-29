@@ -49,6 +49,7 @@ cost_explorer_es_url: $COST_EXPLORER_ES_URL
 cost_explorer_es_username: $COST_EXPLORER_ES_USERNAME
 cost_explorer_es_password: $COST_EXPLORER_ES_PASSWORD
 cost_explorer_es_insecure_skip_tls: $COST_EXPLORER_ES_INSECURE_SKIP_TLS
+#cost_explorer_es_ca_cert : $COST_EXPLORER_ES_CA_CERT
 
 ######################
 ### Worker Section ###

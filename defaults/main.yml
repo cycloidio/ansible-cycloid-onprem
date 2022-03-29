@@ -98,8 +98,8 @@ container_args_extra: ""
 cycloid_api_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint\"{% endif %}"
 
 # Cloud Cost Management cmd 
-cycloid_ccm_container_cmd_args: "/go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml --cost-explorer-skip-queue=true"
-cycloid_ccm_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint {{ cycloid_ccm_container_cmd_args }}\"{% else %}{{ cycloid_ccm_container_cmd_args }}{% endif %}"
+cycloid_job_ccm_ingestion_container_args: "/go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml --cost-explorer-skip-queue=true"
+cycloid_job_ccm_ingestion_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint {{ cycloid_job_ccm_ingestion_container_args }}\"{% else %}{{ cycloid_job_ccm_ingestion_container_args }}{% endif %}"
 
 # docker exec -it cycloid-api bash -c "ls -l /etc/ssl/certs/ | grep DigiCertSHA2HighAssuranceServerCA.crt"
 
@@ -517,14 +517,15 @@ saml_idp_metadata_path: "{%- if saml_auth_enabled and saml_idp_metadata_url == '
 
 
 ###########################
-# Cost Explorer feature (api params)
+# Cost Explorer / Cloud Cost Management feature (api params)
 ###########################
 
-# elasticsearch variable used for Cost Explorer access
+# Elasticsearch variable used for Cost Explorer / Cloud Cost Management access
 cost_explorer_es_url: ""
 cost_explorer_es_username: ""
 cost_explorer_es_password: ""
-cost_explorer_es_insecure_skip_tls: true
+cost_explorer_es_insecure_skip_tls: true # ignore certificate errors if there are any
+#cost_explorer_es_ca_cert : "" # PEM-formatted CA certificate of Elasticsearch
 
 # Share host saml file with container. It shouldn't be changed.
 container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/secrets/saml{%- endif -%}"

@@ -1,16 +1,16 @@
 ---
 
-- name: Define service | cycloid-cloud-cost-management
+- name: Define cycloid-job-ccm-ingestion_container service | cycloid-cloud-cost-management
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: cycloid-ccm
+    name: cycloid-job-ccm-ingestion
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{cycloid_api_image}}"
     container_ports:
       - '3001'
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
-    container_cmd: "{{ cycloid_ccm_container_cmd }}"
+    container_cmd: "{{ cycloid_job_ccm_ingestion_container_cmd }}"
     container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ]) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
@@ -28,6 +28,7 @@
       COST_EXPLORER_ES_USERNAME: "{{ cost_explorer_es_username }}"
       COST_EXPLORER_ES_PASSWORD: "{{ cost_explorer_es_password }}"
       COST_EXPLORER_ES_INSECURE_SKIP_TLS: "{{ cost_explorer_es_insecure_skip_tls }}"
+      #COST_EXPLORER_ES_CA_CERT: "{{ cost_explorer_es_ca_cert }}"
       LOG_LEVEL: "INFO"
       LOG_SVC_LEVEL: "NONE"
       RUN_MIGRATIONS: 0
@@ -36,16 +37,16 @@
 
   tags: docker-services
 
-- name: Define timer | cycloid-cloud-cost-management
+- name: Define cycloid-job-ccm-ingestion timer | cycloid-cloud-cost-management
   template:
-    src: templates/cloud-cost-management/ccm.timer.j2
-    dest: /lib/systemd/system/cycloid-ccm_container.timer
+    src: templates/cloud-cost-management/cycloid-job-ccm-ingestion.timer.j2
+    dest: /lib/systemd/system/cycloid-job-ccm-ingestion.timer
   vars:
     schedule: "*-*-* 00:00:00"
 
 - name: Enable timer | cycloid-cloud-cost-management
   ansible.builtin.systemd:
-    name: cycloid-ccm_container.timer
+    name: cycloid-job-ccm-ingestion.timer
     enabled: yes
     state: started # start or not the timer after its creation
 
