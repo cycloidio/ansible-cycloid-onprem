@@ -50,7 +50,7 @@
     src: templates/cloud-cost-management/cycloid-job-ccm-ingestion.timer.j2
     dest: /lib/systemd/system/cycloid-job-ccm-ingestion.timer
   vars:
-    schedule: "*-*-* 00:00:00"
+    schedule: "{{ cost_explorer_ingestion_schedule }}"
 
 - name: Enable timer | cycloid-cloud-cost-management
   ansible.builtin.systemd:
