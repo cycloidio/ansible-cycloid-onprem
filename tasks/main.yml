@@ -30,7 +30,7 @@
     - include: nginx.yml
       when: setup_cycloid_core|bool
 
-    - include: cycloid_cloud_cost_management.yml
+    - include: cycloid_job_ccm_ingestion.yml
       when: setup_cycloid_core|bool
 
     #- include: prometheus.yml
