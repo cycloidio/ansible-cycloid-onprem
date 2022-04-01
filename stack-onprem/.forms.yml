@@ -247,6 +247,40 @@ use_cases:
               - "mysql:8.0.25"
               - "mariadb:10.2.11"
 
+  - name: Features
+    groups:
+    - name: Cloud Cost Management
+      condition: advanced_opt==true
+      technologies: [ansible]
+      vars:
+        - name: "Elasticsearch URL"
+          description: "Elasticsearch database URL for Cloud Cost Management"
+          key: cost_explorer_es_url
+          widget: simple_text
+          type: string
+          default: ""
+          required: false
+        - name: "Elasticsearch username"
+          description: "Elasticsearch database username for Cloud Cost Management"
+          key: cost_explorer_es_username
+          widget: simple_text
+          type: string
+          default: ""
+          required: false
+        - name: "Elasticsearch password"
+          description: "Elasticsearch database password for Cloud Cost Management"
+          key: cost_explorer_es_password
+          widget: simple_text
+          type: string
+          default: ""
+          required: false
+        - name: "Elasticsearch disable TLS verification"
+          description: "Disable TLS verification on Elasticsearch for Cloud Cost Management"
+          key: cost_explorer_es_insecure_skip_tls
+          widget: switch
+          type: boolean
+          default: true
+            
   - name: Security
     groups:
     - name: Password

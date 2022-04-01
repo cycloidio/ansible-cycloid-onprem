@@ -45,11 +45,11 @@ cycloid_frontend_image: "{{cycloid_frontend_repo}}:{{cycloid_frontend_tag}}"
 cycloid_cache_resque_install: true
 
 # Cost-Explorer: Elasticsearch
-cost_explorer_es_url: $COST_EXPLORER_ES_URL
-cost_explorer_es_username: $COST_EXPLORER_ES_USERNAME
-cost_explorer_es_password: $COST_EXPLORER_ES_PASSWORD
-cost_explorer_es_insecure_skip_tls: $COST_EXPLORER_ES_INSECURE_SKIP_TLS
-#cost_explorer_es_ca_cert : $COST_EXPLORER_ES_CA_CERT
+cost_explorer_es_url: ""
+cost_explorer_es_username: ""
+cost_explorer_es_password: ""
+cost_explorer_es_insecure_skip_tls: ""
+#cost_explorer_es_ca_cert: ""
 
 ######################
 ### Worker Section ###
