@@ -218,6 +218,7 @@ backend:
     LOG_DEV_MODE: false
     LOG_LEVEL: "INFO"
     LOG_SVC_LEVEL: "NONE"
+    # COST_EXPLORER_ES_INSECURE_SKIP_TLS: true
     # AZURE_TENANT_ID: "SECRET"
     # AZURE_CLIENT_ID: "SECRET"
     # GOOGLE_CLIENT_ID: "SECRET"
@@ -235,6 +236,9 @@ backend:
   # extraSecretEnvVars is a list of extra environment variables to set.
   # These variables take value from existing Secret objects.
   extraSecretEnvVars: []
+    # - envName: COST_EXPLORER_ES_CA_CERT
+    #   secretName: cost-explorer-es-http-certs-public
+    #   secretKey: ca.crt
     # - envName: SAML_IDP_METADATA_URL
     #   secretName: saml
     #   secretKey: SAML_IDP_METADATA_URL
@@ -481,7 +485,7 @@ externalMysql:
 # Ref: https://github.com/bitnami/charts/tree/master/bitnami/redis
 #
 redis:
-  ## Use the MySQL chart dependency.
+  ## Use the Redis chart dependency.
   ##
   ## Set to false if bringing your own MySQL, and set the corresponding `secrets`
   ## fields that correspond to the PostgreSQL variables that `concourse web` should use
@@ -537,13 +541,36 @@ externalRedis:
   password: ""
 
 #
+# External Elasticsearch Configuration
+#
+externalElasticsearch:
+  # for now, the externalElasticsearch config will be at first
+  # the only solution to configure the backend for Cloud Cost Management
+  enabled: false
+  #External ES server protocol
+  scheme: https
+  #External ES server host
+  host: cost-explorer-es-http
+  #External ES server port
+  port: 9200
+  #External ES server database
+  username: elastic
+  #External ES password
+  password: ""
+  #The name of an existing secret with database credentials
+  # NOTE: Must contain key `elasticsearch-password` by default is not overriden with `existingSecretKey`
+  # NOTE: When it's set, the `externalElasticsearch.password` parameter is ignored
+  existingSecret: ""
+  #existingSecretKey: elastic
+
+#
 # Concourse
 #
 # Configuration values for the concourse dependency.
 # Ref: https://github.com/concourse/concourse-chart
 #
 concourse:
-  ## Use the MySQL chart dependency.
+  ## Use the Concourse chart dependency.
   ##
   ## Set to false if bringing your own MySQL, and set the corresponding `secrets`
   ## fields that correspond to the PostgreSQL variables that `concourse web` should use
@@ -1020,7 +1047,7 @@ concourse:
 # Ref: https://github.com/hashicorp/vault-helm
 #
 vault:
-  # Use the MySQL chart dependency.
+  # Use the Vault chart dependency.
   #
   # Set to false if bringing your own MySQL, and set the corresponding `secrets`
   # fields that correspond to the PostgreSQL variables that `concourse web` should use

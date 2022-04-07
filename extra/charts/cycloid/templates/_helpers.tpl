@@ -214,6 +214,42 @@ Return the Redis URI
 {{- end -}}
 
 {{/*
+Return the Elasticsearch URL
+*/}}
+{{- define "cycloid.elasticsearchURL" -}}
+    {{- printf "%s://%s:%d" .Values.externalElasticsearch.scheme .Values.externalElasticsearch.host (.Values.externalElasticsearch.port | int) -}}
+{{- end -}}
+
+{{/*
+Return the Elasticsearch User
+*/}}
+{{- define "cycloid.elasticsearchUser" -}}
+    {{- printf "%s" .Values.externalElasticsearch.username -}}
+{{- end -}}
+
+{{/*
+Return the Elasticsearch Secret Name
+*/}}
+{{- define "cycloid.elasticsearchSecretName" -}}
+{{- if .Values.externalElasticsearch.existingSecret -}}
+    {{- printf "%s" .Values.externalElasticsearch.existingSecret -}}
+{{- else -}}
+    {{- printf "%s-externalelasticsearch" (include "cycloid.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the Elasticsearch Secret Key
+*/}}
+{{- define "cycloid.elasticsearchSecretKey" -}}
+{{- if .Values.externalElasticsearch.existingSecret -}}
+    {{- printf "%s" (.Values.externalElasticsearch.existingSecretKey | default "elasticsearch-password") -}}
+{{- else -}}
+    {{- printf "elasticsearch-password" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Inject extra environment vars in the format key:value, if populated
 */}}
 {{- define "cycloid.extraEnvVars" -}}
