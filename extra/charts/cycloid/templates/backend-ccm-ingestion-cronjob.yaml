@@ -1,4 +1,4 @@
-{{- if .Values.backend.enabled }}
+{{- if and .Values.backend.enabled .Values.externalElasticsearch.enabled }}
 {{- if semverCompare ">=1.21-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: batch/v1
 {{- else -}}
@@ -6,7 +6,7 @@ apiVersion: batch/v1beta1
 {{- end }}
 kind: CronJob
 metadata:
-  name: {{ include "backend.fullname" . }}-kpi-import
+  name: {{ include "backend.fullname" . }}-ccm-ingestion
   labels:
     {{- include "cycloid.labels" . | nindent 4 }}
     {{- include "backend.selectorLabels" . | nindent 4 }}
@@ -19,8 +19,8 @@ metadata:
   {{- end }}
 spec:
   suspend: false
-  concurrencyPolicy: Replace 
-  schedule: "0 */1 * * *"
+  concurrencyPolicy: Replace
+  schedule: "0 0 * * *"
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3
   jobTemplate:
@@ -52,14 +52,14 @@ spec:
           restartPolicy: "Never"
 
           containers:
-            - name: kpi-import
+            - name: ccm-ingestion
               securityContext:
                 {{- toYaml .Values.backend.securityContext | nindent 16 }}
               image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
               args:
                 - "/go/youdeploy-http-api"
-                - "kpi-import"
+                - "ingest-cost-explorer"
                 - "--config-file=/opt/config.yml"
               resources:
                 {{- toYaml .Values.backend.cronJob.resources | nindent 16 }}
@@ -94,6 +94,16 @@ spec:
                       optional: true
                 - name: "REDIS_URI"
                   value: {{ include "cycloid.redisUri" . | quote }}
+
+                - name: "COST_EXPLORER_ES_URL"
+                  value: {{ include "cycloid.elasticsearchURL" . | quote }}
+                - name: "COST_EXPLORER_ES_USERNAME"
+                  value: {{ include "cycloid.elasticsearchUser" . | quote }}
+                - name: "COST_EXPLORER_ES_PASSWORD"
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ template "cycloid.elasticsearchSecretName" . }}
+                      key: {{ template "cycloid.elasticsearchSecretKey" . }}
 
                 - name: "CONCOURSE_URL"
                   value: {{ .Values.concourse.url | quote }}
