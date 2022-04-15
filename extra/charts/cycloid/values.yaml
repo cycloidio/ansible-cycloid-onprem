@@ -630,6 +630,10 @@ concourse:
         ##
         database: atc
 
+    worker:
+      baggageclaim:
+        driver: overlay
+
   web:
     ## Enable or disable the web component.
     ## This allows the creation of worker-only releases by setting this to false.
@@ -812,8 +816,15 @@ concourse:
     ##
     resources:
       requests:
-        cpu: "100m"
+        cpu: "1"
         memory: "512Mi"
+      limits:
+        memory: "1Gi"
+
+    ## Node selector for the worker nodes.
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    ##
+    nodeSelector: {}
 
   ## Persistent Volume Storage configuration.
   ## Ref: https://kubernetes.io/docs/user-guide/persistent-volumes
