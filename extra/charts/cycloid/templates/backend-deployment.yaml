@@ -36,7 +36,7 @@ spec:
       serviceAccountName: {{ include "backend.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
-      
+
       initContainers:
         {{- if .Values.mysql.enabled }}
         - name: wait-for-mysql
@@ -61,7 +61,7 @@ spec:
           env:
             - name: "RUN_MIGRATIONS"
               value: "1"
-            
+
             - name: "YOUDEPLOY_MYSQL_SERVICE_HOST"
               value: {{ include "cycloid.mysqlHost" . | quote }}
             - name: "YOUDEPLOY_MYSQL_SERVICE_PORT"
@@ -75,7 +75,91 @@ spec:
                 secretKeyRef:
                   name: {{ template "cycloid.mysqlSecretName" . }}
                   key: mysql-password
-      
+
+            - name: "REDIS_HOST"
+              value: {{ include "cycloid.redisHost" . | quote }}
+            - name: "REDIS_PORT"
+              value: {{ include "cycloid.redisPort" . | quote }}
+            - name: "REDIS_DB"
+              value: {{ include "cycloid.redisDatabase" . | quote }}
+            - name: "REDIS_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "cycloid.redisSecretName" . }}
+                  key: redis-password
+                  optional: true
+            - name: "REDIS_URI"
+              value: {{ include "cycloid.redisUri" . | quote }}
+
+            {{- if .Values.externalElasticsearch.enabled }}
+            - name: "COST_EXPLORER_ES_URL"
+              value: {{ include "cycloid.elasticsearchURL" . | quote }}
+            - name: "COST_EXPLORER_ES_USERNAME"
+              value: {{ include "cycloid.elasticsearchUser" . | quote }}
+            - name: "COST_EXPLORER_ES_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "cycloid.elasticsearchSecretName" . }}
+                  key: {{ template "cycloid.elasticsearchSecretKey" . }}
+            {{- end }}
+
+            - name: "CONCOURSE_URL"
+              value: {{ .Values.backend.concourse.url | quote }}
+            - name: "CONCOURSE_PORT"
+              value: {{ .Values.backend.concourse.port | quote }}
+            - name: "CONCOURSE_TEAM"
+              value: {{ .Values.backend.concourse.team | quote }}
+            - name: "CONCOURSE_USER"
+              value: {{ .Values.backend.concourse.user | quote }}
+            - name: "CONCOURSE_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "backend.backendSecretName" . }}
+                  key: concourse-password
+
+            - name: "VAULT_URL"
+              value: {{ .Values.backend.vault.url | quote }}
+            - name: "VAULT_ROLE_ID"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "backend.backendSecretName" . }}
+                  key: vault-role-id
+            - name: "VAULT_SECRET_ID"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "backend.backendSecretName" . }}
+                  key: vault-secret-id
+
+            - name: "FRONTEND_BASE_URL"
+              value: {{ .Values.frontend.url | quote }}
+            - name: "BACKEND_BASE_URL"
+              value: {{ .Values.backend.url | quote }}
+            - name: "CRYPTO_SIGNING_KEY"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "backend.backendSecretName" . }}
+                  key: crypto-signing-key
+            - name: "JWT_KEY_1"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "backend.backendSecretName" . }}
+                  key: jwt-key-1
+            {{- include "cycloid.extraEnvVars" .Values.backend | nindent 12 }}
+            {{- include "cycloid.extraSecretEnvVars" .Values.backend | nindent 12 }}
+            {{- include "cycloid.extraConfigMapEnvVars" .Values.backend | nindent 12 }}
+          {{- if or .Values.backend.extraEnvVarsCM .Values.backend.extraEnvVarsSecret }}
+          envFrom:
+            {{- if .Values.backend.extraFullConfigMapEnvVars }}
+            - configMapRef:
+                name: {{ .Values.backend.extraFullConfigMapEnvVars }}
+            {{- end }}
+            {{- if .Values.backend.extraFullSecretEnvVars }}
+            - secretRef:
+                name: {{ .Values.backend.extraFullSecretEnvVars }}
+            {{- end }}
+          {{- end }}
+          {{ template "backend.mounts" . }}
+
       containers:
         - name: api
           securityContext:
@@ -118,7 +202,7 @@ spec:
           env:
             - name: "RUN_MIGRATIONS"
               value: "1"
-            
+
             - name: "YOUDEPLOY_MYSQL_SERVICE_HOST"
               value: {{ include "cycloid.mysqlHost" . | quote }}
             - name: "YOUDEPLOY_MYSQL_SERVICE_PORT"
@@ -132,7 +216,7 @@ spec:
                 secretKeyRef:
                   name: {{ template "cycloid.mysqlSecretName" . }}
                   key: mysql-password
-            
+
             - name: "REDIS_HOST"
               value: {{ include "cycloid.redisHost" . | quote }}
             - name: "REDIS_PORT"
@@ -147,6 +231,18 @@ spec:
                   optional: true
             - name: "REDIS_URI"
               value: {{ include "cycloid.redisUri" . | quote }}
+
+            {{- if .Values.externalElasticsearch.enabled }}
+            - name: "COST_EXPLORER_ES_URL"
+              value: {{ include "cycloid.elasticsearchURL" . | quote }}
+            - name: "COST_EXPLORER_ES_USERNAME"
+              value: {{ include "cycloid.elasticsearchUser" . | quote }}
+            - name: "COST_EXPLORER_ES_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "cycloid.elasticsearchSecretName" . }}
+                  key: {{ template "cycloid.elasticsearchSecretKey" . }}
+            {{- end }}
 
             - name: "CONCOURSE_URL"
               value: {{ .Values.backend.concourse.url | quote }}
