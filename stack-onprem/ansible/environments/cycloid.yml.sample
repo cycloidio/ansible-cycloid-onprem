@@ -31,8 +31,15 @@ cycloid_admin_apikey: true
 
 cycloid_db_image: mysql:8.0.21
 
-cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:$BACKEND_IMAGE_TAG
-cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:$FRONTEND_IMAGE_TAG
+## workaround variables to solve stackform limitation
+cycloid_api_repo: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend
+cycloid_frontend_repo: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api
+
+cycloid_api_tag: $BACKEND_IMAGE_TAG
+cycloid_frontend_tag: $FRONTEND_IMAGE_TAG
+#####
+cycloid_api_image: "{{cycloid_api_repo}}:{{cycloid_api_tag}}"
+cycloid_frontend_image: "{{cycloid_frontend_repo}}:{{cycloid_frontend_tag}}"
 
 # resque-web is used to debug redis worker queue. Set true to install it
 cycloid_cache_resque_install: true
