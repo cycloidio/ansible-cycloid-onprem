@@ -38,9 +38,11 @@ cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-f
 cycloid_cache_resque_install: true
 
 # Cost-Explorer: Elasticsearch
-#cost_explorer_es_url: ""
-cost_explorer_es_username: $COST_EXPLORER_ES_USERNAME
-cost_explorer_es_password: $COST_EXPLORER_ES_PASSWORD
+cost_explorer_es_url: ""
+cost_explorer_es_username: ""
+cost_explorer_es_password: ""
+cost_explorer_es_insecure_skip_tls: ""
+#cost_explorer_es_ca_cert: ""
 
 ######################
 ### Worker Section ###

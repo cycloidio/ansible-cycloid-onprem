@@ -523,7 +523,8 @@ cost_explorer_es_url: ""
 cost_explorer_es_username: ""
 cost_explorer_es_password: ""
 cost_explorer_es_insecure_skip_tls: true # ignore certificate errors if there are any
-#cost_explorer_es_ca_cert : "" # PEM-formatted CA certificate of Elasticsearch
+cost_explorer_ingestion_schedule: "*-*-* 00:00:00" # schedule for the timer related to cycloid-job-ccm-ingestion_container service
+#cost_explorer_es_ca_cert: "" # PEM-formatted CA certificate of Elasticsearch
 
 # Share host saml file with container. It shouldn't be changed.
 container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/secrets/saml{%- endif -%}"
