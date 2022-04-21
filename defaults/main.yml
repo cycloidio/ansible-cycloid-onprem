@@ -184,6 +184,7 @@ no_proxy: "{{ (default_no_proxy + extra_no_proxy) | join(',') }}"
 
 cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:prod
 cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:prod
+cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
 concourse_db_image: postgres:9.6
 cycloid_cache_image: redis:6.0.9
 cycloid_db_image: mysql:8.0.21
@@ -207,6 +208,7 @@ concourse_db_path: "{{ cycloid_install_path }}/concourse-db"
 cycloid_smtp_path: "{{ cycloid_install_path }}/cycloid-smtp"
 cycloid_cache_path: "{{ cycloid_install_path }}/cycloid-cache"
 concourse_authorized_worker_keys_path: "authorized_worker_keys"
+concourse_team_authorized_worker_keys_path: "team_authorized_worker_keys.yml"
 concourse_host_key_path: "host_key"
 concourse_session_signing_key_path: "session_signing_key"
 concourse_db_password: "Deraephoh9aay4Aide4phoS7xej1xi5m"

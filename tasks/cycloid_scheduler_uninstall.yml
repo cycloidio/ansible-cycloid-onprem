@@ -4,7 +4,7 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-    - concourse-web
+    - concourse-web_container
     - docker
     - docker.socket
   failed_when: false

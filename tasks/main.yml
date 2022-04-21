@@ -30,6 +30,10 @@
     - include: nginx.yml
       when: setup_cycloid_core|bool
 
+    - include: cycloid_scheduler_sync_worker_keys.yml
+      when: setup_cycloid_scheduler|bool
+
+
     #- include: prometheus.yml
 
     - include: minio.yml
@@ -45,6 +49,9 @@
   when: (validate|bool or validate_only|bool) and not uninstall|bool
 
 - block:
+    - include: cycloid_scheduler_sync_worker_keys_uninstall.yml
+      when: setup_cycloid_scheduler|bool
+
     - include: cycloid_creds_uninstall.yml
       when: setup_cycloid_creds|bool
 

@@ -4,7 +4,7 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-    - vault
+    - vault_container
     - docker
     - docker.socket
   failed_when: false

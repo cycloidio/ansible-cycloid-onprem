@@ -5,7 +5,7 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-    - cycloid-db
+    - cycloid-db_container
     - docker
     - docker.socket
   failed_when: false
