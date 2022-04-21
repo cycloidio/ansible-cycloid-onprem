@@ -132,7 +132,7 @@ resources:
     aws_region: ((aws_default_region))
     aws_secret_access_key: ((aws_secret_key))
     repository: youdeploy-http-api
-    tag: ((cycloid_api_image))
+    tag: ((cycloid_api_tag))
   icon: docker
 
 - name: docker-frontend-image
@@ -142,7 +142,7 @@ resources:
     aws_region: ((aws_default_region))
     aws_secret_access_key: ((aws_secret_key))
     repository: youdeploy-frontend
-    tag: ((cycloid_frontend_image))
+    tag: ((cycloid_frontend_tag))
   icon: docker
 
 jobs:
