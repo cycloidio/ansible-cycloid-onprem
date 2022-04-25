@@ -27,7 +27,7 @@ use_cases:
       technologies: [ansible, pipeline]
       vars:
         - name: "Cycloid API image"
-          description: "Cycloid API image."
+          description: "Provide the Docker image tag to use."
           key: cycloid_api_tag
           widget: auto_complete
           type: string
@@ -36,7 +36,7 @@ use_cases:
               - "prod"
               - "staging"
         - name: "Cycloid Frontend image"
-          description: "Cycloid Frontend image."
+          description: "Provide the Docker image tag to use.."
           key: cycloid_frontend_tag
           widget: auto_complete
           type: string
@@ -44,20 +44,20 @@ use_cases:
           values:
               - "prod"
               - "staging"
-    - name: Product-opt
+    - name: Product-advanced-options
       technologies: [ansible]
       condition: advanced_opt==true
       vars:
-        - name: "Cycloid API image"
-          description: "Cycloid API image."
+        - name: "Cycloid API images repository"
+          description: "Cycloid API images repository."
           key: cycloid_api_repo
           widget: auto_complete
           type: string
           default: "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api"
           values:
               - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api"
-        - name: "Cycloid Frontend image"
-          description: "Cycloid Frontend image."
+        - name: "Cycloid Frontend images repository"
+          description: "Cycloid Frontend images repository."
           key: cycloid_frontend_repo
           widget: auto_complete
           type: string
