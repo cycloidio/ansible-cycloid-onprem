@@ -609,6 +609,10 @@ concourse:
       ##
       externalUrl: http://concourse.cycloid.local
 
+      # Disable the use of Kubernetes Secrets as the credential provider for concourse pipelines (true by default).
+      kubernetes:
+        enabled: false
+
       # Configuration for using Vault as a credential manager.
       ## Ref: https://concourse-ci.org/creds.html#vault
       ##
