@@ -4,8 +4,8 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-    - cycloid-cache
-    - cycloid-cache-resque-web
+    - cycloid-cache_container
+    - cycloid-cache-resque-web_container
     - docker
     - docker.socket
   failed_when: false
