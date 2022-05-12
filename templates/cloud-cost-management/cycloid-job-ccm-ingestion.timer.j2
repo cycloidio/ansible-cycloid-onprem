@@ -1,0 +1,12 @@
+[Unit]
+Description="Cycloid Cloud Cost Management Ingestion Job service execution"
+
+[Timer]
+OnCalendar={{ schedule }}
+#Execute job if it missed a run due to machine being off
+Persistent=true
+#File describing job to execute
+Unit=cycloid-job-ccm-ingestion_container.service
+
+[Install]
+WantedBy=timers.target

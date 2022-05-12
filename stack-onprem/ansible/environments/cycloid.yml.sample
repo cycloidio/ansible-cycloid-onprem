@@ -44,6 +44,13 @@ cycloid_frontend_image: "{{cycloid_frontend_repo}}:{{cycloid_frontend_tag}}"
 # resque-web is used to debug redis worker queue. Set true to install it
 cycloid_cache_resque_install: true
 
+# Cost-Explorer: Elasticsearch
+cost_explorer_es_url: ""
+cost_explorer_es_username: ""
+cost_explorer_es_password: ""
+cost_explorer_es_insecure_skip_tls: ""
+#cost_explorer_es_ca_cert: ""
+
 ######################
 ### Worker Section ###
 ######################
