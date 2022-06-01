@@ -8,7 +8,7 @@ VERSION=${1}
 BRANCH="helm-version_$VERSION"
 
 echo -e "\e[36m# $0 > switching to master branch and make it's up-to-date\e[0m"
-git checkout master && git pull --rebase=preserve
+git checkout master && git pull --rebase=merges
 
 echo -e "\e[36m# $0 > creating $BRANCH PR branch\e[0m"
 git checkout -b $BRANCH
@@ -18,9 +18,6 @@ changie batch $VERSION
 
 echo -e "\e[36m# $0 > merging it into the parent changelog\e[0m"
 changie merge
-# changie replacement in Chart.yaml doesn't seem to work well with the ^
-# @see https://github.com/miniscruff/changie/discussions/179
-sed -i "s/^version: .*/version: $VERSION/" Chart.yaml
 
 echo -e "\e[36m# $0 > committing the changed files\e[0m"
 git add Chart.yaml CHANGELOG.md changes/
