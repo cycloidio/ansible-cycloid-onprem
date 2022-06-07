@@ -41,14 +41,14 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     tags:
       - bitnami-mysql
-    version: ~8.8.8
+    version: ~8.9.6
     condition: mysql.enabled
 
   - name: redis
     repository: https://charts.bitnami.com/bitnami
     tags:
       - bitnami-redis
-    version: ~15.4.1
+    version: ~16.11.3
     condition: redis.enabled
 
   - name: concourse
