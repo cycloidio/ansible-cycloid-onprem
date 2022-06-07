@@ -48,6 +48,25 @@ spec:
             - "-lapp.kubernetes.io/name=mysql"
             - "-lapp.kubernetes.io/component=primary"
         {{- end }}
+        {{- if .Values.redis.enabled }}
+        - name: wait-for-redis
+          image: groundnuty/k8s-wait-for:v1.3
+          imagePullPolicy: Always
+          args:
+            - "service"
+            - "-lapp.kubernetes.io/instance=cycloid"
+            - "-lapp.kubernetes.io/name=redis"
+            - "-lapp.kubernetes.io/component=master"
+        {{- end }}
+        {{- if .Values.vault.enabled }}
+        - name: wait-for-vault
+          image: groundnuty/k8s-wait-for:v1.3
+          imagePullPolicy: Always
+          args:
+            - "service"
+            - "-lapp.kubernetes.io/instance=cycloid"
+            - "-lapp.kubernetes.io/name=vault"
+        {{- end }}
         - name: migrations
           securityContext:
             {{- toYaml .Values.backend.securityContext | nindent 12 }}
