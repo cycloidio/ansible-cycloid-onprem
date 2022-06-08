@@ -421,7 +421,7 @@ mysql:
   image:
     registry: docker.io
     repository: bitnami/mysql
-    tag: 8.0.21-debian-10-r80
+    tag: 8.0.29-debian-10-r2
 
   ## MySQL Authentication parameters
   ## @param mysql.auth.rootPassword MySQL root password
@@ -498,7 +498,7 @@ redis:
   image:
     registry: docker.io
     repository: bitnami/redis
-    tag: 6.0.9-debian-10-r72
+    tag: 6.0.16-debian-11-r0
 
   ## Redis Authentication parameters
   ## ref: https://github.com/bitnami/bitnami-docker-redis#setting-the-server-password-on-first-run
@@ -515,9 +515,6 @@ redis:
   ## @param architecture Redis&trade; architecture. Allowed values: `standalone` or `replication`
   ##
   architecture: standalone
-
-  cluster:
-    enabled: false
 
   persistence:
     enabled: true
