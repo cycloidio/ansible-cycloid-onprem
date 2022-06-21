@@ -52,7 +52,7 @@ module "onprem" {
   #+ Cird block allowed to connect on instances.
   cy_instances_cidr_blocks_allow = ["0.0.0.0/0"]
 
-  debian_ami_name = "debian-10-amd64-*"
+  debian_ami_name = "debian-11-amd64-*"
 
   base_ami_id = ""
 
@@ -62,7 +62,7 @@ module "onprem" {
 
   # debian 11
   # https://wiki.debian.org/Cloud/AmazonEC2Image/Bullseye
-  #base_ami_id = "ami-01ebd2b650c37e4d6"
+  #base_ami_id = "ami-0ad0923fe3bd430fa"
 
   # Centos https://wiki.centos.org/Cloud/AWS
   # centos 7
