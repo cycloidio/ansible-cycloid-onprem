@@ -16,8 +16,9 @@ cycloid
 cycloid
 [smtp_server:children]
 cycloid
-#[minio:children]
-#cycloid
+# Minio installed by default for POC
+[minio:children]
+cycloid
 #[elasticsearch:children]
 #cycloid
 
