@@ -8,8 +8,6 @@ LOGFILE=/tmp/cycloid-install.log
 
 export ANSIBLE_FORCE_COLOR="true"
 
-ANSIBLE_USER=admin
-
 function check-requirements {
   # check OS
   cat /etc/issue >> $LOGFILE
@@ -46,41 +44,60 @@ function init {
 
   python3 -m venv venv | tee -a $LOGFILE
   source venv/bin/activate
-  export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3
   python3 -m pip install --upgrade pip | tee -a $LOGFILE
   python3 -m pip install -U -r pip-requirements.txt | tee -a $LOGFILE
 }
 
 function install-cycloid {
   source venv/bin/activate
+
+  # Because we are using -c local
+  # we don't initialisated a new tty
+  # Ensure we use system python interpreteur and not virtualenv with desactivate
+  # Else you have issue between pip system module and virtualenv. All ansible module doesn't use properly the library installer under venv
+  ANSIBLE_PLAYBOOK=$(which ansible-playbook)
+  deactivate
+
+  #export ANSIBLE_PYTHON_INTERPRETER=$(which python3)
   export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3
 
-  echo "ansible-playbook -u $ANSIBLE_USER -c local -b -i inventory playbook.yml"
-  ansible-playbook -u $ANSIBLE_USER -c local -b -i inventory playbook.yml | tee -a $LOGFILE
+  echo "$ANSIBLE_PLAYBOOK -c local -i inventory playbook.yml"
+  $ANSIBLE_PLAYBOOK -c local -i inventory playbook.yml | tee -a $LOGFILE
 }
 
 function install-worker {
   source venv/bin/activate
+  ANSIBLE_PLAYBOOK=$(which ansible-playbook)
+  deactivate
+
   export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3
 
-  echo "ansible-playbook -u $ANSIBLE_USER -c local -b -i inventory worker.yml"
-  ansible-playbook -u $ANSIBLE_USER -c local -b -i inventory worker.yml | tee -a $LOGFILE
+  echo "$ANSIBLE_PLAYBOOK -c local -i inventory worker.yml"
+  $ANSIBLE_PLAYBOOK -c local -i inventory worker.yml | tee -a $LOGFILE
+}
+
+function display-access {
+  grep -E "^(cycloid_console_dns| +email| +password)" environments/cycloid.yml
 }
 
 function uninstall-cycloid {
   source venv/bin/activate
+  ANSIBLE_PLAYBOOK=$(which ansible-playbook)
+  deactivate
   export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3
 
-  echo "ansible-playbook -u $ANSIBLE_USER -c local -b -i inventory -e uninstall=True playbook.yml"
-  ansible-playbook -u $ANSIBLE_USER -c local -b -i inventory -e uninstall=True playbook.yml | tee -a $LOGFILE
+  echo "$ANSIBLE_PLAYBOOK -c local -i inventory -e uninstall=True playbook.yml"
+  $ANSIBLE_PLAYBOOK -c local -i inventory -e uninstall=True playbook.yml | tee -a $LOGFILE
 }
 
 function report {
   source venv/bin/activate
+  ANSIBLE_PLAYBOOK=$(which ansible-playbook)
+  deactivate
   export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3
 
-  echo "ansible-playbook -u $ANSIBLE_USER -c local -b -i inventory report.yml"
-  ansible-playbook -u $ANSIBLE_USER -c local -b -i inventory report.yml | tee -a $LOGFILE
+  echo "$ANSIBLE_PLAYBOOK -c local -i inventory report.yml"
+  $ANSIBLE_PLAYBOOK -c local -i inventory report.yml | tee -a $LOGFILE
 }
 
 function help {
@@ -90,16 +107,16 @@ function help {
    echo "Syntax: helper.sh [install|install-cycloid|install-worker|reinstall-cycloid|uninstall-cycloid|report|help]"
    echo "options:"
    echo "install              Install requirements, Cycloid and pipeline worker."
-   echo "install-cycloid      Install Cycloid."
-   echo "install-worker       Install pipeline worker."
-   echo "reinstall-cycloid    Reinstall Cycloid."
+   echo "install-cycloid      Install Cycloid only."
+   echo "install-worker       Install pipeline worker only."
+   echo "reinstall-cycloid    Reinstall Cycloid (uninstall+install)."
    echo "uninstall            Uninstall Cycloid."
    echo "report               Generate a report to share with Cycloid team."
    echo
 }
 
+############################################################
 # MAIN
-
 ############################################################
 
 if [ $# -eq 0 ]; then
@@ -113,12 +130,15 @@ case "$1" in
     init
     install-cycloid
     install-worker
+    display-access
     ;;
   "install-cycloid")
     install-cycloid
+    display-access
     ;;
   "install-worker")
     install-worker
+    display-access
     ;;
   "uninstall")
     uninstall-cycloid
@@ -126,6 +146,7 @@ case "$1" in
   "reinstall-cycloid")
     uninstall-cycloid
     install-cycloid
+    display-access
     ;;
   "report")
     report
