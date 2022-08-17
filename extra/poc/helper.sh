@@ -25,7 +25,7 @@ function init {
 
   ## Installation packages
   apt-get update | tee -a $LOGFILE
-  apt-get install build-essential python3-dev python3-pip python3-venv -y | tee -a $LOGFILE
+  apt-get install build-essential python3-dev python3-pip python3-venv unzip -y | tee -a $LOGFILE
 
   ### Common tasks
 
