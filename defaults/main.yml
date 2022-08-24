@@ -195,7 +195,7 @@ cycloid_db_image: mysql:8.0.21
 # If mysql 8.x nativ auth need to be defined
 cycloid_db_container_cmd_mysql8: "--default-authentication-plugin=mysql_native_password"
 cycloid_db_container_cmd: "{% if cycloid_db_image.startswith('mysql:8') %}{{ cycloid_db_container_cmd_mysql8 }}{% endif %}"
-concourse_web_image: concourse/concourse:7.4.0
+concourse_web_image: concourse/concourse:7.8.3
 vault_image: vault:1.5.4
 
 
