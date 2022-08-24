@@ -90,6 +90,28 @@ function uninstall-cycloid {
   $ANSIBLE_PLAYBOOK -c local -i inventory -e uninstall=True playbook.yml | tee -a $LOGFILE
 }
 
+function force-user-email-validation {
+  source venv/bin/activate
+  ANSIBLE_PLAYBOOK=$(which ansible-playbook)
+  deactivate
+
+  export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3
+
+  echo "$ANSIBLE_PLAYBOOK -c local -i inventory mysql-force-user-email-validation.yml"
+  $ANSIBLE_PLAYBOOK -c local -i inventory mysql-force-user-email-validation.yml | tee -a $LOGFILE
+}
+
+function force-pay-orgs {
+  source venv/bin/activate
+  ANSIBLE_PLAYBOOK=$(which ansible-playbook)
+  deactivate
+
+  export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3
+
+  echo "$ANSIBLE_PLAYBOOK -c local -i inventory mysql-force-pay-orgs.yml"
+  $ANSIBLE_PLAYBOOK -c local -i inventory mysql-force-pay-orgs.yml | tee -a $LOGFILE
+}
+
 function report {
   source venv/bin/activate
   ANSIBLE_PLAYBOOK=$(which ansible-playbook)
@@ -104,13 +126,15 @@ function help {
    # Display Help
    echo "Cycloid POC helper script."
    echo
-   echo "Syntax: helper.sh [install|install-cycloid|install-worker|reinstall-cycloid|uninstall-cycloid|report|help]"
+   echo "Syntax: helper.sh [install|install-cycloid|install-worker|reinstall-cycloid|uninstall-cycloid|force-user-email-validation|force-pay-orgs|report|help]"
    echo "options:"
-   echo "install              Install requirements, Cycloid and pipeline worker."
-   echo "install-cycloid      Install Cycloid only."
-   echo "install-worker       Install pipeline worker only."
-   echo "reinstall-cycloid    Reinstall Cycloid (uninstall+install)."
-   echo "uninstall            Uninstall Cycloid."
+   echo "install                        Install requirements, Cycloid and pipeline worker."
+   echo "install-cycloid                Install Cycloid only."
+   echo "install-worker                 Install pipeline worker only."
+   echo "reinstall-cycloid              Reinstall Cycloid (uninstall+install)."
+   echo "uninstall                      Uninstall Cycloid."
+   echo "force-user-email-validation    Valide newly created users on Cycloid"
+   echo "force-pay-orgs                 Unblock newly created organizations on Cycloid"
    echo "report               Generate a report to share with Cycloid team."
    echo
 }
@@ -147,6 +171,12 @@ case "$1" in
     uninstall-cycloid
     install-cycloid
     display-access
+    ;;
+  "force-user-email-validation")
+    force-user-email-validation
+    ;;
+  "force-pay-orgs")
+    force-pay-orgs
     ;;
   "report")
     report
