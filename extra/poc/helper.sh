@@ -63,6 +63,9 @@ function install-cycloid {
 
   echo "$ANSIBLE_PLAYBOOK -c local -i inventory playbook.yml"
   $ANSIBLE_PLAYBOOK -c local -i inventory playbook.yml | tee -a $LOGFILE
+
+  # Restart BE to make sur BE-worker is running
+  systemctl restart cycloid-api_container
 }
 
 function install-worker {
@@ -135,7 +138,7 @@ function help {
    echo "uninstall                      Uninstall Cycloid."
    echo "force-user-email-validation    Valide newly created users on Cycloid"
    echo "force-pay-orgs                 Unblock newly created organizations on Cycloid"
-   echo "report               Generate a report to share with Cycloid team."
+   echo "report                         Generate a report to share with Cycloid team."
    echo
 }
 
