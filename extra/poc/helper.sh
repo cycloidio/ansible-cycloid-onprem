@@ -63,6 +63,9 @@ function install-cycloid {
 
   echo "$ANSIBLE_PLAYBOOK -c local -i inventory playbook.yml"
   $ANSIBLE_PLAYBOOK -c local -i inventory playbook.yml | tee -a $LOGFILE
+
+  # Restart BE to make sur BE-worker is running
+  systemctl restart cycloid-api_container
 }
 
 function install-worker {
@@ -71,6 +74,11 @@ function install-worker {
   deactivate
 
   export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3
+
+  # Temporary until schedule use 7 version.
+  # Update worker to fix cgroup2 issue on debian 11
+  sed -i 's/concourse_version: ".*"/concourse_version: "7.8.2"/g' environments/cycloid.yml
+  echo "concourse_worker_runtime: containerd" >> environments/cycloid.yml
 
   echo "$ANSIBLE_PLAYBOOK -c local -i inventory worker.yml"
   $ANSIBLE_PLAYBOOK -c local -i inventory worker.yml | tee -a $LOGFILE
@@ -135,7 +143,7 @@ function help {
    echo "uninstall                      Uninstall Cycloid."
    echo "force-user-email-validation    Valide newly created users on Cycloid"
    echo "force-pay-orgs                 Unblock newly created organizations on Cycloid"
-   echo "report               Generate a report to share with Cycloid team."
+   echo "report                         Generate a report to share with Cycloid team."
    echo
 }
 
