@@ -42,6 +42,12 @@
       when: ca_certificates_container_shared|bool
 
   roles:
+    - role: cycloid.telegraf
+      ignore_errors: true
+      when: worker_metrics_enabled|bool
+      tags:
+        - telegraf
+
     - role: cycloid.concourse
       tags: cycloid
 
