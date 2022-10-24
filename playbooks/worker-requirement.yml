@@ -3,3 +3,17 @@
   name: cycloid.concourse
   scm: git
 
+- src: git@github.com:cycloidio/ansible-cycloid-onprem.git
+  version: master
+  name: ansible-cycloid-onprem
+  scm: git
+
+- src: https://github.com/cycloidio/ansible-telegraf
+  version: master
+  name: cycloid.telegraf
+  scm: git
+
+- src: https://github.com/dj-wasabi/ansible-telegraf
+  version: master
+  name: dj-wasabi.telegraf
+  scm: git
