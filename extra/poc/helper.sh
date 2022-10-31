@@ -107,6 +107,19 @@ function force-user-email-validation {
 
   echo "$ANSIBLE_PLAYBOOK -c local -i inventory mysql-force-user-email-validation.yml"
   $ANSIBLE_PLAYBOOK -c local -i inventory mysql-force-user-email-validation.yml | tee -a $LOGFILE
+
+  # Auto validate user signup and invite to main org (with custom role 5)
+  # if mysql installed
+  # source  /etc/default/cycloid-api
+  # ROLEID=5
+  # mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE -e "select * from user_emails where verification_token is not NULL;" -Ns
+  # for u in $(mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE -e "select user_id from user_emails where verification_token is not NULL;" -Ns);do
+  #   echo "user $u"
+  #   # valide user
+  #   mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE -e "update user_emails set verification_token=NULL;" -Ns
+  #   # invite user
+  #   mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE -e "INSERT INTO users_organizations_roles (organization_id, role_id, user_id) VALUES (1, $ROLEID, ${u})" -Ns
+  # done
 }
 
 function force-pay-orgs {

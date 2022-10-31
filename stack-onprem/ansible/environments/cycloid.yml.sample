@@ -41,8 +41,8 @@ cycloid_frontend_tag: $FRONTEND_IMAGE_TAG
 cycloid_api_image: "{{cycloid_api_repo}}:{{cycloid_api_tag}}"
 cycloid_frontend_image: "{{cycloid_frontend_repo}}:{{cycloid_frontend_tag}}"
 
-# resque-web is used to debug redis worker queue. Set true to install it
-cycloid_cache_resque_install: true
+# asynqmon is used to debug redis worker queue. Set true to install it
+cycloid_cache_mon_install: true
 
 # Cost-Explorer: Elasticsearch
 cost_explorer_es_url: ""

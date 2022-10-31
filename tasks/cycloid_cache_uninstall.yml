@@ -5,7 +5,7 @@
     state: stopped
   with_items:
     - cycloid-cache_container
-    - cycloid-cache-resque-web_container
+    - cycloid-cache-asynqmon_container
     - docker
     - docker.socket
   failed_when: false
@@ -25,7 +25,7 @@
   with_items:
     - "{{ cycloid_install_path }}"
     - /etc/systemd/system/cycloid-cache_container.service
-    - /etc/systemd/system/cycloid-cache-resque-web.service
+    - /etc/systemd/system/cycloid-cache-asynqmon.service
     - /etc/systemd/system/docker.service
     - /var/lib/docker
     - /opt/containerd

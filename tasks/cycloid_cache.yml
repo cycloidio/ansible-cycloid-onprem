@@ -18,15 +18,15 @@
       - "{{cycloid_cache_path}}:/data"
   tags: docker-services
 
-- name: Define service resque-web | cycloid-cache
+- name: Define service asynqmon | cycloid-cache
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: cycloid-cache-resque-web
+    name: cycloid-cache-asynqmon
     container_docker_pull: "{{ docker_pull }}"
-    container_image: "{{ cycloid_cache_resque_image }}"
+    container_image: "{{ cycloid_cache_mon_image }}"
     container_ports:
-      - '{{ cycloid_cache_resque_port }}:5678'
-    container_args: "-e RESQUE_WEB_HOST={{ cycloid_email_redis_host }} -e RESQUE_WEB_PORT={{ cycloid_email_redis_port }} {{ container_args_extra }}"
+      - '{{ cycloid_cache_mon_port }}:8080'
+    container_args: "-e REDIS_URL=\"redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}\" -e PORT=8080 {{ container_args_extra }}"
   tags: docker-services
-  when: cycloid_cache_resque_install|bool
+  when: cycloid_cache_mon_install|bool
