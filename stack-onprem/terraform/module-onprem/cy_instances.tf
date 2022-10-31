@@ -91,7 +91,7 @@ resource "aws_security_group" "cy_instances" {
     cidr_blocks = var.cy_instances_cidr_blocks_allow
   }
 
-  # resque (used to debug redis queue)
+  # asynqmon (used to debug redis queue)
   ingress {
     from_port   = 5678
     to_port     = 5678

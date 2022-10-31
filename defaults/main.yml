@@ -334,10 +334,10 @@ cycloid_email_redis_db: 0
 # Allow insecure TLS/SSL with email. Usefull when using local postfix as relayhost with selfsigned certs
 cycloid_email_skip_tls_check: false
 
-# resque-web is used to debug redis worker queue. Set true to install it
-cycloid_cache_resque_install: false
-cycloid_cache_resque_image: appwrite/resque-web:latest
-cycloid_cache_resque_port: 5678
+# asynqmon is used to debug redis worker queue. Set true to install it
+cycloid_cache_mon_install: false
+cycloid_cache_mon_image: hibiken/asynqmon:latest
+cycloid_cache_mon_port: 5678
 
 cycloid_jwt_key_1: 2f2122de-63f2-4eec-9c6f-c6abb3e1f007:7cdyHps2tYDp6e7VKPEstE5sDMQbK6WLyN3GmTsF7x7QpE6ZP5ra6yfVSkvXakbB
 cycloid_crypto_signing_key: totally-random-secret-key
