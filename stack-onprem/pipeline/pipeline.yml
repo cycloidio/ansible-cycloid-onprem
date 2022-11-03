@@ -110,7 +110,7 @@ resources:
     branch: ((config_git_branch))
     private_key: ((config_git_private_key))
     paths:
-      - ((config_ansible_path))/environments/*
+      - ((config_ansible_path))/environments/cycloid-((env)).yml
 
 # git_terracost used by populate-datas
 # Cost estimation feature use cloudprovider pricing datas.
