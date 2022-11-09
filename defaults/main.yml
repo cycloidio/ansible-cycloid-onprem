@@ -195,7 +195,7 @@ cycloid_db_image: mysql:8.0.21
 # If mysql 8.x nativ auth need to be defined
 cycloid_db_container_cmd_mysql8: "--default-authentication-plugin=mysql_native_password"
 cycloid_db_container_cmd: "{% if cycloid_db_image.startswith('mysql:8') %}{{ cycloid_db_container_cmd_mysql8 }}{% endif %}"
-concourse_web_image: concourse/concourse:6.7.6
+concourse_web_image: concourse/concourse:7.8.3
 vault_image: vault:1.5.4
 
 
@@ -224,6 +224,9 @@ concourse_auth_password: admin
 
 # disable|require|verify-ca|verify-full
 concourse_db_sslmode: disable
+
+# Extra env vars to pass to scheduler container
+cycloid_scheduler_extra_env: {}
 
 
 # Concourse keys

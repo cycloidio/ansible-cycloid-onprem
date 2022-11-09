@@ -104,42 +104,5 @@
     # Bind network host because of forwarded worker. CC need to know the IP of the web node cause it will use it to connect on local ssh tunnel created
     # to access to the workers. As we run in docker we don't know the IP address, so we bind host to use the one from the host
     container_args: "--network=host --env-file={{ concourse_config_path }}/approle-concourse-ro {{ container_args_extra }}"
-    container_env:
-      CONCOURSE_SESSION_SIGNING_KEY: "/opt/concourse/{{ concourse_session_signing_key_path }}"
-      CONCOURSE_TSA_HOST_KEY: "/opt/concourse/{{ concourse_host_key_path }}"
-      CONCOURSE_TSA_AUTHORIZED_KEYS: "/opt/concourse/{{ concourse_authorized_worker_keys_path }}"
-      CONCOURSE_MAIN_TEAM_LOCAL_USER: "{{ concourse_auth_user }}"
-      CONCOURSE_TSA_TEAM_AUTHORIZED_KEYS_FILE: "/opt/concourse/{{ concourse_team_authorized_worker_keys_path }}"
-      CONCOURSE_ADD_LOCAL_USER: "{{ concourse_auth_user }}:{{ concourse_auth_password }}"
-      # Vault integration
-      CONCOURSE_VAULT_URL: "{{ vault_url }}"
-      CONCOURSE_VAULT_AUTH_BACKEND: approle
-      CONCOURSE_VAULT_PATH_PREFIX: /cycloid
-      CONCOURSE_TLS_CERT: /opt/concourse/ssl.crt
-      CONCOURSE_TLS_KEY: /opt/concourse/ssl.key
-      CONCOURSE_TLS_BIND_PORT: "{{ concourse_port }}"
-      CONCOURSE_VAULT_INSECURE_SKIP_VERIFY: true
-      # Defined in vault
-      #CONCOURSE_VAULT_APPROLE_SECRET_ID: "VAULT SECRET IDs"
-      #CONCOURSE_VAULT_APPROLE_ROLE_ID: "VAULT APPROLE ID"
-      #CONCOURSE_VAULT_AUTH_PARAM: "role_id:$(CONCOURSE_VAULT_APPROLE_ROLE_ID),secret_id:$(CONCOURSE_VAULT_APPROLE_SECRET_ID)"
-      #CONCOURSE_LOG_LEVEL: error
-      #CONCOURSE_TSA_LOG_LEVEL: error
-      CONCOURSE_DEFAULT_BUILD_LOGS_TO_RETAIN: "10"
-      CONCOURSE_MAX_BUILD_LOGS_TO_RETAIN: "10"
-      CONCOURSE_OLD_RESOURCE_GRACE_PERIOD: 5m
-      CONCOURSE_RESOURCE_CACHE_CLEANUP_INTERVAL: 30s
-      CONCOURSE_PEER_ADDRESS: "{{ concourse_peer_address }}"
-      CONCOURSE_EXTERNAL_URL: "{{ concourse_external_url }}"
-      CONCOURSE_POSTGRES_HOST: "{{ concourse_db_host }}"
-      CONCOURSE_POSTGRES_PORT: "5432"
-      CONCOURSE_POSTGRES_USER: "{{concourse_db_user}}"
-      CONCOURSE_POSTGRES_DATABASE: "{{concourse_db_name}}"
-      CONCOURSE_POSTGRES_SSLMODE: "{{concourse_db_sslmode}}"
-      CONCOURSE_POSTGRES_PASSWORD: "{{concourse_db_password}}"
-      #CONCOURSE_INFLUXDB_URL: http://localhost:9122
-      http_proxy: "{{ http_proxy }}"
-      https_proxy: "{{ http_proxy }}"
-      no_proxy: "{{ no_proxy }}"
-
+    container_env: "{{ cycloid_scheduler_env }}"
   tags: docker-services

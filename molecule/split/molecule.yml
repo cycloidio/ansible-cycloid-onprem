@@ -120,7 +120,7 @@ platforms:
      - cycloid_scheduler_db
 
   - name: concourse_worker
-    image: concourse/concourse:6.7.6
+    image: concourse/concourse:7.8.3
     privileged: yes
     volumes:
       - "/tmp/molecule_test:/opt:ro"
