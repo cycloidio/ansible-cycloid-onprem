@@ -5,6 +5,16 @@ FLY=/usr/local/bin/fly
 
 URL=$1
 DATA=$(echo $URL | sed -ne 's/.*organizations\/\([^\/]\+\).*pipelines\/\([^\/]\+\).*jobs\/\([^\/]\+\).*/\1\ \2 \3/p')
+RS_TYPE=job
+
+if [ -z "$DATA" ]
+then
+  # Not a jobs url. Try resource
+
+  DATA=$(echo $URL | sed -ne 's/.*organizations\/\([^\/]\+\).*pipelines\/\([^\/]\+\).*resources\/\([^\/#]\+\).*/\1\ \2 \3/p')
+  RS_TYPE=resource
+fi
+
 ORG=$(echo $DATA | awk '{print $1}')
 PIPE=$(echo $DATA | awk '{print $2}')
 JOB=$(echo $DATA | awk '{print $3}')
@@ -43,7 +53,11 @@ function flyhijack {
   org=$1
   hij=$2
   set -x
-  $FLY --target $org hijack -j $hij sh
+  if [ "$RS_TYPE" == "job" ]; then
+    $FLY --target $org hijack -j $hij sh
+  else
+    $FLY --target $org hijack -c $hij sh
+  fi
 }
 
 ############
