@@ -895,9 +895,11 @@ jobs:
         run:
           path: /bin/bash
           args:
-          - -ec
+          - -c
           - |
             DIR=${PWD}
+            # be able to run job a second time
+            set +e
 
             # use to run galaxy
             eval "$(ssh-agent -s)"
@@ -916,7 +918,7 @@ jobs:
             # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
             # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
             REMOTE_USER=""
-            set +e
+            #set +e
             for user in admin centos ubuntu;do
               ssh ${user}@${MAIN_INSTANCE} ls
               if [ $? -eq 0 ]; then
@@ -924,7 +926,7 @@ jobs:
                 break
               fi
             done
-            set -e
+            #set -e
 
             export API_KEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')
             export CY_API_URL=https://${MAIN_INSTANCE}/api
