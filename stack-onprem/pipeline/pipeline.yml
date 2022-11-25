@@ -215,6 +215,30 @@ jobs:
           plan_run: true
           terraform_source: merged-stack/
 
+      - task: pause-apply
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cycloid/cycloid-toolkit
+              tag: latest
+          container_limits: {}
+          run:
+            path: /bin/bash
+            args:
+              - '-c'
+              - |
+                echo "pause terraform apply to make sure we don't reinstall the onprem"
+                cy --insecure login --org ${ORGANIZATION} --api-key ${API_KEY}
+                cy --org ${ORGANIZATION} pp pause-job --project ${PROJECT} --env ${ENV} --job terraform-apply
+          params:
+            CY_API_URL: 'https://http-api.cycloid.io'
+            ORGANIZATION: ((customer))
+            API_KEY: ((api_key))
+            ENV: ((env))
+            PROJECT: ((project))
+
 - name: terraform-destroy
   max_in_flight: 1
   build_logs_to_retain: 10
@@ -994,7 +1018,7 @@ jobs:
             LATEST_PRICE=$(ls -1 git_terracost/mysql/testdata/*pricing.sql.gz | tail -n1)
             echo "  Using ${LATEST_PRICE}"
             scp -q ${LATEST_PRICE} ${REMOTE_USER}@${MAIN_INSTANCE}:/tmp/
-            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} 'gunzip -f /tmp/*-pricing.sql.gz && source <(sudo grep MYSQL /etc/default/cycloid-api) && mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE < /tmp/*pricing.sql'
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} 'gunzip -f /tmp/*-pricing.sql.gz && sed -i -E "/DROP TABLE IF EXISTS .pricing(_schema)?_migration/d;s/CREATE TABLE/CREATE TABLE IF NOT EXISTS/" /tmp/*-pricing.sql && source <(sudo grep MYSQL /etc/default/cycloid-api) && mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE < /tmp/*pricing.sql'
 
         inputs:
           - name: tfstate
