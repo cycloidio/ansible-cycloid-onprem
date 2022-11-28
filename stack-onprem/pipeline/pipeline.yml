@@ -69,6 +69,18 @@ resources:
       AWS_DEFAULT_REGION: ((aws_default_region))
       AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
 
+# this resource is used to trigger terraform apply only the first time.
+# This file shouldn't be modified, so only 1 version will be defined
+- name: git_stack-first-trigger
+  icon: github-circle
+  type: git
+  source:
+    uri: git@github.com:cycloidio/ansible-cycloid-onprem.git
+    branch: ((stack_git_branch))
+    private_key: ((config_git_private_key))
+    paths:
+      - stack-onprem/pipeline/first-trigger
+
 # The Terraform stack (will be merged with the config)
 - name: git_stack-terraform
   icon: github-circle
@@ -160,6 +172,9 @@ jobs:
       - get: git_config-terraform
         params: {depth: 1}
         trigger: true
+      - get: git_stack-first-trigger
+        params: {depth: 1}
+        trigger: true
 
       - task: merge-stack-and-config
         config:
@@ -185,8 +200,12 @@ jobs:
   build_logs_to_retain: 10
   plan:
     - do:
-      - get: git_stack-terraform
+      - get: git_stack-first-trigger
         trigger: true
+        passed:
+          - terraform-plan
+      - get: git_stack-terraform
+        trigger: false
         passed:
           - terraform-plan
       - get: git_config-terraform
@@ -194,7 +213,7 @@ jobs:
         passed:
           - terraform-plan
       - get: tfstate
-        trigger: true
+        trigger: false
         passed:
           - terraform-plan
 
@@ -215,29 +234,29 @@ jobs:
           plan_run: true
           terraform_source: merged-stack/
 
-      - task: pause-apply
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cycloid/cycloid-toolkit
-              tag: latest
-          container_limits: {}
-          run:
-            path: /bin/bash
-            args:
-              - '-c'
-              - |
-                echo "pause terraform apply to make sure we don't reinstall the onprem"
-                cy --insecure login --org ${ORGANIZATION} --api-key ${API_KEY}
-                cy --org ${ORGANIZATION} pp pause-job --project ${PROJECT} --env ${ENV} --job terraform-apply
-          params:
-            CY_API_URL: 'https://http-api.cycloid.io'
-            ORGANIZATION: ((customer))
-            API_KEY: ((api_key))
-            ENV: ((env))
-            PROJECT: ((project))
+      # - task: pause-apply
+      #   config:
+      #     platform: linux
+      #     image_resource:
+      #       type: docker-image
+      #       source:
+      #         repository: cycloid/cycloid-toolkit
+      #         tag: latest
+      #     container_limits: {}
+      #     run:
+      #       path: /bin/bash
+      #       args:
+      #         - '-c'
+      #         - |
+      #           echo "pause terraform apply to make sure we don't reinstall the onprem"
+      #           cy --insecure login --org ${ORGANIZATION} --api-key ${API_KEY}
+      #           cy --org ${ORGANIZATION} pp pause-job --project ${PROJECT} --env ${ENV} --job terraform-apply
+      #     params:
+      #       CY_API_URL: 'https://http-api.cycloid.io'
+      #       ORGANIZATION: ((customer))
+      #       API_KEY: ((api_key))
+      #       ENV: ((env))
+      #       PROJECT: ((project))
 
 - name: terraform-destroy
   max_in_flight: 1
