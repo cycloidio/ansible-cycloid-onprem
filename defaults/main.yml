@@ -361,7 +361,7 @@ cycloid_console_base_url: "https://{{ cycloid_console_dns }}"
 # Allow additional Origins to request the API. Multiple Origins can be specified using a comma ','.
 # e.g, cycloid_api_cors_allowed_origins: "https://domain1.tld,http://domain2.tld"
 # By default, the {{ cycloid_console_base_url }} is already allowed.
-cycloid_api_cors_allowed_origins: ""
+cycloid_api_cors_allowed_origins: "*"
 
 #
 # minio
