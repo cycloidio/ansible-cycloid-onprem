@@ -192,7 +192,7 @@ use_cases:
               #github_client_secret: ""
 
     - name: Service-ansible
-      condition: advanced_stack_opt==true
+      # condition: advanced_stack_opt==true
       technologies: [ansible]
       vars:
         - name: "SAML Auth enable"
