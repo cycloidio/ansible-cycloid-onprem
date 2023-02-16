@@ -12,7 +12,7 @@
 - name: check SSL exist
   run_once: true
   stat:
-    path: "{{ cycloid_local_datas_path }}/ssl/cycloid.key"
+    path: "{{ cycloid_install_path }}/cycloid.key"
   register: ssl_key
   delegate_to: 127.0.0.1
   become: false
