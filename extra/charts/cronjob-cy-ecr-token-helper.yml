@@ -1,0 +1,67 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cy-ecr-token-helper
+rules:
+  - apiGroups: [""]
+    resources:
+      - secrets
+      - serviceaccounts
+      - serviceaccounts/token
+    verbs:
+      - 'delete'
+      - 'create'
+      - 'patch'
+      - 'get'
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cy-ecr-token-helper
+subjects:
+  - kind: ServiceAccount
+    name: sa-cy-ecr-token-helper
+roleRef:
+  kind: Role
+  name: cy-ecr-token-helper
+  apiGroup: ""
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-cy-ecr-token-helper
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cy-ecr-token-helper
+spec:
+  schedule: '0 */6 * * *'
+  successfulJobsHistoryLimit: 0
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: sa-cy-ecr-token-helper
+          containers:
+            - command:
+                - /bin/sh
+                - -c
+                - |-
+                  pip3 install awscli
+                  TOKEN=`aws ecr get-login-password`
+                  kubectl delete secret -n $SECRET_NAMESPACE --ignore-not-found $SECRET_NAME
+                  kubectl create secret -n $SECRET_NAMESPACE docker-registry $SECRET_NAME \
+                  --docker-server=$ECR_REPOSITORY \
+                  --docker-username=AWS \
+                  --docker-password=$TOKEN
+              env:
+                - name: SECRET_NAME
+                  value: 'cycloid-ecr'
+              envFrom:
+              - secretRef:
+                  name: cycloid-aws-creds
+              image: alpine/k8s:1.25.6
+              imagePullPolicy: IfNotPresent
+              name: ecr-token-helper
+          restartPolicy: Never
