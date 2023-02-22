@@ -86,7 +86,8 @@ instance_private_key_pair: ((git_ssh_bastion.ssh_key))
 install_concourse_worker: true
 install_minio: true
 install_elasticsearch: false
-cycloid_licence: ((custom_cycloid-backend-$LICENCE_ENV.licence_key))
+
+cycloid_licence: ((custom_onprem_licence.$LICENCE_ENV))
 
 cycloid_api_tag: $BACKEND_IMAGE_TAG
 cycloid_frontend_tag: $FRONTEND_IMAGE_TAG

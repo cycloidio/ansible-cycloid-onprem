@@ -13,7 +13,7 @@ use_cases:
           key: advanced_opt
           widget: switch
           type: boolean
-          default: false
+          default: true
 
         - name: Display Stack advanced options
           description: Check to see Stack advanced options to configure your project.
@@ -68,7 +68,7 @@ use_cases:
     - name: Licence
       # TODO: not supported
       # condition: cycloid_api_tag != "prod"
-      condition: cycloid_api_tag==staging
+      # condition: cycloid_api_tag==staging
       technologies: [pipeline]
       vars:
         - name: "Cycloid Licence"
@@ -144,7 +144,8 @@ use_cases:
           required: true
 
     - name: Stack
-      condition: advanced_opt==true
+      # This variable need to be write when using onprem (not playground)
+      # condition: advanced_opt==true
       technologies: [pipeline]
       vars:
         - name: "Stack branch"
@@ -280,7 +281,7 @@ use_cases:
           widget: switch
           type: boolean
           default: true
-            
+
   - name: Security
     groups:
     - name: Password
