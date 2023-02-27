@@ -98,7 +98,7 @@ container_args_extra: ""
 cycloid_api_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint\"{% endif %}"
 
 # Cloud Cost Management cmd
-cycloid_job_ccm_ingestion_container_args: "/go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml --cost-explorer-skip-queue=true"
+cycloid_job_ccm_ingestion_container_args: "/go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml"
 cycloid_job_ccm_ingestion_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint {{ cycloid_job_ccm_ingestion_container_args }}\"{% else %}{{ cycloid_job_ccm_ingestion_container_args }}{% endif %}"
 
 # docker exec -it cycloid-api bash -c "ls -l /etc/ssl/certs/ | grep DigiCertSHA2HighAssuranceServerCA.crt"
