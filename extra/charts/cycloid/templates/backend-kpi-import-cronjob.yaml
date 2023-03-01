@@ -19,7 +19,7 @@ metadata:
   {{- end }}
 spec:
   suspend: false
-  concurrencyPolicy: Replace 
+  concurrencyPolicy: Replace
   schedule: "0 */1 * * *"
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3
@@ -55,7 +55,7 @@ spec:
             - name: kpi-import
               securityContext:
                 {{- toYaml .Values.backend.securityContext | nindent 16 }}
-              image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+              image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
               args:
                 - "/go/youdeploy-http-api"

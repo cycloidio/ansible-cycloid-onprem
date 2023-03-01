@@ -1,3 +1,5 @@
+{{- if .Values.cycloidImagesRegistry.renewToken }}
+---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -36,7 +38,7 @@ kind: CronJob
 metadata:
   name: cy-ecr-token-helper
 spec:
-  schedule: '0 */6 * * *'
+  schedule: {{ .Values.cycloidImagesRegistry.refreshEvery }}
   successfulJobsHistoryLimit: 0
   jobTemplate:
     spec:
@@ -57,11 +59,18 @@ spec:
                   --docker-password=$TOKEN
               env:
                 - name: SECRET_NAME
-                  value: 'cycloid-ecr'
+                  value: {{ with (index .Values.imagePullSecrets 0) }}{{ .name }}{{ end }}
+                - name: ECR_REPOSITORY
+                  value: {{ .Values.cycloidImagesRegistry.repositoryUrl }}
+                - name: AWS_DEFAULT_REGION
+                  value: {{ .Values.cycloidImagesRegistry.repositoryRegion }}
+                - name: SECRET_NAMESPACE
+                  value: {{ .Release.Namespace }}
               envFrom:
               - secretRef:
-                  name: cycloid-aws-creds
-              image: alpine/k8s:1.25.6
+                  name: {{ .Values.cycloidImagesRegistry.secretCredentialName }}
+              image: {{ .Values.cycloidImagesRegistry.image }}
               imagePullPolicy: IfNotPresent
               name: ecr-token-helper
           restartPolicy: Never
+{{- end }}
