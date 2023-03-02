@@ -38,7 +38,7 @@ keywords:
 
 dependencies:
   - name: mysql
-    repository: https://charts.bitnami.com/bitnami
+    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
     tags:
       - bitnami-mysql
     version: ~8.9.6
