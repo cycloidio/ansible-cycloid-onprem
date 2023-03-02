@@ -1,0 +1,7 @@
+kind: Added
+body: Add a Kubernetes cronjob to automatically renew the docker-registry token from
+  Cycloid AWS credentials
+time: 2023-03-01T17:34:36.575678626+01:00
+custom:
+  Ref: Pull
+  RefID: "165"

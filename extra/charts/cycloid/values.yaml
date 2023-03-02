@@ -9,6 +9,20 @@ commonLabels: {}
 # Annotations to add to all deployed objects
 commonAnnotations: {}
 
+# Cycloid image registry description
+# To access Cycloid docker images, a docker-registry token that expires is used.
+# By default, the cronjob (via the renewToken parameter) is enabled to renew the docker-registry token
+# that allow pulling images on the Cycloid image registry
+cycloidImagesRegistry:
+  renewToken: true
+  # Kubernetes secret created following the Cycloid documentation
+  secretCredentialName: cycloid-aws-creds
+  repositoryUrl: 661913936052.dkr.ecr.eu-west-1.amazonaws.com
+  repositoryRegion: eu-west-1
+  refreshEvery: '0 */6 * * *'
+  image: alpine/k8s:1.25.6
+
+
 # Image pull secret to use for registry authentication.
 # The default value matches the secret created during the documentation installation steps
 # which provide access to the AWS ECR Cycloid docker images.

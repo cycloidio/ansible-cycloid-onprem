@@ -55,7 +55,7 @@ spec:
             - name: ccm-ingestion
               securityContext:
                 {{- toYaml .Values.backend.securityContext | nindent 16 }}
-              image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+              image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
               args:
                 - "/go/youdeploy-http-api"
