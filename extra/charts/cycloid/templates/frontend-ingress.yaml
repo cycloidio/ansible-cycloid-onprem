@@ -1,3 +1,4 @@
+{{- if not .Values.openshift }}
 {{- if .Values.frontend.enabled }}
 {{- if .Values.frontend.ingress.enabled -}}
 {{- $fullName := include "frontend.fullname" . -}}
@@ -68,5 +69,6 @@ spec:
               {{- end }}
           {{- end }}
     {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}

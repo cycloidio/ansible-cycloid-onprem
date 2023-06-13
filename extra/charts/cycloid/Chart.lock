@@ -1,15 +1,15 @@
 dependencies:
 - name: mysql
   repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
-  version: 8.9.6
+  version: 9.10.4
 - name: redis
   repository: https://charts.bitnami.com/bitnami
-  version: 16.11.3
+  version: 17.11.3
 - name: concourse
   repository: https://concourse-charts.storage.googleapis.com/
-  version: 14.5.6
+  version: 17.1.1
 - name: vault
   repository: https://helm.releases.hashicorp.com
-  version: 0.9.1
-digest: sha256:963d0dc0df8a1769a210dcf633954de4fd83156765f2acbd5c4f35f4d8d141e4
-generated: "2023-03-02T12:04:49.540453226+01:00"
+  version: 0.24.1
+digest: sha256:378bc707bf0ce53da08e790d7b29c98b1fa99ae5e773bda9a0bf6b7d8db05899
+generated: "2023-06-13T12:41:13.675631843+02:00"

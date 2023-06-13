@@ -47,14 +47,16 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           serviceAccountName: {{ include "backend.serviceAccountName" . }}
-          securityContext:
-            {{- toYaml .Values.backend.podSecurityContext | nindent 12 }}
+          {{- if .Values.backend.podSecurityContext.enabled }}
+          securityContext: {{- omit .Values.backend.podSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           restartPolicy: "Never"
 
           containers:
             - name: ccm-ingestion
-              securityContext:
-                {{- toYaml .Values.backend.securityContext | nindent 16 }}
+              {{- if .Values.backend.securityContext.enabled }}
+              securityContext: {{- omit .Values.backend.securityContext "enabled" | toYaml | nindent 16 }}
+              {{- end }}
               image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
               args:

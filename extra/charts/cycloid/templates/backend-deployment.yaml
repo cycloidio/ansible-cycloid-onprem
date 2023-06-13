@@ -34,13 +34,14 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "backend.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
+      {{- if .Values.backend.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.backend.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
 
       initContainers:
         {{- if .Values.mysql.enabled }}
         - name: wait-for-mysql
-          image: groundnuty/k8s-wait-for:v1.3
+          image: groundnuty/k8s-wait-for:v2.0
           imagePullPolicy: Always
           args:
             - "service"
@@ -50,7 +51,7 @@ spec:
         {{- end }}
         {{- if .Values.redis.enabled }}
         - name: wait-for-redis
-          image: groundnuty/k8s-wait-for:v1.3
+          image: groundnuty/k8s-wait-for:v2.0
           imagePullPolicy: Always
           args:
             - "service"
@@ -60,7 +61,7 @@ spec:
         {{- end }}
         {{- if .Values.vault.enabled }}
         - name: wait-for-vault
-          image: groundnuty/k8s-wait-for:v1.3
+          image: groundnuty/k8s-wait-for:v2.0
           imagePullPolicy: Always
           args:
             - "service"
@@ -68,8 +69,9 @@ spec:
             - "-lapp.kubernetes.io/name=vault"
         {{- end }}
         - name: migrations
-          securityContext:
-            {{- toYaml .Values.backend.securityContext | nindent 12 }}
+          {{- if .Values.backend.securityContext.enabled }}
+          securityContext: {{- omit .Values.backend.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           args:
@@ -181,8 +183,9 @@ spec:
 
       containers:
         - name: api
-          securityContext:
-            {{- toYaml .Values.backend.securityContext | nindent 12 }}
+          {{- if .Values.backend.securityContext.enabled }}
+          securityContext: {{- omit .Values.backend.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           ports:

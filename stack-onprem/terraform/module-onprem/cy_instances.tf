@@ -177,7 +177,7 @@ resource "aws_instance" "cy_instances" {
 resource "aws_eip" "cy_instances" {
   count    = var.cy_instances_count
   instance = aws_instance.cy_instances[count.index].id
-  vpc      = true
+  domain   = "vpc"
 }
 
 output "cy_instances_public_dns" {
