@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -e
 
 [[ $# -ge 1 ]] || (echo -e "\e[33mUSAGE: $0 <version>" && exit 2)
@@ -8,7 +7,7 @@ VERSION=${1}
 BRANCH="helm-version_$VERSION"
 
 echo -e "\e[36m# $0 > switching to master branch and make it's up-to-date\e[0m"
-git checkout master && git pull --rebase=merges
+git checkout master && git pull --rebase=true
 
 echo -e "\e[36m# $0 > creating $BRANCH PR branch\e[0m"
 git checkout -b $BRANCH
