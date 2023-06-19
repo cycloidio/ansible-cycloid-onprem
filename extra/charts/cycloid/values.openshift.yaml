@@ -1,0 +1,131 @@
+# These overrides are appropriate defaults for deploying this chart on OpenShift
+
+openshift: true
+
+#
+# Cycloid Console frontend
+#
+frontend:
+  image:
+    containerPort: 8080
+
+  # Use openshift default SCC
+  podSecurityContext:
+    enabled: false
+  securityContext:
+    enabled: false
+
+  route:
+    enabled: true
+    labels: {}
+    annotations: {}
+    host: console.cycloid.local
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Allow
+      # To use Redirect, make sure frontend.url is using https schema.
+      # insecureEdgeTerminationPolicy: Redirect
+
+
+#
+# Cycloid Console API
+#
+backend:
+  # Use openshift default SCC
+  podSecurityContext:
+    enabled: false
+  securityContext:
+    enabled: false
+
+
+  # OpenShift only - create a route to expose the service
+  route:
+    enabled: true
+    labels: {}
+    annotations: {}
+    host: api.cycloid.local
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Allow
+      # To use Redirect, make sure backend.url is using https schema.
+      # insecureEdgeTerminationPolicy: Redirect
+
+#
+# MySQL
+#
+# Configuration values for the mysql dependency.
+# Ref: https://github.com/bitnami/charts/tree/master/bitnami/mysql
+#
+mysql:
+  primary:
+    podSecurityContext:
+      enabled: false
+      # fsGroup: 1001
+    containerSecurityContext:
+      enabled: false
+      # runAsUser: 1001
+      # allowPrivilegeEscalation: false
+      # capabilities:
+      #   drop:
+      #   - ALL
+      # runAsNonRoot: true
+      # seccompProfile:
+      #   type: RuntimeDefault
+
+#
+# Redis
+#
+# Configuration values for the redis dependency.
+# Ref: https://github.com/bitnami/charts/tree/master/bitnami/redis
+#
+redis:
+  master:
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+      # runAsUser: 1001
+      # allowPrivilegeEscalation: false
+      # capabilities:
+      #   drop:
+      #   - ALL
+      # runAsNonRoot: true
+      # seccompProfile:
+      #   type: RuntimeDefault
+
+#
+# Concourse
+#
+# Configuration values for the concourse dependency.
+# Ref: https://github.com/concourse/concourse-chart
+#
+concourse:
+  postgresql:
+    primary:
+      podSecurityContext:
+        enabled: false
+      containerSecurityContext:
+        enabled: false
+      # containerSecurityContext:
+      #   enabled: true
+      #   runAsUser: 1001
+      #   allowPrivilegeEscalation: false
+      #   capabilities:
+      #     drop:
+      #     - ALL
+      #   runAsNonRoot: true
+      #   seccompProfile:
+      #     type: RuntimeDefault
+
+
+
+#
+# Vault
+#
+# Configuration values for the vault dependency.
+# Ref: https://github.com/hashicorp/vault-helm
+#
+vault:
+  # If deployed on openshift
+  global:
+    openshift: true

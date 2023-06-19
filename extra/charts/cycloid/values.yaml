@@ -29,6 +29,10 @@ cycloidImagesRegistry:
 imagePullSecrets:
   - name: cycloid-ecr
 
+# If deploying to OpenShift
+# If Vault also deployen on openshift, make sure vault.global.openshift is true
+openshift: false
+
 #
 # Cycloid Console frontend
 #
@@ -47,10 +51,12 @@ frontend:
 
   image:
     repository: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Cycloid Console frontend version to use.
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "v3.0.7"
+    tag: "latest-public"
+    # Container local port
+    containerPort: 80
 
   # extraEnvVars is a list of extra environment variables to set.
   extraEnvVars: {}
@@ -89,10 +95,12 @@ frontend:
 
   podAnnotations: {}
 
-  podSecurityContext: {}
+  podSecurityContext:
+    enabled: false
     # fsGroup: 2000
 
-  securityContext: {}
+  securityContext:
+    enabled: false
     # capabilities:
     #   drop:
     #   - ALL
@@ -119,6 +127,17 @@ frontend:
     #  - secretName: cycloid-local-tls
     #    hosts:
     #      - console.cycloid.local
+
+  # OpenShift only - create a route to expose the service
+  # By default the created route will be of type passthrough
+  route:
+    enabled: true
+    labels: {}
+    annotations: {}
+    host: console.cycloid.local
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -194,10 +213,10 @@ backend:
 
   image:
     repository: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Cycloid Console API version to use.
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "v1.0.96"
+    tag: "latest-public"
 
   # Concourse server to be used by the Cycloid Console API.
   # Defaults to the included one within the chart, but you also use a custom one if needed.
@@ -306,10 +325,12 @@ backend:
 
   podAnnotations: {}
 
-  podSecurityContext: {}
+  podSecurityContext:
+    enabled: false
     # fsGroup: 2000
 
-  securityContext: {}
+  securityContext:
+    enabled: false
     # capabilities:
     #   drop:
     #   - ALL
@@ -345,6 +366,17 @@ backend:
     #  - secretName: cycloid-local-tls
     #    hosts:
     #      - api.cycloid.local
+
+  # OpenShift only - create a route to expose the service
+  # By default the created route will be of type passthrough
+  route:
+    enabled: true
+    labels: {}
+    annotations: {}
+    host: api.cycloid.local
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -512,7 +544,7 @@ redis:
   image:
     registry: docker.io
     repository: bitnami/redis
-    tag: 6.0.16-debian-11-r0
+    tag: 7.0.11-debian-11-r12
 
   ## Redis Authentication parameters
   ## ref: https://github.com/bitnami/bitnami-docker-redis#setting-the-server-password-on-first-run
@@ -530,12 +562,13 @@ redis:
   ##
   architecture: standalone
 
-  persistence:
-    enabled: true
-    storageClass: ""
-    accessModes:
-      - ReadWriteOnce
-    size: 8Gi
+  master:
+    persistence:
+      enabled: true
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 8Gi
 
 #
 # External Redis Configuration
@@ -908,16 +941,18 @@ concourse:
 
     fullnameOverride: cycloid-concourse-postgresql
 
-    ### PostgreSQL User to create.
-    ##
-    postgresqlUsername: concourse
-    ## PostgreSQL Password for the new user.
-    ## If not set, a random 10 characters password will be used.
-    ##
-    postgresqlPassword: "ori9aigee0phivooX1jei1Ee"
-    ## PostgreSQL Database to create.
-    ##
-    postgresqlDatabase: atc
+    auth:
+      ### PostgreSQL User to create.
+      username: concourse
+      ## PostgreSQL Password for the new user.
+      ## If not set, a random 10 characters password will be used.
+      ##
+      password: "ori9aigee0phivooX1jei1Ee"
+      # Password for the "postgres" admin user
+      postgresPassword: "ori9aigee0phivooX1jei1Ee"
+      ## PostgreSQL Database to create.
+      ##
+      database: atc
 
     ## Persistent Volume Storage configuration for PostgreSQL.
     ##
@@ -949,7 +984,7 @@ concourse:
     ## Secrets for DB access if bringing your own PostgreSQL
     ##
     postgresUser:
-    postgresPassword:
+    postgresPassword: "pha7soh9eiQu3igeiKaechooche6to3u"
 
     ## List of `username:password` or `username:bcrypted_password` combinations for all your local concourse users.
     ## For details of expected format, see https://concourse-ci.org/local-auth.html
@@ -1081,6 +1116,10 @@ vault:
   #
   enabled: true
 
+  # If deployed on openshift
+  global:
+    openshift: false
+
   injector:
     enabled: false
 
@@ -1089,7 +1128,7 @@ vault:
 
   server:
     image:
-      tag: "1.5.4"
+      tag: "1.13.1"
 
 
     # This configures the Vault Statefulset to create a PVC for data

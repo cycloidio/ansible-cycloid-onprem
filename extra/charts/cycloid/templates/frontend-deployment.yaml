@@ -34,17 +34,19 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "frontend.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.frontend.podSecurityContext | nindent 8 }}
+      {{- if .Values.frontend.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.frontend.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.frontend.securityContext | nindent 12 }}
+          {{- if .Values.frontend.securityContext.enabled }}
+          securityContext: {{- omit .Values.primary.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           image: "{{ tpl .Values.frontend.image.repository $ }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: {{ .Values.frontend.image.containerPort }}
               protocol: TCP
           livenessProbe:
             tcpSocket:
@@ -69,6 +71,8 @@ spec:
               value: {{ .Values.frontend.url | quote }}
             - name: "CYCLOID_API_URL"
               value: {{ .Values.backend.url | quote }}
+            - name: "CYCLOID_NGINX_PORT"
+              value: {{ .Values.frontend.image.containerPort | quote }}
             {{- include "cycloid.extraEnvVars" .Values.frontend | nindent 12 }}
             {{- include "cycloid.extraSecretEnvVars" .Values.frontend | nindent 12 }}
             {{- include "cycloid.extraConfigMapEnvVars" .Values.frontend | nindent 12 }}

@@ -2,3 +2,4 @@ charts/
 scripts/.out
 values.test.yaml
 values.custom.yaml
+values.openshift.custom.yaml

@@ -1,0 +1,36 @@
+{{- if .Values.openshift }}
+{{- if .Values.frontend.route.enabled -}}
+{{- $serviceName := include "frontend.fullname" . -}}
+
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ $serviceName }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    {{- include "frontend.selectorLabels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.frontend.route.annotations .Values.commonAnnotations }}
+  annotations:
+    {{- with .Values.frontend.route.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.commonAnnotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  host: {{ .Values.frontend.route.host }}
+  to:
+    kind: Service
+    name: {{ $serviceName }}
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    {{- toYaml .Values.frontend.route.tls | nindent  4 }}
+{{- end }}
+{{- end }}
