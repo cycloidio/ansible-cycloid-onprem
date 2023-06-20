@@ -23,5 +23,5 @@
 .vscode/
 scripts/.out/
 scripts/release/
-values.*.yaml
+*.custom.yaml
 changes/
