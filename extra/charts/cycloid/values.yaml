@@ -1130,6 +1130,10 @@ vault:
     image:
       tag: "1.13.1"
 
+    # This can be useful when you want your services running on a Kubernetes
+    # cluster to self-authenticate against Vault without the need to pass around Vault credentials.
+    authDelegator:
+      enabled: false
 
     # This configures the Vault Statefulset to create a PVC for data
     # storage when using the file or raft backend storage engines.
