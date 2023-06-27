@@ -343,6 +343,9 @@ cycloid_nginx_api_proxy_pass: "http://cycloid-api:3001"
 # Nginx proxy_pass url used for cycloid console/frontend vhost. Most of the case it shouldn't be changed.
 cycloid_nginx_console_proxy_pass: "http://cycloid-frontend"
 
+# Nginx enables the specified protocols (if not define, use default by nginx)
+# cycloid_nginx_ssl_protocols: "TLSv1 TLSv1.1 TLSv1.2 TLSv1.3"
+
 #
 # Cycloid
 #
