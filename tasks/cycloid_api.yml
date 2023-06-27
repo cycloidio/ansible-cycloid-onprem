@@ -45,7 +45,7 @@
       EMAIL_SKIP_TLS_CHECK: "{{ cycloid_email_skip_tls_check }}"
       # if we use the default fake smtp server (mailhog), enable dev_mode to allow unencrypted connection
       EMAIL_DEV_MODE: "{{ setup_smtp_server }}"
-      REDIS_URI: "redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
+      REDIS_URI: "{{ cycloid_cache_uri }}"
       AZURE_TENANT_ID: "{{ azure_ad_tenant_id }}"
       AZURE_CLIENT_ID: "{{ azure_ad_client_id }}"
       GOOGLE_CLIENT_ID: "{{ google_client_id }}"

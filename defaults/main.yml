@@ -404,6 +404,15 @@ cycloid_email_redis_db: 0
 # Allow insecure TLS/SSL with email. Usefull when using local postfix as relayhost with selfsigned certs
 cycloid_email_skip_tls_check: false
 
+# Cache allow you to define redis envvars
+cycloid_cache_env: {}
+cycloid_cache_uri: "redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
+# Can be usefull to set password on redis
+# cycloid_cache_image: bitnami/redis:7.0.11
+# cycloid_cache_env:
+#   REDIS_PASSWORD: "{{ cycloid_cache_password }}"
+# cycloid_cache_uri: "redis://default:{{ cycloid_cache_password }}@{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
+
 # asynqmon is used to debug redis worker queue. Set true to install it
 cycloid_cache_mon_install: false
 cycloid_cache_mon_image: hibiken/asynqmon:latest
