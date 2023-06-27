@@ -190,13 +190,13 @@ cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-f
 cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:latest-public
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
 concourse_db_image: postgres:9.6
-cycloid_cache_image: redis:6.0.9
-cycloid_db_image: mysql:8.0.21
+cycloid_cache_image: redis:7.0.11
+cycloid_db_image: mysql:8.0.33
 # If mysql 8.x nativ auth need to be defined
 cycloid_db_container_cmd_mysql8: "--default-authentication-plugin=mysql_native_password"
 cycloid_db_container_cmd: "{% if cycloid_db_image.startswith('mysql:8') %}{{ cycloid_db_container_cmd_mysql8 }}{% endif %}"
 concourse_web_image: concourse/concourse:7.8.3
-vault_image: vault:1.5.4
+vault_image: vault:1.13.3
 
 
 #
