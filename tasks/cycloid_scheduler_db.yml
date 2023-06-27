@@ -11,8 +11,7 @@
     name: concourse-db
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{concourse_db_image}}"
-    container_ports:
-      - '5432:5432'
+    container_ports: "{{concourse_db_container_ports}}"
     container_args: "{{ container_args_extra }}"
     container_volumes:
       - "{{concourse_db_path}}:/var/lib/postgresql/data"

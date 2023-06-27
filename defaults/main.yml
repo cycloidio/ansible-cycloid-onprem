@@ -26,6 +26,70 @@ cycloid_install_path: /opt/cycloid
 cycloid_local_datas_path: "{{ playbook_dir }}/datas"
 
 #
+# containers ports
+#
+
+cycloid_api_container_ports:
+  - "0.0.0.0:3001:3001"
+  # - "{{ ansible_default_ipv4.address }}:3001:3001"
+  # - "127.0.0.1:3001:3001"
+cycloid_cache_container_ports:
+  - "0.0.0.0:{{ cycloid_email_redis_port }}:6379"
+  # - "{{ ansible_default_ipv4.address }}:{{ cycloid_email_redis_port }}:6379"
+  # - "127.0.0.1:{{ cycloid_email_redis_port }}:6379"
+vault_container_ports:
+  - "0.0.0.0:8200:8200"
+  # - "{{ ansible_default_ipv4.address }}:8200:8200"
+  # - "127.0.0.1:8200:8200"
+cycloid_db_container_ports:
+  - "0.0.0.0:{{ cycloid_db_port }}:3306"
+  # - "{{ ansible_default_ipv4.address }}:{{ cycloid_db_port }}:3306"
+  # - "127.0.0.1:{{ cycloid_db_port }}:3306"
+cycloid_frontend_container_ports:
+  - "0.0.0.0:3000:80"
+  # - "{{ ansible_default_ipv4.address }}:3000:80"
+  # - "127.0.0.1:3000:80"
+concourse_db_container_ports:
+  - "0.0.0.0:5432:5432"
+  # - "{{ ansible_default_ipv4.address }}:5432:5432"
+  # - "127.0.0.1:5432:5432"
+concourse_web_container_ports:
+  - "0.0.0.0:2222:2222"
+  - "0.0.0.0:8080:8080"
+  - "0.0.0.0:{{ concourse_port }}:{{ concourse_port }}"
+  # - "{{ ansible_default_ipv4.address }}:2222:2222"
+  # - "127.0.0.1:2222:2222"
+  # - "{{ ansible_default_ipv4.address }}:8080:8080"
+  # - "127.0.0.1:8080:8080"
+  # - "{{ ansible_default_ipv4.address }}:{{ concourse_port }}:{{ concourse_port }}"
+  # - "127.0.0.1:{{ concourse_port }}:{{ concourse_port }}"
+cycloid_nginx_container_ports:
+  - "0.0.0.0:80:80"
+  - "0.0.0.0:443:443"
+  # - "{{ ansible_default_ipv4.address }}:80:80"
+  # - "127.0.0.1:80:80"
+  # - "{{ ansible_default_ipv4.address }}:443:443"
+  # - "127.0.0.1:443:443"
+cycloid_smtp_container_ports:
+  - "0.0.0.0:1025:1025"
+  - "0.0.0.0:8025:8025"
+  # - "{{ ansible_default_ipv4.address }}:1025:1025"
+  # - "127.0.0.1:1025:1025"
+  # - "{{ ansible_default_ipv4.address }}:8025:8025"
+  # - "127.0.0.1:8025:8025"
+elasticsearch_container_ports:
+  - "0.0.0.0:{{ elasticsearch_port_node }}:9300"
+  - "0.0.0.0:{{ elasticsearch_port_api }}:9200"
+  # - "{{ ansible_default_ipv4.address }}:{{ elasticsearch_port_node }}:9300"
+  # - "127.0.0.1:{{ elasticsearch_port_node }}:9300"
+  # - "{{ ansible_default_ipv4.address }}:{{ elasticsearch_port_api }}:9200"
+  # - "127.0.0.1:{{ elasticsearch_port_api }}:9200"
+minio_container_ports:
+  - "0.0.0.0:{{ minio_port }}:9000"
+  # - "{{ ansible_default_ipv4.address }}:{{ minio_port }}:9000"
+  # - "127.0.0.1:{{ minio_port }}:9000"
+
+#
 # Pre setup
 #
 
