@@ -92,10 +92,7 @@
     name: concourse-web
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{concourse_web_image}}"
-    container_ports:
-      - '2222:2222'
-      - '8080:8080'
-      - "{{ concourse_port }}:{{ concourse_port }}"
+    container_ports: "{{concourse_web_container_ports}}"
     container_volumes:
       # concourse-authorized-keys
       - "{{ concourse_config_path }}:/opt/concourse"

@@ -29,9 +29,7 @@
           # this is the error message if you place ssl certs in another place
           - "{{ elasticsearch_config_path }}/ssl.key:/usr/share/elasticsearch/config/ssl.key:ro"
           - "{{ elasticsearch_config_path }}/ssl.crt:/usr/share/elasticsearch/config/ssl.crt:ro"
-        container_ports:
-          - "{{ elasticsearch_port_node }}:9300"
-          - "{{ elasticsearch_port_api }}:9200"
+        container_ports: "{{ elasticsearch_container_ports }}"
         container_args: "{{ container_args_extra }}"
         container_labels:
           - ansible.managed=true

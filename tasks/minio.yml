@@ -10,8 +10,7 @@
         container_image: "minio/minio:{{ minio_version }}"
         container_volumes:
           - "{{ minio_config_path }}/data:/data"
-        container_ports:
-          - "{{ minio_port }}:9000"
+        container_ports: "{{ minio_container_ports }}"
         container_args: "{{ container_args_extra }}"
         container_env:
           MINIO_ACCESS_KEY: "{{ minio_access_key }}"

@@ -27,7 +27,7 @@
   uri:
     url: https://127.0.0.1:8200/v1/cycloid?list=true
     validate_certs: no
-    status_code: 400 # "missing client token"
+    status_code: 403 # "permission denied"
     return_content: yes
   register: unseal
   #until: '"Vault is sealed" not in unseal.content'

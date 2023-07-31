@@ -2,6 +2,11 @@ server {
     listen       443 ssl;
     server_name  "{{ cycloid_console_dns }}";
     client_max_body_size 20M;
+
+    {% if cycloid_nginx_ssl_protocols is defined and cycloid_nginx_ssl_protocols|length %}
+    ssl_protocols {{ cycloid_nginx_ssl_protocols }};
+    {% endif %}
+
     #access_log /var/log/nginx/cycloid-console-access.log;
     #error_log  /var/log/nginx/cycloid-console-error.log;
 
