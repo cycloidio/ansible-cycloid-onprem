@@ -8,8 +8,7 @@
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{cycloid_frontend_image}}"
     #container_links: [ 'cycloid-api' ]
-    container_ports:
-      - '3000:80'
+    container_ports: "{{cycloid_frontend_container_ports}}"
     container_args: "{{ container_args_extra }}"
     container_env:
       CYCLOID_API_URL: "{{cycloid_api_base_url}}"

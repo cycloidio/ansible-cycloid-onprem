@@ -26,6 +26,70 @@ cycloid_install_path: /opt/cycloid
 cycloid_local_datas_path: "{{ playbook_dir }}/datas"
 
 #
+# containers ports
+#
+
+cycloid_api_container_ports:
+  - "0.0.0.0:3001:3001"
+  # - "{{ ansible_default_ipv4.address }}:3001:3001"
+  # - "127.0.0.1:3001:3001"
+cycloid_cache_container_ports:
+  - "0.0.0.0:{{ cycloid_email_redis_port }}:6379"
+  # - "{{ ansible_default_ipv4.address }}:{{ cycloid_email_redis_port }}:6379"
+  # - "127.0.0.1:{{ cycloid_email_redis_port }}:6379"
+vault_container_ports:
+  - "0.0.0.0:8200:8200"
+  # - "{{ ansible_default_ipv4.address }}:8200:8200"
+  # - "127.0.0.1:8200:8200"
+cycloid_db_container_ports:
+  - "0.0.0.0:{{ cycloid_db_port }}:3306"
+  # - "{{ ansible_default_ipv4.address }}:{{ cycloid_db_port }}:3306"
+  # - "127.0.0.1:{{ cycloid_db_port }}:3306"
+cycloid_frontend_container_ports:
+  - "0.0.0.0:3000:80"
+  # - "{{ ansible_default_ipv4.address }}:3000:80"
+  # - "127.0.0.1:3000:80"
+concourse_db_container_ports:
+  - "0.0.0.0:5432:5432"
+  # - "{{ ansible_default_ipv4.address }}:5432:5432"
+  # - "127.0.0.1:5432:5432"
+concourse_web_container_ports:
+  - "0.0.0.0:2222:2222"
+  - "0.0.0.0:8080:8080"
+  - "0.0.0.0:{{ concourse_port }}:{{ concourse_port }}"
+  # - "{{ ansible_default_ipv4.address }}:2222:2222"
+  # - "127.0.0.1:2222:2222"
+  # - "{{ ansible_default_ipv4.address }}:8080:8080"
+  # - "127.0.0.1:8080:8080"
+  # - "{{ ansible_default_ipv4.address }}:{{ concourse_port }}:{{ concourse_port }}"
+  # - "127.0.0.1:{{ concourse_port }}:{{ concourse_port }}"
+cycloid_nginx_container_ports:
+  - "0.0.0.0:80:80"
+  - "0.0.0.0:443:443"
+  # - "{{ ansible_default_ipv4.address }}:80:80"
+  # - "127.0.0.1:80:80"
+  # - "{{ ansible_default_ipv4.address }}:443:443"
+  # - "127.0.0.1:443:443"
+cycloid_smtp_container_ports:
+  - "0.0.0.0:1025:1025"
+  - "0.0.0.0:8025:8025"
+  # - "{{ ansible_default_ipv4.address }}:1025:1025"
+  # - "127.0.0.1:1025:1025"
+  # - "{{ ansible_default_ipv4.address }}:8025:8025"
+  # - "127.0.0.1:8025:8025"
+elasticsearch_container_ports:
+  - "0.0.0.0:{{ elasticsearch_port_node }}:9300"
+  - "0.0.0.0:{{ elasticsearch_port_api }}:9200"
+  # - "{{ ansible_default_ipv4.address }}:{{ elasticsearch_port_node }}:9300"
+  # - "127.0.0.1:{{ elasticsearch_port_node }}:9300"
+  # - "{{ ansible_default_ipv4.address }}:{{ elasticsearch_port_api }}:9200"
+  # - "127.0.0.1:{{ elasticsearch_port_api }}:9200"
+minio_container_ports:
+  - "0.0.0.0:{{ minio_port }}:9000"
+  # - "{{ ansible_default_ipv4.address }}:{{ minio_port }}:9000"
+  # - "127.0.0.1:{{ minio_port }}:9000"
+
+#
 # Pre setup
 #
 
@@ -190,13 +254,13 @@ cycloid_frontend_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-f
 cycloid_api_image: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:latest-public
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
 concourse_db_image: postgres:9.6
-cycloid_cache_image: redis:6.0.9
-cycloid_db_image: mysql:8.0.21
+cycloid_cache_image: redis:7.0.11
+cycloid_db_image: mysql:8.0.33
 # If mysql 8.x nativ auth need to be defined
 cycloid_db_container_cmd_mysql8: "--default-authentication-plugin=mysql_native_password"
 cycloid_db_container_cmd: "{% if cycloid_db_image.startswith('mysql:8') %}{{ cycloid_db_container_cmd_mysql8 }}{% endif %}"
 concourse_web_image: concourse/concourse:7.8.3
-vault_image: vault:1.5.4
+vault_image: vault:1.13.3
 
 
 #
@@ -279,6 +343,9 @@ cycloid_nginx_api_proxy_pass: "http://cycloid-api:3001"
 # Nginx proxy_pass url used for cycloid console/frontend vhost. Most of the case it shouldn't be changed.
 cycloid_nginx_console_proxy_pass: "http://cycloid-frontend"
 
+# Nginx enables the specified protocols (if not define, use default by nginx)
+# cycloid_nginx_ssl_protocols: "TLSv1 TLSv1.1 TLSv1.2 TLSv1.3"
+
 #
 # Cycloid
 #
@@ -336,6 +403,15 @@ cycloid_email_redis_port: 6379
 cycloid_email_redis_db: 0
 # Allow insecure TLS/SSL with email. Usefull when using local postfix as relayhost with selfsigned certs
 cycloid_email_skip_tls_check: false
+
+# Cache allow you to define redis envvars
+cycloid_cache_env: {}
+cycloid_cache_uri: "redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
+# Can be usefull to set password on redis
+# cycloid_cache_image: bitnami/redis:7.0.11
+# cycloid_cache_env:
+#   REDIS_PASSWORD: "{{ cycloid_cache_password }}"
+# cycloid_cache_uri: "redis://default:{{ cycloid_cache_password }}@{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
 
 # asynqmon is used to debug redis worker queue. Set true to install it
 cycloid_cache_mon_install: false

@@ -23,6 +23,13 @@
     state: touch
   when: vault_auto_unseal|bool
 
+- name: Copy unseal.sh | cycloid-creds
+  template:
+    src: "vault/unseal.sh.j2"
+    dest: "{{ vault_config_path }}/unseal.sh"
+    mode: 0755
+  when: vault_auto_unseal|bool
+
 - name: Define service | cycloid-creds
   include_role:
     name: mhutter.docker-systemd-service
@@ -33,13 +40,13 @@
       - "{{ vault_config_path }}/file:/vault/file"
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{vault_image}}"
-    container_ports:
-      - '8200:8200'
+    container_ports: "{{vault_container_ports}}"
     container_args: "--cap-add IPC_LOCK {{ container_args_extra }}"
     container_cmd: "vault server -config /vault/config/local.json"
     container_env:
       VAULT_LOCAL_CONFIG: "{{ vault_config|to_json}}"
-      VAULT_DEV_LISTEN_ADDRESS: "127.0.0.1:8201"
+#      VAULT_DEV_LISTEN_ADDRESS: "127.0.0.1:8201"
+
     container_start_post: "{{ vault_start_post }}"
   tags: docker-services
 
@@ -83,13 +90,6 @@
     line: "{{item}}"
     create: yes
   with_items: "{{ vault_local_token['unseal_keys_b64'] }}"
-  when: vault_auto_unseal|bool
-
-- name: Copy unseal.sh | cycloid-creds
-  template:
-    src: "vault/unseal.sh.j2"
-    dest: "{{ vault_config_path }}/unseal.sh"
-    mode: 0755
   when: vault_auto_unseal|bool
 
 - name: Unseal vault | cycloid-creds

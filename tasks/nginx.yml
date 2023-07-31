@@ -52,9 +52,7 @@
     container_volumes:
       - "{{ cycloid_nginx_path }}/vhosts:/etc/nginx/conf.d"
       - "{{ cycloid_nginx_path }}/ssl:/etc/nginx/ssl"
-    container_ports:
-      - '80:80'
-      - '443:443'
+    container_ports: "{{ cycloid_nginx_container_ports }}"
     container_args: "{{ container_args_extra }}"
     container_env:
       NGINX_ENTRYPOINT_QUIET_LOGS: 1

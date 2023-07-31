@@ -26,9 +26,7 @@
     name: cycloid-smtp
     container_docker_pull: "{{ docker_pull }}"
     container_image: "mailhog/mailhog:v1.0.0"
-    container_ports:
-      - '1025:1025'
-      - '8025:8025'
+    container_ports: "{{ cycloid_smtp_container_ports }}"
     container_args: "{{ container_args_extra }}"
     container_volumes:
       - "{{cycloid_smtp_path}}:/opt"

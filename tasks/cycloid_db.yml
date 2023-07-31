@@ -13,8 +13,7 @@
     container_image: "{{ cycloid_db_image }}"
     # needed for mysql 8.x
     container_cmd: "{{ cycloid_db_container_cmd }}"
-    container_ports:
-      - '{{ cycloid_db_port }}:3306'
+    container_ports: "{{ cycloid_db_container_ports }}"
     container_args: "{{ container_args_extra }}"
     container_volumes:
       - "{{cycloid_db_path}}:/var/lib/mysql"
