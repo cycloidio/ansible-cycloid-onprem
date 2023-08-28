@@ -247,8 +247,7 @@ backend:
     EMAIL_SMTP_PASSWORD: "##smtp-password##"
     EMAIL_ADDR_FROM: "Cycloid Console <noreply@domain.tld>"
     EMAIL_ADDR_RETURN_PATH: "admin@domain.tld"
-    EMAIL_INSECURE: false
-    LOG_DEV_MODE: false
+    # EMAIL_DEV_MODE: false
     LOG_LEVEL: "INFO"
     LOG_SVC_LEVEL: "NONE"
     # COST_EXPLORER_ES_INSECURE_SKIP_TLS: true
@@ -929,7 +928,7 @@ concourse:
 
       ## Persistent Volume Storage Size.
       ##
-      size: 20Gi
+      size: 80Gi
 
   postgresql:
     ## Use the PostgreSQL chart dependency.

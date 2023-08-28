@@ -98,7 +98,7 @@ cycloid_packages:
   debian:
         - python3-pip
         - default-mysql-client
-        - python-setuptools
+        - python3-setuptools
         - gnupg2
         - pass
         - netcat
