@@ -17,15 +17,55 @@ changie new
 
 The unreleased pool of changes will be used to generate the `CHANGELOG.md` when cutting a new release.
 
-## HOWTO cut a new release
+## HOWTO add a new release
+
+Update the version
+```bash
+vim Chart.yaml
+# commit/push on master ?
+```
 
 Open a PR preparing the version bump:
 ```bash
-./scripts/release/prepare.sh
+# check the current version
+NEW_VERSION=$(grep ^version: Chart.yaml | awk '{print $2}')
+
+./scripts/release/prepare.sh $NEW_VERSION
+
+# Check the changes
+git show
 ```
 
-Push the release to the S3 helm repository:
+If you have newline issue on `CHANGELOG.md` (missing newline before `##`)
+```bash
+sed -i  -E 's/(## [0-9].*)/\n\n\1/' CHANGELOG.md
+
+# rebase + push --force
+```
+
+Push the release to the S3 helm repository
 ```bash
 ./scripts/release/push.sh
 ```
 
+If the s3 push fail (example `Error: plugin "s3" exited with error`)
+A docker image can be used
+
+```bash
+echo "export AWS_ACCESS_KEY_ID=$(vault read -field=access_key secret/cycloid/aws)" > /tmp/awslogin
+echo "export AWS_SECRET_ACCESS_KEY=$(vault read -field=secret_key secret/cycloid/aws)" >> /tmp/awslogin
+echo "export AWS_DEFAULT_REGION=$REGION" >> /tmp/awslogin
+
+sudo docker run -v $(pwd):/opt/ -v /tmp/awslogin:/tmp/awslogin -it --entrypoint sh  hypnoglow/helm-s3
+
+# from the docker image
+cd /opt/
+# /tmp/awslogin container AWS creds
+source /tmp/awslogin
+helm repo add cycloid-onprem s3://cycloid-onprem-helm-charts/stable/cycloid/
+VERSION=$(grep ^version: Chart.yaml | awk '{print $2}')
+helm s3 push ./cycloid-$VERSION.tgz cycloid-onprem
+helm search repo cycloid-onprem
+```
+
+If not already done, create a PR from the `helm-version_xxx` branch in order to merge the `CHANGELOG.md` update
