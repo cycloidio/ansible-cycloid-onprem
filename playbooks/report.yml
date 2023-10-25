@@ -528,7 +528,7 @@
       ignore_errors: true
 
     - name: mysql dump | cycloid-db-report
-      run_once: true
+      # run_once: true
       shell: |
           mysqldump -h "{{ cycloid_db_host }}" --port {{ cycloid_db_port }} -u "{{ cycloid_db_user }}" --databases "{{ cycloid_db_name }}" -p{{ cycloid_db_password }}  > {{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/mysql/dump.sql
           gzip {{ cycloid_report_path }}/cycloid-db/{{ inventory_hostname }}/mysql/dump.sql
@@ -536,7 +536,7 @@
        executable: /bin/bash
       no_log: true
       ignore_errors: true
-      when: cycloid_report_sensitive|bool
+      when: cycloid_report_sensitive|bool and inventory_hostname == groups['cycloid_db'][0]
 
     when: setup_cycloid_db|bool
 

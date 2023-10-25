@@ -16,11 +16,14 @@ setup_cycloid_creds: "{{ 'cycloid_creds' in group_names }}"
 #+ install and configure minio, a s3-like remote storage
 setup_minio: "{{ 'minio' in group_names }}"
 #. setup_elasticsearch(optional): bool
-#+ install and configure elasticsearch to use it as cycloid external baclend
+#+ install and configure elasticsearch for the current host, group_names is the list of groups associeted to the current host
 setup_elasticsearch: "{{ 'elasticsearch' in group_names }}"
+# specify if cycloid should use or not the local elasticsearch installed
+use_local_elasticsearch: "{%- if 'elasticsearch' in groups and groups['elasticsearch'] | length > 0 -%}true{%- else -%}false{%- endif -%}"
+
 # If you let cycloid-smtp:1025, it will start a mailhog smtpd server to satisfy Cycloid requirements
 setup_smtp_server: "{{ 'smtp_server' in group_names }}"
-
+use_local_smtp_server: "{%- if 'smtp_server' in groups and groups['smtp_server'] | length > 0 -%}true{%- else -%}false{%- endif -%}"
 
 cycloid_install_path: /opt/cycloid
 cycloid_local_datas_path: "{{ playbook_dir }}/datas"
@@ -428,9 +431,8 @@ cycloid_ecr_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') | default(omit
 #cycloid_api_container_links: []
 #concourse_web_container_links: []
 
-cycloid_use_api_via_console: True
 cycloid_api_dns: cycloid-api
-cycloid_api_base_url: "{%- if cycloid_use_api_via_console -%}{{cycloid_console_base_url}}/api{%- else -%}https://{{cycloid_api_dns}}{%- endif -%}"
+cycloid_api_base_url: '{%- if cycloid_api_dns == "cycloid-api" -%}{{cycloid_console_base_url}}/api{%- else -%}https://{{cycloid_api_dns}}{%- endif -%}'
 cycloid_console_dns: cycloid-console
 cycloid_console_base_url: "https://{{ cycloid_console_dns }}"
 
@@ -524,13 +526,14 @@ github_client_secret: ""
 # elasticsearch
 #
 
-#. elasticsearch_basic_auth(option, bool): true
-#. enable elasticsearch basic authentication
-elasticsearch_basic_auth: true
-
 #. elasticsearch_tls(optional, bool): true
 #+ enable TLS on REST interface
 elasticsearch_tls: true
+elasticsearch_schema: '{%- if elasticsearch_tls -%}https{%- else -%}http{%- endif -%}'
+
+# make sure to install mapper-murmur3 for CCM
+elasticsearch_container_args: "--entrypoint /bin/bash"
+elasticsearch_container_cmd: "-c \"/usr/share/elasticsearch/bin/elasticsearch-plugin install mapper-murmur3 && /usr/local/bin/docker-entrypoint.sh\""
 
 #. elasticsearch_port_node(optional, int): 9300
 #+ the node port of elasticsearch
@@ -540,14 +543,21 @@ elasticsearch_port_node: 9300
 #+ the API port of elasticsearch
 elasticsearch_port_api: 9200
 
-#. elasticsearch_version(option, string): 7.6.2
+elasticsearch_image: elasticsearch
+
+#. elasticsearch_version(option, string): 7.17.13
 #+ elasticsearch version to pull from hub.docker.com
-elasticsearch_version: 7.6.2
+elasticsearch_version: 7.17.13
 
 #. elasticsearch_config_path(optional, string): /opt/cycloid/elasticsearch
 #+ the path to store elasticsearch configuration
 elasticsearch_config_path: "{{ cycloid_install_path }}/elasticsearch"
 
+#. elasticsearch_basic_auth(option, bool): true
+#. enable elasticsearch basic authentication
+elasticsearch_basic_auth: true
+cycloid_elasticsearch_user: "elastic"
+cycloid_elasticsearch_password: "NmM5NmIwNmEwM2Q0NmYwNDYyMDgzZGFj"
 #. cycloid_elasticsearch_default(optional, string):
 #+ the default credential to access elasticsearch with 'elastic' user
 cycloid_elasticsearch_default:
@@ -555,8 +565,8 @@ cycloid_elasticsearch_default:
     type: elasticsearch
     path: elasticsearch_default
     raw:
-      username: elastic
-      password: NmM5NmIwNmEwM2Q0NmYwNDYyMDgzZGFj
+      username: "{{ cycloid_elasticsearch_user }}"
+      password: "{{ cycloid_elasticsearch_password }}"
 
 # Docker has issues with Debain 10 Buster nftables that impact access from containers to external.
 # Workaround is to revert to iptables-legacy by setting use_iptables_legacy: true
@@ -598,11 +608,9 @@ saml_idp_metadata_path: "{%- if saml_auth_enabled and saml_idp_metadata_url == '
 ###########################
 # Cost Explorer / Cloud Cost Management feature (api params)
 ###########################
-
-# Elasticsearch variable used for Cost Explorer / Cloud Cost Management access
-cost_explorer_es_url: ""
-cost_explorer_es_username: ""
-cost_explorer_es_password: ""
+cost_explorer_es_url: "{%- if use_local_elasticsearch -%}{{elasticsearch_schema}}://{{ hostvars[groups['elasticsearch'][0]]['ansible_default_ipv4']['address'] }}:{{elasticsearch_port_api}}{%- endif -%}"
+cost_explorer_es_username: "{%- if use_local_elasticsearch -%}{{ cycloid_elasticsearch_user }}{%- endif -%}"
+cost_explorer_es_password: "{%- if use_local_elasticsearch -%}{{ cycloid_elasticsearch_password }}{%- endif -%}"
 cost_explorer_es_insecure_skip_tls: true # ignore certificate errors if there are any
 cost_explorer_ingestion_schedule: "*-*-* 00:00:00" # schedule for the timer related to cycloid-job-ccm-ingestion_container service
 #cost_explorer_es_ca_cert: "" # PEM-formatted CA certificate of Elasticsearch

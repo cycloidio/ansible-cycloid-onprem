@@ -1,5 +1,5 @@
 ---
-- name: install elasticsearch container
+- name: install elasticsearch container | elasticsearch
   block:
     - name: Copy the ssl in service directories
       copy:
@@ -10,17 +10,26 @@
         - key
         - crt
 
-    - name: template elasticsearch config
+    - name: template elasticsearch config | elasticsearch
       template:
         src: elasticsearch/elasticsearch.yml.j2
         dest: "{{ elasticsearch_config_path }}/elasticsearch.yml"
 
-    - name: create elasticsearch container
+    - name: Create extra es directory | elasticsearch
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0777
+        recurse: yes
+      with_items:
+        - "{{ elasticsearch_config_path }}/data/nodes"
+
+    - name: create elasticsearch container | elasticsearch
       include_role:
         name: mhutter.docker-systemd-service
       vars:
         container_name: elasticsearch
-        container_image: "elasticsearch:{{ elasticsearch_version }}"
+        container_image: "{{ elasticsearch_image }}:{{ elasticsearch_version }}"
         container_volumes:
           - "{{ elasticsearch_config_path }}/data:/usr/share/elasticsearch/data"
           # we can't simply override config/elasticsearch since we loose some other cool files
@@ -30,7 +39,8 @@
           - "{{ elasticsearch_config_path }}/ssl.key:/usr/share/elasticsearch/config/ssl.key:ro"
           - "{{ elasticsearch_config_path }}/ssl.crt:/usr/share/elasticsearch/config/ssl.crt:ro"
         container_ports: "{{ elasticsearch_container_ports }}"
-        container_args: "{{ container_args_extra }}"
+        container_args: "{{ elasticsearch_container_args }} {{ container_args_extra }}"
+        container_cmd: "{{ elasticsearch_container_cmd }}"
         container_labels:
           - ansible.managed=true
           - systemd.managed=true
@@ -39,23 +49,24 @@
           ES_JAVA_OPTS: "-Xms512m -Xmx512m"
           # password for the 'elastic' built-in user
           # not an issue to set, even if basic auth is disabled
-          ELASTIC_PASSWORD: "{{ cycloid_elasticsearch_default['raw']['password'] }}"
+          ELASTIC_PASSWORD: "{{ cycloid_elasticsearch_password }}"
         # systemd
         enable: true
         masked: false
         state: started
       tags: docker-services
 
-    - name: wait for elasticsearch availability
+    - name: wait for elasticsearch availability | elasticsearch
       uri:
-        url: "https://localhost:{{ elasticsearch_port_api }}/_cat/health"
+        url: "{{ elasticsearch_schema }}://localhost:{{ elasticsearch_port_api }}/_cat/health"
         # URI does not support ca certificate for now
         validate_certs: false
         status_code:
           - 200
         force_basic_auth: true
-        url_password: "{{ cycloid_elasticsearch_default['raw']['password'] }}"
-        url_username: elastic
+        url_password: "{{ cycloid_elasticsearch_password }}"
+        url_username: "{{ cycloid_elasticsearch_user }}"
       register: resp
       until: resp.status == 200
-      delay: 10
+      retries: 60
+      delay: 5

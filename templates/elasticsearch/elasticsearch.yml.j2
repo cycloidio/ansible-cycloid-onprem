@@ -17,3 +17,6 @@ xpack.security.http.ssl.enabled: true
 xpack.security.http.ssl.certificate: "{{ cert_path | default('/usr/share/elasticsearch/config/ssl.crt') }}"
 xpack.security.http.ssl.key: "{{ key_path | default('/usr/share/elasticsearch/config/ssl.key') }}"
 {% endif %}
+
+# needed for CCM
+# action.destructive_requires_name: false

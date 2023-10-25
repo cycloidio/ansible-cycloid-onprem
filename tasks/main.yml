@@ -23,13 +23,16 @@
     - include: cycloid_scheduler.yml
       when: setup_cycloid_scheduler|bool
 
+    - include: elasticsearch.yml
+      when: setup_elasticsearch
+
     - include: cycloid_api.yml
       when: setup_cycloid_core|bool
     - include: cycloid_frontend.yml
       when: setup_cycloid_core|bool
     - include: nginx.yml
       when: setup_cycloid_core|bool
-    
+
     - include: cycloid_job_ccm_ingestion.yml
       when: setup_cycloid_core|bool and cost_explorer_es_url != ""
 
@@ -42,8 +45,6 @@
     - include: minio.yml
       when: setup_minio|bool
 
-    - include: elasticsearch.yml
-      when: setup_elasticsearch
 
   when: not uninstall|bool and not validate_only|bool
 
