@@ -63,6 +63,7 @@
   until: '"initialized" in vault_init.content'
   retries: 30
   delay: 10
+  run_once: true
 
 - name: Initiate vault | cycloid-creds
   # Http case
@@ -70,6 +71,7 @@
   # https case
   shell: docker exec -e VAULT_SKIP_VERIFY=true vault vault operator init -format=json
   register: vault_tokens
+  run_once: true
   when: vault_init.json.initialized == false
 
 - name: Local save of vault creds | cycloid-creds
@@ -78,9 +80,11 @@
     content: "{{vault_tokens.stdout | from_json | to_nice_json}}"
     dest: "{{playbook_dir}}/vault.secret"
   become: no
+  run_once: true
   when: vault_tokens is not skipped
 
 - name: Read local vault.secret | cycloid-creds
+  run_once: true
   set_fact:
      vault_local_token: "{{(lookup('file', '{{playbook_dir}}/vault.secret')) | to_json | from_json }}"
 
@@ -95,11 +99,13 @@
 - name: Unseal vault | cycloid-creds
   shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault operator unseal {{item}}"
   no_log: true
+  run_once: true
   with_items: "{{ vault_local_token['unseal_keys_b64'] }}"
 
 - name: Auth into vault | cycloid-creds
   shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault login {{ vault_local_token['root_token'] }}"
   become: true
+  run_once: true
   with_items:
     - concourse-ro
     - cycloid
@@ -125,6 +131,7 @@
     with_items:
       - secrets enable -path cycloid kv
       - auth enable approle
+  run_once: true
   when: vault_tokens is not skipped
 
 - name: Check approles/approle-cycloid exists | cycloid-creds
@@ -132,6 +139,7 @@
     module: stat
     path: "{{ cycloid_local_datas_path }}/approles/approle-cycloid"
   register: stat_approles
+  run_once: true
   become: false
 
 - name: Create approle | cycloid-creds
@@ -183,4 +191,5 @@
       - "approle-concourse-ro"
       - "approle-cycloid"
 
+  run_once: true
   when: not stat_approles.stat.exists
