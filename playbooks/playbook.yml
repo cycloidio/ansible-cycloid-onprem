@@ -40,6 +40,7 @@
     - name: Update apt packages
       apt:
         update_cache: yes
+        cache_valid_time: 28800
       when: ansible_os_family == 'Debian' and setup_packages
       ignore_errors: yes
 

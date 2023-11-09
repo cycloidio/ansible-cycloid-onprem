@@ -45,6 +45,7 @@
     container_cmd: "vault server -config /vault/config/local.json"
     container_env:
       VAULT_LOCAL_CONFIG: "{{ vault_config|to_json}}"
+      VAULT_API_ADDR: "{{ vault_url }}"
 #      VAULT_DEV_LISTEN_ADDRESS: "127.0.0.1:8201"
 
     container_start_post: "{{ vault_start_post }}"
@@ -63,6 +64,8 @@
   until: '"initialized" in vault_init.content'
   retries: 30
   delay: 10
+  # when: inventory_hostname == groups['cycloid_creds'][0]
+  # run_once: true
 
 - name: Initiate vault | cycloid-creds
   # Http case
@@ -70,7 +73,8 @@
   # https case
   shell: docker exec -e VAULT_SKIP_VERIFY=true vault vault operator init -format=json
   register: vault_tokens
-  when: vault_init.json.initialized == false
+  # run_once: true
+  when: inventory_hostname == groups['cycloid_creds'][0] and vault_init.json.initialized == false
 
 - name: Local save of vault creds | cycloid-creds
   local_action:
@@ -78,7 +82,8 @@
     content: "{{vault_tokens.stdout | from_json | to_nice_json}}"
     dest: "{{playbook_dir}}/vault.secret"
   become: no
-  when: vault_tokens is not skipped
+  when: inventory_hostname == groups['cycloid_creds'][0] and vault_tokens is not skipped
+  # run_once: true
 
 - name: Read local vault.secret | cycloid-creds
   set_fact:
@@ -94,12 +99,14 @@
 
 - name: Unseal vault | cycloid-creds
   shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault operator unseal {{item}}"
-  no_log: true
+  # no_log: true
   with_items: "{{ vault_local_token['unseal_keys_b64'] }}"
 
 - name: Auth into vault | cycloid-creds
   shell: "docker exec -e VAULT_SKIP_VERIFY=true vault vault login {{ vault_local_token['root_token'] }}"
   become: true
+  when: inventory_hostname == groups['cycloid_creds'][0]
+  # run_once: true
   with_items:
     - concourse-ro
     - cycloid
@@ -125,13 +132,15 @@
     with_items:
       - secrets enable -path cycloid kv
       - auth enable approle
-  when: vault_tokens is not skipped
+  # run_once: true
+  when: vault_tokens is not skipped and inventory_hostname == groups['cycloid_creds'][0]
 
 - name: Check approles/approle-cycloid exists | cycloid-creds
   local_action:
     module: stat
     path: "{{ cycloid_local_datas_path }}/approles/approle-cycloid"
   register: stat_approles
+  when: inventory_hostname == groups['cycloid_creds'][0]
   become: false
 
 - name: Create approle | cycloid-creds
@@ -177,10 +186,17 @@
       src: "{{ vault_config_path }}/{{ item }}"
       dest: "{{ cycloid_local_datas_path }}/approles/{{ item }}"
       mode: 0400
-      # remote_src: yes
       flat: true
     with_items:
       - "approle-concourse-ro"
       - "approle-cycloid"
 
-  when: not stat_approles.stat.exists
+  # run_once: true
+  when: inventory_hostname == groups['cycloid_creds'][0] and not stat_approles.stat.exists
+
+# When using multiple vault, after vault[0] initialized, other vault need to be restarted
+- name: restart vault
+  service:
+    name: vault_container
+    state: restarted
+  when: vault_init.json.initialized == false and inventory_hostname != groups['cycloid_creds'][0]
