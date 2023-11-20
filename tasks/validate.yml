@@ -65,10 +65,10 @@
   uri:
     url: "http://localhost:3001/user"
     validate_certs: no
-    status_code: 401
+    status_code: 403
     return_content: yes
   register: cycloid_api_status
-  until: '"credentials are required" in cycloid_api_status.content'
+  until: '"Credential was rejected from API Request" in cycloid_api_status.content'
   retries: 30
   delay: 10
   ignore_errors: True
@@ -81,12 +81,12 @@
   uri:
     url: "https://localhost:443/user"
     validate_certs: no
-    status_code: 401
+    status_code: 403
     return_content: yes
     headers:
       Host: "{{ cycloid_api_dns }}"
   register: cycloid_api_status_nginx
-  until: '"credentials are required" in cycloid_api_status_nginx.content'
+  until: '"Credential was rejected from API Request" in cycloid_api_status_nginx.content'
   retries: 30
   delay: 10
   ignore_errors: True
