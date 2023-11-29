@@ -1,14 +1,14 @@
 ---
 
-- name: Define cycloid-job-ccm-ingestion_container service | cycloid-cloud-cost-management
+- name: Define cycloid-job-cost-estimation-ingestion_container service | cycloid-cost-estimation
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: cycloid-job-ccm-ingestion
+    name: cycloid-job-cost-estimation-ingestion
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{cycloid_api_image}}"
-    container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
-    container_cmd: "{{ cycloid_job_ccm_ingestion_container_cmd }}"
+    container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid --entrypoint /bin/bash {{ container_args_extra }}"
+    container_cmd: "{{ cycloid_job_cost_estimation_ingestion_container_cmd }}"
     container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ]) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
@@ -30,11 +30,6 @@
       REDIS_URI: "redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
       VAULT_SKIP_VERIFY: true
       VAULT_URL: "{{ vault_url }}"
-      COST_EXPLORER_ES_URL: "{{ cost_explorer_es_url }}"
-      COST_EXPLORER_ES_USERNAME: "{{ cost_explorer_es_username }}"
-      COST_EXPLORER_ES_PASSWORD: "{{ cost_explorer_es_password }}"
-      COST_EXPLORER_ES_INSECURE_SKIP_TLS: "{{ cost_explorer_es_insecure_skip_tls }}"
-      #COST_EXPLORER_ES_CA_CERT: "{{ cost_explorer_es_ca_cert }}"
       LOG_LEVEL: "INFO"
       LOG_SVC_LEVEL: "NONE"
       RUN_MIGRATIONS: 0
@@ -43,20 +38,49 @@
 
   tags: docker-services
 
-- name: Define cycloid-job-ccm-ingestion timer | cycloid-cloud-cost-management
+- name: Define cycloid-job-cost-estimation-ingestion_container timer | cycloid-cost-estimation
   template:
     src: templates/systemd/timer.j2
-    dest: /lib/systemd/system/cycloid-job-ccm-ingestion.timer
+    dest: /lib/systemd/system/cycloid-job-cost-estimation-ingestion.timer
   vars:
-    schedule: "{{ cost_explorer_ingestion_schedule }}"
-    service: "cycloid-job-ccm-ingestion_container"
+    schedule: "{{ cost_estimation_ingestion_schedule }}"
+    service: "cycloid-job-cost-estimation-ingestion_container"
 
-- name: Enable timer | cycloid-cloud-cost-management
+# OnCalendar example
+# Every Minute	*-*-* *:*:00
+# Every 2 minute	*-*-* *:*/2:00
+# Every 5 minutes	*-*-* *:*/5:00
+# Every 15 minutes	*-*-* *:*/15:00
+# Every quarter hour	*-*-* *:*/15:00
+# Every 30 minutes	*-*-* *:*/30:00
+# Every half an hour	*-*-* *:*/30:00
+# Every 60 minutes	*-*-* */1:00:00
+# Every 1 hour	*-*-* *:00:00
+# Every 2 hour	*-*-* */2:00:00
+# Every 3 hour	*-*-* */3:00:00
+# Every other hour	*-*-* */2:00:00
+# Every 6 hour	*-*-* */6:00:00
+# Every 12 hour	*-*-* */12:00:00
+# Hour Range	*-*-* 9-17:00:00
+# Between certain hours	*-*-* 9-17:00:00
+# Every day at midnight	*-*-* 00:00:00
+# Every sunday	Sun *-*-* 00:00:00
+# Every friday	Fri *-*-* 01:00:00
+# Every friday at midnight	Fri *-*-* 00:00:00
+# Every saturday	Sat *-*-* 00:00:00
+# Every weekday	Mon...Fri *-*-* 00:00:00
+# weekends only	Sat,Sun *-*-* 00:00:00
+# Every month	* *-*-01 00:00:00
+# Every quarter	* *-01,04,07,10-01 00:00:00
+# Every 6 months	* *-01,07-01 00:00:00
+# Every year	* *-01-01 00:00:00
+
+- name: Enable timer | cycloid-cost-estimation
   ansible.builtin.systemd:
-    name: cycloid-job-ccm-ingestion.timer
+    name: cycloid-job-cost-estimation-ingestion.timer
     enabled: yes
     state: started # start or not the timer after its creation
 
-- name: Force systemd to reread configs | cycloid-cloud-cost-management
+- name: Force systemd to reread configs | cycloid-cost-estimation
   ansible.builtin.systemd:
     daemon_reload: yes
