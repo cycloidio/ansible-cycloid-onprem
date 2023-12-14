@@ -75,7 +75,7 @@ resources:
   icon: github-circle
   type: git
   source:
-    uri: git@github.com:cycloidio/ansible-cycloid-onprem.git
+    uri: ($ scs_url $)
     branch: ((stack_git_branch))
     private_key: ((config_git_private_key))
     paths:
@@ -86,7 +86,7 @@ resources:
   icon: github-circle
   type: git
   source:
-    uri: git@github.com:cycloidio/ansible-cycloid-onprem.git
+    uri: ($ scs_url $)
     branch: ((stack_git_branch))
     private_key: ((config_git_private_key))
     paths:
@@ -96,7 +96,7 @@ resources:
   icon: github-circle
   type: git
   source:
-    uri: git@github.com:cycloidio/ansible-cycloid-onprem.git
+    uri: ($ scs_url $)
     branch: ((stack_git_branch))
     private_key: ((config_git_private_key))
     ignore_paths:
@@ -108,8 +108,8 @@ resources:
   type: git
   icon: github-circle
   source:
-    uri: ((config_git_repository))
-    branch: ((config_git_branch))
+    uri: ($ cr_url $)
+    branch: ($ cr_branch $)
     private_key: ((config_git_private_key))
     paths:
       - ((config_terraform_path))/*
@@ -118,8 +118,8 @@ resources:
   type: git
   icon: github-circle
   source:
-    uri: ((config_git_repository))
-    branch: ((config_git_branch))
+    uri: ($ cr_url $)
+    branch: ($ cr_branch $)
     private_key: ((config_git_private_key))
     paths:
       - ((config_ansible_path))/environments/cycloid-((env)).yml
@@ -361,11 +361,40 @@ jobs:
             # get the cycloid.yml variable from config
             cp ${DIR}/config/${CONFIG_ANSIBLE_PATH}/environments/cycloid-${ENV}.yml environments/cycloid.yml
             ### Add more Ansible vars ###
-            MAIN_INSTANCE=$(jq -r  .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+            MAIN_INSTANCE=$(jq -r .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
+
+            CYCLOID_INITIAL_USER_PASSWORD=$(jq -r .password.user ${DIR}/tfstate/metadata)
+            CYCLOID_CRYPTO_SIGNING_KEY=$(jq -r .password.signing ${DIR}/tfstate/metadata)
+            CONCOURSE_AUTH_PASSWORD=$(jq -r .password.concourse ${DIR}/tfstate/metadata)
+            CONCOURSE_DB_PASSWORD=$(jq -r .password.postgres ${DIR}/tfstate/metadata)
+            CYCLOID_DB_PASSWORD=$(jq -r .password.mysql ${DIR}/tfstate/metadata)
+            CYCLOID_ELASTICSEARCH_PASSWORD=$(jq -r  .password.elasticsearch ${DIR}/tfstate/metadata)
 
             cat >> environments/cycloid.yml <<EOF
             ### Ansible and Cycloid console will be on https://${MAIN_INSTANCE}
             # Set additionnal ansible vars
+            # External Mysql db information
+            cycloid_db_password: "${CYCLOID_DB_PASSWORD}"
+
+            # External Postgresql db information
+            concourse_db_password: "${CONCOURSE_DB_PASSWORD}"
+
+            # User is hardcoded to elastic (default from docker image)
+            cycloid_elasticsearch_password: ${CYCLOID_ELASTICSEARCH_PASSWORD}
+
+            # # Initial Cycloid user
+            cycloid_initial_user:
+              username: "admin"
+              email: "admin+onprem_${ENV}@cycloid.io"
+              password: ${CYCLOID_INITIAL_USER_PASSWORD}
+              given_name: admin
+              family_name: cycloid
+
+            # Set random password for databses.
+            cycloid_crypto_signing_key: "${CYCLOID_CRYPTO_SIGNING_KEY}"
+            # Set concourse admin user password
+            concourse_auth_password: "${CONCOURSE_AUTH_PASSWORD}"
+
             # extra vars from pipeline job
             cycloid_console_dns: "${MAIN_INSTANCE}"
             cycloid_ecr_access_key: "${AWS_ACCESS_KEY_ID}"
@@ -457,8 +486,8 @@ jobs:
             echo "" >> ${OUTPUT_FILE}
             echo "### Onprem ready on: https://${MAIN_INSTANCE}" >> ${OUTPUT_FILE}
             echo "### Admin user:" >> ${OUTPUT_FILE}
-            grep "  email:" ${DIR}/cycloid-onprem/environments/cycloid.yml >> ${OUTPUT_FILE}
-            grep "  password:" ${DIR}/cycloid-onprem/environments/cycloid.yml >> ${OUTPUT_FILE}
+            echo "  email: admin+onprem_${ENV}@cycloid.io" >> ${OUTPUT_FILE}
+            echo "  password: ${CYCLOID_INITIAL_USER_PASSWORD}" >> ${OUTPUT_FILE}
             echo "" >> ${OUTPUT_FILE}
             echo "### Asynqmon on: http://$(grep cycloid_cache -A1 inventory | tail -n1):5678" >> ${OUTPUT_FILE}
             echo "" >> ${OUTPUT_FILE}
