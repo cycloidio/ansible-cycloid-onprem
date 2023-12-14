@@ -34,11 +34,13 @@
       when: setup_cycloid_core|bool
 
     - include: cycloid_job_ccm_ingestion.yml
-      when: setup_cycloid_core|bool and cost_explorer_es_url != ""
+      when: setup_cycloid_core|bool and cost_explorer_es_url != "" and inventory_hostname == groups['cycloid_core'][0]
 
     - include: cycloid_scheduler_sync_worker_keys.yml
       when: setup_cycloid_scheduler|bool
 
+    - include: cycloid_job_cost_estimation_injection.yml
+      when: cycloid_job_cost_estimation_injection|bool and inventory_hostname == groups['cycloid_core'][0]
 
     #- include: prometheus.yml
 

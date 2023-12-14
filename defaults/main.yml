@@ -164,10 +164,6 @@ container_args_extra: ""
 # If ca_certificates_container_shared, run update-ca before the /entrypoint
 cycloid_api_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint\"{% endif %}"
 
-# Cloud Cost Management cmd
-cycloid_job_ccm_ingestion_container_args: "/go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml"
-cycloid_job_ccm_ingestion_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint {{ cycloid_job_ccm_ingestion_container_args }}\"{% else %}{{ cycloid_job_ccm_ingestion_container_args }}{% endif %}"
-
 # docker exec -it cycloid-api bash -c "ls -l /etc/ssl/certs/ | grep DigiCertSHA2HighAssuranceServerCA.crt"
 
 # If your server doesn't have internet access. Packages can't be install manually
@@ -612,8 +608,36 @@ cost_explorer_es_url: "{%- if use_local_elasticsearch -%}{{elasticsearch_schema}
 cost_explorer_es_username: "{%- if use_local_elasticsearch -%}{{ cycloid_elasticsearch_user }}{%- endif -%}"
 cost_explorer_es_password: "{%- if use_local_elasticsearch -%}{{ cycloid_elasticsearch_password }}{%- endif -%}"
 cost_explorer_es_insecure_skip_tls: true # ignore certificate errors if there are any
+# Every midnight
 cost_explorer_ingestion_schedule: "*-*-* 00:00:00" # schedule for the timer related to cycloid-job-ccm-ingestion_container service
 #cost_explorer_es_ca_cert: "" # PEM-formatted CA certificate of Elasticsearch
+
+# Cloud Cost Management cmd
+cycloid_job_ccm_ingestion_container_args: "/entrypoint /go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml"
+cycloid_job_ccm_ingestion_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint {{ cycloid_job_ccm_ingestion_container_args }}\"{% else %}{{ cycloid_job_ccm_ingestion_container_args }}{% endif %}"
+
+###########################
+# Cost Estimation         #
+###########################
+# Ingest price of cloud povider use for Cost estimation feature
+cycloid_job_cost_estimation_injection_aws: false
+cycloid_job_cost_estimation_injection_azure: false
+cycloid_job_cost_estimation_injection_gcp: false
+
+cycloid_job_cost_estimation_injection: "{% if cycloid_job_cost_estimation_injection_aws or cycloid_job_cost_estimation_injection_azure or cycloid_job_cost_estimation_injection_gcp %}true{% else %}false{% endif %}"
+
+# command used to create an ingest job on the queue
+cost_estimation_ingestion_aws_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers aws --pricing-ingest-aws-use-known-services --pricing-ingest-aws-minimal; "
+cost_estimation_ingestion_azure_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers azure --pricing-ingest-azure-use-known-services --pricing-ingest-azure-minimal; "
+# credential used to reach gcp pricing datas
+cost_estimation_gcp_cred_json: ""
+cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers google --pricing-ingest-google-credential-json  {{ cost_estimation_gcp_cred_json }} --pricing-ingest-google-use-known-services --pricing-ingest-google-minimal; "
+
+cycloid_job_cost_estimation_ingestion_container_args: "{% if cycloid_job_cost_estimation_injection_aws %}{{ cost_estimation_ingestion_aws_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_azure %}{{ cost_estimation_ingestion_azure_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_gcp %}{{ cost_estimation_ingestion_gcp_minimal }}{% endif %}"
+cycloid_job_cost_estimation_ingestion_container_cmd: "-c {% if ca_certificates_container_shared %}\"/usr/sbin/update-ca-certificates; {{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% else %}\"{{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% endif %}"
+
+# Every sunday
+cost_estimation_ingestion_schedule: "Sun *-*-* 00:00:00"
 
 # Share host saml file with container. It shouldn't be changed.
 container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/secrets/saml{%- endif -%}"
