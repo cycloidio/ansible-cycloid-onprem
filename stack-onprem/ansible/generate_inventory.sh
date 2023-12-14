@@ -3,6 +3,11 @@
 # Output/metadata file path is given to get ips
 TF_OUTPUT=$1
 
+# Example metadata
+# export INVENTORY_WORKER=true
+# export ELASTICSEARCH=true
+# echo '{"cy_instances_public_ip":["1.1.1.1", "2.2.2.2", "3.3.3.3", "4.4.4.4"]}' > /tmp/metadata
+
 #Env variables (bool) used to know if we should create
 # CONCOURSE_WORKER
 # MINIO
@@ -27,7 +32,9 @@ INVENTORY_OTHER="cycloid_scheduler cycloid_scheduler_db"
 INVENTORY_WORKER=""
 
 if [ "$ELASTICSEARCH" = "true" ]; then
-  INVENTORY_OTHER="$INVENTORY_OTHER elasticsearch"
+  # If ES enable, prefer move cycloid_* under INVENTORY_CYCLOID and keep INVENTORY_OTHER dedicated to Elasticsearch
+  INVENTORY_CYCLOID="$INVENTORY_CYCLOID $INVENTORY_OTHER"
+  INVENTORY_OTHER="elasticsearch"
 fi
 
 if [ "$MINIO" = "true" ]; then

@@ -15,14 +15,6 @@ use_cases:
           type: boolean
           default: true
 
-        - name: Display Stack advanced options
-          description: Check to see Stack advanced options to configure your project.
-          key: advanced_stack_opt
-          widget: switch
-          type: boolean
-          default: false
-
-
     - name: Product
       technologies: [ansible, pipeline]
       vars:
@@ -78,71 +70,6 @@ use_cases:
           widget: cy_cred
           default: "((custom_onprem_licence.prod))"
 
-    - name: Default config
-      condition: advanced_stack_opt==true
-      technologies: [pipeline]
-      vars:
-        - name: "AWS access key"
-          description: "Amazon AWS access key for Terraform."
-          key: aws_access_key
-          widget: cy_cred
-          type: string
-          default: "((aws_admin.access_key))"
-        - name: "AWS secret key"
-          description: "Amazon AWS secret key for Terraform."
-          key: aws_secret_key
-          widget: cy_cred
-          type: string
-          default: "((aws_admin.secret_key))"
-        - name: "Amazon AWS region"
-          description: "Amazon AWS region to use for Terraform."
-          key: aws_default_region
-          widget: auto_complete
-          type: string
-          values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
-          default: eu-west-1
-        - name: "Terraform storage bucket"
-          description: "AWS S3 bucket name to store terraform remote state file."
-          key: terraform_storage_bucket_name
-          widget: simple_text
-          type: string
-          default: ($ organization_canonical $)-terraform-remote-state
-        - name: "Terraform version"
-          description: "Terraform version used."
-          key: terraform_version
-          widget: simple_text
-          type: string
-          default: '1.0.7'
-        - name: "Config repository"
-          key: config_git_repository
-          type: string
-          widget: cy_crs
-          description: "Git repository URL containing the config of the stack."
-          default: "git@github.com:cycloidio/cycloid-stacks.git"
-          required: true
-        - name: "Config git key"
-          description: "SSH key pair to fetch the config Git repository."
-          key: config_git_private_key
-          type: string
-          widget: cy_cred
-          default: "((git_github.ssh_key))"
-          required: true
-        - name: "Config branch"
-          key: config_git_branch
-          widget: cy_branch
-          type: string
-          description: "The branch used by the config repository"
-          source: config_git_repository
-          default: "config"
-          required: true
-        - name: "Private SSH KEY to connect on instances"
-          description: "Private SSH KEY to connect on instances."
-          key: instance_private_key_pair
-          type: string
-          widget: cy_cred
-          default: "((git_ssh_bastion.ssh_key))"
-          required: true
-
     - name: Stack
       # This variable need to be write when using onprem (not playground)
       # condition: advanced_opt==true
@@ -170,8 +97,8 @@ use_cases:
           widget: switch
           type: boolean
           default: true
-        - name: "Elasticsearch (logs) enabled"
-          description: "Install Elasticsearch (used for centralized logs. Required dedicated instance or a bigger mutu)"
+        - name: "Elasticsearch (CCM) enabled"
+          description: "Install Elasticsearch (used for CCM. Required dedicated instance or a bigger mutu)"
           key: install_elasticsearch
           widget: switch
           type: boolean
@@ -193,7 +120,6 @@ use_cases:
               #github_client_secret: ""
 
     - name: Service-ansible
-      # condition: advanced_stack_opt==true
       technologies: [ansible]
       vars:
         - name: "SAML Auth enable"
@@ -216,116 +142,54 @@ use_cases:
               - "https://samltest.id/saml/idp"
 
     - name: Service-ansible-opt
-      condition: advanced_stack_opt==true
+      condition: advanced_opt==true
       technologies: [ansible]
       vars:
-        - name: "Create Public stacks catalog repository"
-          description: "Create Public stacks catalog repository. (need valide licence)"
-          key: cycloid_public_stacks
-          widget: switch
-          type: boolean
-          default: true
-        - name: "Create admin APIKEY"
-          description: "Create admin APIKEY and store it on disk. (need valide licence)"
-          key: cycloid_admin_apikey
-          widget: switch
-          type: boolean
-          default: true
-        - name: "Share host certificates in containers"
-          description: "Share host certificates in containers"
-          key: ca_certificates_container_shared
-          widget: switch
-          type: boolean
-          default: true
         - name: "Cycloid Database image"
           description: "Cycloid Database image."
           key: cycloid_db_image
           widget: auto_complete
           type: string
-          default: "mysql:8.0.21"
+          default: "mysql:8.0.33"
           values:
               - "mysql:8.0.21"
               - "mysql:8.0.25"
               - "mariadb:10.2.11"
 
-  - name: Features
-    groups:
-    - name: Cloud Cost Management
-      condition: advanced_opt==true
-      technologies: [ansible]
-      vars:
-        - name: "Elasticsearch URL"
-          description: "Elasticsearch database URL for Cloud Cost Management"
-          key: cost_explorer_es_url
-          widget: simple_text
-          type: string
-          default: ""
-          required: false
-        - name: "Elasticsearch username"
-          description: "Elasticsearch database username for Cloud Cost Management"
-          key: cost_explorer_es_username
-          widget: simple_text
-          type: string
-          default: ""
-          required: false
-        - name: "Elasticsearch password"
-          description: "Elasticsearch database password for Cloud Cost Management"
-          key: cost_explorer_es_password
-          widget: simple_text
-          type: string
-          default: ""
-          required: false
-        - name: "Elasticsearch disable TLS verification"
-          description: "Disable TLS verification on Elasticsearch for Cloud Cost Management"
-          key: cost_explorer_es_insecure_skip_tls
-          widget: switch
-          type: boolean
-          default: true
-
-  - name: Security
-    groups:
-    - name: Password
-      condition: advanced_opt==true
-      technologies: [ansible]
-      vars:
-        - name: "Cycloid Database password"
-          description: "Cycloid Database password."
-          key: cycloid_db_password
-          widget: simple_text
-          type: string
-          default: "OZvQdTtdvP9yVZBwBxeQcELDSn8QKAG9"
-          required: true
-        - name: "Concourse Database password"
-          description: "Concourse Database password."
-          key: concourse_db_password
-          widget: simple_text
-          type: string
-          default: "JENJTtK8aVPQzxvSN39xCQaLl1dYt9eP"
-          required: true
-        - name: "Concourse admin user password"
-          description: "Concourse admin user password."
-          key: concourse_auth_password
-          widget: simple_text
-          type: string
-          default: "pooph4iek9OhqueeGhah3ooCheiKongo"
-          required: true
-        - name: "Cycloid initial user information"
-          description: "Cycloid initial user information"
-          key: cycloid_initial_user
-          widget: text_area
-          type: raw
-          default: |+
-            username: "admin"
-            email: "disabled@email.cycloid"
-            password: "$$$$$$$$"
-            given_name: admin
-            family_name: cycloid
-        - name: "Initial Organization name"
-          description: "Initial Organization name."
-          key: cycloid_initial_organization_name
-          widget: simple_text
-          type: string
-          default: "Cycloid"
+  # Use local ES, if needed can be exposed via extra vars
+  # - name: Features
+  #   groups:
+  #   - name: Cloud Cost Management
+  #     condition: advanced_opt==true
+  #     technologies: [ansible]
+  #     vars:
+  #       - name: "Elasticsearch URL"
+  #         description: "Elasticsearch database URL for Cloud Cost Management"
+  #         key: cost_explorer_es_url
+  #         widget: simple_text
+  #         type: string
+  #         default: ""
+  #         required: false
+  #       - name: "Elasticsearch username"
+  #         description: "Elasticsearch database username for Cloud Cost Management"
+  #         key: cost_explorer_es_username
+  #         widget: simple_text
+  #         type: string
+  #         default: ""
+  #         required: false
+  #       - name: "Elasticsearch password"
+  #         description: "Elasticsearch database password for Cloud Cost Management"
+  #         key: cost_explorer_es_password
+  #         widget: simple_text
+  #         type: string
+  #         default: ""
+  #         required: false
+  #       - name: "Elasticsearch disable TLS verification"
+  #         description: "Disable TLS verification on Elasticsearch for Cloud Cost Management"
+  #         key: cost_explorer_es_insecure_skip_tls
+  #         widget: switch
+  #         type: boolean
+  #         default: true
 
   - name: Infrastructure
     groups:
@@ -357,13 +221,12 @@ use_cases:
           type: string
           default: "debian-11-amd64-*"
           values:
-              - "debian-9-amd64-*"
               - "debian-10-amd64-*"
               - "debian-11-amd64-*"
-              - "CentOS 7.9.2009 x86_64*"
+              - "debian-12-amd64-*"
               - "CentOS 8.3.2011 x86_64*"
-              - "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"
               - "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+              - "ubuntu/images/hvm-ssd/ubuntu-focal-22.04-amd64-server-*"
         - name: "Base ami ID (optional)"
           description: "Type of Aws EC2 frontend servers."
           key: base_ami_id
@@ -374,7 +237,6 @@ use_cases:
               - "ami-0ad0923fe3bd430fa"
 
     - name: terraform-opt
-      condition: advanced_stack_opt==true
       technologies: [terraform]
       vars:
         - name: "Instance disk size"
