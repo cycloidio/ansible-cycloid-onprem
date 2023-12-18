@@ -96,7 +96,7 @@ use_cases:
           key: install_minio
           widget: switch
           type: boolean
-          default: true
+          default: false
         - name: "Elasticsearch (CCM) enabled"
           description: "Install Elasticsearch (used for CCM. Required dedicated instance or a bigger mutu)"
           key: install_elasticsearch
@@ -199,9 +199,9 @@ use_cases:
         - name: "Instance count"
           description: "Number of Aws EC2 onprem server to create."
           key: cy_instances_count
-          widget: simple_text
-          type: string
-          default: "1"
+          widget: number
+          type: integer
+          default: 1
         - name: "Instance type"
           description: "Type of Aws EC2 onprem servers."
           key: cy_instances_type

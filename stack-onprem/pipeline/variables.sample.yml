@@ -80,7 +80,7 @@ instance_private_key_pair: ((git_ssh_bastion.ssh_key))
 
 install_concourse_worker: true
 install_minio: true
-install_elasticsearch: false
+install_elasticsearch: $INSTALL_ELASTICSEARCH
 
 cycloid_licence: ((custom_onprem_licence.$LICENCE_ENV))
 
