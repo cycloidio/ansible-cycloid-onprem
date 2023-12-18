@@ -491,6 +491,10 @@ jobs:
             echo "" >> ${OUTPUT_FILE}
             echo "### Asynqmon on: http://$(grep cycloid_cache -A1 inventory | tail -n1):5678" >> ${OUTPUT_FILE}
             echo "" >> ${OUTPUT_FILE}
+            echo "### Kibana on: http://$(grep elasticsearch -A1 inventory | tail -n1):5601" >> ${OUTPUT_FILE}
+            echo "  user: elastic" >> ${OUTPUT_FILE}
+            echo "  password: ${CYCLOID_ELASTICSEARCH_PASSWORD}" >> ${OUTPUT_FILE}
+            echo "" >> ${OUTPUT_FILE}
             echo "### How to use CLI:" >> ${OUTPUT_FILE}
             echo "export API_KEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')" >> ${OUTPUT_FILE}
             echo "export CY_API_URL=https://${MAIN_INSTANCE}/api" >> ${OUTPUT_FILE}

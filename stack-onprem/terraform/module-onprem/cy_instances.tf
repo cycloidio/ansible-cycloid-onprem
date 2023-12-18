@@ -91,6 +91,15 @@ resource "aws_security_group" "cy_instances" {
     cidr_blocks = var.cy_instances_cidr_blocks_allow
   }
 
+  # kibana
+  ingress {
+    from_port   = 5601
+    to_port     = 5601
+    protocol    = "tcp"
+    self        = true
+    cidr_blocks = var.cy_instances_cidr_blocks_allow
+  }
+
   # asynqmon (used to debug redis queue)
   ingress {
     from_port   = 5678
