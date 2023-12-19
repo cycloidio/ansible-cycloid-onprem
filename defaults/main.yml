@@ -91,6 +91,8 @@ minio_container_ports:
   - "0.0.0.0:{{ minio_port }}:9000"
   # - "{{ ansible_default_ipv4.address }}:{{ minio_port }}:9000"
   # - "127.0.0.1:{{ minio_port }}:9000"
+kibana_container_ports:
+  - "0.0.0.0:{{ kibana_port }}:{{ kibana_port }}"
 
 #
 # Pre setup
@@ -563,6 +565,13 @@ cycloid_elasticsearch_default:
     raw:
       username: "{{ cycloid_elasticsearch_user }}"
       password: "{{ cycloid_elasticsearch_password }}"
+
+###########################
+# kibana
+###########################
+kibana_image: bitnami/kibana:7.17.16
+kibana_port: 5601
+kibana_config_path: "{{ cycloid_install_path }}/kibana"
 
 # Docker has issues with Debain 10 Buster nftables that impact access from containers to external.
 # Workaround is to revert to iptables-legacy by setting use_iptables_legacy: true

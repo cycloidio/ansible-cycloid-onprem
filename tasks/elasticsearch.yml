@@ -23,6 +23,7 @@
         recurse: yes
       with_items:
         - "{{ elasticsearch_config_path }}/data/nodes"
+        - "{{ kibana_config_path }}"
 
     - name: create elasticsearch container | elasticsearch
       include_role:
@@ -70,3 +71,37 @@
       until: resp.status == 200
       retries: 60
       delay: 5
+
+##########
+# Kibana #
+##########
+
+- name: create kibana container | elasticsearch
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    container_name: kibana
+    container_image: "{{ kibana_image }}"
+    container_volumes:
+      - "{{ kibana_config_path }}:/bitnami/kibana"
+    container_ports: "{{ kibana_container_ports }}"
+    container_args: ""
+    container_labels:
+      - ansible.managed=true
+      - systemd.managed=true
+      - cycloid.io=true
+    container_env:
+      KIBANA_ELASTICSEARCH_URL: "{{ elasticsearch_schema }}://{{ hostvars[groups['elasticsearch'][0]]['ansible_default_ipv4']['address'] }}"
+      KIBANA_ELASTICSEARCH_PORT_NUMBER: "{{ elasticsearch_port_api }}"
+      KIBANA_PORT_NUMBER: "{{ kibana_port }}"
+      KIBANA_PASSWORD: "{{ cycloid_elasticsearch_password }}"
+      KIBANA_ELASTICSEARCH_PASSWORD: "{{ cycloid_elasticsearch_password }}"
+      KIBANA_ELASTICSEARCH_ENABLE_TLS: "{{ elasticsearch_tls }}"
+      KIBANA_CREATE_USER: true
+      KIBANA_ELASTICSEARCH_TLS_VERIFICATION_MODE: "{%- if cost_explorer_es_insecure_skip_tls -%}none{%- else -%}full{%- endif -%}"
+
+    # systemd
+    enable: true
+    masked: false
+    state: started
+  tags: docker-services
