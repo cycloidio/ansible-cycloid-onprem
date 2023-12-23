@@ -467,7 +467,7 @@ mysql:
   image:
     registry: docker.io
     repository: bitnami/mysql
-    tag: 8.0.29-debian-10-r2
+    tag: 8.0.35-debian-11-r0
 
   ## MySQL Authentication parameters
   ## @param mysql.auth.rootPassword MySQL root password
@@ -544,7 +544,7 @@ redis:
   image:
     registry: docker.io
     repository: bitnami/redis
-    tag: 7.0.11-debian-11-r12
+    tag: 7.2.3-debian-11-r1
 
   ## Redis Authentication parameters
   ## ref: https://github.com/bitnami/bitnami-docker-redis#setting-the-server-password-on-first-run
@@ -1127,8 +1127,8 @@ vault:
       enabled: false
 
   server:
-    image:
-      tag: "1.13.1"
+    # image:
+    #   tag: "1.15.2"
 
     # This can be useful when you want your services running on a Kubernetes
     # cluster to self-authenticate against Vault without the need to pass around Vault credentials.

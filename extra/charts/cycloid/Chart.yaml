@@ -6,7 +6,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.12.5
+version: 0.12.6
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -14,7 +14,7 @@ version: 0.12.5
 # It is recommended to use it with quotes.
 appVersion: "3.0.7"
 
-kubeVersion: ">= 1.19.0-0"
+kubeVersion: ">= 1.21.0-0"
 
 home: https://cycloid.io
 
@@ -41,28 +41,30 @@ dependencies:
     repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
     tags:
       - bitnami-mysql
-    version: ~9.10.4
+    # https://github.com/bitnami/charts/blob/main/bitnami/mysql/Chart.yaml#L37
+    version: 9.15.0
     condition: mysql.enabled
 
   - name: redis
     repository: https://charts.bitnami.com/bitnami
     tags:
       - bitnami-redis
-    version: ~17.11.3
+    # https://github.com/bitnami/charts/blob/main/bitnami/redis/Chart.yaml
+    version: 18.5.0
     condition: redis.enabled
 
   - name: concourse
     repository: https://concourse-charts.storage.googleapis.com/
     tags:
       - concourse
-    version: ~17.1.0
+    version: 17.2.1
     condition: concourse.enabled
 
   - name: vault
     repository: https://helm.releases.hashicorp.com
     tags:
       - hashicorp-vault
-    version: ~0.24.1
+    version: 0.27.0
     condition: vault.enabled
 
 # annotations:
