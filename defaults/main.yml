@@ -639,7 +639,7 @@ cost_estimation_ingestion_aws_minimal: "/entrypoint /go/youdeploy-http-api prici
 cost_estimation_ingestion_azure_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers azure --pricing-ingest-azure-use-known-services --pricing-ingest-azure-minimal; "
 # credential used to reach gcp pricing datas
 cost_estimation_gcp_cred_json: ""
-cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers google --pricing-ingest-google-credential-json  {{ cost_estimation_gcp_cred_json }} --pricing-ingest-google-use-known-services --pricing-ingest-google-minimal; "
+cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers google --pricing-ingest-google-credential-json  $PRICING_INGEST_GOOGLE_CREDENTIAL_JSON --pricing-ingest-google-use-known-services --pricing-ingest-google-minimal; "
 
 cycloid_job_cost_estimation_ingestion_container_args: "{% if cycloid_job_cost_estimation_injection_aws %}{{ cost_estimation_ingestion_aws_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_azure %}{{ cost_estimation_ingestion_azure_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_gcp %}{{ cost_estimation_ingestion_gcp_minimal }}{% endif %}"
 cycloid_job_cost_estimation_ingestion_container_cmd: "-c {% if ca_certificates_container_shared %}\"/usr/sbin/update-ca-certificates; {{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% else %}\"{{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% endif %}"
