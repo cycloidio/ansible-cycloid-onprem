@@ -30,7 +30,12 @@
         - name: "Requirements: ECR login for cycloid docker images when Offline setup"
           debug:
             msg: "$(AWS_ACCESS_KEY_ID={{ cycloid_ecr_access_key }} AWS_SECRET_ACCESS_KEY={{ cycloid_ecr_secret_key }} aws ecr get-login --no-include-email --region eu-west-1)"
-          when: cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined
+          when: not use_registry_scaleway and cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined
+
+        - name: "Requirements: Scaleway registry login for cycloid docker images when Offline setup"
+          debug:
+            msg: $(SECRET_KEY_ID={{ cycloid_scw_registry_secret_key }} docker login rg.fr-par.scw.cloud/cycloidio -u nologin -p ${SECRET_KEY_ID})"
+          when: use_registry_scaleway and cycloid_scw_registry_access_key is defined and cycloid_scw_registry_secret_key is defined
 
         - name: "Requirements: Docker images when Offline setup"
           debug:
