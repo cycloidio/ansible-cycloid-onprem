@@ -21,6 +21,9 @@ aws_default_region: eu-west-1
 #+ AWS S3 bucket name to store terraform remote state file.
 terraform_storage_bucket_name: ($ organization_canonical $)-terraform-remote-state
 
+scw_access_key: ((scw_repository.access_key))
+scw_secret_key: ((scw_repository.secret_key))
+
 #
 # Repos
 #

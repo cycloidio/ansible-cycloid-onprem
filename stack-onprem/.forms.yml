@@ -45,17 +45,19 @@ use_cases:
           key: cycloid_api_repo
           widget: auto_complete
           type: string
-          default: "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api"
+          default: "rg.fr-par.scw.cloud/cycloidio/cycloid-backend"
           values:
               - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api"
+              - "rg.fr-par.scw.cloud/cycloidio/cycloid-backend"
         - name: "Cycloid Frontend images repository"
           description: "Cycloid Frontend images repository."
           key: cycloid_frontend_repo
           widget: auto_complete
           type: string
-          default: "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend"
+          default: "rg.fr-par.scw.cloud/cycloidio/cycloid-frontend"
           values:
               - "661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend"
+              - "rg.fr-par.scw.cloud/cycloidio/cycloid-frontend"
 
     - name: Licence
       # TODO: not supported
