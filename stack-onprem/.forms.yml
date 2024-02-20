@@ -150,10 +150,10 @@ use_cases:
           key: cycloid_db_image
           widget: auto_complete
           type: string
-          default: "mysql:8.0.33"
+          default: "mysql:8.0.35"
           values:
-              - "mysql:8.0.21"
               - "mysql:8.0.25"
+              - "mysql:8.0.33"
               - "mariadb:10.2.11"
 
   # Use local ES, if needed can be exposed via extra vars
