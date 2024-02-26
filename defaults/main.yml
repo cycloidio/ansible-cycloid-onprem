@@ -154,17 +154,17 @@ container_volumes_ca_certificates_default:
   redhat: "/etc/pki/ca-trust/source/anchors:/usr/local/share/ca-certificates/anchors"
 
 # If ca_certificates_container_shared, share CA volumes with containers
-container_volumes_ca_certificates: "{% if ca_certificates_container_shared %}{{ container_volumes_ca_certificates_default[ansible_os_family | lower] }}{% endif %}"
+container_volumes_ca_certificates: "{% if ca_certificates_container_shared|bool %}{{ container_volumes_ca_certificates_default[ansible_os_family | lower] }}{% endif %}"
 # If ca_certificates_container_shared, update-ca-certificates on containers
 #update_ca_start_post: "{% if ca_certificates_container_shared %}/usr/sbin/update-ca-certificates{% endif %}"
-container_args_update_ca: "{% if ca_certificates_container_shared %}--entrypoint /bin/bash{% endif %}"
+container_args_update_ca: "{% if ca_certificates_container_shared|bool %}--entrypoint /bin/bash{% endif %}"
 
 # container_args_extra can be used to give extra argument when running all containers.
 # It can be used for example to override domain server "--dns 172.17.0.1"
 container_args_extra: ""
 
 # If ca_certificates_container_shared, run update-ca before the /entrypoint
-cycloid_api_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint\"{% endif %}"
+cycloid_api_container_cmd: "{% if ca_certificates_container_shared|bool %}-c \"/usr/sbin/update-ca-certificates; /entrypoint\"{% endif %}"
 
 # docker exec -it cycloid-api bash -c "ls -l /etc/ssl/certs/ | grep DigiCertSHA2HighAssuranceServerCA.crt"
 
@@ -604,17 +604,17 @@ saml_local_path: "{{ cycloid_local_datas_path }}/saml"
 saml_config_path: "{{ cycloid_install_path }}/saml"
 
 # SAML2 api internal path. It shouldn't be changed. Following path will be used when SAML enabled with saml_auth_enabled: true.
-saml_sp_certificate_path: "{%- if saml_auth_enabled -%}/secrets/saml/{{ saml_sp_certificate_file }}{%- endif -%}"
-saml_sp_private_key_path: "{%- if saml_auth_enabled -%}/secrets/saml/{{ saml_sp_private_key_file }}{%- endif -%}"
-saml_idp_metadata_path: "{%- if saml_auth_enabled and saml_idp_metadata_url == '' -%}/secrets/saml/{{ saml_idp_metadata_file }}{%- endif -%}"
+saml_sp_certificate_path: "{%- if saml_auth_enabled|bool -%}/secrets/saml/{{ saml_sp_certificate_file }}{%- endif -%}"
+saml_sp_private_key_path: "{%- if saml_auth_enabled|bool -%}/secrets/saml/{{ saml_sp_private_key_file }}{%- endif -%}"
+saml_idp_metadata_path: "{%- if saml_auth_enabled|bool and saml_idp_metadata_url == '' -%}/secrets/saml/{{ saml_idp_metadata_file }}{%- endif -%}"
 
 
 ###########################
 # Cost Explorer / Cloud Cost Management feature (api params)
 ###########################
-cost_explorer_es_url: "{%- if use_local_elasticsearch -%}{{elasticsearch_schema}}://{{ hostvars[groups['elasticsearch'][0]]['ansible_default_ipv4']['address'] }}:{{elasticsearch_port_api}}{%- endif -%}"
-cost_explorer_es_username: "{%- if use_local_elasticsearch -%}{{ cycloid_elasticsearch_user }}{%- endif -%}"
-cost_explorer_es_password: "{%- if use_local_elasticsearch -%}{{ cycloid_elasticsearch_password }}{%- endif -%}"
+cost_explorer_es_url: "{%- if use_local_elasticsearch|bool -%}{{elasticsearch_schema}}://{{ hostvars[groups['elasticsearch'][0]]['ansible_default_ipv4']['address'] }}:{{elasticsearch_port_api}}{%- endif -%}"
+cost_explorer_es_username: "{%- if use_local_elasticsearch|bool -%}{{ cycloid_elasticsearch_user }}{%- endif -%}"
+cost_explorer_es_password: "{%- if use_local_elasticsearch|bool -%}{{ cycloid_elasticsearch_password }}{%- endif -%}"
 cost_explorer_es_insecure_skip_tls: true # ignore certificate errors if there are any
 # Every midnight
 cost_explorer_ingestion_schedule: "*-*-* 00:00:00" # schedule for the timer related to cycloid-job-ccm-ingestion_container service
@@ -622,7 +622,7 @@ cost_explorer_ingestion_schedule: "*-*-* 00:00:00" # schedule for the timer rela
 
 # Cloud Cost Management cmd
 cycloid_job_ccm_ingestion_container_args: "/entrypoint /go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml"
-cycloid_job_ccm_ingestion_container_cmd: "{% if ca_certificates_container_shared %}-c \"/usr/sbin/update-ca-certificates; /entrypoint {{ cycloid_job_ccm_ingestion_container_args }}\"{% else %}{{ cycloid_job_ccm_ingestion_container_args }}{% endif %}"
+cycloid_job_ccm_ingestion_container_cmd: "{% if ca_certificates_container_shared|bool %}-c \"/usr/sbin/update-ca-certificates; /entrypoint {{ cycloid_job_ccm_ingestion_container_args }}\"{% else %}{{ cycloid_job_ccm_ingestion_container_args }}{% endif %}"
 
 ###########################
 # Cost Estimation         #
@@ -632,7 +632,7 @@ cycloid_job_cost_estimation_injection_aws: false
 cycloid_job_cost_estimation_injection_azure: false
 cycloid_job_cost_estimation_injection_gcp: false
 
-cycloid_job_cost_estimation_injection: "{% if cycloid_job_cost_estimation_injection_aws or cycloid_job_cost_estimation_injection_azure or cycloid_job_cost_estimation_injection_gcp %}true{% else %}false{% endif %}"
+cycloid_job_cost_estimation_injection: "{% if cycloid_job_cost_estimation_injection_aws|bool or cycloid_job_cost_estimation_injection_azure or cycloid_job_cost_estimation_injection_gcp|bool %}true{% else %}false{% endif %}"
 
 # command used to create an ingest job on the queue
 cost_estimation_ingestion_aws_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers aws --pricing-ingest-aws-use-known-services --pricing-ingest-aws-minimal; "
@@ -641,8 +641,8 @@ cost_estimation_ingestion_azure_minimal: "/entrypoint /go/youdeploy-http-api pri
 cost_estimation_gcp_cred_json: ""
 cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers google --pricing-ingest-google-credential-json  $PRICING_INGEST_GOOGLE_CREDENTIAL_JSON --pricing-ingest-google-use-known-services --pricing-ingest-google-minimal; "
 
-cycloid_job_cost_estimation_ingestion_container_args: "{% if cycloid_job_cost_estimation_injection_aws %}{{ cost_estimation_ingestion_aws_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_azure %}{{ cost_estimation_ingestion_azure_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_gcp %}{{ cost_estimation_ingestion_gcp_minimal }}{% endif %}"
-cycloid_job_cost_estimation_ingestion_container_cmd: "-c {% if ca_certificates_container_shared %}\"/usr/sbin/update-ca-certificates; {{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% else %}\"{{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% endif %}"
+cycloid_job_cost_estimation_ingestion_container_args: "{% if cycloid_job_cost_estimation_injection_aws|bool %}{{ cost_estimation_ingestion_aws_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_azure|bool %}{{ cost_estimation_ingestion_azure_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_gcp|bool %}{{ cost_estimation_ingestion_gcp_minimal }}{% endif %}"
+cycloid_job_cost_estimation_ingestion_container_cmd: "-c {% if ca_certificates_container_shared|bool %}\"/usr/sbin/update-ca-certificates; {{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% else %}\"{{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% endif %}"
 
 # Every sunday
 cost_estimation_ingestion_schedule: "Sun *-*-* 00:00:00"

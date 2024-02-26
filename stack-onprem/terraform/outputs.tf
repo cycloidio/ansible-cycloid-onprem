@@ -17,3 +17,13 @@ output "password" {
   value     = module.onprem.password
   sensitive = true
 }
+
+output "iam_ses_smtp_user_key" {
+  value     = module.onprem.iam_ses_smtp_user_key
+  sensitive = true
+}
+
+output "iam_ses_smtp_user_secret" {
+  value     = module.onprem.iam_ses_smtp_user_secret
+  sensitive = true
+}

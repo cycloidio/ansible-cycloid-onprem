@@ -17,7 +17,7 @@ cycloid_public_stacks: true
 ca_certificates_container_shared: true
 cycloid_admin_apikey: true
 
-cycloid_db_image: mysql:8.0.33
+cycloid_db_image: mysql:8.0.35
 
 ## workaround variables to solve stackform limitation
 cycloid_api_repo: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api

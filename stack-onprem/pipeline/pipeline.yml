@@ -368,7 +368,10 @@ jobs:
             CONCOURSE_AUTH_PASSWORD=$(jq -r .password.concourse ${DIR}/tfstate/metadata)
             CONCOURSE_DB_PASSWORD=$(jq -r .password.postgres ${DIR}/tfstate/metadata)
             CYCLOID_DB_PASSWORD=$(jq -r .password.mysql ${DIR}/tfstate/metadata)
-            CYCLOID_ELASTICSEARCH_PASSWORD=$(jq -r  .password.elasticsearch ${DIR}/tfstate/metadata)
+            CYCLOID_ELASTICSEARCH_PASSWORD=$(jq -r .password.elasticsearch ${DIR}/tfstate/metadata)
+
+            IAM_SES_SMTP_USER_KEY=$(jq -r .iam_ses_smtp_user_key ${DIR}/tfstate/metadata)
+            IAM_SES_SMTP_USER_SECRET=$(jq -r .iam_ses_smtp_user_secret ${DIR}/tfstate/metadata)
 
             cat >> environments/cycloid.yml <<EOF
             ### Ansible and Cycloid console will be on https://${MAIN_INSTANCE}
@@ -394,6 +397,14 @@ jobs:
             cycloid_crypto_signing_key: "${CYCLOID_CRYPTO_SIGNING_KEY}"
             # Set concourse admin user password
             concourse_auth_password: "${CONCOURSE_AUTH_PASSWORD}"
+
+            # SMTP
+            cycloid_email_addr_from: "Cycloid Onprem <noreply-${ENV}@cycloid.io>"
+            cycloid_email_addr_return_path: "admin+onprem-${ENV}@cycloid.io"
+            cycloid_email_smtp_username: "${IAM_SES_SMTP_USER_KEY}"
+            cycloid_email_smtp_password: "${IAM_SES_SMTP_USER_SECRET}"
+            cycloid_email_smtp_svr_addr: "email-smtp.eu-west-1.amazonaws.com:587"
+            use_local_smtp_server: "false"
 
             # extra vars from pipeline job
             cycloid_console_dns: "${MAIN_INSTANCE}"
