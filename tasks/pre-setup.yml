@@ -38,9 +38,9 @@
 
 - name: Log into Cycloid Scaleway registry
   docker_login:
-    registry_url:
-    username: user
-    password: password
+    registry_url: "{{cycloid_scw_registry}}"
+    username: nologin
+    password: "{{scw_secret_key}"
   when: use_registry_scaleway and cycloid_scw_registry_access_key is defined and cycloid_scw_registry_secret_key is defined and not offline_setup
 
 - name: Create config directory | pre-setup

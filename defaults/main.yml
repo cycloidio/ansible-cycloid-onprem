@@ -427,6 +427,7 @@ cycloid_ecr_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') | default(omit)}}"
 cycloid_ecr_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') | default(omit)}}"
 
 # iam credential to get scaleway images
+cycloid_scw_registry: "rg.fr-par.scw.cloud/cycloidio"
 cycloid_scw_registry_access_key: "{{ lookup('env','SCALEWAY_ACCESS_KEY_ID') | default(omit)}}"
 cycloid_scw_registry_secret_key: "{{ lookup('env','SCALEWAY_SECRET_ACCESS_KEY') | default(omit)}}"
 
