@@ -252,7 +252,7 @@ no_proxy: "{{ (default_no_proxy + extra_no_proxy) | join(',') }}"
 #
 use_registry_scaleway: true
 # uses scaleway registry by default otherwise uses AWS
-cycloid_frontend_image: "{{'rg.fr-par.scw.cloud/cycloidio/youdeploy-frontend:latest-public' if use_registry_scaleway else '661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:latest-public'}}"
+cycloid_frontend_image: "{{'rg.fr-par.scw.cloud/cycloidio/cycloid-frontend:latest-public' if use_registry_scaleway else '661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:latest-public'}}"
 cycloid_api_image: "{{'rg.fr-par.scw.cloud/cycloidio/cycloid-backend:latest-public' if use_registry_scaleway else '661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:latest-public'}}"
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
 concourse_db_image: postgres:14.5
