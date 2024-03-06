@@ -28,7 +28,8 @@ cycloidImagesRegistry:
 
 # Image pull secret to use for registry authentication.
 # The default value matches the secret created during the documentation installation steps
-# which provide access to the AWS ECR Cycloid docker images.
+# which provide access to the scaleway Cycloid docker images.
+# Note! In case of use of the AWS ECR instead change to cycloid-ecr
 imagePullSecrets:
   - name: scw-registry-secret
 
