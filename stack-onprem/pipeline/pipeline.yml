@@ -140,21 +140,19 @@ resources:
 - name: docker-backend-image
   type: registry-image
   source:
-    aws_access_key_id: ((aws_access_key))
-    aws_region: ((aws_default_region))
-    aws_secret_access_key: ((aws_secret_key))
-    repository: youdeploy-http-api
+    repository: rg.fr-par.scw.cloud/cycloidio/cycloid-backend
+    username: "nologin"
+    password: ((scw_secret_key))
     tag: ((cycloid_api_tag))
   icon: docker
 
 - name: docker-frontend-image
   type: registry-image
   source:
-    aws_access_key_id: ((aws_access_key))
-    aws_region: ((aws_default_region))
-    aws_secret_access_key: ((aws_secret_key))
-    repository: youdeploy-frontend
-    tag: ((cycloid_frontend_tag))
+    repository: rg.fr-par.scw.cloud/cycloidio/cycloid-frontend
+    username: "nologin"
+    password: ((scw_secret_key))
+    tag: ((cycloid_api_tag))
   icon: docker
 
 jobs:
@@ -408,8 +406,8 @@ jobs:
 
             # extra vars from pipeline job
             cycloid_console_dns: "${MAIN_INSTANCE}"
-            cycloid_ecr_access_key: "${AWS_ACCESS_KEY_ID}"
-            cycloid_ecr_secret_key: "${AWS_SECRET_ACCESS_KEY}"
+            cycloid_scw_registry_access_key: "${SCW_ACCESS_KEY}"
+            cycloid_scw_registry_secret_key: "${SCW_SECRET_KEY}"
             cycloid_licence: "${CYCLOID_LICENCE}"
             EOF
 
@@ -530,6 +528,8 @@ jobs:
           ELASTICSEARCH: ((install_elasticsearch))
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           GITHUB_KEY: ((config_git_private_key))
+          SCW_ACCESS_KEY: ((scw_access_key))
+          SCW_SECRET_KEY: ((scw_secret_key))
           AWS_ACCESS_KEY_ID: ((aws_access_key))
           AWS_DEFAULT_REGION: ((aws_default_region))
           AWS_SECRET_ACCESS_KEY: ((aws_secret_key))

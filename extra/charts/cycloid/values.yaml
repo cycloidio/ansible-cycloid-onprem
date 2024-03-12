@@ -14,7 +14,10 @@ commonAnnotations: {}
 # By default, the cronjob (via the renewToken parameter) is enabled to renew the docker-registry token
 # that allow pulling images on the Cycloid image registry
 cycloidImagesRegistry:
-  renewToken: true
+  # not needed with scaleway login
+  # If used you should change the repository for frontend and backend
+  #
+  renewToken: false
   # Kubernetes secret created following the Cycloid documentation
   secretCredentialName: cycloid-aws-creds
   repositoryUrl: 661913936052.dkr.ecr.eu-west-1.amazonaws.com
@@ -25,9 +28,10 @@ cycloidImagesRegistry:
 
 # Image pull secret to use for registry authentication.
 # The default value matches the secret created during the documentation installation steps
-# which provide access to the AWS ECR Cycloid docker images.
+# which provide access to the scaleway Cycloid docker images.
+# Note! In case of use of the AWS ECR instead change to cycloid-ecr
 imagePullSecrets:
-  - name: cycloid-ecr
+  - name: scw-registry-secret
 
 # If deploying to OpenShift
 # If Vault also deployen on openshift, make sure vault.global.openshift is true
@@ -50,7 +54,8 @@ frontend:
   replicaCount: 1
 
   image:
-    repository: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend
+    # If using AWS replace by 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend
+    repository: rg.fr-par.scw.cloud/cycloidio/cycloid-frontend
     pullPolicy: Always
     # Cycloid Console frontend version to use.
     # Overrides the image tag whose default is the chart appVersion.
@@ -212,7 +217,8 @@ backend:
   replicaCount: 1
 
   image:
-    repository: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api
+    # If using AWS replace by 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api
+    repository: rg.fr-par.scw.cloud/cycloidio/cycloid-backend
     pullPolicy: Always
     # Cycloid Console API version to use.
     # Overrides the image tag whose default is the chart appVersion.

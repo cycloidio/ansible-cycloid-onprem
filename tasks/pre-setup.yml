@@ -22,7 +22,7 @@
     state: latest
   when: setup_packages
 
-# Depends for ECR login
+# Depends for ECR/Scaleway login
 - name: Install pip depends | pre-setup
   pip:
      name:
@@ -30,18 +30,17 @@
       - awscli
       - docker
      state: latest
-  when: cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined and setup_packages
+  when: (not use_registry_scaleway and cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined and setup_packages) or (use_registry_scaleway and cycloid_scw_registry_access_key is defined and cycloid_scw_registry_secret_key is defined and setup_packages)
 
 - name: ECR login | pre-setup
   shell: "$(AWS_ACCESS_KEY_ID={{ cycloid_ecr_access_key }} AWS_SECRET_ACCESS_KEY={{ cycloid_ecr_secret_key }} aws ecr get-login --no-include-email --region eu-west-1)"
-  when: cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined and not offline_setup
-
-# For private docker
-#- name: Log into Cycloid ecr
-#  docker_login:
-#    registry_url:
-#    username: user
-#    password: password
+  when: not use_registry_scaleway and cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined and not offline_setup
+- name: Log into Cycloid Scaleway registry
+  docker_login:
+    registry_url: "{{cycloid_scw_registry}}"
+    username: nologin
+    password: "{{cycloid_scw_registry_secret_key}}"
+  when: use_registry_scaleway and cycloid_scw_registry_access_key is defined and cycloid_scw_registry_secret_key is defined and not offline_setup
 
 - name: Create config directory | pre-setup
   file:

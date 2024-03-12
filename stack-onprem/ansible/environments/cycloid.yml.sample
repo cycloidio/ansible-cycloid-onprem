@@ -20,8 +20,8 @@ cycloid_admin_apikey: true
 cycloid_db_image: mysql:8.0.35
 
 ## workaround variables to solve stackform limitation
-cycloid_api_repo: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api
-cycloid_frontend_repo: 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend
+cycloid_api_repo: rg.fr-par.scw.cloud/cycloidio/cycloid-backend
+cycloid_frontend_repo: rg.fr-par.scw.cloud/cycloidio/cycloid-frontend
 
 cycloid_api_tag: $BACKEND_IMAGE_TAG
 cycloid_frontend_tag: $FRONTEND_IMAGE_TAG
