@@ -56,7 +56,7 @@ echo "export AWS_ACCESS_KEY_ID=$(vault read -field=access_key secret/cycloid/aws
 echo "export AWS_SECRET_ACCESS_KEY=$(vault read -field=secret_key secret/cycloid/aws)" >> /tmp/awslogin
 echo "export AWS_DEFAULT_REGION=$REGION" >> /tmp/awslogin
 
-sudo docker run -v $(pwd):/opt/ -v /tmp/awslogin:/tmp/awslogin -it --entrypoint sh  hypnoglow/helm-s3
+sudo docker run -v $(pwd):/opt/ -v /tmp/awslogin:/tmp/awslogin -it --entrypoint sh  hypnoglow/helm-s3:commit.f2dded8-helm3.13
 
 # from the docker image
 cd /opt/
