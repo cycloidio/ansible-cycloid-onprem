@@ -110,16 +110,16 @@ use_cases:
           description: "Cycloid EXTRA_ANSIBLE_VARS"
           key: ansible_params_extravars
           widget: text_area
-          type: raw
-          default: |+
-              test: "foo"
-              #azure_ad_tenant_id: ""
-              #azure_ad_client_id: ""
-              #google_client_id: ""
-              #google_client_secret: ""
-              #github_host_address: "https://api.github.com"
-              #github_client_id: ""
-              #github_client_secret: ""
+          type: map
+          default:
+            test: "foo"
+            #azure_ad_tenant_id: ""
+            #azure_ad_client_id: ""
+            #google_client_id: ""
+            #google_client_secret: ""
+            #github_host_address: "https://api.github.com"
+            #github_client_id: ""
+            #github_client_secret: ""
 
     - name: Service-ansible
       technologies: [ansible]
