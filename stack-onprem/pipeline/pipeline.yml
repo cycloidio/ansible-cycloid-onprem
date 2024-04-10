@@ -1009,7 +1009,6 @@ jobs:
             # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
             # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
             REMOTE_USER=""
-            #set +e
             for user in admin centos ubuntu;do
               ssh ${user}@${MAIN_INSTANCE} ls
               if [ $? -eq 0 ]; then
@@ -1017,57 +1016,14 @@ jobs:
                 break
               fi
             done
-            #set -e
 
             export API_KEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')
-            export CY_API_URL=https://${MAIN_INSTANCE}/api
-            export ORG=cycloid
-            cy --insecure login --org $ORG --api-key $API_KEY
+            export CY_TARGET_API_KEY="$API_KEY"
+            export CY_TARGET_API_URL=https://${MAIN_INSTANCE}/api
+            export CY_TARGET_ORG=cycloid
 
-            echo "Adding credentials ..."
-            cy --insecure  --org $ORG  credential create ssh --name github --ssh-key /root/.ssh/id_rsa_git
-            CRED=$(cy --insecure  --org $ORG  credential list -o json | jq -r '.[] | select( .name | contains("github")) | .canonical')
-
-            cy --insecure  --org $ORG config-repo create --branch config --cred $CRED --url $CR_REPO --default  --name onprem-test
-            cy --insecure  --org $ORG catalog-repo create --branch stacks --cred $CRED --url $CR_REPO  --name onprem-test-stacks
-
-            # minio creds (default value used)
-            cy --insecure  --org $ORG  credential create aws --name minio --access-key ((onprem_minio_access_key)) --secret-key ((onprem_minio_secret_key))
-
-            # AWS
-            cy --insecure  --org $ORG  credential create aws --name admin_aws --access-key ((((onprem_aws_cred_name)).access_key)) --secret-key ((((onprem_aws_cred_name)).secret_key))
-            cy --insecure  --org $ORG  credential create aws --name admin_aws-sandbox --access-key ((((onprem_aws_sandbox_cred_name)).access_key)) --secret-key ((((onprem_aws_sandbox_cred_name)).secret_key))
-
-            # GCP
-            echo '((((onprem_gcp_cred_name)).json_key))' > /tmp/sandbox
-            cy --insecure  --org $ORG  credential create gcp --name admin_gcp_cycloid-sandbox --json-key /tmp/sandbox
-            rm /tmp/sandbox
-
-            # Azure
-            cy --insecure  --org $ORG  credential create azure --name admin_azure --client-id ((((onprem_azure_cred_name)).client_id)) --client-secret ((((onprem_azure_cred_name)).client_secret)) --subscription-id ((((onprem_azure_cred_name)).subscription_id)) --tenant-id ((((onprem_azure_cred_name)).tenant_id))
-            cy --insecure  --org $ORG  credential create azure_storage --name azure-tfstate --account-name ((((onprem_azure_storage_cred_name)).account_name)) --access-key ((((onprem_azure_storage_cred_name)).access_key))
-
-            # create dummy project
-            echo "Creating dummy project ..."
-            wget https://raw.githubusercontent.com/cycloid-community-catalog/stack-dummy/master/pipeline/pipeline.yml
-            wget https://raw.githubusercontent.com/cycloid-community-catalog/stack-dummy/master/pipeline/variables.sample.yml
-            cy --insecure --org $ORG project create \
-              --name dummy \
-              --description "from dummy stack" \
-              --stack-ref cycloid:stack-dummy \
-              --config-repo onprem-test \
-              --env test \
-              --usecase default \
-              --pipeline "pipeline.yml" \
-              --vars "variables.sample.yml"
-
-            # InfraView for dummy/test
-            echo "InfraView for dummy/test project ..."
-            cy --insecure --org $ORG --project dummy --env test external-backend create infraview AWSRemoteTFState \
-              --bucket-name ${IV_BUCKET_NAME} \
-              --bucket-path ${IV_BUCKET_PATH} \
-              --cred admin_aws \
-              --region "eu-west-1"
+            # Start the provisioning script
+            curl -L https://raw.githubusercontent.com/cycloidio/cycloid-utils/master/cy-provisioner/cy-provisioner | bash
 
             # Logs for dummy/test
             echo "Logs for dummy/test project ..."
@@ -1096,5 +1052,5 @@ jobs:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           GIT_PRIVATE_KEY: ((($ .cr_cred_path $).ssh_key))
           CR_REPO: ((onprem_cr_repository))
-          IV_BUCKET_NAME: cycloid-terraform-remote-state
-          IV_BUCKET_PATH: cycloidio-website/demo-hack/cycloid-demo.tfstate
+          CY_SOURCE_API_KEY: ((fbh-cred-ro.api_key))
+          ENV: ($ environment $)
