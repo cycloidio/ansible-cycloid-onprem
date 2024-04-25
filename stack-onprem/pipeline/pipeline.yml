@@ -152,7 +152,7 @@ resources:
     repository: rg.fr-par.scw.cloud/cycloidio/cycloid-frontend
     username: "nologin"
     password: ((scw_secret_key))
-    tag: ((cycloid_api_tag))
+    tag: ((cycloid_frontend_tag))
   icon: docker
 
 jobs:
