@@ -286,6 +286,7 @@ concourse_db_user: concourse
 concourse_db_name: concourse
 concourse_auth_user: admin
 concourse_auth_password: admin
+concourse_log_level: info
 
 # disable|require|verify-ca|verify-full
 concourse_db_sslmode: disable
@@ -438,6 +439,9 @@ cycloid_api_dns: cycloid-api
 cycloid_api_base_url: '{%- if cycloid_api_dns == "cycloid-api" -%}{{cycloid_console_base_url}}/api{%- else -%}https://{{cycloid_api_dns}}{%- endif -%}'
 cycloid_console_dns: cycloid-console
 cycloid_console_base_url: "https://{{ cycloid_console_dns }}"
+
+# DEBUG
+cycloid_api_log_level: "INFO"
 
 # Allow additional Origins to request the API. Multiple Origins can be specified using a comma ','.
 # e.g, cycloid_api_cors_allowed_origins: "https://domain1.tld,http://domain2.tld"

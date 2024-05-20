@@ -67,9 +67,8 @@
       COST_EXPLORER_ES_PASSWORD: "{{ cost_explorer_es_password }}"
       COST_EXPLORER_ES_INSECURE_SKIP_TLS: "{{ cost_explorer_es_insecure_skip_tls }}"
       #COST_EXPLORER_ES_CA_CERT: "{{ cost_explorer_es_ca_cert }}"
-      LOG_LEVEL: "INFO"
+      LOG_LEVEL: "{{ cycloid_api_log_level }}"
       LOG_SVC_LEVEL: "NONE"
-      #LOG_LEVEL: "DEBUG"
       #LOG_DEV_MODE: true
       #LOG_SVC_LEVEL: "DEBUG"
       http_proxy: "{{ http_proxy }}"
