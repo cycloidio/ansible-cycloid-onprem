@@ -30,7 +30,7 @@
         name: mhutter.docker-systemd-service
       vars:
         container_name: elasticsearch
-        container_image: "{{ elasticsearch_image }}:{{ elasticsearch_version }}"
+        container_image: "{{ elasticsearch_image }}"
         container_volumes:
           - "{{ elasticsearch_config_path }}/data:/usr/share/elasticsearch/data"
           # we can't simply override config/elasticsearch since we loose some other cool files

@@ -184,7 +184,7 @@
       with_items:
         - { name: "github.com", url: "github.com", port: "22"}
         - { name: "cycloid-core", url: "localhost", port: "3001"}
-        - { name: "cycloid-cache", url: "{{ cycloid_email_redis_host }}", port: "{{ cycloid_email_redis_port }}"}
+        - { name: "cycloid-cache", url: "{{ cycloid_cache_host }}", port: "{{ cycloid_cache_port }}"}
         - { name: "cycloid-db", url: "{{ cycloid_db_host }}", port: "{{ cycloid_db_port }}"}
         - { name: "cycloid-smtp", url: "{{ hostvars[groups['smtp_server'][0]]['ansible_default_ipv4']['address'] }}", port: "1025"}
         - { name: "cycloid-smtps", url: "{{ hostvars[groups['smtp_server'][0]]['ansible_default_ipv4']['address'] }}", port: "8025"}
@@ -295,7 +295,7 @@
       no_log: true
       ignore_errors: true
       with_items:
-        - { name: "cycloid-cache", url: "localhost", port: "{{ cycloid_email_redis_port }}"}
+        - { name: "cycloid-cache", url: "localhost", port: "{{ cycloid_cache_port }}"}
 
     - name: docker | cache-report
       shell: |
