@@ -12,6 +12,19 @@ cycloid_console_dns: cycloid-console
 #+ If not defined, proxypass from cycloid_console_dns will be used.
 cycloid_api_dns: cycloid-api
 
+#. cycloid_initial_user(required, map):
+#+ Cycloid initial user details.
+cycloid_initial_user:
+  username: "admin"
+  email: "disabled@no-email.cycloid"
+  password: "Ch4ngm3pls"
+  given_name: admin
+  family_name: cycloid
+
+#. cycloid_initial_user(optional, string): "Cycloid"
+#+ First Cycloid organization name.
+cycloid_initial_organization_name: Cycloid
+
 #. cycloid_api_log_level(optional, string): "INFO"
 #+ Sets the log level for Cycloid API.
 cycloid_api_log_level: "INFO"
@@ -28,15 +41,44 @@ cycloid_frontend_version: "latest-public"
 #+ Cycloid API version
 cycloid_api_version: "latest-public"
 
+#. cycloid_crypto_signing_key(required, string):
+#+ Define a cryptographic signing key within the Cycloid platform.
+cycloid_crypto_signing_key: totally-random-secret-key
+
+#
+# Cycloid DB
+#
+
+#. cycloid_db_host(required, string): "{{ hostvars[groups['cycloid_db'][0]]['ansible_default_ipv4']['address'] }}"
+#+ Specifies the hostname or IP address of the Cycloid database server.
+#+ by default Get the address of the first defined host in cycloid_db group
+cycloid_db_host: "{{ hostvars[groups['cycloid_db'][0]]['ansible_default_ipv4']['address'] }}"
+#. cycloid_db_port(required, string): "3306"
+#+ Defines the port number on which the Cycloid database server is listening.
+cycloid_db_port: 3306
+#. cycloid_db_user(required, string): "cycloid"
+#+ Specifies the username for the Cycloid database.
+cycloid_db_user: cycloid
+#. cycloid_db_password(required, string): "Ch4ngm3pls"
+#+ Defines the password for accessing the Cycloid database.
+cycloid_db_password: "Ch4ngm3pls"
+#. cycloid_db_name(optional, string): "cycloid"
+#+ Defines the name of the Cycloid database.
+cycloid_db_name: cycloid
+
+#
+# Concourse
+#
+
 #. concourse_url(required, string): "https://{{ hostvars[groups['cycloid_scheduler'][0]]['ansible_default_ipv4']['address'] }}"
 #+ Specifies the URL where Concourse CI can be accessed from the Cycloid API
 concourse_url: "https://{{ hostvars[groups['cycloid_scheduler'][0]]['ansible_default_ipv4']['address'] }}"
 #. concourse_auth_user(required, string): "admin"
 #+ Defines the username for authenticating with Concourse CI.
 concourse_auth_user: admin
-#. concourse_auth_password(required, string): "admin"
+#. concourse_auth_password(required, string): "Ch4ngm3pls"
 #+ Defines the password for the Concourse CI user.
-concourse_auth_password: admin
+concourse_auth_password: Ch4ngm3pls
 #. concourse_log_level(optional, string): "info"
 #+ Sets the log level for Concourse CI.
 concourse_log_level: info
@@ -49,45 +91,25 @@ concourse_db_port: "5432"
 #. concourse_db_user(required, string): "concourse"
 #+ Specifies the username for the Concourse CI database.
 concourse_db_user: concourse
-#. concourse_db_password(required, string): ""
+#. concourse_db_password(required, string): "Ch4ngm3pls"
 #+ Defines the password for accessing the Concourse CI database.
-concourse_db_password: "Deraephoh9aay4Aide4phoS7xej1xi5m"
+concourse_db_password: "Ch4ngm3pls"
 #. concourse_db_name(optional, string): "concourse"
 #+ Defines the name of the Concourse CI database.
 concourse_db_name: concourse
+
+#
+# Vault/Secret
+#
 
 #. vault_url(required, string): "https://{{ hostvars[groups['cycloid_creds'][0]]['ansible_default_ipv4']['address'] }}:8200"
 #+ External vault url used by others services.
 vault_url: https://{{ hostvars[groups['cycloid_creds'][0]]['ansible_default_ipv4']['address'] }}:8200
 
-#. cycloid_initial_user(required, map):
-#+ Cycloid initial user details.
-cycloid_initial_user:
-  username: "admin"
-  email: "disabled@no-email.cycloid"
-  password: "Ch4ngm3pls"
-  given_name: admin
-  family_name: cycloid
 
-#. cycloid_initial_user(optional, string): "Cycloid"
-#+ First Cycloid organization name.
-cycloid_initial_organization_name: Cycloid
-#. cycloid_db_host(required, string): "{{ hostvars[groups['cycloid_db'][0]]['ansible_default_ipv4']['address'] }}"
-#+ Specifies the hostname or IP address of the Cycloid database server.
-#+ by default Get the address of the first defined host in cycloid_db group
-cycloid_db_host: "{{ hostvars[groups['cycloid_db'][0]]['ansible_default_ipv4']['address'] }}"
-#. cycloid_db_port(required, string): "3306"
-#+ Defines the port number on which the Cycloid database server is listening.
-cycloid_db_port: 3306
-#. cycloid_db_user(required, string): "cycloid"
-#+ Specifies the username for the Cycloid database.
-cycloid_db_user: cycloid
-#. cycloid_db_password(required, string):
-#+ Defines the password for accessing the Cycloid database.
-cycloid_db_password: "chovoh6gahti5ohP0AiF6eex6evoonie"
-#. cycloid_db_name(optional, string): "cycloid"
-#+ Defines the name of the Cycloid database.
-cycloid_db_name: cycloid
+#
+# Email
+#
 
 #. cycloid_email_smtp_svr_addr(required, string): "{{ hostvars[groups['smtp_server'][0]]['ansible_default_ipv4']['address'] }}:1025"
 #+ Specifies the address of the SMTP server used for sending emails.
@@ -97,20 +119,24 @@ cycloid_email_smtp_svr_addr: "{{ hostvars[groups['smtp_server'][0]]['ansible_def
 #. cycloid_email_smtp_username(required, string): "admin"
 #+ Defines the username for SMTP authentication.
 cycloid_email_smtp_username: admin
-#. cycloid_email_smtp_password(required, string):
+#. cycloid_email_smtp_password(required, string): "Ch4ngm3pls"
 #+ Defines the password for SMTP authentication.
-cycloid_email_smtp_password: admin
+cycloid_email_smtp_password: Ch4ngm3pls
 #. cycloid_email_addr_from(required, string): "noreply@cycloid.io"
 #+ Specifies the email address that will appear in the "From" field of emails sent by Cycloid.
 cycloid_email_addr_from: noreply@cycloid.io
 #. cycloid_email_addr_return_path(required, string): "admin+bounce@cycloid.io"
 #+ Defines the return email for bounced emails.
-cycloid_email_addr_return_path: admin+ydbounce@cycloid.io
+cycloid_email_addr_return_path: admin+bounce@cycloid.io
+#. cycloid_email_skip_tls_check(optional, bool): "false"
+#+ Allow insecure TLS/SSL with email. Usefull when using local postfix as relayhost with selfsigned certs
+cycloid_email_skip_tls_check: false
 
 # cycloid_email_redis* defined to keep retro compatibility.
 # In the future these variable will be depreciate and replaced by cycloid_cache_host and cycloid_cache_port
 cycloid_email_redis_host: "{{ hostvars[groups['cycloid_cache'][0]]['ansible_default_ipv4']['address'] }}"
 cycloid_email_redis_port: 6379
+
 #. cycloid_cache_host(required, string): "{{ hostvars[groups['cycloid_cache'][0]]['ansible_default_ipv4']['address'] }}"
 #+ Specifies the hostname or IP address of Redis server.
 #+ by default Get the address of the first defined host in cycloid_cache group
@@ -121,20 +147,12 @@ cycloid_cache_port: "{{ cycloid_email_redis_port }}"
 #. cycloid_cache_username(optional, string): "default"
 #+ The username for authenticating with the Redis cache server. Set to empty "" to disable authentication.
 cycloid_cache_username: default
-#. cycloid_cache_password(optional, string):
+#. cycloid_cache_password(optional, string): "Ch4ngm3pls"
 #+ The password for authenticating with the Redis cache server. Set to empty "" to disable authentication.
-cycloid_cache_password: "Deraephoh9aay4Aide4phoS7xej1xi5m"
+cycloid_cache_password: "Ch4ngm3pls"
 #. cycloid_cache_schema(optional, string): "redis"
 #+ Redis URI schema. Use "rediss" for Redis connection over a secure (SSL/TLS) connection.
 cycloid_cache_schema: redis
-
-#. cycloid_email_skip_tls_check(optional, bool): "false"
-#+ Allow insecure TLS/SSL with email. Usefull when using local postfix as relayhost with selfsigned certs
-cycloid_email_skip_tls_check: false
-
-#. cycloid_crypto_signing_key(required, string):
-#+ Define a cryptographic signing key within the Cycloid platform.
-cycloid_crypto_signing_key: totally-random-secret-key
 
 #. cost_explorer_es_url(optional, string): "{{elasticsearch_schema}}://{{ hostvars[groups['elasticsearch'][0]]['ansible_default_ipv4']['address'] }}:{{elasticsearch_port_api}}"
 #+ Defines the URL for connecting to the Elasticsearch service used by the Cost Explorer.
@@ -142,7 +160,7 @@ cost_explorer_es_url: "{%- if use_local_elasticsearch|bool -%}{{elasticsearch_sc
 #. cost_explorer_es_username(optional, string): "elastic"
 #+ Specifies the username for authenticating with the Elasticsearch service.
 cost_explorer_es_username: "{%- if use_local_elasticsearch|bool -%}{{ cycloid_elasticsearch_user }}{%- endif -%}"
-#. cost_explorer_es_password(optional, string):
+#. cost_explorer_es_password(optional, string): "Ch4ngm3pls"
 #+ Defines the password for authenticating with the Elasticsearch service.
 cost_explorer_es_password: "{%- if use_local_elasticsearch|bool -%}{{ cycloid_elasticsearch_password }}{%- endif -%}"
 #. cost_explorer_es_insecure_skip_tls(optional, bool): true
@@ -167,6 +185,9 @@ cycloid_job_cost_estimation_injection_azure: false
 #. cycloid_job_cost_estimation_injection_gcp(optional, bool): "false"
 #+ Ingest the price of the GCP cloud provider for use in the Cost Estimation feature.
 cycloid_job_cost_estimation_injection_gcp: false
+#. cost_estimation_gcp_cred_json(optional, string): ""
+#+ GCP json credential used to reach GCP pricing datas.
+cost_estimation_gcp_cred_json: ""
 
 #. cost_estimation_ingestion_schedule(optional, string): "Sun *-*-* 00:00:00"
 #+ Sets the schedule for CostEstimation Ingestion jobs.
@@ -260,7 +281,7 @@ extra_no_proxy: []
 cycloid_cache_mon_install: false
 
 #. vault_config(optional, map):
-#+ Override Vault config such storage
+#+ Override Vault config such storage.
 vault_config:
   storage:
     file:
@@ -321,14 +342,21 @@ github_client_secret: ""
 
 # By default SAML3 files should be stored under saml/{cycloid-saml-sp.crt, ycloid-saml-sp.key, idp-metadata}
 
-# Enabled SAML auth on Cyclid API.
+#. saml_auth_enabled(optional, bool): false
+#+ Enabled SAML auth on Cyclid API.
 saml_auth_enabled: false
-# Url to get your xml identity provider federation metadata file. If defined, do not provide saml_idp_metadata_file
+#. saml_idp_metadata_url(optional, string): ""
+#+ URL to get your XML Identity Provider federation metadata file. If defined, do not provide saml_idp_metadata_file.
 saml_idp_metadata_url: ""
-# Name of the Public certificate to use in cycloid
+#. saml_sp_certificate_file(optional, string): "cycloid-saml-sp.crt"
+# Name of the Public certificate stored in saml_local_path to use in cycloid
 saml_sp_certificate_file: "cycloid-saml-sp.crt"
-# Name of the certificate private key to use in cycloid
+#. saml_sp_private_key_file(optional, string): "cycloid-saml-sp.key"
+#+ Enabled SAML auth on Cyclid API.
+# Name of the certificate private key stored in saml_local_path to use in cycloid
 saml_sp_private_key_file: "cycloid-saml-sp.key"
+#. saml_idp_metadata_file(optional, string): "idp-metadata"
+#+ Enabled SAML auth on Cyclid API.
 # Name of your xml identity provider federation metadata file. It could also be provided as an url with saml_idp_metadata_url
 saml_idp_metadata_file: "idp-metadata"
 
@@ -697,15 +725,6 @@ minio_config_path: "{{ cycloid_install_path }}/minio"
 # Keep env include var as legacy compatibility
 env: prod
 
-###########################
-# report.yml playbook     #
-###########################
-
-cycloid_report_path: "/tmp/cycloid-report"
-cycloid_report_local_path: "/tmp/cycloid-report-local"
-cycloid_report_sensitive: false
-cycloid_report_curl_timeout: 4
-
 #
 # elasticsearch
 #
@@ -735,6 +754,8 @@ elasticsearch_config_path: "{{ cycloid_install_path }}/elasticsearch"
 #. enable elasticsearch basic authentication
 elasticsearch_basic_auth: true
 cycloid_elasticsearch_user: "elastic"
+#. cycloid_elasticsearch_password(optional, string): ""
+#+ the default credential to access elasticsearch with 'elastic' user
 cycloid_elasticsearch_password: "NmM5NmIwNmEwM2Q0NmYwNDYyMDgzZGFj"
 #. cycloid_elasticsearch_default(optional, string):
 #+ the default credential to access elasticsearch with 'elastic' user
@@ -781,15 +802,15 @@ cycloid_job_ccm_ingestion_container_cmd: "{% if ca_certificates_container_shared
 ###########################
 # Cost Estimation         #
 ###########################
+# enable injestion if one cloud provider enabled
 cycloid_job_cost_estimation_injection: "{% if cycloid_job_cost_estimation_injection_aws|bool or cycloid_job_cost_estimation_injection_azure or cycloid_job_cost_estimation_injection_gcp|bool %}true{% else %}false{% endif %}"
 
 # command used to create an ingest job on the queue
 cost_estimation_ingestion_aws_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers aws --pricing-ingest-aws-use-known-services --pricing-ingest-aws-minimal; "
 cost_estimation_ingestion_azure_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers azure --pricing-ingest-azure-use-known-services --pricing-ingest-azure-minimal; "
-# credential used to reach gcp pricing datas
-cost_estimation_gcp_cred_json: ""
 cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers google --pricing-ingest-google-credential-json  $PRICING_INGEST_GOOGLE_CREDENTIAL_JSON --pricing-ingest-google-use-known-services --pricing-ingest-google-minimal; "
 
+# merge cost_estimation_ingestion cmd
 cycloid_job_cost_estimation_ingestion_container_args: "{% if cycloid_job_cost_estimation_injection_aws|bool %}{{ cost_estimation_ingestion_aws_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_azure|bool %}{{ cost_estimation_ingestion_azure_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_gcp|bool %}{{ cost_estimation_ingestion_gcp_minimal }}{% endif %}"
 cycloid_job_cost_estimation_ingestion_container_cmd: "-c {% if ca_certificates_container_shared|bool %}\"/usr/sbin/update-ca-certificates; {{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% else %}\"{{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% endif %}"
 
@@ -800,3 +821,12 @@ container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/sec
 # Monitoring
 #
 worker_metrics_enabled: false
+
+###########################
+# report.yml playbook     #
+###########################
+
+cycloid_report_path: "/tmp/cycloid-report"
+cycloid_report_local_path: "/tmp/cycloid-report-local"
+cycloid_report_sensitive: false
+cycloid_report_curl_timeout: 4
