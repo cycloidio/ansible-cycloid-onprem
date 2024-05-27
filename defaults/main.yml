@@ -260,8 +260,7 @@ cycloid_public_stacks: "{% if cycloid_licence != '' %}{{ not offline_setup }}{% 
 cycloid_admin_apikey: "false"
 
 #. ssl_subject_alt_name(optional, list): []
-#+ a list of alternative common name to use in addition of the default ones for the self signed certs
-#+ use `DNS` for a domain name and `IP` for a raw IP address
+#+ Alternative common name to use in addition of the default ones for the self signed certs . Use `DNS` for a domain name and `IP` for a raw IP address.
 ssl_subject_alt_name: []
 
 # HTTP proxy
@@ -301,11 +300,11 @@ vault_config:
 #
 
 #. azure_ad_tenant_id(optional, string): ""
-#+ the tenant ID of Azure AD
+#+ The tenant ID of Azure AD
 azure_ad_tenant_id: ""
 
 #. azure_ad_client_id(optional, string): ""
-#+ the client ID of Azure AD
+#+ The client ID of Azure AD
 azure_ad_client_id: ""
 
 #
@@ -313,11 +312,11 @@ azure_ad_client_id: ""
 #
 
 #. google_client_id(optional, string): ""
-#+ the client ID of Google
+#+ The client ID of Google
 google_client_id: ""
 
 #. google_client_secret(optional, string): ""
-#+ the client secret of Google
+#+ The client secret of Google
 google_client_secret: ""
 
 #
@@ -329,11 +328,11 @@ google_client_secret: ""
 github_host_address: "{%- if github_client_id != '' -%}https://api.github.com{%- endif -%}"
 
 #. github_client_id(optional, string): ""
-#+ the client ID of Github
+#+ The client ID of Github
 github_client_id: ""
 
 #. github_client_secret(optional, string): ""
-#+ the client secret of Github
+#+ The client secret of Github
 github_client_secret: ""
 
 ###########################
@@ -349,15 +348,13 @@ saml_auth_enabled: false
 #+ URL to get your XML Identity Provider federation metadata file. If defined, do not provide saml_idp_metadata_file.
 saml_idp_metadata_url: ""
 #. saml_sp_certificate_file(optional, string): "cycloid-saml-sp.crt"
-# Name of the Public certificate stored in saml_local_path to use in cycloid
+#+ Name of the Public certificate stored in saml_local_path to use in cycloid.
 saml_sp_certificate_file: "cycloid-saml-sp.crt"
 #. saml_sp_private_key_file(optional, string): "cycloid-saml-sp.key"
-#+ Enabled SAML auth on Cyclid API.
-# Name of the certificate private key stored in saml_local_path to use in cycloid
+#+ Name of the certificate private key stored in saml_local_path to use in cycloid.
 saml_sp_private_key_file: "cycloid-saml-sp.key"
 #. saml_idp_metadata_file(optional, string): "idp-metadata"
-#+ Enabled SAML auth on Cyclid API.
-# Name of your xml identity provider federation metadata file. It could also be provided as an url with saml_idp_metadata_url
+#+ Name of your xml identity provider federation metadata file. It could also be provided as an url with saml_idp_metadata_url.
 saml_idp_metadata_file: "idp-metadata"
 
 
@@ -540,9 +537,8 @@ cycloid_third_party:
   crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party.crt"
   key: "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party.key"
 
-#. default_ssl_subject_alt_name(optional, dict)
-#+ a list of alternative common name to use for the self signed certs
-#+ use `DNS` for a domain name and `IP` for a raw IP address
+#. default_ssl_subject_alt_name(optional, list)
+#+ Alternative common name to use for the self signed certs use `DNS` for a domain name and `IP` for a raw IP address
 default_ssl_subject_alt_name:
   - DNS:127.0.0.1
   - DNS:cycloid
