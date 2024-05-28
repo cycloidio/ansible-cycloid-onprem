@@ -7,7 +7,7 @@
       vars:
         container_name: minio
         container_cmd: server /data
-        container_image: "minio/minio:{{ minio_version }}"
+        container_image: "{{ minio_image }}"
         container_volumes:
           - "{{ minio_config_path }}/data:/data"
         container_ports: "{{ minio_container_ports }}"

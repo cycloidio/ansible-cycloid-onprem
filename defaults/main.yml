@@ -1,37 +1,432 @@
 ---
+##########
+# Common #
+##########
 
-validate: True
-validate_only: False
+#. cycloid_console_dns(required, string): ""
+#+ Resolvable domain name from the instance and externally to use Cycloid console.
+cycloid_console_dns: cycloid-console
 
-# Set to true to uninstall cycloid
-uninstall: False
+#. cycloid_api_dns(optional, string): ""
+#+ Resolvable domain name from the instance and externally to use Cycloid API.
+#+ If not defined, proxypass from cycloid_console_dns will be used.
+cycloid_api_dns: cycloid-api
 
+#. cycloid_initial_user(required, map):
+#+ Cycloid initial user details.
+cycloid_initial_user:
+  username: "admin"
+  email: "disabled@no-email.cycloid"
+  password: "Ch4ngm3pls"
+  given_name: admin
+  family_name: cycloid
+
+#. cycloid_initial_user(optional, string): "Cycloid"
+#+ First Cycloid organization name.
+cycloid_initial_organization_name: Cycloid
+
+#. cycloid_api_log_level(optional, string): "INFO"
+#+ Sets the log level for Cycloid API.
+cycloid_api_log_level: "INFO"
+
+#. cycloid_licence(optional, string): ""
+#+ If provided, initialize Cycloid with the licence
+cycloid_licence: ""
+
+#. cycloid_frontend_version(optional, string): "latest-public"
+#+ Cycloid Frontend version
+cycloid_frontend_version: "latest-public"
+
+#. cycloid_api_version(optional, string): "latest-public"
+#+ Cycloid API version
+cycloid_api_version: "latest-public"
+
+#. cycloid_crypto_signing_key(required, string):
+#+ Define a cryptographic signing key within the Cycloid platform.
+cycloid_crypto_signing_key: totally-random-secret-key
+
+#
+# Cycloid DB
+#
+
+#. cycloid_db_host(required, string): "{{ hostvars[groups['cycloid_db'][0]]['ansible_default_ipv4']['address'] }}"
+#+ Specifies the hostname or IP address of the Cycloid database server.
+#+ by default Get the address of the first defined host in cycloid_db group
+cycloid_db_host: "{{ hostvars[groups['cycloid_db'][0]]['ansible_default_ipv4']['address'] }}"
+#. cycloid_db_port(required, string): "3306"
+#+ Defines the port number on which the Cycloid database server is listening.
+cycloid_db_port: 3306
+#. cycloid_db_user(required, string): "cycloid"
+#+ Specifies the username for the Cycloid database.
+cycloid_db_user: cycloid
+#. cycloid_db_password(required, string): "Ch4ngm3pls"
+#+ Defines the password for accessing the Cycloid database.
+cycloid_db_password: "Ch4ngm3pls"
+#. cycloid_db_name(optional, string): "cycloid"
+#+ Defines the name of the Cycloid database.
+cycloid_db_name: cycloid
+
+#
+# Concourse
+#
+
+#. concourse_url(required, string): "https://{{ hostvars[groups['cycloid_scheduler'][0]]['ansible_default_ipv4']['address'] }}"
+#+ Specifies the URL where Concourse CI can be accessed from the Cycloid API
+concourse_url: "https://{{ hostvars[groups['cycloid_scheduler'][0]]['ansible_default_ipv4']['address'] }}"
+#. concourse_auth_user(required, string): "admin"
+#+ Defines the username for authenticating with Concourse CI.
+concourse_auth_user: admin
+#. concourse_auth_password(required, string): "Ch4ngm3pls"
+#+ Defines the password for the Concourse CI user.
+concourse_auth_password: Ch4ngm3pls
+#. concourse_log_level(optional, string): "info"
+#+ Sets the log level for Concourse CI.
+concourse_log_level: info
+#. concourse_db_host(required, string): ""
+#+ Specifies the hostname or IP address of the Concourse CI database server.
+concourse_db_host:  "{{ hostvars[groups['cycloid_scheduler_db'][0]]['ansible_default_ipv4']['address'] }}"
+#. concourse_db_port(required, string): "5432"
+#+ Defines the port number on which the Concourse CI database server is listening.
+concourse_db_port: "5432"
+#. concourse_db_user(required, string): "concourse"
+#+ Specifies the username for the Concourse CI database.
+concourse_db_user: concourse
+#. concourse_db_password(required, string): "Ch4ngm3pls"
+#+ Defines the password for accessing the Concourse CI database.
+concourse_db_password: "Ch4ngm3pls"
+#. concourse_db_name(optional, string): "concourse"
+#+ Defines the name of the Concourse CI database.
+concourse_db_name: concourse
+
+#
+# Vault/Secret
+#
+
+#. vault_url(required, string): "https://{{ hostvars[groups['cycloid_creds'][0]]['ansible_default_ipv4']['address'] }}:8200"
+#+ External vault url used by others services.
+vault_url: https://{{ hostvars[groups['cycloid_creds'][0]]['ansible_default_ipv4']['address'] }}:8200
+
+
+#
+# Email
+#
+
+#. cycloid_email_smtp_svr_addr(required, string): "{{ hostvars[groups['smtp_server'][0]]['ansible_default_ipv4']['address'] }}:1025"
+#+ Specifies the address of the SMTP server used for sending emails.
+# The following example will rely on a smtp server installed locally on the host
+# cycloid_email_smtp_svr_addr: "{{ ansible_docker0['ipv4']['address'] }}:25"
+cycloid_email_smtp_svr_addr: "{{ hostvars[groups['smtp_server'][0]]['ansible_default_ipv4']['address'] }}:1025"
+#. cycloid_email_smtp_username(required, string): "admin"
+#+ Defines the username for SMTP authentication.
+cycloid_email_smtp_username: admin
+#. cycloid_email_smtp_password(required, string): "Ch4ngm3pls"
+#+ Defines the password for SMTP authentication.
+cycloid_email_smtp_password: Ch4ngm3pls
+#. cycloid_email_addr_from(required, string): "noreply@cycloid.io"
+#+ Specifies the email address that will appear in the "From" field of emails sent by Cycloid.
+cycloid_email_addr_from: noreply@cycloid.io
+#. cycloid_email_addr_return_path(required, string): "admin+bounce@cycloid.io"
+#+ Defines the return email for bounced emails.
+cycloid_email_addr_return_path: admin+bounce@cycloid.io
+#. cycloid_email_skip_tls_check(optional, bool): "false"
+#+ Allow insecure TLS/SSL with email. Usefull when using local postfix as relayhost with selfsigned certs
+cycloid_email_skip_tls_check: false
+
+# cycloid_email_redis* defined to keep retro compatibility.
+# In the future these variable will be depreciate and replaced by cycloid_cache_host and cycloid_cache_port
+cycloid_email_redis_host: "{{ hostvars[groups['cycloid_cache'][0]]['ansible_default_ipv4']['address'] }}"
+cycloid_email_redis_port: 6379
+
+#. cycloid_cache_host(required, string): "{{ hostvars[groups['cycloid_cache'][0]]['ansible_default_ipv4']['address'] }}"
+#+ Specifies the hostname or IP address of Redis server.
+#+ by default Get the address of the first defined host in cycloid_cache group
+cycloid_cache_host: "{{ cycloid_email_redis_host }}"
+#. cycloid_cache_port(optional, string): "6379"
+#+ Specifies the port to reach Redis server.
+cycloid_cache_port: "{{ cycloid_email_redis_port }}"
+#. cycloid_cache_username(optional, string): "default"
+#+ The username for authenticating with the Redis cache server. Set to empty "" to disable authentication.
+cycloid_cache_username: default
+#. cycloid_cache_password(optional, string): "Ch4ngm3pls"
+#+ The password for authenticating with the Redis cache server. Set to empty "" to disable authentication.
+cycloid_cache_password: "Ch4ngm3pls"
+#. cycloid_cache_schema(optional, string): "redis"
+#+ Redis URI schema. Use "rediss" for Redis connection over a secure (SSL/TLS) connection.
+cycloid_cache_schema: redis
+
+#. cost_explorer_es_url(optional, string): "{{elasticsearch_schema}}://{{ hostvars[groups['elasticsearch'][0]]['ansible_default_ipv4']['address'] }}:{{elasticsearch_port_api}}"
+#+ Defines the URL for connecting to the Elasticsearch service used by the Cost Explorer.
+cost_explorer_es_url: "{%- if use_local_elasticsearch|bool -%}{{elasticsearch_schema}}://{{ hostvars[groups['elasticsearch'][0]]['ansible_default_ipv4']['address'] }}:{{elasticsearch_port_api}}{%- endif -%}"
+#. cost_explorer_es_username(optional, string): "elastic"
+#+ Specifies the username for authenticating with the Elasticsearch service.
+cost_explorer_es_username: "{%- if use_local_elasticsearch|bool -%}{{ cycloid_elasticsearch_user }}{%- endif -%}"
+#. cost_explorer_es_password(optional, string): "Ch4ngm3pls"
+#+ Defines the password for authenticating with the Elasticsearch service.
+cost_explorer_es_password: "{%- if use_local_elasticsearch|bool -%}{{ cycloid_elasticsearch_password }}{%- endif -%}"
+#. cost_explorer_es_insecure_skip_tls(optional, bool): true
+#+ Configures whether to ignore TLS certificate errors when connecting to Elasticsearch.
+cost_explorer_es_insecure_skip_tls: true # ignore certificate errors if there are any
+#. cost_explorer_ingestion_schedule(optional, string): "*-*-* 00:00:00"
+#+ Sets the schedule for CostExplorer Ingestion jobs.
+# Every midnight
+cost_explorer_ingestion_schedule: "*-*-* 00:00:00"
+
+#
+# Cost Estimation
+#
+
+#
+#. cycloid_job_cost_estimation_injection_aws(optional, bool): "false"
+#+ Ingest the price of the AWS cloud provider for use in the Cost Estimation feature.
+cycloid_job_cost_estimation_injection_aws: false
+#. cycloid_job_cost_estimation_injection_azure(optional, bool): "false"
+#+ Ingest the price of the Azure cloud provider for use in the Cost Estimation feature.
+cycloid_job_cost_estimation_injection_azure: false
+#. cycloid_job_cost_estimation_injection_gcp(optional, bool): "false"
+#+ Ingest the price of the GCP cloud provider for use in the Cost Estimation feature.
+cycloid_job_cost_estimation_injection_gcp: false
+#. cost_estimation_gcp_cred_json(optional, string): ""
+#+ GCP json credential used to reach GCP pricing datas.
+cost_estimation_gcp_cred_json: ""
+
+#. cost_estimation_ingestion_schedule(optional, string): "Sun *-*-* 00:00:00"
+#+ Sets the schedule for CostEstimation Ingestion jobs.
+# Every sunday midnight
+cost_estimation_ingestion_schedule: "Sun *-*-* 00:00:00"
+
+#####################
+# advanced settings #
+#####################
+
+#. validate(optional, bool): true
+#+ Wait and validate running services via validate.yml
+validate: true
+
+#. validate_only(optional, bool): false
+#+ If true, only run validate.yml and skip other tasks
+validate_only: false
+
+#. uninstall(optional, bool): false
+#+ /!\ Set to true only if you want to uninstall cycloid /!\
+uninstall: false
+
+#. ca_certificates_container_shared(optional, bool): false
+#+ Share your rootCA from the host to containers
+ca_certificates_container_shared: false
+
+#. cycloid_packages(optional, map): debian
+#+ List of packages to install depending of the OS
+cycloid_packages:
+  debian:
+        - python3-pip
+        - default-mysql-client
+        - python3-setuptools
+        - gnupg2
+        - pass
+        - netcat
+  debian-10:
+        - python3-pip
+        - default-mysql-client
+        - python-setuptools
+        - gnupg2
+        - pass
+        - netcat
+        - python-backports.ssl-match-hostname
+  redhat:
+        - python3-pip
+        - mysql
+        - gnupg2
+        - nmap-ncat
+  centos-7:
+        - python3-pip
+        - mysql
+        - gnupg2
+        - nmap-ncat
+
+#. container_args_extra(optional, string): ""
+#+ Used to give extra argument to containers. Example to override domain server "--dns 172.17.0.1"
+container_args_extra: ""
+
+#. offline_setup(optional, bool): false
+#+ Set true to not install packages automatically.
+offline_setup: false
+
+#. cycloid_public_stacks(optional, bool): true
+#+ Create a catalog repository with Cycloid Public Stacks. (`cycloid_licence` need to be defined)
+cycloid_public_stacks: "{% if cycloid_licence != '' %}{{ not offline_setup }}{% else %}false{% endif %}"
+
+#. cycloid_admin_apikey(optional, bool): false
+#+ Create admin APIKEY on the first organization. APIKEY will be stored localy under ``{{playbook_dir}}/admin.apikey`. (`cycloid_licence` need to be defined)
+cycloid_admin_apikey: "false"
+
+#. ssl_subject_alt_name(optional, list): []
+#+ Alternative common name to use in addition of the default ones for the self signed certs . Use `DNS` for a domain name and `IP` for a raw IP address.
+ssl_subject_alt_name: []
+
+# HTTP proxy
+#. http_proxy(optional, string): ""
+#+ Specify the proxy server for HTTP connections. When set, all HTTP requests will be routed through the specified proxy server.
+http_proxy: ""
+#. https_proxy(optional, string): ""
+#+ Specify the proxy server for HTTPS connections. When set, all HTTPS requests will be routed through the specified proxy server.
+https_proxy: ""
+
+#. extra_no_proxy(optional, list): []
+#+ Specify a list of domain names, IP addresses, or network blocks that should bypass the proxy
+extra_no_proxy: []
+
+#. cycloid_cache_mon_install(optional, bool): false
+#+ Asynqmon is used to debug redis worker queue. Set true to install it
+cycloid_cache_mon_install: false
+
+#. vault_config(optional, map):
+#+ Override Vault config such storage.
+vault_config:
+  storage:
+    file:
+       path: /vault/file
+  ui: true
+  listener:
+    tcp:
+      address: "0.0.0.0:8200"
+      tls_disable: "0"
+      tls_cert_file: "/vault/config/ssl.crt"
+      tls_key_file:  "/vault/config/ssl.key"
+  default_lease_ttl: "168h"
+  max_lease_ttl: "720h"
+
+#
+# Azure AD integration
+#
+
+#. azure_ad_tenant_id(optional, string): ""
+#+ The tenant ID of Azure AD
+azure_ad_tenant_id: ""
+
+#. azure_ad_client_id(optional, string): ""
+#+ The client ID of Azure AD
+azure_ad_client_id: ""
+
+#
+# Google Oauth integration
+#
+
+#. google_client_id(optional, string): ""
+#+ The client ID of Google
+google_client_id: ""
+
+#. google_client_secret(optional, string): ""
+#+ The client secret of Google
+google_client_secret: ""
+
+#
+# Github Oauth integration
+#
+
+#. github_client_secret(optional, string): "https://api.github.com"
+#+ Use api github by default when oauth enabled. Need to be changed if using GitHub Enterprise.
+github_host_address: "{%- if github_client_id != '' -%}https://api.github.com{%- endif -%}"
+
+#. github_client_id(optional, string): ""
+#+ The client ID of Github
+github_client_id: ""
+
+#. github_client_secret(optional, string): ""
+#+ The client secret of Github
+github_client_secret: ""
+
+###########################
+# SAML2 authentification
+###########################
+
+# By default SAML3 files should be stored under saml/{cycloid-saml-sp.crt, ycloid-saml-sp.key, idp-metadata}
+
+#. saml_auth_enabled(optional, bool): false
+#+ Enabled SAML auth on Cyclid API.
+saml_auth_enabled: false
+#. saml_idp_metadata_url(optional, string): ""
+#+ URL to get your XML Identity Provider federation metadata file. If defined, do not provide saml_idp_metadata_file.
+saml_idp_metadata_url: ""
+#. saml_sp_certificate_file(optional, string): "cycloid-saml-sp.crt"
+#+ Name of the Public certificate stored in saml_local_path to use in cycloid.
+saml_sp_certificate_file: "cycloid-saml-sp.crt"
+#. saml_sp_private_key_file(optional, string): "cycloid-saml-sp.key"
+#+ Name of the certificate private key stored in saml_local_path to use in cycloid.
+saml_sp_private_key_file: "cycloid-saml-sp.key"
+#. saml_idp_metadata_file(optional, string): "idp-metadata"
+#+ Name of your xml identity provider federation metadata file. It could also be provided as an url with saml_idp_metadata_url.
+saml_idp_metadata_file: "idp-metadata"
+
+
+############
+# internal #
+############
+
+# Dynamic variables to determine if the component should be installed.
+# Setup Cycloid frontend, Backend and Nginx
 setup_cycloid_core: "{{ 'cycloid_core' in group_names }}"
+# Setup Concourse
 setup_cycloid_scheduler: "{{ 'cycloid_scheduler' in group_names }}"
-setup_cycloid_db: "{{ 'cycloid_db' in group_names }}"
-setup_cycloid_cache: "{{ 'cycloid_cache' in group_names }}"
+# Setup Postgres (Concourse DB)
 setup_cycloid_scheduler_db: "{{ 'cycloid_scheduler_db' in group_names }}"
+# Setup Mysql (Cycloid DB)
+setup_cycloid_db: "{{ 'cycloid_db' in group_names }}"
+# Setup Redis
+setup_cycloid_cache: "{{ 'cycloid_cache' in group_names }}"
+# Setup Vault
 setup_cycloid_creds: "{{ 'cycloid_creds' in group_names }}"
-#. setup_minio(optional): bool
-#+ install and configure minio, a s3-like remote storage
+# Setup MinIo (s3-like remote storage)
 setup_minio: "{{ 'minio' in group_names }}"
-#. setup_elasticsearch(optional): bool
-#+ install and configure elasticsearch for the current host, group_names is the list of groups associeted to the current host
+# Setup ElasticSearch
 setup_elasticsearch: "{{ 'elasticsearch' in group_names }}"
+# Setup fake SMTP (it will start a mailhog smtpd server to satisfy Cycloid requirements)
+setup_smtp_server: "{{ 'smtp_server' in group_names }}"
+
+# Global host variable to indicate if
+
 # specify if cycloid should use or not the local elasticsearch installed
 use_local_elasticsearch: "{%- if 'elasticsearch' in groups and groups['elasticsearch'] | length > 0 -%}true{%- else -%}false{%- endif -%}"
-
-# If you let cycloid-smtp:1025, it will start a mailhog smtpd server to satisfy Cycloid requirements
-setup_smtp_server: "{{ 'smtp_server' in group_names }}"
 use_local_smtp_server: "{%- if 'smtp_server' in groups and groups['smtp_server'] | length > 0 -%}true{%- else -%}false{%- endif -%}"
 
-cycloid_install_path: /opt/cycloid
+# Local path used to store certificats
 cycloid_local_datas_path: "{{ playbook_dir }}/datas"
+
+# Path used to install Cycloid
+cycloid_install_path: /opt/cycloid
+
+# Get the list of packages to install from cycloid_packages
+cycloid_packages_list: "{{ cycloid_packages[ansible_distribution | lower + '-' + ansible_distribution_major_version] | default(cycloid_packages[ansible_os_family | lower]) }}"
+
+#
+# Docker
+#
+
+# uses scaleway registry by default otherwise uses AWS
+use_registry_scaleway: true
+
+cycloid_frontend_image: "{% if use_registry_scaleway|bool %}rg.fr-par.scw.cloud/cycloidio/cycloid-frontend:{{ cycloid_frontend_version }}{% else %}661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:{{ cycloid_frontend_version }}{% endif %}"
+cycloid_api_image: "{% if use_registry_scaleway|bool %}rg.fr-par.scw.cloud/cycloidio/cycloid-backend:{{ cycloid_api_version }}{% else %}661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:{{ cycloid_api_version }}{% endif %}"
+
+cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
+concourse_db_image: postgres:14.5
+cycloid_cache_image: bitnami/redis:7.2.5
+cycloid_db_image: mysql:8.0.35
+concourse_web_image: concourse/concourse:7.8.3
+vault_image: vault:1.13.3
+cycloid_nginx_image: nginx:1.26
+cycloid_cache_mon_image: hibiken/asynqmon:latest
+minio_image: "minio/minio:latest"
+elasticsearch_image: elasticsearch:7.17.13
+kibana_image: bitnami/kibana:7.17.16
+
+cycloid_cache_mon_port: 5678
+cycloid_db_container_cmd: "--default-authentication-plugin=mysql_native_password"
 
 #
 # containers ports
 #
 
+# Chose to listen to one IP address or every IP address
 cycloid_api_container_ports:
   - "0.0.0.0:3001:3001"
   # - "{{ ansible_default_ipv4.address }}:3001:3001"
@@ -53,7 +448,7 @@ cycloid_frontend_container_ports:
   # - "{{ ansible_default_ipv4.address }}:3000:80"
   # - "127.0.0.1:3000:80"
 concourse_db_container_ports:
-  - "0.0.0.0:5432:5432"
+  - "0.0.0.0:{{ concourse_db_port }}:5432"
   # - "{{ ansible_default_ipv4.address }}:5432:5432"
   # - "127.0.0.1:5432:5432"
 concourse_web_container_ports:
@@ -95,40 +490,6 @@ kibana_container_ports:
   - "0.0.0.0:{{ kibana_port }}:{{ kibana_port }}"
 
 #
-# Pre setup
-#
-
-# Install packages regarding OS (debian by default)
-cycloid_packages:
-  debian:
-        - python3-pip
-        - default-mysql-client
-        - python3-setuptools
-        - gnupg2
-        - pass
-        - netcat
-  debian-10:
-        - python3-pip
-        - default-mysql-client
-        - python-setuptools
-        - gnupg2
-        - pass
-        - netcat
-        - python-backports.ssl-match-hostname
-  redhat:
-        - python3-pip
-        - mysql
-        - gnupg2
-        - nmap-ncat
-  centos-7:
-        - python3-pip
-        - mysql
-        - gnupg2
-        - nmap-ncat
-
-cycloid_packages_list: "{{ cycloid_packages[ansible_distribution | lower + '-' + ansible_distribution_major_version] | default(cycloid_packages[ansible_os_family | lower]) }}"
-
-#
 # Install your own rootCa on onprem servers
 #
 
@@ -137,16 +498,13 @@ ca_certificates_path:
   debian: /usr/local/share/ca-certificates
   redhat: /etc/pki/ca-trust/source/anchors
 
-# To containing your own root certificates to deploy on servers
+# Local path used to upload your own root certificates to deploy on servers
 ca_certificates_local_path: "{{ cycloid_local_datas_path }}/rootca/*"
 
 # System command to update root certificates
 ca_certificates_handler:
   debian: "/usr/sbin/update-ca-certificates"
   redhat: "/usr/bin/update-ca-trust"
-
-# Share your rootCA from the host to containers
-ca_certificates_container_shared: false
 
 # Certificates volumes to share on containers depending of ansible_os_family
 container_volumes_ca_certificates_default:
@@ -159,39 +517,9 @@ container_volumes_ca_certificates: "{% if ca_certificates_container_shared|bool 
 #update_ca_start_post: "{% if ca_certificates_container_shared %}/usr/sbin/update-ca-certificates{% endif %}"
 container_args_update_ca: "{% if ca_certificates_container_shared|bool %}--entrypoint /bin/bash{% endif %}"
 
-# container_args_extra can be used to give extra argument when running all containers.
-# It can be used for example to override domain server "--dns 172.17.0.1"
-container_args_extra: ""
-
 # If ca_certificates_container_shared, run update-ca before the /entrypoint
 cycloid_api_container_cmd: "{% if ca_certificates_container_shared|bool %}-c \"/usr/sbin/update-ca-certificates; /entrypoint\"{% endif %}"
-
 # docker exec -it cycloid-api bash -c "ls -l /etc/ssl/certs/ | grep DigiCertSHA2HighAssuranceServerCA.crt"
-
-# If your server doesn't have internet access. Packages can't be install manually
-# Set offline_setup: true to not install packages automatically
-offline_setup: false
-
-# If offline false, setup packages and docker
-setup_packages: "{{ not offline_setup }}"
-setup_docker: "{{ not offline_setup }}"
-
-# Pull docker image when configuring the service
-docker_pull: "{{ not offline_setup }}"
-
-# If provided, Set Cycloid licence
-cycloid_licence: ""
-
-# Body request to set Cycloid licence via the API
-cycloid_licence_body:
-  key: "{{ cycloid_licence }}"
-
-# Add cycloid public stack to the catalog repository. (can't create stack if licence is not activated)
-cycloid_public_stacks: "{% if cycloid_licence != '' %}{{ not offline_setup }}{% else %}false{% endif %}"
-
-# Create admin APIKEY on the first organization. (can't create stack if licence is not activated)
-# APIKEY will be stored localy under {{playbook_dir}}/admin.apikey
-cycloid_admin_apikey: "false"
 
 # SSL
 #
@@ -209,9 +537,8 @@ cycloid_third_party:
   crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party.crt"
   key: "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party.key"
 
-#. default_ssl_subject_alt_name(optional, dict)
-#+ a list of alternative common name to use for the self signed certs
-#+ use `DNS` for a domain name and `IP` for a raw IP address
+#. default_ssl_subject_alt_name(optional, list)
+#+ Alternative common name to use for the self signed certs use `DNS` for a domain name and `IP` for a raw IP address
 default_ssl_subject_alt_name:
   - DNS:127.0.0.1
   - DNS:cycloid
@@ -220,17 +547,6 @@ default_ssl_subject_alt_name:
   - DNS:concourse
   - DNS:minio
   - DNS:elasticsearch
-
-#. ssl_subject_alt_name(optional, dict)
-#+ a list of alternative common name to use in addition of the default ones for the self signed certs
-#+ use `DNS` for a domain name and `IP` for a raw IP address
-ssl_subject_alt_name: []
-
-# HTTP proxy
-http_proxy: ""
-https_proxy: ""
-
-extra_no_proxy: []
 
 default_no_proxy:
   - "localhost"
@@ -247,27 +563,21 @@ default_no_proxy:
 
 no_proxy: "{{ (default_no_proxy + extra_no_proxy) | join(',') }}"
 
-#
-# Docker
-#
-use_registry_scaleway: true
-# uses scaleway registry by default otherwise uses AWS
-cycloid_frontend_image: "{{'rg.fr-par.scw.cloud/cycloidio/cycloid-frontend:latest-public' if use_registry_scaleway else '661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:latest-public'}}"
-cycloid_api_image: "{{'rg.fr-par.scw.cloud/cycloidio/cycloid-backend:latest-public' if use_registry_scaleway else '661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:latest-public'}}"
-cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
-concourse_db_image: postgres:14.5
-cycloid_cache_image: redis:7.2.3
-cycloid_db_image: mysql:8.0.35
-# If mysql 8.x nativ auth need to be defined
-cycloid_db_container_cmd_mysql8: "--default-authentication-plugin=mysql_native_password"
-cycloid_db_container_cmd: "{% if cycloid_db_image.startswith('mysql:8') %}{{ cycloid_db_container_cmd_mysql8 }}{% endif %}"
-concourse_web_image: concourse/concourse:7.8.3
-vault_image: vault:1.13.3
+# If offline false, setup packages and docker
+setup_packages: "{{ not offline_setup }}"
+setup_docker: "{{ not offline_setup }}"
+
+# Pull docker image when configuring the service
+docker_pull: "{{ not offline_setup }}"
+
+# Body request to set Cycloid licence via the API
+cycloid_licence_body:
+  key: "{{ cycloid_licence }}"
 
 #
 # Concourse
 #
-concourse_url: "https://{{ hostvars[groups['cycloid_scheduler'][0]]['ansible_default_ipv4']['address'] }}"
+
 concourse_port: 8443
 # concourse_peer_address: must be specified IP used to reach the individual web node, from other web nodes.
 concourse_peer_address: "{{ ansible_default_ipv4.address }}"
@@ -280,20 +590,12 @@ concourse_authorized_worker_keys_path: "authorized_worker_keys"
 concourse_team_authorized_worker_keys_path: "team_authorized_worker_keys.yml"
 concourse_host_key_path: "host_key"
 concourse_session_signing_key_path: "session_signing_key"
-concourse_db_password: "Deraephoh9aay4Aide4phoS7xej1xi5m"
-concourse_db_host:  "{{ hostvars[groups['cycloid_scheduler_db'][0]]['ansible_default_ipv4']['address'] }}"
-concourse_db_user: concourse
-concourse_db_name: concourse
-concourse_auth_user: admin
-concourse_auth_password: admin
-concourse_log_level: info
 
 # disable|require|verify-ca|verify-full
 concourse_db_sslmode: disable
 
 # Extra env vars to pass to scheduler container
 cycloid_scheduler_extra_env: {}
-
 
 # Concourse keys
 #concourse_session_signing_key:
@@ -311,21 +613,6 @@ concourse_authorized_worker_keys:
 # Vault
 #
 vault_config_path: "{{ cycloid_install_path }}/vault"
-vault_config:
-  storage:
-    file:
-       path: /vault/file
-  ui: true
-  listener:
-    tcp:
-      address: "0.0.0.0:8200"
-      tls_disable: "0"
-      tls_cert_file: "/vault/config/ssl.crt"
-      tls_key_file:  "/vault/config/ssl.key"
-  default_lease_ttl: "168h"
-  max_lease_ttl: "720h"
-# External vault url used by others services
-vault_url: https://{{ hostvars[groups['cycloid_creds'][0]]['ansible_default_ipv4']['address'] }}:8200
 
 # Copy the vault secret key on the vault server and update vault service to automatically unseal at startup
 vault_auto_unseal: true
@@ -337,7 +624,6 @@ vault_start_post: "{% if vault_auto_unseal|bool %}{{ vault_unseal_cmd }}{% endif
 #
 
 cycloid_nginx_path: "{{ cycloid_install_path }}/nginx"
-cycloid_nginx_image: nginx:1.19.4
 
 # Nginx proxy_pass url used for cycloid api vhost. Most of the case it shouldn't be changed.
 cycloid_nginx_api_proxy_pass: "http://cycloid-api:3001"
@@ -352,19 +638,10 @@ cycloid_nginx_console_proxy_pass: "http://cycloid-frontend"
 # Cycloid
 #
 
-cycloid_initial_user:
-  username: "admin"
-  email: "disabled@no-email.cycloid"
-  password: "Ch4ngm3pls"
-  given_name: admin
-  family_name: cycloid
-
-cycloid_initial_organization_name: Cycloid
 cycloid_initial_organization_canonical: "{{ cycloid_initial_organization_name|lower|regex_replace('[^a-z0-9\\-_]') }}"
 cycloid_initial_organization:
     name: "{{ cycloid_initial_organization_name }}"
     canonical: "{{ cycloid_initial_organization_canonical }}"
-
 
 #cycloid_initial_catalog_cred:
 #    name: Catalog credential
@@ -382,46 +659,20 @@ cycloid_initial_service_catalog:
     url: https://github.com/cycloid-community-catalog/public-stacks
     branch: master
 
-cycloid_db_password: "chovoh6gahti5ohP0AiF6eex6evoonie"
-# cycloid_db_host: cycloid-db
-# Get the address of the first defined host in cycloid_db group
-cycloid_db_host: "{{ hostvars[groups['cycloid_db'][0]]['ansible_default_ipv4']['address'] }}"
-
-cycloid_db_port: 3306
-cycloid_db_user: cycloid
-cycloid_db_name: cycloid
 cycloid_db_path: "{{ cycloid_install_path }}/cycloid-db"
 
-cycloid_email_smtp_svr_addr: "{{ hostvars[groups['smtp_server'][0]]['ansible_default_ipv4']['address'] }}:1025"
-# The following example will rely on a smtp server installed locally on the host
-#cycloid_email_smtp_svr_addr: "{{ ansible_docker0['ipv4']['address'] }}:25"
-
-cycloid_email_smtp_username: admin
-cycloid_email_smtp_password: admin
-cycloid_email_addr_from: noreply@cycloid.io
-cycloid_email_addr_return_path: admin+ydbounce@cycloid.io
-cycloid_email_redis_host: "{{ hostvars[groups['cycloid_cache'][0]]['ansible_default_ipv4']['address'] }}"
-cycloid_email_redis_port: 6379
+# default redis db
 cycloid_email_redis_db: 0
-# Allow insecure TLS/SSL with email. Usefull when using local postfix as relayhost with selfsigned certs
-cycloid_email_skip_tls_check: false
+
+# If no user or password given, assume auth is disabled
+cycloid_cache_auth_disabled: "{% if cycloid_cache_username == '' or cycloid_cache_password == '' %}true{% else %}false{% endif %}"
+cycloid_cache_uri: "{{ cycloid_cache_schema }}://{% if not cycloid_cache_auth_disabled|bool %}{{ cycloid_cache_username }}:{{ cycloid_cache_password }}@{% endif %}{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
 
 # Cache allow you to define redis envvars
-cycloid_cache_env: {}
-cycloid_cache_uri: "redis://{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
-# Can be usefull to set password on redis
-# cycloid_cache_image: bitnami/redis:7.0.11
-# cycloid_cache_env:
-#   REDIS_PASSWORD: "{{ cycloid_cache_password }}"
-# cycloid_cache_uri: "redis://default:{{ cycloid_cache_password }}@{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
-
-# asynqmon is used to debug redis worker queue. Set true to install it
-cycloid_cache_mon_install: false
-cycloid_cache_mon_image: hibiken/asynqmon:latest
-cycloid_cache_mon_port: 5678
+cycloid_cache_env:
+  REDIS_PASSWORD: "{{ cycloid_cache_password }}"
 
 cycloid_jwt_key_1: 2f2122de-63f2-4eec-9c6f-c6abb3e1f007:7cdyHps2tYDp6e7VKPEstE5sDMQbK6WLyN3GmTsF7x7QpE6ZP5ra6yfVSkvXakbB
-cycloid_crypto_signing_key: totally-random-secret-key
 
 # iam credential to get ecr images
 cycloid_ecr_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') | default(omit)}}"
@@ -435,13 +686,8 @@ cycloid_scw_registry_secret_key: "{{ lookup('env','SCALEWAY_SECRET_ACCESS_KEY') 
 #cycloid_api_container_links: []
 #concourse_web_container_links: []
 
-cycloid_api_dns: cycloid-api
 cycloid_api_base_url: '{%- if cycloid_api_dns == "cycloid-api" -%}{{cycloid_console_base_url}}/api{%- else -%}https://{{cycloid_api_dns}}{%- endif -%}'
-cycloid_console_dns: cycloid-console
 cycloid_console_base_url: "https://{{ cycloid_console_dns }}"
-
-# DEBUG
-cycloid_api_log_level: "INFO"
 
 # Allow additional Origins to request the API. Multiple Origins can be specified using a comma ','.
 # e.g, cycloid_api_cors_allowed_origins: "https://domain1.tld,http://domain2.tld"
@@ -451,10 +697,6 @@ cycloid_api_cors_allowed_origins: "*"
 #
 # minio
 #
-
-#. minio_version(optional, string): "latest"
-#+ docker tag image to use, default latest
-minio_version: latest
 
 #. minio_port(optional, int): 9000
 #+ MinIO port, default to 9000
@@ -476,58 +718,8 @@ minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 #+ host directory used to store config/datas used by the container
 minio_config_path: "{{ cycloid_install_path }}/minio"
 
-
 # Keep env include var as legacy compatibility
 env: prod
-
-###########################
-# report.yml playbook     #
-###########################
-
-cycloid_report_path: "/tmp/cycloid-report"
-cycloid_report_local_path: "/tmp/cycloid-report-local"
-cycloid_report_sensitive: false
-cycloid_report_curl_timeout: 4
-
-#
-# Azure AD integration
-#
-
-#. azure_ad_tenant_id(optional, string): ""
-#+ the tenant ID of Azure AD
-azure_ad_tenant_id: ""
-
-#. azure_ad_client_id(optional, string): ""
-#+ the client ID of Azure AD
-azure_ad_client_id: ""
-
-#
-# Google Oauth integration
-#
-
-#. google_client_id(optional, string): ""
-#+ the client ID of Google
-google_client_id: ""
-
-#. google_client_secret(optional, string): ""
-#+ the client secret of Google
-google_client_secret: ""
-
-#
-# Github Oauth integration
-#
-
-#. github_client_secret(optional, string): "https://api.github.com"
-#+ Use api github by default when oauth enabled. Need to be changed if using GitHub Enterprise.
-github_host_address: "{%- if github_client_id != '' -%}https://api.github.com{%- endif -%}"
-
-#. github_client_id(optional, string): ""
-#+ the client ID of Github
-github_client_id: ""
-
-#. github_client_secret(optional, string): ""
-#+ the client secret of Github
-github_client_secret: ""
 
 #
 # elasticsearch
@@ -550,12 +742,6 @@ elasticsearch_port_node: 9300
 #+ the API port of elasticsearch
 elasticsearch_port_api: 9200
 
-elasticsearch_image: elasticsearch
-
-#. elasticsearch_version(option, string): 7.17.13
-#+ elasticsearch version to pull from hub.docker.com
-elasticsearch_version: 7.17.13
-
 #. elasticsearch_config_path(optional, string): /opt/cycloid/elasticsearch
 #+ the path to store elasticsearch configuration
 elasticsearch_config_path: "{{ cycloid_install_path }}/elasticsearch"
@@ -564,6 +750,8 @@ elasticsearch_config_path: "{{ cycloid_install_path }}/elasticsearch"
 #. enable elasticsearch basic authentication
 elasticsearch_basic_auth: true
 cycloid_elasticsearch_user: "elastic"
+#. cycloid_elasticsearch_password(optional, string): ""
+#+ the default credential to access elasticsearch with 'elastic' user
 cycloid_elasticsearch_password: "NmM5NmIwNmEwM2Q0NmYwNDYyMDgzZGFj"
 #. cycloid_elasticsearch_default(optional, string):
 #+ the default credential to access elasticsearch with 'elastic' user
@@ -578,7 +766,6 @@ cycloid_elasticsearch_default:
 ###########################
 # kibana
 ###########################
-kibana_image: bitnami/kibana:7.17.16
 kibana_port: 5601
 kibana_config_path: "{{ cycloid_install_path }}/kibana"
 
@@ -587,26 +774,7 @@ kibana_config_path: "{{ cycloid_install_path }}/kibana"
 # https://github.com/geerlingguy/ansible-role-docker/issues/189
 use_iptables_legacy: false
 
-
-###########################
-# SAML2 authentification
-###########################
-# Enabled SAML auth on Cyclid API.
-saml_auth_enabled: false
-
-# By default SAML3 files should be stored under saml/{cycloid-saml-sp.crt, ycloid-saml-sp.key, idp-metadata}
-
-# Url to get your xml identity provider federation metadata file. If defined, do not provide saml_idp_metadata_file
-saml_idp_metadata_url: ""
-# Name of the Public certificate to use in cycloid
-saml_sp_certificate_file: "cycloid-saml-sp.crt"
-# Name of the certificate private key to use in cycloid
-saml_sp_private_key_file: "cycloid-saml-sp.key"
-# Name of your xml identity provider federation metadata file. It could also be provided as an url with saml_idp_metadata_url
-saml_idp_metadata_file: "idp-metadata"
-
-
-
+# SAML
 # Ansible Local path where your saml certs/metadata are stored
 saml_local_path: "{{ cycloid_local_datas_path }}/saml"
 
@@ -618,16 +786,9 @@ saml_sp_certificate_path: "{%- if saml_auth_enabled|bool -%}/secrets/saml/{{ sam
 saml_sp_private_key_path: "{%- if saml_auth_enabled|bool -%}/secrets/saml/{{ saml_sp_private_key_file }}{%- endif -%}"
 saml_idp_metadata_path: "{%- if saml_auth_enabled|bool and saml_idp_metadata_url == '' -%}/secrets/saml/{{ saml_idp_metadata_file }}{%- endif -%}"
 
-
 ###########################
 # Cost Explorer / Cloud Cost Management feature (api params)
 ###########################
-cost_explorer_es_url: "{%- if use_local_elasticsearch|bool -%}{{elasticsearch_schema}}://{{ hostvars[groups['elasticsearch'][0]]['ansible_default_ipv4']['address'] }}:{{elasticsearch_port_api}}{%- endif -%}"
-cost_explorer_es_username: "{%- if use_local_elasticsearch|bool -%}{{ cycloid_elasticsearch_user }}{%- endif -%}"
-cost_explorer_es_password: "{%- if use_local_elasticsearch|bool -%}{{ cycloid_elasticsearch_password }}{%- endif -%}"
-cost_explorer_es_insecure_skip_tls: true # ignore certificate errors if there are any
-# Every midnight
-cost_explorer_ingestion_schedule: "*-*-* 00:00:00" # schedule for the timer related to cycloid-job-ccm-ingestion_container service
 #cost_explorer_es_ca_cert: "" # PEM-formatted CA certificate of Elasticsearch
 
 # Cloud Cost Management cmd
@@ -637,25 +798,17 @@ cycloid_job_ccm_ingestion_container_cmd: "{% if ca_certificates_container_shared
 ###########################
 # Cost Estimation         #
 ###########################
-# Ingest price of cloud povider use for Cost estimation feature
-cycloid_job_cost_estimation_injection_aws: false
-cycloid_job_cost_estimation_injection_azure: false
-cycloid_job_cost_estimation_injection_gcp: false
-
+# enable injestion if one cloud provider enabled
 cycloid_job_cost_estimation_injection: "{% if cycloid_job_cost_estimation_injection_aws|bool or cycloid_job_cost_estimation_injection_azure or cycloid_job_cost_estimation_injection_gcp|bool %}true{% else %}false{% endif %}"
 
 # command used to create an ingest job on the queue
 cost_estimation_ingestion_aws_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers aws --pricing-ingest-aws-use-known-services --pricing-ingest-aws-minimal; "
 cost_estimation_ingestion_azure_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers azure --pricing-ingest-azure-use-known-services --pricing-ingest-azure-minimal; "
-# credential used to reach gcp pricing datas
-cost_estimation_gcp_cred_json: ""
 cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers google --pricing-ingest-google-credential-json  $PRICING_INGEST_GOOGLE_CREDENTIAL_JSON --pricing-ingest-google-use-known-services --pricing-ingest-google-minimal; "
 
+# merge cost_estimation_ingestion cmd
 cycloid_job_cost_estimation_ingestion_container_args: "{% if cycloid_job_cost_estimation_injection_aws|bool %}{{ cost_estimation_ingestion_aws_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_azure|bool %}{{ cost_estimation_ingestion_azure_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_gcp|bool %}{{ cost_estimation_ingestion_gcp_minimal }}{% endif %}"
 cycloid_job_cost_estimation_ingestion_container_cmd: "-c {% if ca_certificates_container_shared|bool %}\"/usr/sbin/update-ca-certificates; {{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% else %}\"{{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% endif %}"
-
-# Every sunday
-cost_estimation_ingestion_schedule: "Sun *-*-* 00:00:00"
 
 # Share host saml file with container. It shouldn't be changed.
 container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/secrets/saml{%- endif -%}"
@@ -664,3 +817,12 @@ container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/sec
 # Monitoring
 #
 worker_metrics_enabled: false
+
+###########################
+# report.yml playbook     #
+###########################
+
+cycloid_report_path: "/tmp/cycloid-report"
+cycloid_report_local_path: "/tmp/cycloid-report-local"
+cycloid_report_sensitive: false
+cycloid_report_curl_timeout: 4
