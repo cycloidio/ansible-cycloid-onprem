@@ -36,7 +36,7 @@ Access to the database :
 
 ```
 source  /etc/default/cycloid-api
-mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST
+mysql --protocol=TCP -u$DB_USER -p$DB_PWD -h $DB_HOST
 ```
 
 TODO

@@ -228,8 +228,8 @@
     - name: mysql access | core-report
       shell: |
           source  /etc/default/cycloid-api
-          mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE -e "show tables;" > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/access_port/cycloid-db-tables.log
-          mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST -e "SHOW VARIABLES LIKE \"%version%\";" > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/access_port/cycloid-db-version.log
+          mysql --protocol=TCP -u$DB_USER -p$DB_PWD -h $DB_HOST --database $DB_NAME -e "show tables;" > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/access_port/cycloid-db-tables.log
+          mysql --protocol=TCP -u$DB_USER -p$DB_PWD -h $DB_HOST -e "SHOW VARIABLES LIKE \"%version%\";" > {{ cycloid_report_path }}/cycloid-core/{{ inventory_hostname }}/access_port/cycloid-db-version.log
       args:
        executable: /bin/bash
       no_log: false

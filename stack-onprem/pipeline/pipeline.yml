@@ -1083,7 +1083,7 @@ jobs:
             LATEST_PRICE=$(ls -1 git_terracost/mysql/testdata/*pricing.sql.gz | tail -n1)
             echo "  Using ${LATEST_PRICE}"
             scp -q ${LATEST_PRICE} ${REMOTE_USER}@${MAIN_INSTANCE}:/tmp/
-            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} 'gunzip -f /tmp/*-pricing.sql.gz && sed -i -E "/DROP TABLE IF EXISTS .pricing(_schema)?_migration/d;s/CREATE TABLE/CREATE TABLE IF NOT EXISTS/" /tmp/*-pricing.sql && source <(sudo grep MYSQL /etc/default/cycloid-api) && mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE < /tmp/*pricing.sql'
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} 'gunzip -f /tmp/*-pricing.sql.gz && sed -i -E "/DROP TABLE IF EXISTS .pricing(_schema)?_migration/d;s/CREATE TABLE/CREATE TABLE IF NOT EXISTS/" /tmp/*-pricing.sql && source <(sudo grep MYSQL /etc/default/cycloid-api) && mysql --protocol=TCP -u$DB_USER -p$DB_PWD -h $DB_HOST --database $DB_NAME < /tmp/*pricing.sql'
 
         inputs:
           - name: tfstate

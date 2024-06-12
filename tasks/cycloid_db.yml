@@ -18,8 +18,8 @@
     container_volumes:
       - "{{cycloid_db_path}}:/var/lib/mysql"
     container_env:
-      MYSQL_USER: cycloid
-      MYSQL_DATABASE: cycloid
-      MYSQL_PASSWORD: "{{cycloid_db_password}}"
+      DB_USER: cycloid
+      DB_NAME: cycloid
+      DB_PWD: "{{cycloid_db_password}}"
       MYSQL_ROOT_PASSWORD: "{{cycloid_db_password}}"
   tags: docker-services
