@@ -25,7 +25,7 @@
       DB_USER: "{{ cycloid_db_user }}"
       DB_PWD: "{{ cycloid_db_password }}"
       DB_HOST: "{{ cycloid_db_host }}"
-      YOUDEPLOY_MYSQL_SERVICE_PORT: "{{ cycloid_db_port }}"
+      DB_PORT: "{{ cycloid_db_port }}"
       CONCOURSE_URL: "{{ concourse_url }}"
       CONCOURSE_PORT: "{{ concourse_port }}"
       CONCOURSE_USER: "{{ concourse_auth_user }}"
@@ -69,12 +69,13 @@
       #COST_EXPLORER_ES_CA_CERT: "{{ cost_explorer_es_ca_cert }}"
       LOG_LEVEL: "{{ cycloid_api_log_level }}"
       LOG_SVC_LEVEL: "NONE"
+      # Do not use api as worker since we use a dedicated container
+      WORKER_RUN_INTERNAL: "{{cycloid_api_worker_run_internal}}
       #LOG_DEV_MODE: true
       #LOG_SVC_LEVEL: "DEBUG"
       http_proxy: "{{ http_proxy }}"
       https_proxy: "{{ http_proxy }}"
       no_proxy: "{{ no_proxy }}"
-
   tags: docker-services
 
 - name: Force flush handlers to ensure cycloid-api is started to create the first user | cycloid-core api
@@ -326,3 +327,60 @@
     src: scripts/cycloid-intercept.sh
     dest: /usr/local/bin/cycloid-intercept
     mode: '0755'
+
+- name: Define service | cycloid-core api-task-manager
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    name: cycloid-api-task-manager
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{cycloid_api_image}}"
+    container_ports: "{{ cycloid_api_container_ports }}"
+    container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
+    container_cmd: "{{ cycloid_api_container_cmd }}"
+    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ]) | select()|list }}" # select()|list ensure to remove empty list [""]
+    container_env:
+      # Run backend as worker/task-manager
+      RUN_CMD: worker
+      DB_NAME: "{{ cycloid_db_name }}"
+      DB_USER: "{{ cycloid_db_user }}"
+      DB_PWD: "{{ cycloid_db_password }}"
+      DB_HOST: "{{ cycloid_db_host }}"
+      DB_PORT: "{{ cycloid_db_port }}"
+      CONCOURSE_URL: "{{ concourse_url }}"
+      CONCOURSE_PORT: "{{ concourse_port }}"
+      CONCOURSE_USER: "{{ concourse_auth_user }}"
+      CONCOURSE_PASSWORD: "{{ concourse_auth_password }}"
+      CONCOURSE_TEAM: main
+      VAULT_URL: "{{ vault_url }}"
+      VAULT_SKIP_VERIFY: true
+      # Defined by env-file
+      #VAULT_ROLE_ID:
+      #VAULT_SECRET_ID:
+      #JAEGER_ENDPOINT: "localhost:14268"
+      EMAIL_SMTP_SVR_ADDR: "{{ cycloid_email_smtp_svr_addr }}"
+      EMAIL_SMTP_USERNAME: "{{ cycloid_email_smtp_username }}"
+      EMAIL_SMTP_PASSWORD: "{{ cycloid_email_smtp_password }}"
+      EMAIL_ADDR_FROM: "{{ cycloid_email_addr_from }}"
+      EMAIL_ADDR_RETURN_PATH: "{{ cycloid_email_addr_return_path }}"
+      EMAIL_SKIP_TLS_CHECK: "{{ cycloid_email_skip_tls_check }}"
+      # if we use the default fake smtp server (mailhog), enable dev_mode to allow unencrypted connection
+      EMAIL_DEV_MODE: "{{ use_local_smtp_server }}"
+      REDIS_URI: "{{ cycloid_cache_uri }}"
+      CRYPTO_SIGNING_KEY: "{{ cycloid_crypto_signing_key }}"
+      COST_EXPLORER_ES_URL: "{{ cost_explorer_es_url }}"
+      COST_EXPLORER_ES_USERNAME: "{{ cost_explorer_es_username }}"
+      COST_EXPLORER_ES_PASSWORD: "{{ cost_explorer_es_password }}"
+      COST_EXPLORER_ES_INSECURE_SKIP_TLS: "{{ cost_explorer_es_insecure_skip_tls }}"
+      #COST_EXPLORER_ES_CA_CERT: "{{ cost_explorer_es_ca_cert }}"
+      FRONTEND_BASE_URL: "{{ cycloid_console_base_url }}"
+      BACKEND_BASE_URL: "{{ cycloid_api_base_url }}"
+      LOG_LEVEL: "{{ cycloid_api_log_level }}"
+      LOG_SVC_LEVEL: "NONE"
+      #LOG_DEV_MODE: true
+      #LOG_SVC_LEVEL: "DEBUG"
+      http_proxy: "{{ http_proxy }}"
+      https_proxy: "{{ http_proxy }}"
+      no_proxy: "{{ no_proxy }}"
+  tags: docker-services
+  when: cycloid_api_task_manager_enabled|bool

@@ -224,6 +224,11 @@ backend:
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest-public"
 
+  # If enabled, split API and Task-manager/Worker (process job in queue) in 2 pods
+  taskManager:
+    enabled: true
+    replicaCount: 1
+
   # Concourse server to be used by the Cycloid Console API.
   # Defaults to the included one within the chart, but you also use a custom one if needed.
   concourse:

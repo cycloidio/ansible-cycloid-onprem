@@ -1,11 +1,10 @@
-{{- if .Values.backend.enabled }}
+{{- if .Values.backend.taskManager.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "backend.fullname" . }}
+  name: {{ include "backend.fullname" . }}-taskManager
   labels:
     {{- include "cycloid.labels" . | nindent 4 }}
-    {{- include "backend.selectorLabels" . | nindent 4 }}
     {{- with .Values.commonLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -14,9 +13,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.backend.autoscaling.enabled }}
-  replicas: {{ .Values.backend.replicaCount }}
-  {{- end }}
+  replicas: {{ .Values.backend.taskManager.replicaCount }}
   selector:
     matchLabels:
       {{- include "backend.selectorLabels" . | nindent 6 }}
@@ -68,121 +65,9 @@ spec:
             - "-lapp.kubernetes.io/instance=cycloid"
             - "-lapp.kubernetes.io/name=vault"
         {{- end }}
-        - name: migrations
-          {{- if .Values.backend.securityContext.enabled }}
-          securityContext: {{- omit .Values.backend.securityContext "enabled" | toYaml | nindent 12 }}
-          {{- end }}
-          image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
-          args:
-            - "/go/youdeploy-http-api"
-            - "version"
-          resources:
-            {{- toYaml .Values.backend.resources | nindent 12 }}
-          env:
-            - name: "RUN_MIGRATIONS"
-              value: "1"
-
-            - name: "DB_HOST"
-              value: {{ include "cycloid.mysqlHost" . | quote }}
-            - name: "DB_PORT"
-              value: {{ include "cycloid.mysqlPort" . | quote }}
-            - name: "DB_NAME"
-              value: {{ include "cycloid.mysqlDatabase" . | quote }}
-            - name: "DB_USER"
-              value: {{ include "cycloid.mysqlUser" . | quote }}
-            - name: "DB_PWD"
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "cycloid.mysqlSecretName" . }}
-                  key: mysql-password
-
-            - name: "REDIS_HOST"
-              value: {{ include "cycloid.redisHost" . | quote }}
-            - name: "REDIS_PORT"
-              value: {{ include "cycloid.redisPort" . | quote }}
-            - name: "REDIS_DB"
-              value: {{ include "cycloid.redisDatabase" . | quote }}
-            - name: "REDIS_PASSWORD"
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "cycloid.redisSecretName" . }}
-                  key: redis-password
-                  optional: true
-            - name: "REDIS_URI"
-              value: {{ include "cycloid.redisUri" . | quote }}
-
-            {{- if .Values.externalElasticsearch.enabled }}
-            - name: "COST_EXPLORER_ES_URL"
-              value: {{ include "cycloid.elasticsearchURL" . | quote }}
-            - name: "COST_EXPLORER_ES_USERNAME"
-              value: {{ include "cycloid.elasticsearchUser" . | quote }}
-            - name: "COST_EXPLORER_ES_PASSWORD"
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "cycloid.elasticsearchSecretName" . }}
-                  key: {{ template "cycloid.elasticsearchSecretKey" . }}
-            {{- end }}
-
-            - name: "CONCOURSE_URL"
-              value: {{ .Values.backend.concourse.url | quote }}
-            - name: "CONCOURSE_PORT"
-              value: {{ .Values.backend.concourse.port | quote }}
-            - name: "CONCOURSE_TEAM"
-              value: {{ .Values.backend.concourse.team | quote }}
-            - name: "CONCOURSE_USER"
-              value: {{ .Values.backend.concourse.user | quote }}
-            - name: "CONCOURSE_PASSWORD"
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "backend.backendSecretName" . }}
-                  key: concourse-password
-
-            - name: "VAULT_URL"
-              value: {{ .Values.backend.vault.url | quote }}
-            - name: "VAULT_ROLE_ID"
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "backend.backendSecretName" . }}
-                  key: vault-role-id
-            - name: "VAULT_SECRET_ID"
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "backend.backendSecretName" . }}
-                  key: vault-secret-id
-
-            - name: "FRONTEND_BASE_URL"
-              value: {{ .Values.frontend.url | quote }}
-            - name: "BACKEND_BASE_URL"
-              value: {{ .Values.backend.url | quote }}
-            - name: "CRYPTO_SIGNING_KEY"
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "backend.backendSecretName" . }}
-                  key: crypto-signing-key
-            - name: "JWT_KEY_1"
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "backend.backendSecretName" . }}
-                  key: jwt-key-1
-            {{- include "cycloid.extraEnvVars" .Values.backend | nindent 12 }}
-            {{- include "cycloid.extraSecretEnvVars" .Values.backend | nindent 12 }}
-            {{- include "cycloid.extraConfigMapEnvVars" .Values.backend | nindent 12 }}
-          {{- if or .Values.backend.extraEnvVarsCM .Values.backend.extraEnvVarsSecret }}
-          envFrom:
-            {{- if .Values.backend.extraFullConfigMapEnvVars }}
-            - configMapRef:
-                name: {{ .Values.backend.extraFullConfigMapEnvVars }}
-            {{- end }}
-            {{- if .Values.backend.extraFullSecretEnvVars }}
-            - secretRef:
-                name: {{ .Values.backend.extraFullSecretEnvVars }}
-            {{- end }}
-          {{- end }}
-          {{ template "backend.mounts" . }}
 
       containers:
-        - name: api
+        - name: task-manager
           {{- if .Values.backend.securityContext.enabled }}
           securityContext: {{- omit .Values.backend.securityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
@@ -190,11 +75,11 @@ spec:
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 3001
+              containerPort: 2112
               protocol: TCP
           startupProbe:
             httpGet:
-              path: /status
+              path: /metrics
               port: http
             initialDelaySeconds: 0
             periodSeconds: 30
@@ -203,7 +88,7 @@ spec:
             failureThreshold: 10
           livenessProbe:
             httpGet:
-              path: /status
+              path: /metrics
               port: http
             initialDelaySeconds: 0
             periodSeconds: 10
@@ -212,7 +97,7 @@ spec:
             failureThreshold: 3
           # readinessProbe:
           #   httpGet:
-          #     path: /
+          #     path: /metrics
           #     port: http
           #   initialDelaySeconds: 0
           #   periodSeconds: 10
@@ -222,12 +107,9 @@ spec:
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
           env:
-            - name: "RUN_MIGRATIONS"
-              value: "1"
-            {{- if .Values.backend.taskManager.enabled }}
-            - name: "WORKER_RUN_INTERNAL"
-              value: "false"
-            {{- end }}
+            - name: "RUN_CMD"
+              value: "worker"
+
             - name: "DB_HOST"
               value: {{ include "cycloid.mysqlHost" . | quote }}
             - name: "DB_PORT"
@@ -305,11 +187,6 @@ spec:
                 secretKeyRef:
                   name: {{ template "backend.backendSecretName" . }}
                   key: crypto-signing-key
-            - name: "JWT_KEY_1"
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "backend.backendSecretName" . }}
-                  key: jwt-key-1
             {{- include "cycloid.extraEnvVars" .Values.backend | nindent 12 }}
             {{- include "cycloid.extraSecretEnvVars" .Values.backend | nindent 12 }}
             {{- include "cycloid.extraConfigMapEnvVars" .Values.backend | nindent 12 }}

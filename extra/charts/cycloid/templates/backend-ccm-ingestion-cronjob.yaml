@@ -70,7 +70,7 @@ spec:
                   value: "0"
                 - name: "DB_HOST"
                   value: {{ include "cycloid.mysqlHost" . | quote }}
-                - name: "YOUDEPLOY_MYSQL_SERVICE_PORT"
+                - name: "DB_PORT"
                   value: {{ include "cycloid.mysqlPort" . | quote }}
                 - name: "DB_NAME"
                   value: {{ include "cycloid.mysqlDatabase" . | quote }}
