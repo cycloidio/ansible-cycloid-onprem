@@ -112,13 +112,13 @@ function force-user-email-validation {
   # if mysql installed
   # source  /etc/default/cycloid-api
   # ROLEID=5
-  # mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE -e "select * from user_emails where verification_token is not NULL;" -Ns
-  # for u in $(mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE -e "select user_id from user_emails where verification_token is not NULL;" -Ns);do
+  # mysql --protocol=TCP -u$DB_USER -p$DB_PWD -h $DB_HOST --database $DB_NAME -e "select * from user_emails where verification_token is not NULL;" -Ns
+  # for u in $(mysql --protocol=TCP -u$DB_USER -p$DB_PWD -h $DB_HOST --database $DB_NAME -e "select user_id from user_emails where verification_token is not NULL;" -Ns);do
   #   echo "user $u"
   #   # valide user
-  #   mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE -e "update user_emails set verification_token=NULL;" -Ns
+  #   mysql --protocol=TCP -u$DB_USER -p$DB_PWD -h $DB_HOST --database $DB_NAME -e "update user_emails set verification_token=NULL;" -Ns
   #   # invite user
-  #   mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE -e "INSERT INTO users_organizations_roles (organization_id, role_id, user_id) VALUES (1, $ROLEID, ${u})" -Ns
+  #   mysql --protocol=TCP -u$DB_USER -p$DB_PWD -h $DB_HOST --database $DB_NAME -e "INSERT INTO users_organizations_roles (organization_id, role_id, user_id) VALUES (1, $ROLEID, ${u})" -Ns
   # done
 }
 

@@ -21,10 +21,10 @@
     container_cmd: "{{ cycloid_api_container_cmd }}"
     container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ]) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
-      MYSQL_DATABASE: "{{ cycloid_db_name }}"
-      MYSQL_USER: "{{ cycloid_db_user }}"
-      MYSQL_PASSWORD: "{{ cycloid_db_password }}"
-      YOUDEPLOY_MYSQL_SERVICE_HOST: "{{ cycloid_db_host }}"
+      DB_NAME: "{{ cycloid_db_name }}"
+      DB_USER: "{{ cycloid_db_user }}"
+      DB_PWD: "{{ cycloid_db_password }}"
+      DB_HOST: "{{ cycloid_db_host }}"
       YOUDEPLOY_MYSQL_SERVICE_PORT: "{{ cycloid_db_port }}"
       CONCOURSE_URL: "{{ concourse_url }}"
       CONCOURSE_PORT: "{{ concourse_port }}"

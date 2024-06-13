@@ -83,15 +83,15 @@ spec:
             - name: "RUN_MIGRATIONS"
               value: "1"
 
-            - name: "YOUDEPLOY_MYSQL_SERVICE_HOST"
+            - name: "DB_HOST"
               value: {{ include "cycloid.mysqlHost" . | quote }}
             - name: "YOUDEPLOY_MYSQL_SERVICE_PORT"
               value: {{ include "cycloid.mysqlPort" . | quote }}
-            - name: "MYSQL_DATABASE"
+            - name: "DB_NAME"
               value: {{ include "cycloid.mysqlDatabase" . | quote }}
-            - name: "MYSQL_USER"
+            - name: "DB_USER"
               value: {{ include "cycloid.mysqlUser" . | quote }}
-            - name: "MYSQL_PASSWORD"
+            - name: "DB_PWD"
               valueFrom:
                 secretKeyRef:
                   name: {{ template "cycloid.mysqlSecretName" . }}
@@ -225,15 +225,15 @@ spec:
             - name: "RUN_MIGRATIONS"
               value: "1"
 
-            - name: "YOUDEPLOY_MYSQL_SERVICE_HOST"
+            - name: "DB_HOST"
               value: {{ include "cycloid.mysqlHost" . | quote }}
             - name: "YOUDEPLOY_MYSQL_SERVICE_PORT"
               value: {{ include "cycloid.mysqlPort" . | quote }}
-            - name: "MYSQL_DATABASE"
+            - name: "DB_NAME"
               value: {{ include "cycloid.mysqlDatabase" . | quote }}
-            - name: "MYSQL_USER"
+            - name: "DB_USER"
               value: {{ include "cycloid.mysqlUser" . | quote }}
-            - name: "MYSQL_PASSWORD"
+            - name: "DB_PWD"
               valueFrom:
                 secretKeyRef:
                   name: {{ template "cycloid.mysqlSecretName" . }}

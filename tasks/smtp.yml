@@ -30,6 +30,4 @@
     container_args: "{{ container_args_extra }}"
     container_volumes:
       - "{{cycloid_smtp_path}}:/opt"
-    container_env:
-      MYSQL_USER: /opt/mailhog.auth
   tags: docker-services

@@ -32,7 +32,7 @@ function flylogin {
 
   # Get the teamId from org name (mysql)
   REQUEST="select team_name from concourse_accounts where organization_id = (select id from organizations where canonical='${org}');"
-  TEAM=$(echo $REQUEST | mysql --protocol=TCP -u$MYSQL_USER -p$MYSQL_PASSWORD -h $YOUDEPLOY_MYSQL_SERVICE_HOST --database $MYSQL_DATABASE 2>/dev/null | tail -n1)
+  TEAM=$(echo $REQUEST | mysql --protocol=TCP -u$DB_USER -p$DB_PWD -h $DB_HOST --database $DB_NAME 2>/dev/null | tail -n1)
   # tail -n1 to remove field name (connect doesnt have --silence yet)
   echo "fly login $org"
 
