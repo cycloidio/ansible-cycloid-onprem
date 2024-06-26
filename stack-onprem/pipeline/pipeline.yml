@@ -524,7 +524,6 @@ jobs:
           ENV: ((env))
           CONFIG_ANSIBLE_PATH: ((config_ansible_path))
           CONCOURSE_WORKER: ((install_concourse_worker))
-          MINIO: ((install_minio))
           ELASTICSEARCH: ((install_elasticsearch))
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           GITHUB_KEY: ((config_git_private_key))
@@ -1026,9 +1025,6 @@ jobs:
 
             cy --insecure  --org $ORG config-repo create --branch config --cred $CRED --url $CR_REPO --default  --name onprem-test
             cy --insecure  --org $ORG catalog-repo create --branch stacks --cred $CRED --url $CR_REPO  --name onprem-test-stacks
-
-            # minio creds (default value used)
-            cy --insecure  --org $ORG  credential create aws --name minio --access-key ((onprem_minio_access_key)) --secret-key ((onprem_minio_secret_key))
 
             # AWS
             cy --insecure  --org $ORG  credential create aws --name admin_aws --access-key ((((onprem_aws_cred_name)).access_key)) --secret-key ((((onprem_aws_cred_name)).secret_key))

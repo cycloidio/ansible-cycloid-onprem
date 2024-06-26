@@ -85,7 +85,6 @@ ansible_params_extravars:
 instance_private_key_pair: ((git_ssh_bastion.ssh_key))
 
 install_concourse_worker: $INSTALL_CONCOURSE_WORKER
-install_minio: false
 install_elasticsearch: $INSTALL_ELASTICSEARCH
 
 cycloid_licence: ((custom_onprem_licence.$LICENCE_ENV))
@@ -96,8 +95,6 @@ cycloid_frontend_tag: $FRONTEND_IMAGE_TAG
 #### Datas populate on onprem setup ####
 onprem_cr_repository: git@github.com:cycloidio/onprem-test.git
 
-onprem_minio_access_key: AKIAIOSFODNN7EXAMPLE
-onprem_minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 # cred name need to exist on your org
 onprem_aws_cred_name: aws_admin
 onprem_aws_sandbox_cred_name: aws_sandbox

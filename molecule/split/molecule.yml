@@ -41,7 +41,6 @@ platforms:
     groups:
      - cycloid_core
      - smtp_server
-     - minio
      - cycloid_cache
 
   - name: cy-db
