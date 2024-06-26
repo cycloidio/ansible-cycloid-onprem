@@ -207,7 +207,7 @@ backend:
   # True if you want to enable the Cycloid Console API.
   enabled: true
 
-  nameOverride: "backend"
+  nameOverride: "api"
   fullnameOverride: ""
 
   # The externally accessible FQDN for the Cycloid Console API.
