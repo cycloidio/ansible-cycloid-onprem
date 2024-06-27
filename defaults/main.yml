@@ -413,8 +413,8 @@ concourse_web_image: concourse/concourse:7.8.3
 vault_image: vault:1.13.3
 cycloid_nginx_image: nginx:1.26
 cycloid_cache_mon_image: hibiken/asynqmon:latest
-elasticsearch_image: elasticsearch:7.17.13
-kibana_image: bitnami/kibana:7.17.16
+elasticsearch_image: elasticsearch:8.8.1
+kibana_image: bitnami/kibana:8.8.1
 
 cycloid_cache_mon_port: 5678
 

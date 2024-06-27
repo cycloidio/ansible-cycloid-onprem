@@ -478,7 +478,7 @@ mysql:
   image:
     registry: docker.io
     repository: bitnami/mysql
-    tag: 8.0.35-debian-11-r0
+    tag: 8.0.36
 
   ## MySQL Authentication parameters
   ## @param mysql.auth.rootPassword MySQL root password
