@@ -123,7 +123,7 @@
           Connection: "keep-alive"
           DNT: "1"
           Content-type: "application/vnd.cycloid.io.v1+json"
-        body: "{{cycloid_initial_user|to_json}}"
+        body: "{{cycloid_login_user|to_json}}"
       no_log: false
       register: cy_user_token
 

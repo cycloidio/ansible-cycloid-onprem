@@ -693,6 +693,12 @@ cycloid_api_task_manager_enabled: true
 # Disable internal worker on API container.
 cycloid_api_worker_run_internal: "{%- if cycloid_api_task_manager_enabled|bool -%}false{%- else -%}true{%- endif -%}"
 
+# API call /user/login expect only email/pass properties.
+# If more params, it fail
+cycloid_login_user:
+  email: "{{ cycloid_initial_user.email }}"
+  password: "{{ cycloid_initial_user.password }}"
+
 # Keep env include var as legacy compatibility
 env: prod
 
