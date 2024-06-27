@@ -537,7 +537,7 @@ cycloid_third_party:
 #. default_ssl_subject_alt_name(optional, list)
 #+ Alternative common name to use for the self signed certs use `DNS` for a domain name and `IP` for a raw IP address
 default_ssl_subject_alt_name:
-  - DNS:127.0.0.1
+  - IP:127.0.0.1
   - DNS:cycloid
   - DNS:localhost
   - DNS:vault
