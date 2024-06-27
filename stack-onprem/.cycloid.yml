@@ -8,7 +8,6 @@ keywords:
   - 'cycloid'
   - 'concourse'
   - 'worker'
-  - 'minio'
   - 'elasticsearch'
   - 'docker'
   - 'ses'
@@ -19,8 +18,6 @@ author: 'Cycloid'
 image: 'https://www.cycloid.io/themes/cycloid/images/owl_logo.png'
 technologies:
   - technology: cycloid-core
-    version: n/a
-  - technology: minio
     version: n/a
   - technology: redis
     version: n/a

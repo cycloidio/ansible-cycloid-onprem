@@ -28,7 +28,7 @@ function flylogin {
   fi
 
   # Get concourse and mysql access
-  eval $(grep 'MYSQL\|CONCOURSE' /etc/default/cycloid-api)
+  eval $(grep 'DB\|CONCOURSE' /etc/default/cycloid-api)
 
   # Get the teamId from org name (mysql)
   REQUEST="select team_name from concourse_accounts where organization_id = (select id from organizations where canonical='${org}');"

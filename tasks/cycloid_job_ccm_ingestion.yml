@@ -15,7 +15,7 @@
       DB_USER: "{{ cycloid_db_user }}"
       DB_PWD: "{{ cycloid_db_password }}"
       DB_HOST: "{{ cycloid_db_host }}"
-      YOUDEPLOY_MYSQL_SERVICE_PORT: "{{ cycloid_db_port }}"
+      DB_PORT: "{{ cycloid_db_port }}"
       EMAIL_SMTP_SVR_ADDR: "{{ cycloid_email_smtp_svr_addr }}"
       EMAIL_SMTP_USERNAME: "{{ cycloid_email_smtp_username }}"
       EMAIL_SMTP_PASSWORD: "{{ cycloid_email_smtp_password }}"

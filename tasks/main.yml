@@ -44,10 +44,6 @@
 
     #- include: prometheus.yml
 
-    - include: minio.yml
-      when: setup_minio|bool
-
-
   when: not uninstall|bool and not validate_only|bool
 
 # Wait and validate running services
@@ -79,8 +75,6 @@
     - include: cycloid_core_uninstall.yml
       when: setup_cycloid_core|bool
 
-    - include: minio_uninstall.yml
-      when: setup_minio|bool
     - include: elasticsearch_uninstall.yml
       when: setup_elasticsearch|bool
   when: uninstall|bool

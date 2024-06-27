@@ -93,12 +93,6 @@ use_cases:
           widget: switch
           type: boolean
           default: false
-        - name: "Minio (S3) enabled"
-          description: "Install MinIo (user as aws s3 external backend for tfstate)"
-          key: install_minio
-          widget: switch
-          type: boolean
-          default: false
         - name: "Elasticsearch (CCM) enabled"
           description: "Install Elasticsearch (used for CCM. Required dedicated instance or a bigger mutu)"
           key: install_elasticsearch
@@ -152,10 +146,9 @@ use_cases:
           key: cycloid_db_image
           widget: auto_complete
           type: string
-          default: "mysql:8.0.35"
+          default: "bitnami/mysql:8.0.36"
           values:
-              - "mysql:8.0.25"
-              - "mysql:8.0.33"
+              - "mysql:8.0.35"
               - "mariadb:10.2.11"
 
   # Use local ES, if needed can be exposed via extra vars
@@ -223,11 +216,9 @@ use_cases:
           type: string
           default: "debian-11-amd64-*"
           values:
-              - "debian-10-amd64-*"
               - "debian-11-amd64-*"
               - "debian-12-amd64-*"
               - "CentOS 8.3.2011 x86_64*"
-              - "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
               - "ubuntu/images/hvm-ssd/ubuntu-focal-22.04-amd64-server-*"
         - name: "Base ami ID (optional)"
           description: "Type of Aws EC2 frontend servers."

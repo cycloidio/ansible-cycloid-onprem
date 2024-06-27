@@ -51,7 +51,6 @@ platforms:
      - cycloid_db
      - cycloid_scheduler_db
      - cycloid_creds
-     - minio
      - smtp_server
      - cycloid_cache
 
@@ -83,7 +82,6 @@ provisioner:
   options:
     extra-vars:
       env: test
-      setup_minio: true
       use_iptables_legacy: true
     #vvv: "True"
   env:
