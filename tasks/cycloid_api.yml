@@ -335,7 +335,7 @@
     name: cycloid-api-task-manager
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{cycloid_api_image}}"
-    container_ports: "{{ cycloid_api_container_ports }}"
+    container_ports: "{{ cycloid_api_task_manage_container_ports }}"
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
     container_cmd: "{{ cycloid_api_container_cmd }}"
     container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ]) | select()|list }}" # select()|list ensure to remove empty list [""]

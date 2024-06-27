@@ -422,11 +422,16 @@ cycloid_cache_mon_port: 5678
 # containers ports
 #
 
+cycloid_api_port: 3001
+cycloid_api_task_manager_port: 2112
+
 # Chose to listen to one IP address or every IP address
 cycloid_api_container_ports:
-  - "0.0.0.0:3001:3001"
+  - "0.0.0.0:{{ cycloid_api_port }}:3001"
   # - "{{ ansible_default_ipv4.address }}:3001:3001"
   # - "127.0.0.1:3001:3001"
+cycloid_api_task_manage_container_ports:
+  - "0.0.0.0:{{ cycloid_api_task_manager_port }}:2112"
 cycloid_cache_container_ports:
   - "0.0.0.0:{{ cycloid_email_redis_port }}:6379"
   # - "{{ ansible_default_ipv4.address }}:{{ cycloid_email_redis_port }}:6379"
@@ -617,7 +622,7 @@ vault_start_post: "{% if vault_auto_unseal|bool %}{{ vault_unseal_cmd }}{% endif
 cycloid_nginx_path: "{{ cycloid_install_path }}/nginx"
 
 # Nginx proxy_pass url used for cycloid api vhost. Most of the case it shouldn't be changed.
-cycloid_nginx_api_proxy_pass: "http://cycloid-api:3001"
+cycloid_nginx_api_proxy_pass: "http://cycloid-api:{{ cycloid_api_port }}"
 
 # Nginx proxy_pass url used for cycloid console/frontend vhost. Most of the case it shouldn't be changed.
 cycloid_nginx_console_proxy_pass: "http://cycloid-frontend"
