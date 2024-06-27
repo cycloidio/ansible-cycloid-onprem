@@ -408,7 +408,7 @@ cycloid_api_image: "{% if use_registry_scaleway|bool %}rg.fr-par.scw.cloud/cyclo
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
 concourse_db_image: postgres:14.5
 cycloid_cache_image: bitnami/redis:7.2.5
-cycloid_db_image: mysql:8.0.35
+cycloid_db_image: bitnami/mysql:8.0.36
 concourse_web_image: concourse/concourse:7.8.3
 vault_image: vault:1.13.3
 cycloid_nginx_image: nginx:1.26
@@ -417,7 +417,6 @@ elasticsearch_image: elasticsearch:7.17.13
 kibana_image: bitnami/kibana:7.17.16
 
 cycloid_cache_mon_port: 5678
-cycloid_db_container_cmd: "--default-authentication-plugin=mysql_native_password"
 
 #
 # containers ports

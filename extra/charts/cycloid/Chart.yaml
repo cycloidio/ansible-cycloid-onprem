@@ -65,6 +65,7 @@ dependencies:
     repository: https://helm.releases.hashicorp.com
     tags:
       - hashicorp-vault
+    # https://github.com/hashicorp/vault-helm/blob/main/Chart.yaml#L6
     version: 0.27.0
     condition: vault.enabled
 

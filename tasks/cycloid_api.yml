@@ -15,7 +15,7 @@
   vars:
     name: cycloid-api
     container_docker_pull: "{{ docker_pull }}"
-    container_image: "{{cycloid_api_image}}"
+    container_image: "{{ cycloid_api_image }}"
     container_ports: "{{ cycloid_api_container_ports }}"
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
     container_cmd: "{{ cycloid_api_container_cmd }}"
@@ -70,7 +70,7 @@
       LOG_LEVEL: "{{ cycloid_api_log_level }}"
       LOG_SVC_LEVEL: "NONE"
       # Do not use api as worker since we use a dedicated container
-      WORKER_RUN_INTERNAL: "{{cycloid_api_worker_run_internal}}
+      WORKER_RUN_INTERNAL: "{{ cycloid_api_worker_run_internal }}"
       #LOG_DEV_MODE: true
       #LOG_SVC_LEVEL: "DEBUG"
       http_proxy: "{{ http_proxy }}"
