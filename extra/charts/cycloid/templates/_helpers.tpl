@@ -201,15 +201,36 @@ Return the Redis Secret Name
 {{- end -}}
 
 {{/*
+Return the Redis schema
+*/}}
+{{- define "cycloid.redisSchema" -}}
+{{- if or .Values.redis.tls.enabled .Values.externalRedis.tls.enabled -}}
+  rediss
+{{- else -}}
+  redis
+{{- end -}}
+{{- end -}}
+
+
+{{/*
+Return the Redis username and password for authentication
+*/}}
+{{- define "cycloid.redisUserAuth" -}}
+  {{- if .Values.redis.auth.enabled -}}
+    :$(REDIS_PASSWORD)@
+  {{- else if .Values.externalRedis.auth.enabled -}}
+      {{ .Values.externalRedis.auth.username }}:$(REDIS_PASSWORD)@
+  {{- end -}}
+{{- end -}}
+
+{{/*
 Return the Redis URI
 */}}
 {{- define "cycloid.redisUri" -}}
-{{- if .Values.redis.enabled -}}
-  {{- if .Values.redis.auth.enabled -}}
-    {{- printf "redis://:$(REDIS_PASSWORD)@$(REDIS_HOST):$(REDIS_PORT)/$(REDIS_DB)" -}}
-  {{- else -}}
-    {{- printf "redis://$(REDIS_HOST):$(REDIS_PORT)/$(REDIS_DB)" -}}
-  {{- end -}}
+{{- $redisSchema := include "cycloid.redisSchema" . -}}
+{{- $redisAuth := include "cycloid.redisUserAuth" . -}}
+{{- if or .Values.redis.enabled .Values.externalRedis.enabled -}}
+        {{- printf "%s://%s$(REDIS_HOST):$(REDIS_PORT)/$(REDIS_DB)" $redisSchema $redisAuth -}}
 {{- end -}}
 {{- end -}}
 
