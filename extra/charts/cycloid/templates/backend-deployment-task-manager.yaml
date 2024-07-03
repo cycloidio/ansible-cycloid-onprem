@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "backend.fullname" . }}-taskManager
+  name: {{ include "backend.fullname" . }}-task-manager
   labels:
     {{- include "cycloid.labels" . | nindent 4 }}
     {{- with .Values.commonLabels }}
