@@ -13,6 +13,9 @@ Try to add a change file to the unreleased pool for every distinct changes you h
 The following command will prompt you for several information and generate a change file for you:
 ```bash
 changie new
+git add .
+git commit -p
+git push
 ```
 
 The unreleased pool of changes will be used to generate the `CHANGELOG.md` when cutting a new release.
