@@ -413,12 +413,13 @@ jobs:
 
             # Galaxy install for onprem
             set -x
-            ansible-galaxy install -r requirements.yml --roles-path=roles -v
+            ansible-galaxy role install -r requirements.yml -p roles -v --force
+            ansible-galaxy collection install -r requirements.yml -p collections -v --force
             set +x
 
             # If worker needed, generate config used by the next install-worker job
             if [ "$CONCOURSE_WORKER" = "true" ]; then
-              ansible-galaxy install -r worker-requirement.yml --roles-path=roles -v --force
+              ansible-galaxy role install -r worker-requirements.yml -p roles -v --force
             fi
 
             # Update onprem ansible role with files from the selected branch
