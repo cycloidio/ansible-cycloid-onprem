@@ -1,4 +1,5 @@
 ---
+roles:
 #- src: https://github.com/cycloidio/ansible-prometheus.git
 #  version: master
 #  name: cycloid.prometheus
@@ -28,3 +29,9 @@
   version: master
   name: mhutter.docker-systemd-service
   scm: git
+
+collections:
+  # Install a collection from Ansible Galaxy.
+  - name: community.docker
+    version: ">=3.10.0"
+    source: https://galaxy.ansible.com

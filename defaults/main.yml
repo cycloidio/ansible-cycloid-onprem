@@ -402,8 +402,18 @@ cycloid_packages_list: "{{ cycloid_packages[ansible_distribution | lower + '-' +
 # uses scaleway registry by default otherwise uses AWS
 use_registry_scaleway: true
 
-cycloid_frontend_image: "{% if use_registry_scaleway|bool %}rg.fr-par.scw.cloud/cycloidio/cycloid-frontend:{{ cycloid_frontend_version }}{% else %}661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend:{{ cycloid_frontend_version }}{% endif %}"
-cycloid_api_image: "{% if use_registry_scaleway|bool %}rg.fr-par.scw.cloud/cycloidio/cycloid-backend:{{ cycloid_api_version }}{% else %}661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api:{{ cycloid_api_version }}{% endif %}"
+# iam credential to get ecr images
+cycloid_aws_registry: 661913936052.dkr.ecr.eu-west-1.amazonaws.com
+cycloid_ecr_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') | default(omit)}}"
+cycloid_ecr_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') | default(omit)}}"
+
+# iam credential to get scaleway images
+cycloid_scw_registry: "rg.fr-par.scw.cloud/cycloidio"
+cycloid_scw_registry_access_key: "{{ lookup('env','SCALEWAY_ACCESS_KEY_ID') | default(omit)}}"
+cycloid_scw_registry_secret_key: "{{ lookup('env','SCALEWAY_SECRET_ACCESS_KEY') | default(omit)}}"
+
+cycloid_frontend_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-frontend:{{ cycloid_frontend_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-frontend:{{ cycloid_frontend_version }}{% endif %}"
+cycloid_api_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-backend:{{ cycloid_api_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-http-api:{{ cycloid_api_version }}{% endif %}"
 
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
 concourse_db_image: postgres:14.5
@@ -669,15 +679,6 @@ cycloid_cache_env:
   REDIS_PASSWORD: "{{ cycloid_cache_password }}"
 
 cycloid_jwt_key_1: 2f2122de-63f2-4eec-9c6f-c6abb3e1f007:7cdyHps2tYDp6e7VKPEstE5sDMQbK6WLyN3GmTsF7x7QpE6ZP5ra6yfVSkvXakbB
-
-# iam credential to get ecr images
-cycloid_ecr_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') | default(omit)}}"
-cycloid_ecr_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') | default(omit)}}"
-
-# iam credential to get scaleway images
-cycloid_scw_registry: "rg.fr-par.scw.cloud/cycloidio"
-cycloid_scw_registry_access_key: "{{ lookup('env','SCALEWAY_ACCESS_KEY_ID') | default(omit)}}"
-cycloid_scw_registry_secret_key: "{{ lookup('env','SCALEWAY_SECRET_ACCESS_KEY') | default(omit)}}"
 
 #cycloid_api_container_links: []
 #concourse_web_container_links: []
