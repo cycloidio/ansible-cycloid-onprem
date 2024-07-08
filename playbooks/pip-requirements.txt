@@ -1,4 +1,4 @@
-ansible==10.1.*
+ansible==8.7.*
 docker
 passlib
 bcrypt
