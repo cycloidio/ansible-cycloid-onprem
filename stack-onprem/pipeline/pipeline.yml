@@ -41,28 +41,28 @@ resource_types:
   type: docker-image
   source:
     repository: ljfranklin/terraform-resource
-    tag: ((terraform_version))
+    tag: '1.8.2'
 
 resources:
 - name: tfstate
   type: terraform
   icon: terraform
   source:
-    env_name: ((env))
+    env_name: ($ .environment $)
     backend_type: s3
     backend_config:
-      bucket: ((terraform_storage_bucket_name))
-      key: ((project))-((env)).tfstate
-      workspace_key_prefix: ((project))
+      bucket: ($ .organization_canonical $)-terraform-remote-state
+      key: ($ .project $)-($ .environment $).tfstate
+      workspace_key_prefix: ($ .project $)
       region: ((aws_default_region))
       access_key: ((aws_access_key))
       secret_key: ((aws_secret_key))
     vars:
       access_key: ((aws_access_key))
       secret_key: ((aws_secret_key))
-      env: ((env))
-      project: ((project))
-      customer: ((customer))
+      env: ($ .environment $)
+      project: ($ .project $)
+      customer: ($ .organization_canonical $)
       aws_region: ((aws_default_region))
     env:
       AWS_ACCESS_KEY_ID: ((aws_access_key))
@@ -75,9 +75,9 @@ resources:
   icon: github-circle
   type: git
   source:
-    uri: ($ scs_url $)
+    uri: ($ .scs_url $)
     branch: ((stack_git_branch))
-    private_key: ((config_git_private_key))
+    private_key: ((($ .cr_cred_path $).ssh_key))
     paths:
       - stack-onprem/pipeline/first-trigger
 
@@ -86,9 +86,9 @@ resources:
   icon: github-circle
   type: git
   source:
-    uri: ($ scs_url $)
+    uri: ($ .scs_url $)
     branch: ((stack_git_branch))
-    private_key: ((config_git_private_key))
+    private_key: ((($ .cr_cred_path $).ssh_key))
     paths:
       - stack-onprem/terraform/*
 
@@ -96,9 +96,9 @@ resources:
   icon: github-circle
   type: git
   source:
-    uri: ($ scs_url $)
+    uri: ($ .scs_url $)
     branch: ((stack_git_branch))
-    private_key: ((config_git_private_key))
+    private_key: ((($ .cr_cred_path $).ssh_key))
     ignore_paths:
       - stack-onprem/terraform/*
       - stack-onprem/pipeline/*
@@ -108,21 +108,21 @@ resources:
   type: git
   icon: github-circle
   source:
-    uri: ($ cr_url $)
-    branch: ($ cr_branch $)
-    private_key: ((config_git_private_key))
+    uri: ($ .cr_url $)
+    branch: ($ .cr_branch $)
+    private_key: ((($ .cr_cred_path $).ssh_key))
     paths:
-      - ((config_terraform_path))/*
+      - ($ .project $)/terraform/($ .environment $)/*
 
 - name: git_config-ansible
   type: git
   icon: github-circle
   source:
-    uri: ($ cr_url $)
-    branch: ($ cr_branch $)
-    private_key: ((config_git_private_key))
+    uri: ($ .cr_url $)
+    branch: ($ .cr_branch $)
+    private_key: ((($ .cr_cred_path $).ssh_key))
     paths:
-      - ((config_ansible_path))/environments/cycloid-((env)).yml
+      - ($ .project $)/ansible/environments/cycloid-($ .environment $).yml
 
 # git_terracost used by populate-datas
 # Cost estimation feature use cloudprovider pricing datas.
@@ -133,7 +133,7 @@ resources:
   source:
     uri: git@github.com:cycloidio/terracost.git
     branch: master
-    private_key: ((config_git_private_key))
+    private_key: ((($ .cr_cred_path $).ssh_key))
     paths:
       - mysql/testdata/*
 
@@ -183,7 +183,7 @@ jobs:
           - name: git_stack-terraform
             path: "stack"
         params:
-          CONFIG_PATH: ((config_terraform_path))
+          CONFIG_PATH: ($ .project $)/terraform/($ .environment $)
           STACK_PATH: stack-onprem/terraform
 
       - put: tfstate
@@ -224,7 +224,7 @@ jobs:
           - name: git_stack-terraform
             path: "stack"
         params:
-          CONFIG_PATH: ((config_terraform_path))
+          CONFIG_PATH: ($ .project $)/terraform/($ .environment $)
           STACK_PATH: stack-onprem/terraform
 
       - put: tfstate
@@ -251,10 +251,10 @@ jobs:
       #           cy --org ${ORGANIZATION} pp pause-job --project ${PROJECT} --env ${ENV} --job terraform-apply
       #     params:
       #       CY_API_URL: 'https://http-api.cycloid.io'
-      #       ORGANIZATION: ((customer))
+      #       ORGANIZATION: ($ .organization_canonical $)
       #       API_KEY: ((api_key))
-      #       ENV: ((env))
-      #       PROJECT: ((project))
+      #       ENV: ($ .environment $)
+      #       PROJECT: ($ .project $)
 
 - name: terraform-destroy
   max_in_flight: 1
@@ -276,7 +276,7 @@ jobs:
             - name: git_stack-terraform
               path: "stack"
           params:
-            CONFIG_PATH: ((config_terraform_path))
+            CONFIG_PATH: ($ .project $)/terraform/($ .environment $)
             STACK_PATH: stack-onprem/terraform
 
         - put: tfstate
@@ -522,12 +522,12 @@ jobs:
           - name: cycloid-onprem
           - name: access
         params:
-          ENV: ((env))
-          CONFIG_ANSIBLE_PATH: ((config_ansible_path))
+          ENV: ($ .environment $)
+          CONFIG_ANSIBLE_PATH: ($ .project $)/ansible
           CONCOURSE_WORKER: ((install_concourse_worker))
           ELASTICSEARCH: ((install_elasticsearch))
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
-          GITHUB_KEY: ((config_git_private_key))
+          GITHUB_KEY: ((($ .cr_cred_path $).ssh_key))
           SCW_ACCESS_KEY: ((scw_access_key))
           SCW_SECRET_KEY: ((scw_secret_key))
           AWS_ACCESS_KEY_ID: ((aws_access_key))
@@ -707,12 +707,12 @@ jobs:
               path: "stack"
           params:
             CY_API_URL: 'https://http-api.cycloid.io'
-            ORGANIZATION: ((customer))
+            ORGANIZATION: ($ .organization_canonical $)
             API_KEY: ((api_key))
-            ENV: ((env))
-            PROJECT: ((project))
-            BUCKET_PATH: ((project))/((env))/((project))-((env)).tfstate
-            BUCKET_NAME: ((terraform_storage_bucket_name))
+            ENV: ($ .environment $)
+            PROJECT: ($ .project $)
+            BUCKET_PATH: ($ .project $)/($ .environment $)/($ .project $)-($ .environment $).tfstate
+            BUCKET_NAME: ($ .organization_canonical $)-terraform-remote-state
             EXTERNAL_BACKEND_AWS_CRED_NAME: ((external_backend_aws_cred_name))
             AWS_ACCESS_KEY_ID: ((aws_access_key))
             AWS_DEFAULT_REGION: ((aws_default_region))
@@ -1087,7 +1087,7 @@ jobs:
           - name: git_terracost
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
-          GIT_PRIVATE_KEY: ((config_git_private_key))
+          GIT_PRIVATE_KEY: ((($ .cr_cred_path $).ssh_key))
           CR_REPO: ((onprem_cr_repository))
           IV_BUCKET_NAME: cycloid-terraform-remote-state
           IV_BUCKET_PATH: cycloidio-website/demo-hack/cycloid-demo.tfstate

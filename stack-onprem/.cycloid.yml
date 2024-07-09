@@ -1,5 +1,5 @@
 ---
-version: '2'
+version: '3'
 name: 'On-premise'
 canonical: 'cycloid-onprem'
 status: 'private'
@@ -41,12 +41,12 @@ config:
         path: 'pipeline/pipeline.yml'
       variables:
         path: 'pipeline/variables.sample.yml'
-        destination: '($ project $)/pipeline/variables-($ environment $).yml'
+        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
     terraform:
       onprem:
         path: 'terraform/main.tf.sample'
-        destination: '($ project $)/terraform/($ environment $)/main.tf'
+        destination: '($ .project $)/terraform/($ .environment $)/main.tf'
     ansible:
       onprem:
         path: 'ansible/environments/cycloid.yml.sample'
-        destination: '($ project $)/ansible/environments/cycloid-($ environment $).yml'
+        destination: '($ .project $)/ansible/environments/cycloid-($ .environment $).yml'
