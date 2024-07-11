@@ -352,6 +352,11 @@ app.kubernetes.io/name: {{ include "backend.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{- define "backendTaskManager.selectorLabels" -}}
+app.kubernetes.io/name: {{ printf "%s-task-manager" (include "backend.name" .) }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
 {{/*
 Create the name of the service account to use
 */}}
