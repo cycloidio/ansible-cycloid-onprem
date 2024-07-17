@@ -27,6 +27,6 @@
     container_image: "{{ cycloid_cache_mon_image }}"
     container_ports:
       - '{{ cycloid_cache_mon_port }}:8080'
-    container_args: "-e REDIS_URL=\"redis://{{ cycloid_cache_host }}:{{ cycloid_cache_port }}\" -e PORT=8080 {{ container_args_extra }}"
+    container_args: "-e REDIS_URL=\"{{ cycloid_cache_uri }}\" -e PORT=8080 {{ container_args_extra }}"
   tags: docker-services
   when: cycloid_cache_mon_install|bool
