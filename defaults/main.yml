@@ -498,6 +498,7 @@ elasticsearch_container_ports:
   # - "127.0.0.1:{{ elasticsearch_port_api }}:9200"
 minio_container_ports:
   - "0.0.0.0:{{ minio_port }}:9000"
+  - "0.0.0.0:{{ minio_console_port }}:9001"
   # - "{{ ansible_default_ipv4.address }}:{{ minio_port }}:9000"
   # - "127.0.0.1:{{ minio_port }}:9000"
 kibana_container_ports:
@@ -723,18 +724,19 @@ env: prod
 #. minio_port(optional, int): 9000
 #+ MinIO port, default to 9000
 minio_port: 9000
+minio_console_port: 9001
 
-#. minio_access_key(required): str
+#. minio_root_user(required): str
 #+ the aws-like access key
-minio_access_key: AKIAIOSFODNN7EXAMPLE
+minio_root_user: AKIEXAMPLE
 
 #. minio_secret_key(required): str
 #+ the aws-like secret key
-minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+minio_root_password: EXAMPLEKEY
 
 #. minio_browser(optional, string): off
 #+ uncomment to enable browser interface
-# minio_browser: on
+minio_browser: off
 
 #. minio_config_path(optional, string): "{{ cycloid_install_path }}/minio"
 #+ host directory used to store config/datas used by the container

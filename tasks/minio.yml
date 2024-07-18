@@ -13,8 +13,9 @@
         container_ports: "{{ minio_container_ports }}"
         container_args: "{{ container_args_extra }}"
         container_env:
-          MINIO_ACCESS_KEY: "{{ minio_access_key }}"
-          MINIO_SECRET_KEY: "{{ minio_secret_key }}"
+          # https://min.io/docs/minio/linux/reference/minio-server/minio-server.html
+          MINIO_ROOT_USER: "{{ minio_root_user }}"
+          MINIO_ROOT_PASSWORD: "{{ minio_root_password }}"
           MINIO_BROWSER: "{{ minio_browser | default('off') }}"
         container_labels:
           - ansible.managed=true
