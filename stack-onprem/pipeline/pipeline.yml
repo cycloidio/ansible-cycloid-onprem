@@ -461,7 +461,7 @@ jobs:
             # 30 retry = wait 240 sec
             max_retry=30
             for i in $(seq 1 $max_retry); do
-              echo "waiting... (${i}/${max_retry})"
+              echo "waiting... ( ${i}/${max_retry} )"
               if ( nc -z -w3 ${MAIN_INSTANCE} 22 < /dev/null  ); then
                 echo "port 22 open"
                 break
