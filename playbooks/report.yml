@@ -613,6 +613,80 @@
 
     when: setup_cycloid_creds|bool
 
+
+
+########################
+# minio report
+########################
+  - block:
+    - name: create report directory | minio-report
+      file:
+        path: "{{ item }}"
+        state: directory
+        recurse: yes
+      with_items:
+        - "{{ cycloid_report_path }}/minio/{{ inventory_hostname }}/systemctl"
+        - "{{ cycloid_report_path }}/minio/{{ inventory_hostname }}/curl"
+        - "{{ cycloid_report_path }}/minio/{{ inventory_hostname }}/access_port"
+        - "{{ cycloid_report_path }}/minio/{{ inventory_hostname }}/docker"
+
+    - name: systemctl | minio-report
+      shell: |
+          systemctl cat {{ item }} > {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/systemctl/{{ item }} 2>&1
+          systemctl status {{ item }} > {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/systemctl/{{ item }}.status 2>&1
+
+          # Get the EnvironmentFile
+          EnvironmentFile=$(cat {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/systemctl/{{ item }} | grep EnvironmentFile | awk -F '[=]' '{print $2}')
+          if [ ! -z "$EnvironmentFile" ]; then
+            cp $EnvironmentFile {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/systemctl/
+            if [ "{{ cycloid_report_sensitive|bool }}" == "False" ]; then
+              sed -i 's/PASSWORD=.*/PASSWORD=XXXXXXXX/; s/JWT_KEY.*/JWT_KEY_XXXXX/' {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/systemctl/$(basename $EnvironmentFile)
+            fi
+          fi
+
+          journalctl -xel -u {{ item }} > {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/systemctl/{{ item }}.log 2>&1
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+      with_items:
+        - "minio_container.service"
+        - "docker.service"
+
+    - name: curl | minio-report
+      shell: |
+          echo "curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL" >> {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/curl/{{ item.name }}.log
+          curl {{ item.url }} --connect-timeout {{ cycloid_report_curl_timeout }} -k -vL  >> {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/curl/{{ item.name }}.log 2>&1
+      args:
+       executable: /bin/bash
+      no_log: false
+      ignore_errors: true
+      with_items:
+        - { name: "github.com", url: "https://github.com"}
+        - { name: "minio", url: "http://localhost:9000"}
+
+    - name: access_port | minio-report
+      shell: |
+          echo "nc -zv -w 2 {{ item.url }} {{ item.port }}" > {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/access_port/{{ item.name }}.log
+          nc -zv -w 2 {{ item.url }} {{ item.port }} >> {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/access_port/{{ item.name }}.log 2>&1
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+      with_items:
+        - { name: "minio", url: "localhost", port: "{{ minio_port }}"}
+
+    - name: docker | minio-report
+      shell: |
+          docker inspect minio > {{ cycloid_report_path }}/minio/{{ inventory_hostname }}/docker/docker_inspect 2>&1
+      args:
+       executable: /bin/bash
+      no_log: true
+      ignore_errors: true
+
+    when: setup_minio|bool
+
+
 ########################
 # smtp_server report
 ########################

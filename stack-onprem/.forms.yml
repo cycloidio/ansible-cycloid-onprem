@@ -93,6 +93,12 @@ use_cases:
           widget: switch
           type: boolean
           default: false
+        - name: "Minio (S3) enabled"
+          description: "Install MinIo (user as aws s3 external backend for tfstate)"
+          key: install_minio
+          widget: switch
+          type: boolean
+          default: false
         - name: "Elasticsearch (CCM) enabled"
           description: "Install Elasticsearch (used for CCM. Required dedicated instance or a bigger mutu)"
           key: install_elasticsearch

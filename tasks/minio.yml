@@ -1,0 +1,37 @@
+---
+- name: Install minio container | minio
+  block:
+    - name: Define service | minio
+      include_role:
+        name: mhutter.docker-systemd-service
+      vars:
+        container_name: minio
+        container_cmd: server /data
+        container_image: "{{ minio_image }}"
+        container_volumes:
+          - "{{ minio_config_path }}/data:/data"
+        container_ports: "{{ minio_container_ports }}"
+        container_args: "{{ container_args_extra }}"
+        container_env:
+          MINIO_ACCESS_KEY: "{{ minio_access_key }}"
+          MINIO_SECRET_KEY: "{{ minio_secret_key }}"
+          MINIO_BROWSER: "{{ minio_browser | default('off') }}"
+        container_labels:
+          - ansible.managed=true
+          - systemd.managed=true
+          - cycloid.io=true
+        # systemd
+        enable: true
+        masked: false
+        state: started
+      tags: docker-services
+
+    - name: Wait for minio availability | minio
+      uri:
+        url: "http://localhost:{{ minio_port }}/"
+        status_code:
+          - 200
+          - 403
+      register: resp
+      until: resp.status == 200 or resp.status == 403
+      delay: 5

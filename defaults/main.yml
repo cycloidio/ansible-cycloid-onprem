@@ -375,6 +375,8 @@ setup_cycloid_db: "{{ 'cycloid_db' in group_names }}"
 setup_cycloid_cache: "{{ 'cycloid_cache' in group_names }}"
 # Setup Vault
 setup_cycloid_creds: "{{ 'cycloid_creds' in group_names }}"
+# Setup MinIo (s3-like remote storage)
+setup_minio: "{{ 'minio' in group_names }}"
 # Setup ElasticSearch
 setup_elasticsearch: "{{ 'elasticsearch' in group_names }}"
 # Setup fake SMTP (it will start a mailhog smtpd server to satisfy Cycloid requirements)
@@ -425,6 +427,7 @@ cycloid_nginx_image: nginx:1.26
 cycloid_cache_mon_image: hibiken/asynqmon:latest
 elasticsearch_image: elasticsearch:8.8.1
 kibana_image: bitnami/kibana:8.8.1
+minio_image: "minio/minio:latest"
 
 cycloid_cache_mon_port: 5678
 
@@ -493,6 +496,10 @@ elasticsearch_container_ports:
   # - "127.0.0.1:{{ elasticsearch_port_node }}:9300"
   # - "{{ ansible_default_ipv4.address }}:{{ elasticsearch_port_api }}:9200"
   # - "127.0.0.1:{{ elasticsearch_port_api }}:9200"
+minio_container_ports:
+  - "0.0.0.0:{{ minio_port }}:9000"
+  # - "{{ ansible_default_ipv4.address }}:{{ minio_port }}:9000"
+  # - "127.0.0.1:{{ minio_port }}:9000"
 kibana_container_ports:
   - "0.0.0.0:{{ kibana_port }}:{{ kibana_port }}"
 
@@ -552,6 +559,7 @@ default_ssl_subject_alt_name:
   - DNS:localhost
   - DNS:vault
   - DNS:concourse
+  - DNS:minio
   - DNS:elasticsearch
 
 default_no_proxy:
@@ -707,6 +715,30 @@ cycloid_login_user:
 
 # Keep env include var as legacy compatibility
 env: prod
+
+#
+# minio
+#
+
+#. minio_port(optional, int): 9000
+#+ MinIO port, default to 9000
+minio_port: 9000
+
+#. minio_access_key(required): str
+#+ the aws-like access key
+minio_access_key: AKIAIOSFODNN7EXAMPLE
+
+#. minio_secret_key(required): str
+#+ the aws-like secret key
+minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+#. minio_browser(optional, string): off
+#+ uncomment to enable browser interface
+# minio_browser: on
+
+#. minio_config_path(optional, string): "{{ cycloid_install_path }}/minio"
+#+ host directory used to store config/datas used by the container
+minio_config_path: "{{ cycloid_install_path }}/minio"
 
 #
 # elasticsearch
