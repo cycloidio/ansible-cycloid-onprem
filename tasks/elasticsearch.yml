@@ -22,7 +22,7 @@
         mode: 0777
         recurse: yes
       with_items:
-        - "{{ elasticsearch_config_path }}/data/nodes"
+        - "{{ elasticsearch_config_path }}/data"
         - "{{ kibana_config_path }}"
 
     - name: create elasticsearch container | elasticsearch
