@@ -425,8 +425,8 @@ concourse_web_image: concourse/concourse:7.8.3
 vault_image: vault:1.13.3
 cycloid_nginx_image: nginx:1.26
 cycloid_cache_mon_image: hibiken/asynqmon:latest
-elasticsearch_image: elasticsearch:8.8.1
-kibana_image: bitnami/kibana:8.8.1
+elasticsearch_image: elasticsearch:8.10.2
+kibana_image: bitnami/kibana:8.10.2
 minio_image: "minio/minio:latest"
 
 cycloid_cache_mon_port: 5678
