@@ -502,9 +502,11 @@ mysql:
   ##
   primary:
     # MySQL Primary Persistence parameters
-    # ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+    # ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+    # Used to provide storage that persists beyond the lifecycle of individual pods.
+    # A Persistent Volume retains data even if the pod is removed.
     # @param mysql.primary.persistence.enabled Enable persistence on MySQL using PVC(s)
-    # @param mysql.primary.persistence.storageClass Persistent Volume storage class
+    # @param mysql.primary.persistence.storageClass Persistent Volume storage class. This Should be specified if no default StorageClass defined in your cluster.
     # @param mysql.primary.persistence.accessModes [array] Persistent Volume access modes
     # @param mysql.primary.persistence.size Persistent Volume size
     #
