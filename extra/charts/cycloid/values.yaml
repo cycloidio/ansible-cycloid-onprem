@@ -23,7 +23,7 @@ cycloidImagesRegistry:
   repositoryUrl: 661913936052.dkr.ecr.eu-west-1.amazonaws.com
   repositoryRegion: eu-west-1
   refreshEvery: '0 */6 * * *'
-  image: alpine/k8s:1.25.6
+  image: alpine/k8s:1.29.8
 
 
 # Image pull secret to use for registry authentication.

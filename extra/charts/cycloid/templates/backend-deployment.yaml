@@ -41,7 +41,7 @@ spec:
       initContainers:
         {{- if .Values.mysql.enabled }}
         - name: wait-for-mysql
-          image: groundnuty/k8s-wait-for:v2.0
+          image: cycloid/k8s-wait-for:v1.29.8
           imagePullPolicy: Always
           args:
             - "service"
@@ -51,7 +51,7 @@ spec:
         {{- end }}
         {{- if .Values.redis.enabled }}
         - name: wait-for-redis
-          image: groundnuty/k8s-wait-for:v2.0
+          image: cycloid/k8s-wait-for:v1.29.8
           imagePullPolicy: Always
           args:
             - "service"
@@ -61,7 +61,7 @@ spec:
         {{- end }}
         {{- if .Values.vault.enabled }}
         - name: wait-for-vault
-          image: groundnuty/k8s-wait-for:v2.0
+          image: cycloid/k8s-wait-for:v1.29.8
           imagePullPolicy: Always
           args:
             - "service"
