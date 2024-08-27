@@ -361,8 +361,8 @@ backend:
       nginx.ingress.kubernetes.io/proxy-connect-timeout: "360"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "360"
       nginx.ingress.kubernetes.io/proxy-read-timeout: "360"
-      nginx.ingress.kubernetes.io/configuration-snippet: "chunked_transfer_encoding off;"
       nginx.ingress.kubernetes.io/proxy-body-size: 20m
+      # nginx.ingress.kubernetes.io/configuration-snippet: "chunked_transfer_encoding off;"
       # If using the nginx-ingress-controller from NGINXinc: https://github.com/nginxinc/kubernetes-ingress
       # nginx.org/proxy-connect-timeout: "360s"
       # nginx.org/proxy-send-timeout: "360s"
