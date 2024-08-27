@@ -3,9 +3,11 @@
 DIR="$(dirname $(readlink -f $0))"
 OUTPUT_DIR="$DIR/.out"
 
+source $DIR/cecho-utils.sh
+
 if [ -z "$NAMESPACE" ]
 then
-      echo 'Make sure to defined export NAMESPACE='
+      perror "$0 Make sure to defined export NAMESPACE="
 fi
 
 command -v jq >/dev/null
@@ -17,7 +19,7 @@ VAULT_SEAL_STATUS=$?
 set -e
 
 if [ $VAULT_SEAL_STATUS -eq 2 ]; then
-  echo -e "\e[36m# $0 > Unsealing Vault\e[0m"
+  pwarning "$0 > Unsealing Vault"
   echo ">> Key 1"
   if [ $JQ_STATUS -eq 0 ] && [ -f "$OUTPUT_DIR/vault-init.json" ]; then
     kubectl -n $NAMESPACE exec -t -i cycloid-vault-0 -- vault operator unseal $(cat "$OUTPUT_DIR/vault-init.json" | jq -r '.unseal_keys_b64[0]')
@@ -36,9 +38,9 @@ if [ $VAULT_SEAL_STATUS -eq 2 ]; then
   else
     kubectl -n $NAMESPACE exec -t -i cycloid-vault-0 -- vault operator unseal
   fi
-  echo -e "\e[32m# $0 > Vault unsealed\e[0m"
+  psuccess "$0 > Vault unsealed"
 elif [ $VAULT_SEAL_STATUS -eq 0 ]; then
-  echo -e "\e[33m# $0 > Vault already unsealed\e[0m"
+  pinfo "$0 > Vault already unsealed"
 else
-  echo -e "\e[31m# $0 > ERROR: something is wrong with Vault\e[0m" >&2
+  perror "$0 > ERROR: something is wrong with Vault" >&2
 fi
