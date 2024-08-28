@@ -22,6 +22,7 @@ PATTERNS="
 set +x
 if [ ! -f "$VALUES_CUSTOM_YAML" ]; then
     perror "$0 > $VALUES_CUSTOM_YAML file not found"
+    exit 1
 else
     psuccess "$0 > $VALUES_CUSTOM_YAML successfully found"
 fi

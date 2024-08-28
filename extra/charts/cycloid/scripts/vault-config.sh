@@ -8,6 +8,7 @@ source $DIR/cecho-utils.sh
 if [ -z "$NAMESPACE" ]
 then
       perror "$0 Make sure to defined export NAMESPACE="
+      exit 1
 fi
 
 command -v jq >/dev/null
