@@ -99,9 +99,10 @@ pwarning "$0 > Creating Vault cycloid approle role"
 if [ $VAULT_CYCLOID_APPROLE_STATUS -eq 2 ]; then
   kubectl -n $NAMESPACE exec -t -i cycloid-vault-0 -- vault write auth/approle/role/cycloid token_max_ttl=1h policies=cycloid token_ttl=20m
   kubectl -n $NAMESPACE exec -t -i cycloid-vault-0 -- vault read auth/approle/role/cycloid/role-id -format=json | tee "$OUTPUT_DIR/cycloid-role-id.json"
-  psuccess "# /!\\ /!\\ Save this value as the cycloid role-id, you will need it"
+  pinfo "# ... Save this value as the cycloid role-id"
   kubectl -n $NAMESPACE  exec -t -i cycloid-vault-0 -- vault write -f auth/approle/role/cycloid/secret-id -format=json | tee "$OUTPUT_DIR/cycloid-secret-id.json"
-  psuccess "# /!\\ /!\\ Save this value as the cycloid secret-id, you will need it"
+  pinfo "# ... Save this value as the cycloid secret-id"
+  psuccess "# /!\\ /!\\ Please make sure to backup values.custom.yaml file and the following directory $OUTPUT_DIR"
 else
   perror "$0 > Vault cycloid approle role already exists"
 fi
@@ -114,11 +115,12 @@ pwarning "$0 > Creating Vault cycloid-ro approle role"
 if [ $VAULT_CYCLOID_APPROLE_STATUS -eq 2 ]; then
   kubectl -n $NAMESPACE exec -t -i cycloid-vault-0 -- vault write auth/approle/role/cycloid-ro period=30m token_max_ttl=0m policies=cycloid-ro token_ttl=30m
   kubectl -n $NAMESPACE exec -t -i cycloid-vault-0 -- vault read auth/approle/role/cycloid-ro/role-id -format=json | tee "$OUTPUT_DIR/cycloid-ro-role-id.json"
-  psuccess "# /!\\ /!\\ Save this value as the cycloid-ro role-id, you will need it"
+  pinfo "# ...Save this value as the cycloid-ro role-id"
   kubectl -n $NAMESPACE exec -t -i cycloid-vault-0 -- vault write -f auth/approle/role/cycloid-ro/secret-id -format=json | tee "$OUTPUT_DIR/cycloid-ro-secret-id.json"
-  psuccess "# /!\\ /!\\ Save this value as the cycloid-ro secret-id, you will need it"
+  pinfo "# ... Save this value as the cycloid-ro secret-id"
+  psuccess "# /!\\ /!\\ Please make sure to backup values.custom.yaml file and the following directory $OUTPUT_DIR"
 else
   perror "$0 > Vault cycloid-ro approle role already exists"
 fi
 
-pinfo "$0 > Vault configured for Cycloid"
+pwarning "$0 > Vault configured for Cycloid"

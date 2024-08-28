@@ -20,7 +20,7 @@ set -e
 if [ $VAULT_INIT_STATUS -eq 2 ]; then
   pwarning "$0 > Initializing Vault"
   kubectl -n $NAMESPACE exec -t -i cycloid-vault-0 -- vault operator init -format=json | tee "$OUTPUT_DIR/vault-init.json"
-  psuccess "# /!\\ /!\\ Save this value, you will need it"
+  psuccess "# /!\\ /!\\ Please make sure to backup values.custom.yaml file and the following directory $OUTPUT_DIR"
   pinfo "$0 > Vault initialized"
 elif [ $VAULT_INIT_STATUS -eq 0 ]; then
   perror "$0 > Vault already initialized"
