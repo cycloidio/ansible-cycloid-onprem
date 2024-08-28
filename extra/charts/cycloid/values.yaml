@@ -133,17 +133,6 @@ frontend:
     #    hosts:
     #      - console.cycloid.local
 
-  # OpenShift only - create a route to expose the service
-  # By default the created route will be of type passthrough
-  route:
-    enabled: true
-    labels: {}
-    annotations: {}
-    host: console.cycloid.local
-    tls:
-      termination: edge
-      insecureEdgeTerminationPolicy: Redirect
-
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -377,17 +366,6 @@ backend:
     #  - secretName: cycloid-local-tls
     #    hosts:
     #      - api.cycloid.local
-
-  # OpenShift only - create a route to expose the service
-  # By default the created route will be of type passthrough
-  route:
-    enabled: true
-    labels: {}
-    annotations: {}
-    host: api.cycloid.local
-    tls:
-      termination: edge
-      insecureEdgeTerminationPolicy: Redirect
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -728,6 +706,7 @@ concourse:
         ## The name of the database to use.
         ##
         database: atc
+        ## user/password defined under secrets section
 
     worker:
       baggageclaim:
@@ -1005,8 +984,7 @@ concourse:
       size: 8Gi
 
   secrets:
-    ## Secrets for DB access if bringing your own PostgreSQL
-    ##
+    ## User/Pass need to be specified if bringing your own PostgreSQL.
     postgresUser:
     postgresPassword: ""
 
@@ -1055,16 +1033,7 @@ concourse:
 #
 vault:
   # Use the Vault chart dependency.
-  #
-  # Set to false if bringing your own MySQL, and set the corresponding `secrets`
-  # fields that correspond to the PostgreSQL variables that `concourse web` should use
-  # to connect to.
-  #
   enabled: true
-
-  # If deployed on openshift
-  global:
-    openshift: false
 
   injector:
     enabled: false
@@ -1086,7 +1055,6 @@ vault:
     # See https://www.vaultproject.io/docs/configuration/storage/index.html to know more
     dataStorage:
       enabled: true
-      # Size of the PVC created
       size: 10Gi
       # Location where the PVC will be mounted.
       mountPath: "/vault/data"
@@ -1134,8 +1102,6 @@ vault:
 
     # Ingress allows ingress services to be created to allow external access
     # from Kubernetes to access Vault pods.
-    # If deployment is on OpenShift, the following block is ignored.
-    # In order to expose the service, use the route section below
     ingress:
       enabled: false
       labels: {}
