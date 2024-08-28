@@ -169,7 +169,6 @@ redis:
     password: "ociaseij9so2ooThiut0dug7"
   master:
     persistence:
-      enabled: true
       storageClass: ""
       size: 8Gi
 
@@ -258,8 +257,6 @@ concourse:
     ##
     ## Ref: https://kubernetes.io/docs/user-guide/persistent-volumes
     persistence:
-      ## Enable PostgreSQL persistence using Persistent Volume Claims.
-      enabled: true
       ## Persistent Volume Storage Class to be used by PersistentVolumes created
       ## for PostgreSQL.
       ##
