@@ -23,7 +23,7 @@ cycloidImagesRegistry:
   repositoryUrl: 661913936052.dkr.ecr.eu-west-1.amazonaws.com
   repositoryRegion: eu-west-1
   refreshEvery: '0 */6 * * *'
-  image: alpine/k8s:1.25.6
+  image: alpine/k8s:1.29.8
 
 
 # Image pull secret to use for registry authentication.
@@ -361,8 +361,8 @@ backend:
       nginx.ingress.kubernetes.io/proxy-connect-timeout: "360"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "360"
       nginx.ingress.kubernetes.io/proxy-read-timeout: "360"
-      nginx.ingress.kubernetes.io/configuration-snippet: "chunked_transfer_encoding off;"
       nginx.ingress.kubernetes.io/proxy-body-size: 20m
+      # nginx.ingress.kubernetes.io/configuration-snippet: "chunked_transfer_encoding off;"
       # If using the nginx-ingress-controller from NGINXinc: https://github.com/nginxinc/kubernetes-ingress
       # nginx.org/proxy-connect-timeout: "360s"
       # nginx.org/proxy-send-timeout: "360s"
@@ -502,9 +502,11 @@ mysql:
   ##
   primary:
     # MySQL Primary Persistence parameters
-    # ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+    # ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+    # Used to provide storage that persists beyond the lifecycle of individual pods.
+    # A Persistent Volume retains data even if the pod is removed.
     # @param mysql.primary.persistence.enabled Enable persistence on MySQL using PVC(s)
-    # @param mysql.primary.persistence.storageClass Persistent Volume storage class
+    # @param mysql.primary.persistence.storageClass Persistent Volume storage class. This Should be specified if no default StorageClass defined in your cluster.
     # @param mysql.primary.persistence.accessModes [array] Persistent Volume access modes
     # @param mysql.primary.persistence.size Persistent Volume size
     #
