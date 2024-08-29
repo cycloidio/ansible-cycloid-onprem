@@ -45,13 +45,13 @@ injectKey () {
 
 pwarning "$0 > Generate and replace passwords"
 for pattern in $PATTERNS; do
-    password="$(< /dev/urandom tr -dc A-Z-a-z-0-9 | head -c32)"
+    password="$(< /dev/urandom tr -dc A-Za-z0-9- | head -c32)"
     pinfo "  ... Replacing $pattern"
     sed -i "s/$pattern/$password/g" $VALUES_CUSTOM_YAML
 done
 
 pattern="##backend-jwtKey1##"
-password="$(< /dev/urandom tr -dc A-Z-a-z-0-9 | head -c64)"
+password="$(< /dev/urandom tr -dc A-Za-z0-9 | head -c64)"
 randomuuid=$(uuidgen)
 pinfo "  ... Replacing $pattern"
 sed -i "s/$pattern/${randomuuid}:${password}/g" $VALUES_CUSTOM_YAML
