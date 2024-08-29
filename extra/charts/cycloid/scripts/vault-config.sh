@@ -5,7 +5,7 @@ OUTPUT_DIR="$DIR/.out"
 
 source $DIR/cecho-utils.sh
 
-VALUES_CUSTOM_YAML=./values.custom.yaml
+export VALUES_CUSTOM_YAML="${VALUES_CUSTOM_YAML:-./values.custom.yaml}"
 
 if [ -z "$NAMESPACE" ]
 then

@@ -7,7 +7,7 @@ source $DIR/cecho-utils.sh
 
 [ ! -d $OUTPUT_DIR ] && mkdir $OUTPUT_DIR
 
-VALUES_CUSTOM_YAML=./values.custom.yaml
+export VALUES_CUSTOM_YAML="${VALUES_CUSTOM_YAML:-./values.custom.yaml}"
 
 PATTERNS="
 ##backend-cryptoSigningKey##
