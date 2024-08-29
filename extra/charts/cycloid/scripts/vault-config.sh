@@ -5,10 +5,24 @@ OUTPUT_DIR="$DIR/.out"
 
 source $DIR/cecho-utils.sh
 
+VALUES_CUSTOM_YAML=./values.custom.yaml
+
 if [ -z "$NAMESPACE" ]
 then
       perror "$0 Make sure to defined export NAMESPACE="
       exit 1
+fi
+
+if [ ! -f "$VALUES_CUSTOM_YAML" ]; then
+    perror "$0 > $VALUES_CUSTOM_YAML file not found"
+    exit 1
+else
+    psuccess "$0 > $VALUES_CUSTOM_YAML successfully found"
+fi
+
+if ! command -v jq /dev/null; then
+    perror "$0 > jq command not found. Please install it. For exammple apt-get install jq"
+    exit 1
 fi
 
 command -v jq >/dev/null
@@ -119,7 +133,16 @@ if [ $VAULT_CYCLOID_APPROLE_STATUS -eq 2 ]; then
   pinfo "# ...Save this value as the cycloid-ro role-id"
   kubectl -n $NAMESPACE exec -t -i cycloid-vault-0 -- vault write -f auth/approle/role/cycloid-ro/secret-id -format=json | tee "$OUTPUT_DIR/cycloid-ro-secret-id.json"
   pinfo "# ... Save this value as the cycloid-ro secret-id"
+
+  pinfo "  ... Writing generated approles into $VALUES_CUSTOM_YAML"
+  sed -i "s/##cycloid-vault-approle-role-id##/$(cat $OUTPUT_DIR/cycloid-role-id.json | jq -r '.data.role_id')/g" $VALUES_CUSTOM_YAML
+  sed -i "s/##cycloid-vault-approle-secret-id##/$(cat $OUTPUT_DIR/cycloid-secret-id.json | jq -r '.data.secret_id')/g" $VALUES_CUSTOM_YAML
+  sed -i "s/##cycloid-ro-vault-approle-role-id##/$(cat $OUTPUT_DIR/cycloid-ro-role-id.json | jq -r '.data.role_id')/g" $VALUES_CUSTOM_YAML
+  sed -i "s/##cycloid-ro-vault-approle-secret-id##/$(cat $OUTPUT_DIR/cycloid-ro-secret-id.json | jq -r '.data.secret_id')/g" $VALUES_CUSTOM_YAML
+
   psuccess "# /!\\ /!\\ Please make sure to backup values.custom.yaml file and the following directory $OUTPUT_DIR"
+
+
 else
   perror "$0 > Vault cycloid-ro approle role already exists"
 fi

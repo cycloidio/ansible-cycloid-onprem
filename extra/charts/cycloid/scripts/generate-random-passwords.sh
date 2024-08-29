@@ -18,13 +18,17 @@ PATTERNS="
 ##concourse-postgresql-auth-postgresPassword##
 ##concourse-postgresql-auth-password##
 "
-
 set +x
 if [ ! -f "$VALUES_CUSTOM_YAML" ]; then
     perror "$0 > $VALUES_CUSTOM_YAML file not found"
     exit 1
 else
     psuccess "$0 > $VALUES_CUSTOM_YAML successfully found"
+fi
+
+if ! command -v uuidgen /dev/null; then
+    perror "$0 > uuidgen command not found. Please install it. For exammple apt-get install uuid-runtime"
+    exit 1
 fi
 
 injectKey () {
@@ -45,6 +49,12 @@ for pattern in $PATTERNS; do
     pinfo "  ... Replacing $pattern"
     sed -i "s/$pattern/$password/g" $VALUES_CUSTOM_YAML
 done
+
+pattern="##backend-jwtKey1##"
+password="$(< /dev/urandom tr -dc A-Z-a-z-0-9 | head -c64)"
+randomuuid=$(uuidgen)
+pinfo "  ... Replacing $pattern"
+sed -i "s/$pattern/${randomuuid}:${password}/g" $VALUES_CUSTOM_YAML
 
 pwarning "$0 > Generate keys using ssh-keygen"
 

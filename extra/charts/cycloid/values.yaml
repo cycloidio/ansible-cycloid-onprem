@@ -249,7 +249,7 @@ backend:
     secretId: "##cycloid-vault-approle-secret-id##"
 
   cryptoSigningKey: "##backend-cryptoSigningKey##"
-  jwtKey1: "2f2122de-63f2-4eec-9c6f-c6abb3e1f007:7cdyHps2tYDp6e7VKPEstE5sDMQbK6WLyN3GmTsF7x7QpE6ZP5ra6yfVSkvXakbB"
+  jwtKey1: "##backend-jwtKey1##"
 
   # extraEnvVars is a list of extra environment variables to set.
   extraEnvVars:
