@@ -1,0 +1,8 @@
+kind: Changed
+body: k8s, Adding new generate-random-passwords.sh script. And change default passwords
+  in values.yaml. The goal is to generate new passwords for every setup to avoid users
+  letting default one.
+time: 2024-08-28T16:20:08.649653828+02:00
+custom:
+  Ref: Pull
+  RefID: "452"
