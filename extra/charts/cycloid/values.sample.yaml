@@ -8,6 +8,7 @@ frontend:
   # The externally accessible FQDN for the Cycloid Console frontend.
   # If you change this value, don't to also update the ingress declaration below.
   url: "http://console.cycloid.local"
+  # We recommend setting the replicaCount to 2 in production environments to ensure high availability (HA).
   replicaCount: 1
 
   image:
@@ -18,9 +19,6 @@ frontend:
   ingress:
     # Class name for the ingress controller. Example "nginx"
     className: ""
-    annotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
     hosts:
       - host: console.cycloid.local
         paths:
@@ -40,12 +38,36 @@ backend:
   # The externally accessible FQDN for the Cycloid Console API.
   # If you change this value, don't to also update the ingress declaration below.
   url: "http://api.cycloid.local"
+  # We recommend setting the replicaCount to 2 in production environments to ensure high availability (HA).
   replicaCount: 1
 
   image:
     # Cycloid Console API version to use.
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest-public"
+
+  ingress:
+    # Class name for the ingress controller. Example "nginx"
+    className: ""
+    hosts:
+      - host: api.cycloid.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: cycloid-local-tls
+    #    hosts:
+    #      - api.cycloid.local
+
+  # extraEnvVars is a list of extra environment variables to set.
+  extraEnvVars:
+    EMAIL_SMTP_SVR_ADDR: "##smtp-host:smtp-port##"
+    EMAIL_SMTP_USERNAME: "##smtp-username##"
+    EMAIL_SMTP_PASSWORD: "##smtp-password##"
+    EMAIL_ADDR_FROM: "Cycloid Console <noreply@domain.tld>"
+    EMAIL_ADDR_RETURN_PATH: "admin@domain.tld"
+    LOG_LEVEL: "INFO"
+    LOG_SVC_LEVEL: "NONE"
 
   # Concourse server to be used by the Cycloid Console API.
   # Defaults to the included one within the chart, but you also use a custom one if needed.
@@ -64,28 +86,6 @@ backend:
   cryptoSigningKey: "##backend-cryptoSigningKey##"
   jwtKey1: "##backend-jwtKey1##"
 
-  # extraEnvVars is a list of extra environment variables to set.
-  extraEnvVars:
-    EMAIL_SMTP_SVR_ADDR: "##smtp-host:smtp-port##"
-    EMAIL_SMTP_USERNAME: "##smtp-username##"
-    EMAIL_SMTP_PASSWORD: "##smtp-password##"
-    EMAIL_ADDR_FROM: "Cycloid Console <noreply@domain.tld>"
-    EMAIL_ADDR_RETURN_PATH: "admin@domain.tld"
-    LOG_LEVEL: "INFO"
-    LOG_SVC_LEVEL: "NONE"
-
-  ingress:
-    className: ""
-    hosts:
-      - host: api.cycloid.local
-        paths:
-          - path: /
-            pathType: ImplementationSpecific
-    tls: []
-    #  - secretName: cycloid-local-tls
-    #    hosts:
-    #      - api.cycloid.local
-
 
 #
 # MySQL
@@ -99,20 +99,6 @@ mysql:
   ## to connect to.
   ##
   enabled: true
-
-  ## MySQL Authentication parameters
-  ## @param mysql.auth.rootPassword MySQL root password
-  ## @param mysql.auth.database MySQL custom database
-  ## @param mysql.auth.username MySQL custom user name
-  ## @param mysql.auth.password MySQL custom user password
-  ## ref: https://github.com/bitnami/bitnami-docker-mysql#setting-the-root-password-on-first-run
-  ##      https://github.com/bitnami/bitnami-docker-mysql/blob/master/README.md#creating-a-database-on-first-run
-  ##      https://github.com/bitnami/bitnami-docker-mysql/blob/master/README.md#creating-a-database-user-on-first-run
-  auth:
-    rootPassword: "##mysql-auth-rootPassword##"
-    database: cycloid
-    username: cycloid
-    password: "##mysql-auth-password##"
 
   ## MySQL Primary configuration
   ##
@@ -130,9 +116,23 @@ mysql:
       storageClass: ""
       size: 8Gi
 
+  ## MySQL Authentication parameters
+  ## @param mysql.auth.rootPassword MySQL root password
+  ## @param mysql.auth.database MySQL custom database
+  ## @param mysql.auth.username MySQL custom user name
+  ## @param mysql.auth.password MySQL custom user password
+  ## ref: https://github.com/bitnami/bitnami-docker-mysql#setting-the-root-password-on-first-run
+  ##      https://github.com/bitnami/bitnami-docker-mysql/blob/master/README.md#creating-a-database-on-first-run
+  ##      https://github.com/bitnami/bitnami-docker-mysql/blob/master/README.md#creating-a-database-user-on-first-run
+  auth:
+    rootPassword: "##mysql-auth-rootPassword##"
+    database: cycloid
+    username: cycloid
+    password: "##mysql-auth-password##"
+
 #
 # External MySQL Configuration
-# All of these values are only used if `mysql.enabled=false`
+# All of these values are only used if `mysql.enabled: false`
 #
 externalMysql:
   # External MySQL server host
@@ -161,6 +161,11 @@ redis:
   ##
   enabled: true
 
+  master:
+    persistence:
+      storageClass: ""
+      size: 8Gi
+
   ## Redis Authentication parameters
   ## ref: https://github.com/bitnami/charts/tree/main/bitnami/redis#redis-common-configuration-parameters
   ##
@@ -169,10 +174,6 @@ redis:
     ## Defaults to a random 10-character alphanumeric string if not set
     ##
     password: "##redis-auth-password##"
-  master:
-    persistence:
-      storageClass: ""
-      size: 8Gi
 
 #
 # External Redis Configuration
@@ -197,7 +198,6 @@ externalRedis:
   tls:
     enabled: false
 
-
 #
 # Concourse
 #
@@ -217,30 +217,11 @@ concourse:
       ## Need to be specified if bringing your own PostgreSQL.
       ## Configurations regarding how the web component is able to connect to a postgres instance.
       postgres:
-        host:
+        # All of these values are only used if `concourse.postgresql.enabled: false`
+        host: ""
         port: 5432
         database: atc
-        ## user/password defined under secrets section
-
-  web:
-    sidecarContainers:
-      - name: concourse-team-authorized-key-sync
-        image: cycloid/concourse-team-authorized-key-sync:latest
-        imagePullPolicy: Always
-        env:
-          - name: VAULT_URL
-            value: http://cycloid-vault:8200
-          - name: VAULT_ROLE_ID
-            value: "##cycloid-ro-vault-approle-role-id##"
-          - name: VAULT_SECRET_ID
-            value: "##cycloid-ro-vault-approle-secret-id##"
-          - name: YAML_KEYS_FILE
-            value: /etc/concourse-teams/tsa-team-authorized-keys.yaml
-          - name: VERBOSE
-            value: "True"
-        volumeMounts:
-          - mountPath: /etc/concourse-teams
-            name: concourse-teams
+        ## user/password defined under `concourse.secrets.postgresUser/postgresPassword` section
 
   postgresql:
     ## Use the PostgreSQL chart dependency.
@@ -280,9 +261,11 @@ concourse:
       storageClass:
       size: 8Gi
 
+
   secrets:
     ## User/Pass need to be specified if bringing your own PostgreSQL.
-    postgresUser:
+    ## Only used if `concourse.postgresql.enabled: false`
+    postgresUser: ""
     postgresPassword: ""
 
     ## List of `username:password` or `username:bcrypted_password` combinations for all your local concourse users.
@@ -321,6 +304,27 @@ concourse:
     ## Ref: https://concourse-ci.org/vault-credential-manager.html#vault-approle-auth
     ##
     vaultAuthParam: "role_id:##cycloid-ro-vault-approle-role-id##,secret_id:##cycloid-ro-vault-approle-secret-id##"
+
+
+  web:
+    sidecarContainers:
+      - name: concourse-team-authorized-key-sync
+        image: cycloid/concourse-team-authorized-key-sync:latest
+        imagePullPolicy: Always
+        env:
+          - name: VAULT_URL
+            value: http://cycloid-vault:8200
+          - name: VAULT_ROLE_ID
+            value: "##cycloid-ro-vault-approle-role-id##"
+          - name: VAULT_SECRET_ID
+            value: "##cycloid-ro-vault-approle-secret-id##"
+          - name: YAML_KEYS_FILE
+            value: /etc/concourse-teams/tsa-team-authorized-keys.yaml
+          - name: VERBOSE
+            value: "True"
+        volumeMounts:
+          - mountPath: /etc/concourse-teams
+            name: concourse-teams
 
 #
 # Vault
