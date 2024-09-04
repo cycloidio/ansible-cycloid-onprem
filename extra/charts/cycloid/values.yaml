@@ -1,110 +1,110 @@
-# Default values for cycloid.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+# Helm chart values for deploying Cycloid and related components.
 
 nameOverride: ""
 fullnameOverride: ""
-# Labels to add to all deployed objects
+
+# Common labels to add to all Kubernetes objects created by this chart.
 commonLabels: {}
-# Annotations to add to all deployed objects
+
+# Common annotations to add to all Kubernetes objects created by this chart.
 commonAnnotations: {}
 
-# Cycloid image registry description
+# Cycloid image registry configuration.
 # To access Cycloid docker images, a docker-registry token that expires is used.
 # By default, the cronjob (via the renewToken parameter) is enabled to renew the docker-registry token
 # that allow pulling images on the Cycloid image registry
 cycloidImagesRegistry:
+  # Enable a cronjob to renew the docker-registry token periodically.
   # not needed with scaleway login
-  # If used you should change the repository for frontend and backend
-  #
   renewToken: false
-  # Kubernetes secret created following the Cycloid documentation
+  # Kubernetes secret containing credentials for accessing the image registry.
   secretCredentialName: cycloid-aws-creds
+  # URL of the Docker image repository.
   repositoryUrl: 661913936052.dkr.ecr.eu-west-1.amazonaws.com
+  # AWS region of the Docker image repository.
   repositoryRegion: eu-west-1
+  # Cron schedule for renewing the token.
   refreshEvery: '0 */6 * * *'
+  # Docker image used by the cronjob to renew the token.
   image: alpine/k8s:1.29.8
 
-
-# Image pull secret to use for registry authentication.
+# Image pull secret used for authenticating with the Docker registry.
 # The default value matches the secret created during the documentation installation steps
 # which provide access to the scaleway Cycloid docker images.
 # Note! In case of use of the AWS ECR instead change to cycloid-ecr
 imagePullSecrets:
   - name: scw-registry-secret
 
-# If deploying to OpenShift
-# If Vault also deployen on openshift, make sure vault.global.openshift is true
+# Set to true if deploying on OpenShift.
 openshift: false
 
 #
 # Cycloid Console frontend
 #
 frontend:
-  # True if you want to enable the Cycloid Console frontend.
+  # Enable the Cycloid Console frontend service.
   enabled: true
 
+  # Override the default name for the frontend service.
   nameOverride: "frontend"
+  # Override the full name for the frontend service.
   fullnameOverride: ""
 
-  # The externally accessible FQDN for the Cycloid Console frontend.
-  # If you change this value, don't to also update the ingress declaration below.
+  # External URL for accessing the Cycloid Console frontend.
+  # If you change this value, update the ingress declaration below too.
   url: "http://console.cycloid.local"
 
+  # Number of replicas for the frontend service.
   replicaCount: 1
 
   image:
     # If using AWS replace by 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend
     repository: rg.fr-par.scw.cloud/cycloidio/cycloid-frontend
     pullPolicy: Always
-    # Cycloid Console frontend version to use.
-    # Overrides the image tag whose default is the chart appVersion.
+    # Tag of the Docker image to use.
     tag: "latest-public"
-    # Container local port
+    # Container port to expose for the frontend service.
     containerPort: 80
 
-  # extraEnvVars is a list of extra environment variables to set.
+  # List of additional environment variables to set for the frontend container.
   extraEnvVars: {}
     # MYENVVAR: VALUE
 
-  # extraSecretEnvVars is a list of extra environment variables to set.
-  # These variables take value from existing Secret objects.
+  # List of additional environment variables to set from existing Kubernetes Secrets.
   extraSecretEnvVars: []
     # - envName: MYENVVAR
     #   secretName: secret_name
     #   secretKey: SECRET_KEY
 
-  # extraConfigMapEnvVars is a list of extra environment variables to set.
-  # These variables take value from existing ConfigMap objects.
+  # List of additional environment variables to set from existing ConfigMaps.
   extraConfigMapEnvVars: []
     # - envName: MYENVVAR
     #   configMapName: configmap_name
     #   configMapKey: CONFIGMAP_KEY
 
-  # extraFullConfigMapEnvVars is the name of an existing ConfigMap containing extra env vars for containers.
-  # All the ConfigMap keys will be accessible as env vars within the containers.
+  # Name of an existing ConfigMap containing additional environment variables.
   extraFullConfigMapEnvVars: ""
 
-  # extraFullSecretEnvVars is the name of an existing Secret containing extra env vars for containers.
-  # All the Secret keys will be accessible as env vars within the containers.
+  # Name of an existing Secret containing additional environment variables.
   extraFullSecretEnvVars: ""
 
   serviceAccount:
-    # Specifies whether a service account should be created
+    # Specify whether a service account should be created for the frontend.
     create: true
-    # Annotations to add to the service account
+    # Annotations to add to the service account.
     annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
+    # Name of the service account to use. If not set, a name is generated.
     name: ""
 
   podAnnotations: {}
 
   podSecurityContext:
+    # Enable security context for frontend pods.
     enabled: false
     # fsGroup: 2000
 
   securityContext:
+    # Enable security context for frontend containers.
     enabled: false
     # capabilities:
     #   drop:
@@ -118,7 +118,9 @@ frontend:
     port: 80
 
   ingress:
+    # Enable ingress for the frontend service.
     enabled: true
+    # Class name for the ingress controller. Example "nginx"
     className: ""
     annotations: {}
       # kubernetes.io/ingress.class: nginx
@@ -128,21 +130,11 @@ frontend:
         paths:
           - path: /
             pathType: ImplementationSpecific
+    # Certificate configuration for the ingress.
     tls: []
     #  - secretName: cycloid-local-tls
     #    hosts:
     #      - console.cycloid.local
-
-  # OpenShift only - create a route to expose the service
-  # By default the created route will be of type passthrough
-  route:
-    enabled: true
-    labels: {}
-    annotations: {}
-    host: console.cycloid.local
-    tls:
-      termination: edge
-      insecureEdgeTerminationPolicy: Redirect
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -157,16 +149,17 @@ frontend:
     #   memory: 128Mi
 
   autoscaling:
+    # Enable or disable horizontal pod autoscaling for the frontend.
     enabled: false
+    # Minimum number of replicas.
     minReplicas: 1
+    # Maximum number of replicas.
     maxReplicas: 100
+    # Target CPU utilization percentage for scaling.
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
 
-  # Affinity Settings
-  # Commenting out or setting as empty the affinity variable, will allow
-  # deployment to single node services such as Minikube
-  # This should be either a multi-line string or YAML matching the PodSpec's affinity field.
+  # Affinity settings for scheduling frontend pods on specific nodes.
   affinity: |
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
@@ -258,7 +251,6 @@ backend:
     EMAIL_SMTP_PASSWORD: "##smtp-password##"
     EMAIL_ADDR_FROM: "Cycloid Console <noreply@domain.tld>"
     EMAIL_ADDR_RETURN_PATH: "admin@domain.tld"
-    # EMAIL_DEV_MODE: false
     LOG_LEVEL: "INFO"
     LOG_SVC_LEVEL: "NONE"
     # COST_EXPLORER_ES_INSECURE_SKIP_TLS: true
@@ -377,17 +369,6 @@ backend:
     #  - secretName: cycloid-local-tls
     #    hosts:
     #      - api.cycloid.local
-
-  # OpenShift only - create a route to expose the service
-  # By default the created route will be of type passthrough
-  route:
-    enabled: true
-    labels: {}
-    annotations: {}
-    host: api.cycloid.local
-    tls:
-      termination: edge
-      insecureEdgeTerminationPolicy: Redirect
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -728,6 +709,7 @@ concourse:
         ## The name of the database to use.
         ##
         database: atc
+        ## user/password defined under secrets section
 
     worker:
       baggageclaim:
@@ -1005,8 +987,7 @@ concourse:
       size: 8Gi
 
   secrets:
-    ## Secrets for DB access if bringing your own PostgreSQL
-    ##
+    ## User/Pass need to be specified if bringing your own PostgreSQL.
     postgresUser:
     postgresPassword: ""
 
@@ -1055,16 +1036,7 @@ concourse:
 #
 vault:
   # Use the Vault chart dependency.
-  #
-  # Set to false if bringing your own MySQL, and set the corresponding `secrets`
-  # fields that correspond to the PostgreSQL variables that `concourse web` should use
-  # to connect to.
-  #
   enabled: true
-
-  # If deployed on openshift
-  global:
-    openshift: false
 
   injector:
     enabled: false
@@ -1086,7 +1058,6 @@ vault:
     # See https://www.vaultproject.io/docs/configuration/storage/index.html to know more
     dataStorage:
       enabled: true
-      # Size of the PVC created
       size: 10Gi
       # Location where the PVC will be mounted.
       mountPath: "/vault/data"
@@ -1134,8 +1105,6 @@ vault:
 
     # Ingress allows ingress services to be created to allow external access
     # from Kubernetes to access Vault pods.
-    # If deployment is on OpenShift, the following block is ignored.
-    # In order to expose the service, use the route section below
     ingress:
       enabled: false
       labels: {}

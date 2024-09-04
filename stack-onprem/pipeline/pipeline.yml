@@ -367,6 +367,7 @@ jobs:
             CONCOURSE_DB_PASSWORD=$(jq -r .password.postgres ${DIR}/tfstate/metadata)
             CYCLOID_DB_PASSWORD=$(jq -r .password.mysql ${DIR}/tfstate/metadata)
             CYCLOID_ELASTICSEARCH_PASSWORD=$(jq -r .password.elasticsearch ${DIR}/tfstate/metadata)
+            CYCLOID_JWT_KEY_1=$(jq -r .password.jwt_key ${DIR}/tfstate/metadata)
 
             IAM_SES_SMTP_USER_KEY=$(jq -r .iam_ses_smtp_user_key ${DIR}/tfstate/metadata)
             IAM_SES_SMTP_USER_SECRET=$(jq -r .iam_ses_smtp_user_secret ${DIR}/tfstate/metadata)
@@ -390,6 +391,8 @@ jobs:
               password: ${CYCLOID_INITIAL_USER_PASSWORD}
               given_name: admin
               family_name: cycloid
+
+            cycloid_jwt_key_1: "${CYCLOID_JWT_KEY_1}"
 
             # Set random password for databses.
             cycloid_crypto_signing_key: "${CYCLOID_CRYPTO_SIGNING_KEY}"
