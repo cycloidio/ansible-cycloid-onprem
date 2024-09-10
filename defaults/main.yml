@@ -681,6 +681,10 @@ cycloid_initial_service_catalog:
 
 cycloid_db_path: "{{ cycloid_install_path }}/cycloid-db"
 
+# Path used inside mysql docker image to stora data.
+# By default mysql use "/var/lib/mysql" but bitnami use "/bitnami/mysql"
+cycloid_db_container_path: "/bitnami/mysql"
+
 # default redis db
 cycloid_email_redis_db: 0
 
