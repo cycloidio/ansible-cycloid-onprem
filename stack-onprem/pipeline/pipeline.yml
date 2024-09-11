@@ -137,9 +137,9 @@ resources:
     paths:
       - mysql/testdata/*
 
-- name: cycloid-utils
+- name: cycloid_utils
   type: git
-  icon: git
+  icon: github-circle
   source:
     uri: git@github.com:cycloidio/cycloid-utils.git
     branch: master
@@ -996,8 +996,6 @@ jobs:
           source:
             repository: cycloid/cycloid-toolkit
             tag: latest
-        inputs:
-        - cycloid_utils
         run:
           path: /bin/bash
           args:
@@ -1058,6 +1056,7 @@ jobs:
         inputs:
           - name: tfstate
           - name: git_terracost
+          - name: cycloid_utils
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           GIT_PRIVATE_KEY: ((($ .cr_cred_path $).ssh_key))
