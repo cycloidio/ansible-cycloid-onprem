@@ -58,7 +58,7 @@ dependencies:
     tags:
       - concourse
     # https://github.com/concourse/concourse-chart/blob/master/Chart.yaml#L4
-    version: 17.2.1
+    version: 17.3.1
     condition: concourse.enabled
 
   - name: vault
