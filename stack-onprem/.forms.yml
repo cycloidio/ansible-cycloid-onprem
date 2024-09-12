@@ -72,6 +72,71 @@ use_cases:
           widget: cy_cred
           default: "((custom_onprem_licence.prod))"
 
+    - name: Default config
+      condition: advanced_stack_opt==true
+      technologies: [pipeline]
+      vars:
+        - name: "AWS access key"
+          description: "Amazon AWS access key for Terraform."
+          key: aws_access_key
+          widget: cy_cred
+          type: string
+          default: "((aws_admin.access_key))"
+        - name: "AWS secret key"
+          description: "Amazon AWS secret key for Terraform."
+          key: aws_secret_key
+          widget: cy_cred
+          type: string
+          default: "((aws_admin.secret_key))"
+        - name: "Amazon AWS region"
+          description: "Amazon AWS region to use for Terraform."
+          key: aws_default_region
+          widget: auto_complete
+          type: string
+          values: ["eu-north-1","ap-south-1","eu-west-3","eu-west-2","eu-west-1","ap-northeast-2","ap-northeast-1","sa-east-1","ca-central-1","ap-southeast-1","ap-southeast-2","eu-central-1","us-east-1","us-east-2","us-west-1","us-west-2"]
+          default: eu-west-1
+        - name: "Terraform storage bucket"
+          description: "AWS S3 bucket name to store terraform remote state file."
+          key: terraform_storage_bucket_name
+          widget: simple_text
+          type: string
+          default: ($ .organization_canonical $)-terraform-remote-state
+        - name: "Terraform version"
+          description: "Terraform version used."
+          key: terraform_version
+          widget: simple_text
+          type: string
+          default: '1.0.7'
+        - name: "Config repository"
+          key: config_git_repository
+          type: string
+          widget: cy_crs
+          description: "Git repository URL containing the config of the stack."
+          default: "git@github.com:cycloidio/cycloid-stacks.git"
+          required: true
+        - name: "Config git key"
+          description: "SSH key pair to fetch the config Git repository."
+          key: config_git_private_key
+          type: string
+          widget: cy_cred
+          default: "((git_github.ssh_key))"
+          required: true
+        - name: "Config branch"
+          key: config_git_branch
+          widget: cy_branch
+          type: string
+          description: "The branch used by the config repository"
+          source: config_git_repository
+          default: "config"
+          required: true
+        - name: "Private SSH KEY to connect on instances"
+          description: "Private SSH KEY to connect on instances."
+          key: instance_private_key_pair
+          type: string
+          widget: cy_cred
+          default: "((git_ssh_bastion.ssh_key))"
+          required: true
+
     - name: Stack
       # This variable need to be write when using onprem (not playground)
       # condition: advanced_opt==true
