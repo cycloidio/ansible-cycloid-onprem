@@ -1,19 +1,18 @@
 # YAML anchors
 shared:
-
-  # Task : sync and merge with rsync 2 rep. Used to merge stack and config
-  - &merge-stack-and-config
-    platform: linux
-    image_resource:
-      type: docker-image
-      source:
-        repository: cycloid/cycloid-toolkit
-        tag: latest
-    run:
-      path: /usr/bin/merge-stack-and-config
-    outputs:
-    - name: merged-stack
-      path: "merged-stack"
+# Task : sync and merge with rsync 2 rep. Used to merge stack and config
+- &merge-stack-and-config
+  platform: linux
+  image_resource:
+    type: docker-image
+    source:
+      repository: cycloid/cycloid-toolkit
+      tag: latest
+  run:
+    path: /usr/bin/merge-stack-and-config
+  outputs:
+  - name: merged-stack
+    path: "merged-stack"
 
 groups:
 - name: overview
@@ -166,7 +165,6 @@ resources:
   icon: docker
 
 jobs:
-
 # Merge and trigger a plan whenever there is a commit in Terraform stack or config
 - name: terraform-plan
   serial: True
@@ -241,30 +239,6 @@ jobs:
         params:
           plan_run: true
           terraform_source: merged-stack/
-
-      # - task: pause-apply
-      #   config:
-      #     platform: linux
-      #     image_resource:
-      #       type: docker-image
-      #       source:
-      #         repository: cycloid/cycloid-toolkit
-      #         tag: latest
-      #     container_limits: {}
-      #     run:
-      #       path: /bin/bash
-      #       args:
-      #         - '-c'
-      #         - |
-      #           echo "pause terraform apply to make sure we don't reinstall the onprem"
-      #           cy --insecure login --org ${ORGANIZATION} --api-key ${API_KEY}
-      #           cy --org ${ORGANIZATION} pp pause-job --project ${PROJECT} --env ${ENV} --job terraform-apply
-      #     params:
-      #       CY_API_URL: 'https://http-api.cycloid.io'
-      #       ORGANIZATION: ($ .organization_canonical $)
-      #       API_KEY: ((api_key))
-      #       ENV: ($ .environment $)
-      #       PROJECT: ($ .project $)
 
 - name: terraform-destroy
   max_in_flight: 1
@@ -549,7 +523,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
           CYCLOID_LICENCE: ((cycloid_licence))
           ANSIBLE_EXTRA_VARS:
-             ((ansible_params_extravars))
+            ((ansible_params_extravars))
 
     - task: access
       config:
@@ -643,7 +617,7 @@ jobs:
           CONCOURSE_WORKER: ((install_concourse_worker))
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
-             ((ansible_params_extravars))
+            ((ansible_params_extravars))
 
 
 - name: extra-configuration
@@ -742,6 +716,9 @@ jobs:
         - terraform-apply
       trigger: false
 
+    - get: cycloid_utils
+      trigger: false
+
     - task: ansible
       config:
         platform: linux
@@ -784,12 +761,17 @@ jobs:
             set -x
             ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory playbook.yml -e uninstall=True -e @extra_ansible_vars.json"
 
+            CY_TARGET_API_URL="https://${MAIN_INSTANCE}/api" \
+              python3 cycloid-utils/cy-provisioner/cy-initializer.py --delete
         inputs:
           - name: tfstate
+          - name: cycloid_utils
         params:
+          ENV: ($ .environment $)
+          PROJECT: ($ .project $)
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
-             ((ansible_params_extravars))
+            ((ansible_params_extravars))
 
 - name: mysql-force-pay-orgs
   serial: True
@@ -847,7 +829,7 @@ jobs:
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
-             ((ansible_params_extravars))
+            ((ansible_params_extravars))
 
 - name: mysql-force-user-email-validation
   serial: True
@@ -906,7 +888,7 @@ jobs:
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
-             ((ansible_params_extravars))
+            ((ansible_params_extravars))
 
 - name: report
   serial: True
@@ -965,7 +947,7 @@ jobs:
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
-             ((ansible_params_extravars))
+            ((ansible_params_extravars))
 
 - name: populate-datas
   serial: True
@@ -1062,5 +1044,5 @@ jobs:
           GIT_PRIVATE_KEY: ((($ .cr_cred_path $).ssh_key))
           CR_REPO: ((onprem_cr_repository))
           CY_SOURCE_API_KEY: ((custom_api-key-admin.key))
-          ENV: ($ environment $)
-          PROJECT: ($ project $)
+          ENV: ($ .environment $)
+          PROJECT: ($ .project $)
