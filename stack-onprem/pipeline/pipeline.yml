@@ -142,7 +142,7 @@ resources:
   source:
     uri: git@github.com:cycloidio/cycloid-utils.git
     branch: master
-    private_key: ((stack_git_private_key))
+    private_key: ((($ .cr_cred_path $).ssh_key))
     paths:
       - cy-provisioner/*
 

@@ -170,7 +170,6 @@ use_cases:
           widget: switch
           type: boolean
           default: false
-
         - name: "Ansible extra variables"
           description: "Cycloid EXTRA_ANSIBLE_VARS"
           key: ansible_params_extravars
