@@ -111,8 +111,8 @@ use_cases:
           key: ansible_params_extravars
           widget: text_area
           type: map
-          default:
-            test: "foo"
+          default: |+
+            cycloid_api_provisioning: false
             #azure_ad_tenant_id: ""
             #azure_ad_client_id: ""
             #google_client_id: ""
