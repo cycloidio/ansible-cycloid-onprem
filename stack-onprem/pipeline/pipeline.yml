@@ -1013,7 +1013,7 @@ jobs:
             done
 
             CY_TARGET_API_URL="https://${MAIN_INSTANCE}/api" \
-            PROVISIONING_ENABLED=true \
+            ENABLE_PROVISIONING=true \
               python3 cycloid_utils/cy-provisioner/cy-initializer.py
 
             # Logs for dummy/test
