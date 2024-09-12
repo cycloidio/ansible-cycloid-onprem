@@ -49,7 +49,7 @@ config_ansible_path: ($ .project $)/ansible
 terraform_version: '1.1.9'
 
 ansible_params_extravars:
-  test: "foo"
+  cycloid_api_provisioning: true
 
 instance_private_key_pair: ((git_ssh_bastion.ssh_key))
 
