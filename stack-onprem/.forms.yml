@@ -73,7 +73,7 @@ use_cases:
           default: "((custom_onprem_licence.prod))"
 
     - name: Default config
-      condition: advanced_stack==true
+      condition: advanced_opt==true
       technologies: [pipeline]
       vars:
         - name: "AWS access key"
