@@ -176,15 +176,8 @@ use_cases:
           key: ansible_params_extravars
           widget: text_area
           type: map
-          default: |+
-            cycloid_api_provisioning: false
-            #azure_ad_tenant_id: ""
-            #azure_ad_client_id: ""
-            #google_client_id: ""
-            #google_client_secret: ""
-            #github_host_address: "https://api.github.com"
-            #github_client_id: ""
-            #github_client_secret: ""
+          default:
+            cycloid_api_provisioning: "false"
 
     - name: Service-ansible
       technologies: [ansible]
