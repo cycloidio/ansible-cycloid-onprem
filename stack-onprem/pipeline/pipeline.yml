@@ -1013,11 +1013,13 @@ jobs:
             done
 
             CY_TARGET_API_URL="https://${MAIN_INSTANCE}/api" \
+            PROVISIONING_ENABLED=true \
               python3 cycloid_utils/cy-provisioner/cy-initializer.py
 
             # Logs for dummy/test
             echo "Logs for dummy/test project ..."
-            cy --insecure --org $ORG --project dummy external-backend create logs AWSCloudWatchLogs \
+            cy --insecure --org $ORG external-backend create logs AWSCloudWatchLogs \
+               --project dummy \
               --cred admin_aws \
               --region "eu-west-1"
 
