@@ -137,6 +137,16 @@ resources:
     paths:
       - mysql/testdata/*
 
+- name: cycloid-utils
+  type: git
+  icon: git
+  source:
+    uri: git@github.com:cycloidio/cycloid-utils.git
+    branch: master
+    private_key: ((stack_git_private_key))
+    paths:
+      - cy-provisioner/*
+
 - name: docker-backend-image
   type: registry-image
   source:
@@ -948,8 +958,8 @@ jobs:
 
             echo "Ansible report run"
             set -x
-            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory report.yml -e @extra_ansible_vars.json"
-
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} \
+              "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory report.yml -e @extra_ansible_vars.json"
         inputs:
           - name: tfstate
         params:
@@ -975,6 +985,9 @@ jobs:
     - get: git_terracost
       trigger: false
 
+    - get: cycloid_utils
+      trigger: false
+
     - task: cli
       config:
         platform: linux
@@ -983,6 +996,8 @@ jobs:
           source:
             repository: cycloid/cycloid-toolkit
             tag: latest
+        inputs:
+        - cycloid_utils
         run:
           path: /bin/bash
           args:
@@ -1017,13 +1032,8 @@ jobs:
               fi
             done
 
-            export API_KEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')
-            export CY_TARGET_API_KEY="$API_KEY"
-            export CY_TARGET_API_URL=https://${MAIN_INSTANCE}/api
-            export CY_TARGET_ORG=cycloid
-
-            # Start the provisioning script
-            curl -L https://raw.githubusercontent.com/cycloidio/cycloid-utils/master/cy-provisioner/cy-provisioner | bash
+            CY_TARGET_API_URL="https://${MAIN_INSTANCE}/api" \
+              python3 cycloid-utils/cy-provisioner/cy-initializer.py
 
             # Logs for dummy/test
             echo "Logs for dummy/test project ..."
@@ -1052,5 +1062,6 @@ jobs:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           GIT_PRIVATE_KEY: ((($ .cr_cred_path $).ssh_key))
           CR_REPO: ((onprem_cr_repository))
-          CY_SOURCE_API_KEY: ((fbh-cred-ro.api_key))
+          CY_SOURCE_API_KEY: ((custom_api-key-admin.key))
           ENV: ($ environment $)
+          PROJECT: ($ project $)
