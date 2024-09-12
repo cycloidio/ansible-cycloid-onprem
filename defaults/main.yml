@@ -12,6 +12,10 @@ cycloid_console_dns: cycloid-console
 #+ If not defined, proxypass from cycloid_console_dns will be used.
 cycloid_api_dns: cycloid-api
 
+# Set to true to uninstall cycloid
+uninstall: False
+cycloid_api_provisioning: True
+
 #. cycloid_initial_user(required, map):
 #+ Cycloid initial user details.
 cycloid_initial_user:

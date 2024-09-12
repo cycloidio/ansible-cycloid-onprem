@@ -1,19 +1,18 @@
 # YAML anchors
 shared:
-
-  # Task : sync and merge with rsync 2 rep. Used to merge stack and config
-  - &merge-stack-and-config
-    platform: linux
-    image_resource:
-      type: docker-image
-      source:
-        repository: cycloid/cycloid-toolkit
-        tag: latest
-    run:
-      path: /usr/bin/merge-stack-and-config
-    outputs:
-    - name: merged-stack
-      path: "merged-stack"
+# Task : sync and merge with rsync 2 rep. Used to merge stack and config
+- &merge-stack-and-config
+  platform: linux
+  image_resource:
+    type: docker-image
+    source:
+      repository: cycloid/cycloid-toolkit
+      tag: latest
+  run:
+    path: /usr/bin/merge-stack-and-config
+  outputs:
+  - name: merged-stack
+    path: "merged-stack"
 
 groups:
 - name: overview
@@ -137,6 +136,16 @@ resources:
     paths:
       - mysql/testdata/*
 
+- name: cycloid_utils
+  type: git
+  icon: github-circle
+  source:
+    uri: git@github.com:cycloidio/cycloid-utils.git
+    branch: master
+    private_key: ((stack_git_private_key))
+    paths:
+      - cy-provisioner/*
+
 - name: docker-backend-image
   type: registry-image
   source:
@@ -156,7 +165,6 @@ resources:
   icon: docker
 
 jobs:
-
 # Merge and trigger a plan whenever there is a commit in Terraform stack or config
 - name: terraform-plan
   serial: True
@@ -231,30 +239,6 @@ jobs:
         params:
           plan_run: true
           terraform_source: merged-stack/
-
-      # - task: pause-apply
-      #   config:
-      #     platform: linux
-      #     image_resource:
-      #       type: docker-image
-      #       source:
-      #         repository: cycloid/cycloid-toolkit
-      #         tag: latest
-      #     container_limits: {}
-      #     run:
-      #       path: /bin/bash
-      #       args:
-      #         - '-c'
-      #         - |
-      #           echo "pause terraform apply to make sure we don't reinstall the onprem"
-      #           cy --insecure login --org ${ORGANIZATION} --api-key ${API_KEY}
-      #           cy --org ${ORGANIZATION} pp pause-job --project ${PROJECT} --env ${ENV} --job terraform-apply
-      #     params:
-      #       CY_API_URL: 'https://http-api.cycloid.io'
-      #       ORGANIZATION: ($ .organization_canonical $)
-      #       API_KEY: ((api_key))
-      #       ENV: ($ .environment $)
-      #       PROJECT: ($ .project $)
 
 - name: terraform-destroy
   max_in_flight: 1
@@ -539,7 +523,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
           CYCLOID_LICENCE: ((cycloid_licence))
           ANSIBLE_EXTRA_VARS:
-             ((ansible_params_extravars))
+            ((ansible_params_extravars))
 
     - task: access
       config:
@@ -633,7 +617,7 @@ jobs:
           CONCOURSE_WORKER: ((install_concourse_worker))
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
-             ((ansible_params_extravars))
+            ((ansible_params_extravars))
 
 
 - name: extra-configuration
@@ -732,6 +716,9 @@ jobs:
         - terraform-apply
       trigger: false
 
+    - get: cycloid_utils
+      trigger: false
+
     - task: ansible
       config:
         platform: linux
@@ -774,12 +761,17 @@ jobs:
             set -x
             ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory playbook.yml -e uninstall=True -e @extra_ansible_vars.json"
 
+            CY_TARGET_API_URL="https://${MAIN_INSTANCE}/api" \
+              python3 cycloid-utils/cy-provisioner/cy-initializer.py --delete
         inputs:
           - name: tfstate
+          - name: cycloid_utils
         params:
+          ENV: ($ .environment $)
+          PROJECT: ($ .project $)
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
-             ((ansible_params_extravars))
+            ((ansible_params_extravars))
 
 - name: mysql-force-pay-orgs
   serial: True
@@ -837,7 +829,7 @@ jobs:
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
-             ((ansible_params_extravars))
+            ((ansible_params_extravars))
 
 - name: mysql-force-user-email-validation
   serial: True
@@ -896,7 +888,7 @@ jobs:
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
-             ((ansible_params_extravars))
+            ((ansible_params_extravars))
 
 - name: report
   serial: True
@@ -948,14 +940,14 @@ jobs:
 
             echo "Ansible report run"
             set -x
-            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory report.yml -e @extra_ansible_vars.json"
-
+            ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} \
+              "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory report.yml -e @extra_ansible_vars.json"
         inputs:
           - name: tfstate
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           ANSIBLE_EXTRA_VARS:
-             ((ansible_params_extravars))
+            ((ansible_params_extravars))
 
 - name: populate-datas
   serial: True
@@ -973,6 +965,9 @@ jobs:
       trigger: false
 
     - get: git_terracost
+      trigger: false
+
+    - get: cycloid_utils
       trigger: false
 
     - task: cli
@@ -1009,7 +1004,6 @@ jobs:
             # Forms allow to select OS by name and ami id. In case of AMI we can't know which user to use.
             # We want to avoid the needs of indicate os user in forms. So we try one by one until the good user is found.
             REMOTE_USER=""
-            #set +e
             for user in admin centos ubuntu;do
               ssh ${user}@${MAIN_INSTANCE} ls
               if [ $? -eq 0 ]; then
@@ -1017,57 +1011,9 @@ jobs:
                 break
               fi
             done
-            #set -e
 
-            export API_KEY=$(ssh ${REMOTE_USER}@${MAIN_INSTANCE} 'cat ~/cycloid-onprem/admin.apikey')
-            export CY_API_URL=https://${MAIN_INSTANCE}/api
-            export ORG=cycloid
-            cy --insecure login --org $ORG --api-key $API_KEY
-
-            echo "Adding credentials ..."
-            cy --insecure  --org $ORG  credential create ssh --name github --ssh-key /root/.ssh/id_rsa_git
-            CRED=$(cy --insecure  --org $ORG  credential list -o json | jq -r '.[] | select( .name | contains("github")) | .canonical')
-
-            cy --insecure  --org $ORG config-repo create --branch config --cred $CRED --url $CR_REPO --default  --name onprem-test
-            cy --insecure  --org $ORG catalog-repo create --branch stacks --cred $CRED --url $CR_REPO  --name onprem-test-stacks
-
-            # minio creds (default value used)
-            cy --insecure  --org $ORG  credential create aws --name minio --access-key ((onprem_minio_access_key)) --secret-key ((onprem_minio_secret_key))
-
-            # AWS
-            cy --insecure  --org $ORG  credential create aws --name admin_aws --access-key ((((onprem_aws_cred_name)).access_key)) --secret-key ((((onprem_aws_cred_name)).secret_key))
-            cy --insecure  --org $ORG  credential create aws --name admin_aws-sandbox --access-key ((((onprem_aws_sandbox_cred_name)).access_key)) --secret-key ((((onprem_aws_sandbox_cred_name)).secret_key))
-
-            # GCP
-            echo '((((onprem_gcp_cred_name)).json_key))' > /tmp/sandbox
-            cy --insecure  --org $ORG  credential create gcp --name admin_gcp_cycloid-sandbox --json-key /tmp/sandbox
-            rm /tmp/sandbox
-
-            # Azure
-            cy --insecure  --org $ORG  credential create azure --name admin_azure --client-id ((((onprem_azure_cred_name)).client_id)) --client-secret ((((onprem_azure_cred_name)).client_secret)) --subscription-id ((((onprem_azure_cred_name)).subscription_id)) --tenant-id ((((onprem_azure_cred_name)).tenant_id))
-            cy --insecure  --org $ORG  credential create azure_storage --name azure-tfstate --account-name ((((onprem_azure_storage_cred_name)).account_name)) --access-key ((((onprem_azure_storage_cred_name)).access_key))
-
-            # create dummy project
-            echo "Creating dummy project ..."
-            wget https://raw.githubusercontent.com/cycloid-community-catalog/stack-dummy/master/pipeline/pipeline.yml
-            wget https://raw.githubusercontent.com/cycloid-community-catalog/stack-dummy/master/pipeline/variables.sample.yml
-            cy --insecure --org $ORG project create \
-              --name dummy \
-              --description "from dummy stack" \
-              --stack-ref cycloid:stack-dummy \
-              --config-repo onprem-test \
-              --env test \
-              --usecase default \
-              --pipeline "pipeline.yml" \
-              --vars "variables.sample.yml"
-
-            # InfraView for dummy/test
-            echo "InfraView for dummy/test project ..."
-            cy --insecure --org $ORG --project dummy --env test external-backend create infraview AWSRemoteTFState \
-              --bucket-name ${IV_BUCKET_NAME} \
-              --bucket-path ${IV_BUCKET_PATH} \
-              --cred admin_aws \
-              --region "eu-west-1"
+            CY_TARGET_API_URL="https://${MAIN_INSTANCE}/api" \
+              python3 cycloid-utils/cy-provisioner/cy-initializer.py
 
             # Logs for dummy/test
             echo "Logs for dummy/test project ..."
@@ -1092,9 +1038,11 @@ jobs:
         inputs:
           - name: tfstate
           - name: git_terracost
+          - name: cycloid_utils
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           GIT_PRIVATE_KEY: ((($ .cr_cred_path $).ssh_key))
           CR_REPO: ((onprem_cr_repository))
-          IV_BUCKET_NAME: cycloid-terraform-remote-state
-          IV_BUCKET_PATH: cycloidio-website/demo-hack/cycloid-demo.tfstate
+          CY_SOURCE_API_KEY: ((custom_api-key-admin.key))
+          ENV: ($ .environment $)
+          PROJECT: ($ .project $)

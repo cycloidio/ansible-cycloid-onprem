@@ -20,6 +20,10 @@ aws_default_region: eu-west-1
 # "Amazon Scaleway access key for Terraform."
 scw_access_key: ((scaleway_machine.access_key))
 
+#. terraform_storage_bucket_name (required): ($ .organization_canonical $)-terraform-remote-state
+#+ AWS S3 bucket name to store terraform remote state file.
+terraform_storage_bucket_name: ($ .organization_canonical $)-terraform-remote-state
+
 # "Amazon Scaleway secret key for Terraform."
 scw_secret_key: ((scaleway_machine.secret_key))
 
@@ -28,7 +32,7 @@ scw_secret_key: ((scaleway_machine.secret_key))
 #
 
 #. api_key (optionnal): ((custom_api-key-admin.key))
-#+ API key used to configure infra view / logs / start/stop ...
+#+ API key used to configure infra view / logs / start/stop ..
 api_key: ((custom_api-key-admin.key))
 external_backend_aws_cred_name: aws
 
@@ -38,9 +42,14 @@ stack_git_branch: $ONPREM_STACK_BRANCH
 
 #. config_terraform_path (required): ($ .project $)/terraform/($ .environment $)
 #+ Path of Terraform files in the config git repository
+config_terraform_path: ($ .project $)/terraform/($ .environment $)
+
+config_ansible_path: ($ .project $)/ansible
+
+terraform_version: '1.1.9'
 
 ansible_params_extravars:
-  test: "foo"
+  cycloid_api_provisioning: true
 
 instance_private_key_pair: ((git_ssh_bastion.ssh_key))
 
@@ -48,7 +57,7 @@ install_concourse_worker: $INSTALL_CONCOURSE_WORKER
 install_minio: false
 install_elasticsearch: $INSTALL_ELASTICSEARCH
 
-cycloid_licence: ((custom_onprem_licence.$LICENCE_ENV))
+cycloid_licence: ((custom_onprem_licence.($ .environment $)))
 
 cycloid_api_tag: $BACKEND_IMAGE_TAG
 cycloid_frontend_tag: $FRONTEND_IMAGE_TAG
