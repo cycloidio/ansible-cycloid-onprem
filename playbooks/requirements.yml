@@ -26,12 +26,14 @@ roles:
   scm: git
 
 - src: https://github.com/mhutter/ansible-docker-systemd-service
-  version: 8dfae1d
+  # latest commit, can be updated
+  version: 2014a18
   name: mhutter.docker-systemd-service
   scm: git
 
 collections:
   # Install a collection from Ansible Galaxy.
   - name: community.docker
-    version: 3.10.3
+    # latest tag, can be updated
+    version: 3.12.1
     source: https://galaxy.ansible.com

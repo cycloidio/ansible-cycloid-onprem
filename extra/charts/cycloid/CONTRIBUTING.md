@@ -67,9 +67,13 @@ cd /opt/
 source /tmp/awslogin
 helm repo add cycloid-onprem s3://cycloid-onprem-helm-charts/stable/cycloid/
 VERSION=$(grep ^version: Chart.yaml | awk '{print $2}')
-helm s3 push ./cycloid-$VERSION.tgz cycloid-onprem
+helm s3 push ./cycloid-$VERSION.tgz cycloid-onprem --relative
 helm search repo cycloid-onprem
 ```
+
+`--relative` is used to push https:// url instead of s3:// in the index
+If s3:// url have been pushed, please reindex it:
+`helm s3 reindex cycloid-onprem --relative`
 
 If not already done, create a PR from the `helm-version_xxx` branch in order to merge the `CHANGELOG.md` update
 
