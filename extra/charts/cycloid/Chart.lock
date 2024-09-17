@@ -7,7 +7,7 @@ dependencies:
   version: 18.5.0
 - name: concourse
   repository: https://concourse-charts.storage.googleapis.com/
-  version: 17.2.1
+  version: 17.3.1
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.27.0
