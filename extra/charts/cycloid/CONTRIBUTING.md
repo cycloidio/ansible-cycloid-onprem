@@ -77,7 +77,22 @@ If s3:// url have been pushed, please reindex it:
 
 If not already done, create a PR from the `helm-version_xxx` branch in order to merge the `CHANGELOG.md` update
 
+### Update the external local charts (if Chart.yaml updated)
+
+If you updated a chart dependency version, you need to update charts/ and Chart.lock with the following commands
+
+```bash
+rm charts/* Chart.lock -rf
+helm dep list | tail -n+2 | head -n-1 | awk '{print $1","$3}' | while read repo; do helm repo add ${repo%%,*} ${repo##*,}; done < /dev/stdin
+helm dependency build
+cd charts
+for i in $(ls *.tgz);do tar zxf $i;done ; rm *.tgz
+cd -
+```
+
 ## Update cycloid-intercept script
+
+If the cycloid-intercept has been updated, make sure to push the latest version on the public s3 bucket
 
 ```bash
 export AWS_ACCESS_KEY_ID=$(vault read -field=access_key secret/cycloid/aws)
