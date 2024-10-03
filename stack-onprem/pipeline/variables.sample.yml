@@ -46,7 +46,7 @@ config_terraform_path: ($ .project $)/terraform/($ .environment $)
 
 config_ansible_path: ($ .project $)/ansible
 
-terraform_version: '1.1.9'
+terraform_version: '1.5.7'
 
 ansible_params_extravars:
   cycloid_api_provisioning: true
