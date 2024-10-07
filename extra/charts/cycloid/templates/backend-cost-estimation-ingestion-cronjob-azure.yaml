@@ -1,4 +1,4 @@
-{{- if and .Values.backend.enabled .Values.externalElasticsearch.enabled }}
+{{- if and .Values.backend.enabled .Values.backend.cronJob.costEstimation.azure.enabled }}
 {{- if semverCompare ">=1.21-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: batch/v1
 {{- else -}}
@@ -6,7 +6,7 @@ apiVersion: batch/v1beta1
 {{- end }}
 kind: CronJob
 metadata:
-  name: {{ include "backend.fullname" . }}-ccm-ingestion
+  name: {{ include "backend.fullname" . }}-cost-estimation-azure-ingestion
   labels:
     {{- include "cycloid.labels" . | nindent 4 }}
     {{- include "backend.selectorLabels" . | nindent 4 }}
@@ -20,7 +20,7 @@ metadata:
 spec:
   suspend: false
   concurrencyPolicy: Replace
-  schedule: {{ .Values.backend.cronJob.ccm.schedule }}
+  schedule: {{ .Values.backend.cronJob.costEstimation.azure.schedule }}
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3
   jobTemplate:
@@ -51,18 +51,17 @@ spec:
           securityContext: {{- omit .Values.backend.podSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           restartPolicy: "Never"
-
           containers:
-            - name: ccm-ingestion
+            - name: cost-estimation-azure-ingestion
               {{- if .Values.backend.securityContext.enabled }}
               securityContext: {{- omit .Values.backend.securityContext "enabled" | toYaml | nindent 16 }}
               {{- end }}
               image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
               args:
-                - "/go/youdeploy-http-api"
-                - "ingest-cost-explorer"
-                - "--config-file=/opt/config.yml"
+                {{- range .Values.backend.cronJob.costEstimation.azure.args }}
+                - {{ . }}
+                {{- end }}
               resources:
                 {{- toYaml .Values.backend.cronJob.resources | nindent 16 }}
               env:
@@ -81,7 +80,6 @@ spec:
                     secretKeyRef:
                       name: {{ template "cycloid.mysqlSecretName" . }}
                       key: mysql-password
-
                 - name: "REDIS_HOST"
                   value: {{ include "cycloid.redisHost" . | quote }}
                 - name: "REDIS_PORT"
@@ -96,31 +94,6 @@ spec:
                       optional: true
                 - name: "REDIS_URI"
                   value: {{ include "cycloid.redisUri" . | quote }}
-
-                - name: "COST_EXPLORER_ES_URL"
-                  value: {{ include "cycloid.elasticsearchURL" . | quote }}
-                - name: "COST_EXPLORER_ES_USERNAME"
-                  value: {{ include "cycloid.elasticsearchUser" . | quote }}
-                - name: "COST_EXPLORER_ES_PASSWORD"
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ template "cycloid.elasticsearchSecretName" . }}
-                      key: {{ template "cycloid.elasticsearchSecretKey" . }}
-
-                - name: "CONCOURSE_URL"
-                  value: {{ .Values.concourse.url | quote }}
-                - name: "CONCOURSE_PORT"
-                  value: {{ .Values.concourse.port | quote }}
-                - name: "CONCOURSE_TEAM"
-                  value: {{ .Values.concourse.team | quote }}
-                - name: "CONCOURSE_USER"
-                  value: {{ .Values.concourse.user | quote }}
-                - name: "CONCOURSE_PASSWORD"
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ template "backend.backendSecretName" . }}
-                      key: concourse-password
-
                 - name: "VAULT_URL"
                   value: {{ .Values.backend.vault.url | quote }}
                 - name: "VAULT_ROLE_ID"
@@ -133,21 +106,6 @@ spec:
                     secretKeyRef:
                       name: {{ template "backend.backendSecretName" . }}
                       key: vault-secret-id
-
-                - name: "FRONTEND_BASE_URL"
-                  value: {{ .Values.frontend.url | quote }}
-                - name: "BACKEND_BASE_URL"
-                  value: {{ .Values.backend.url | quote }}
-                - name: "CRYPTO_SIGNING_KEY"
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ template "backend.backendSecretName" . }}
-                      key: crypto-signing-key
-                - name: "JWT_KEY_1"
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ template "backend.backendSecretName" . }}
-                      key: jwt-key-1
                 {{- include "cycloid.extraEnvVars" .Values.backend | nindent 16 }}
                 {{- include "cycloid.extraSecretEnvVars" .Values.backend | nindent 16 }}
                 {{- include "cycloid.extraConfigMapEnvVars" .Values.backend | nindent 16 }}

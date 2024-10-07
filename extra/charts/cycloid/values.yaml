@@ -439,6 +439,63 @@ backend:
       #   cpu: 1
       #   memory: 512Mi
 
+    # Injestion cronJob for Cloud Cost Management
+    ccm:
+      schedule: "0 0 * * *"
+
+    # Cloud provider price injestion cronJob for Cost Estimation
+    costEstimation:
+      # Ingest the price of the AWS cloud provider for use in the Cost Estimation feature.
+      aws:
+        enabled: false
+        schedule: "0 0 * * 0"
+        args:
+          - "/entrypoint"
+          - "/go/youdeploy-http-api"
+          - "pricing"
+          - "ingest"
+          - "--config-file=/opt/config.yml"
+          - "--pricing-ingest-providers"
+          - "aws"
+          - "--pricing-ingest-aws-use-known-services"
+          - "--pricing-ingest-aws-minimal"
+
+      # Ingest the price of the Azure cloud provider for use in the Cost Estimation feature.
+      azure:
+        enabled: false
+        schedule: "0 0 * * 0"
+        args:
+          - "/entrypoint"
+          - "/go/youdeploy-http-api"
+          - "pricing"
+          - "ingest"
+          - "--config-file=/opt/config.yml"
+          - "--pricing-ingest-providers"
+          - "azure"
+          - "--pricing-ingest-azure-use-known-services"
+          - "--pricing-ingest-azure-minimal"
+
+      # Ingest the price of the GCP cloud provider for use in the Cost Estimation feature.
+      gcp:
+        enabled: false
+        schedule: "0 0 * * 0"
+        # Please create the following secret to provider PRICING_INGEST_GOOGLE_CREDENTIAL_JSON variable
+        # kubectl create secret generic pricing-ingest-google-credential --from-file=gcp-credentials.json
+        # Secret name wich container GCP json credential used to reach GCP pricing datas.
+        secretName: pricing-ingest-google-credential
+        args:
+          - "/entrypoint"
+          - "/go/youdeploy-http-api"
+          - "pricing"
+          - "ingest"
+          - "--config-file=/opt/config.yml"
+          - "--pricing-ingest-providers"
+          - "google"
+          - "--pricing-ingest-google-credential-json"
+          - "$(PRICING_INGEST_GOOGLE_CREDENTIAL_JSON)"
+          - "--pricing-ingest-google-use-known-services"
+          - "--pricing-ingest-google-minimal"
+
 #
 # MySQL
 #

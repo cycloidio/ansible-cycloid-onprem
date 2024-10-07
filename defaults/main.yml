@@ -50,7 +50,7 @@ cycloid_api_version: "latest-public"
 cycloid_crypto_signing_key: totally-random-secret-key
 
 #. cycloid_jwt_key_1(required, string):
-#+ Key used to sign all the API JWT. Format is UUID:RANDOM
+#+ Key used to sign all the API JWT and External Backend inventory token. Format is UUID:RANDOM
 # Example to generate: echo "$(< /proc/sys/kernel/random/uuid):$(< /dev/urandom tr -dc A-Za-z0-9 | head -c64)"
 cycloid_jwt_key_1: "2f2122de-63f2-4eec-9c6f-c6abb3e1f007:7cdyHps2tYDp6e7VKPEstE5sDMQbK6WLyN3GmTsF7x7QpE6ZP5ra6yfVSkvXakbB"
 

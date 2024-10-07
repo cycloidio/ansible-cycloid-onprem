@@ -23,6 +23,9 @@ helm package .
 echo -e "\e[36m# $0 > making sure the S3 helm repo is added locally\e[0m"
 helm repo add cycloid-onprem s3://cycloid-onprem-helm-charts/stable/cycloid/
 
+echo -e "\e[36m# $0 > copy changelog on s3\e[0m"
+aws s3 cp CHANGELOG.md s3://cycloid-onprem-helm-charts/stable/cycloid/
+
 echo -e "\e[36m# $0 > pushing the helm package to the S3 helm repo\e[0m"
 helm s3 push ./cycloid-$VERSION.tgz cycloid-onprem --relative
 
