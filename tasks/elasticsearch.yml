@@ -105,3 +105,6 @@
     masked: false
     state: started
   tags: docker-services
+
+- name: Force flush handlers to ensure container is started | elasticsearch
+  meta: flush_handlers

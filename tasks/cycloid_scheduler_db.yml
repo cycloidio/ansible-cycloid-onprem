@@ -20,3 +20,6 @@
       POSTGRES_DB: "{{concourse_db_name}}"
       POSTGRES_PASSWORD: "{{concourse_db_password}}"
   tags: docker-services
+
+- name: Force flush handlers to ensure container is started | cycloid-scheduler-db
+  meta: flush_handlers
