@@ -30,3 +30,6 @@
       MYSQL_ROOT_PASSWORD: "{{ cycloid_db_password }}"
       MYSQL_AUTHENTICATION_PLUGIN: "mysql_native_password"
   tags: docker-services
+
+- name: Force flush handlers to ensure container is started | cycloid-db
+  meta: flush_handlers

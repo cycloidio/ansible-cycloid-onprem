@@ -31,3 +31,6 @@
     container_volumes:
       - "{{cycloid_smtp_path}}:/opt"
   tags: docker-services
+
+- name: Force flush handlers to ensure container is started | smtp-server
+  meta: flush_handlers

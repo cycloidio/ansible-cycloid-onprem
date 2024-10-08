@@ -103,3 +103,6 @@
     container_args: "--network=host --env-file={{ concourse_config_path }}/approle-concourse-ro {{ container_args_extra }}"
     container_env: "{{ cycloid_scheduler_env }}"
   tags: docker-services
+
+- name: Force flush handlers to ensure container is started | cycloid-scheduler
+  meta: flush_handlers

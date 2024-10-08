@@ -19,3 +19,6 @@
       VAULT_INSECURE_SKIP_VERIFY: "True"
       YAML_KEYS_FILE: "/datas/{{ concourse_team_authorized_worker_keys_path }}"
   tags: docker-services
+
+- name: Force flush handlers to ensure container is started | cycloid-scheduler-sync-worker-keys
+  meta: flush_handlers

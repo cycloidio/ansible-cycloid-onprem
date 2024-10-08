@@ -18,6 +18,9 @@
       - "{{cycloid_cache_path}}:/data"
   tags: docker-services
 
+- name: Force flush handlers to ensure container is started | cycloid-cache
+  meta: flush_handlers
+
 - name: Define service asynqmon | cycloid-cache
   include_role:
     name: mhutter.docker-systemd-service

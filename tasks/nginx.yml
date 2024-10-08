@@ -69,3 +69,6 @@
 #    persistent: yes
 #  when: ansible_selinux and ansible_selinux.status == "enabled"
 #  tags: nginx
+
+- name: Force flush handlers to ensure container is started | cycloid-core nginx
+  meta: flush_handlers

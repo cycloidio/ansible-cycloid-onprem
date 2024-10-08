@@ -36,3 +36,6 @@
       register: resp
       until: resp.status == 200 or resp.status == 403
       delay: 5
+
+- name: Force flush handlers to ensure container is started | minio
+  meta: flush_handlers

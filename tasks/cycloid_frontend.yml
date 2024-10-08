@@ -14,3 +14,6 @@
       CYCLOID_API_URL: "{{cycloid_api_base_url}}"
       CYCLOID_BASE_URL: "{{ cycloid_console_base_url }}"
   tags: docker-services
+
+- name: Force flush handlers to ensure container is started | cycloid-core frontend
+  meta: flush_handlers
