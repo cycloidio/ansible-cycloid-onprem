@@ -427,7 +427,7 @@ cycloid_frontend_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_regis
 cycloid_api_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-backend:{{ cycloid_api_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-http-api:{{ cycloid_api_version }}{% endif %}"
 
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
-concourse_db_image: postgres:14.5
+concourse_db_image: postgres:15.4
 cycloid_cache_image: bitnami/redis:7.2.5
 cycloid_db_image: bitnami/mysql:8.0.36
 concourse_web_image: concourse/concourse:7.9.1
