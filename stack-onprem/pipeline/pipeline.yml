@@ -483,8 +483,8 @@ jobs:
             echo "" >> ${OUTPUT_FILE}
             echo "### Onprem ready on: https://${MAIN_INSTANCE}" >> ${OUTPUT_FILE}
             echo "### Admin user:" >> ${OUTPUT_FILE}
-            echo "  email: admin+onprem_${ENV}@cycloid.io" >> ${OUTPUT_FILE}
-            echo "  password: ${CYCLOID_INITIAL_USER_PASSWORD}" >> ${OUTPUT_FILE}
+            echo "  email: admin+${PROJECT}-${ENV}@cycloid.io" >> ${OUTPUT_FILE}
+            echo "  password: please check populate data" >> ${OUTPUT_FILE}
             echo "" >> ${OUTPUT_FILE}
             echo "### Asynqmon on: http://$(grep cycloid_cache -A1 inventory | tail -n1):5678" >> ${OUTPUT_FILE}
             echo "" >> ${OUTPUT_FILE}
@@ -762,7 +762,7 @@ jobs:
             ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory playbook.yml -e uninstall=True -e @extra_ansible_vars.json"
 
             CY_TARGET_API_URL="https://${MAIN_INSTANCE}/api" \
-              python3 cycloid_utils/cy-provisioner/cy-initializer.py --delete
+            python3 cycloid_utils/cy-provisioner/cy-initializer.py --delete
         inputs:
           - name: tfstate
           - name: cycloid_utils
@@ -770,6 +770,7 @@ jobs:
           ENV: ($ .environment $)
           PROJECT: ($ .project $)
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
+          CY_SOURCE_API_KEY: ((custom_api-key-admin.key))
           ANSIBLE_EXTRA_VARS:
             ((ansible_params_extravars))
 
