@@ -209,7 +209,7 @@ use_cases:
           key: cycloid_db_image
           widget: auto_complete
           type: string
-          default: "bitnami/mysql:8.0.36"
+          default: "bitnami/mysql:8.4.3"
           values:
               - "mysql:8.0.35"
               - "mariadb:10.2.11"
