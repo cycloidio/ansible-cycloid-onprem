@@ -4,12 +4,12 @@ dependencies:
   version: 11.1.19
 - name: redis
   repository: https://charts.bitnami.com/bitnami
-  version: 18.5.0
+  version: 20.2.1
 - name: concourse
   repository: https://concourse-charts.storage.googleapis.com/
   version: 17.3.1
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.27.0
-digest: sha256:cb8e4fcb300053fd96f6dc717a0cd65b9816ed27af5b4b5cd24e7597e4b10b53
-generated: "2024-10-31T09:31:44.497870249+01:00"
+digest: sha256:b7bc3872b67dea7dd247520298c4c5299cf2d7c90180b156547ce74877151a7a
+generated: "2024-11-07T15:35:22.679194452+01:00"

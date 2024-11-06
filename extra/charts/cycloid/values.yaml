@@ -595,7 +595,7 @@ redis:
   image:
     registry: docker.io
     repository: bitnami/redis
-    tag: 7.2.3-debian-11-r1
+    tag: 7.4.1-debian-12-r0
 
   ## Redis Authentication parameters
   ## ref: https://github.com/bitnami/charts/tree/main/bitnami/redis#redis-common-configuration-parameters
