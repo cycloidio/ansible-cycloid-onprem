@@ -428,7 +428,7 @@ cycloid_api_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }
 
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
 concourse_db_image: postgres:15.4
-cycloid_cache_image: bitnami/redis:7.2.5
+cycloid_cache_image: bitnami/redis:7.4.1
 cycloid_db_image: bitnami/mysql:8.4.3
 concourse_web_image: concourse/concourse:7.9.1
 vault_image: vault:1.13.3
