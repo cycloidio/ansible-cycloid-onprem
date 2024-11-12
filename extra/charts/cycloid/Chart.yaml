@@ -66,7 +66,7 @@ dependencies:
     tags:
       - hashicorp-vault
     # https://github.com/hashicorp/vault-helm/blob/main/Chart.yaml#L6
-    version: 0.27.0
+    version: 0.29.0
     condition: vault.enabled
 
 # annotations:
