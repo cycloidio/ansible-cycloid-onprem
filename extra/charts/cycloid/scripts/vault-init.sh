@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/bash
 set -x
 DIR="$(dirname $(readlink -f $0))"
 OUTPUT_DIR="$DIR/.out"
