@@ -106,7 +106,7 @@ use_cases:
           key: terraform_version
           widget: simple_text
           type: string
-          default: '1.1.7'
+          default: '1.8.2'
         - name: "Config repository"
           key: config_git_repository
           type: string
