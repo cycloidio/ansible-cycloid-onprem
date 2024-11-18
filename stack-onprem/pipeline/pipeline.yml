@@ -1012,6 +1012,7 @@ jobs:
               fi
             done
 
+            set -e
             export CY_TARGET_API_URL="https://${MAIN_INSTANCE}/api"
 
             git_stack-ansible/stack-onprem/scripts/wait-for-backend.sh
