@@ -1012,7 +1012,10 @@ jobs:
               fi
             done
 
-            CY_TARGET_API_URL="https://${MAIN_INSTANCE}/api" \
+            export CY_TARGET_API_URL="https://${MAIN_INSTANCE}/api"
+
+            git_stack-ansible/stack-onprem/scripts/wait-for-backend.sh
+
             ENABLE_PROVISIONING=true \
               python3 cycloid_utils/cy-provisioner/cy-initializer.py
 
@@ -1041,6 +1044,7 @@ jobs:
           - name: tfstate
           - name: git_terracost
           - name: cycloid_utils
+          - name: git_stack-ansible
         params:
           SSH_PRIVATE_KEY: ((instance_private_key_pair))
           GIT_PRIVATE_KEY: ((($ .cr_cred_path $).ssh_key))
