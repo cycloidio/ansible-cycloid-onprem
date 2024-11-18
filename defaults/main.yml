@@ -432,7 +432,7 @@ cycloid_cache_image: bitnami/redis:7.4.1
 cycloid_db_image: bitnami/mysql:8.4.3
 concourse_web_image: concourse/concourse:7.9.1
 vault_image: hashicorp/vault:1.18.1
-cycloid_nginx_image: nginx:1.26
+cycloid_nginx_image: nginx:1.27
 cycloid_cache_mon_image: hibiken/asynqmon:latest
 elasticsearch_image: elasticsearch:8.10.2
 kibana_image: bitnami/kibana:8.10.2
