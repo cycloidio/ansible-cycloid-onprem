@@ -22,11 +22,11 @@ groups:
   - asg
 resource_types:
 - name: cron-resource
-  type: docker-image
+  type: registry-image
   source:
     repository: cycloid/cron-resource
 - name: keyval
-  type: docker-image
+  type: registry-image
   source:
     repository: swce/keyval-resource
 resources:
@@ -47,7 +47,7 @@ jobs:
       config:
         platform: linux
         image_resource:
-          type: docker-image
+          type: registry-image
           source:
             repository: busybox
             tag: latest
@@ -69,7 +69,7 @@ jobs:
       config:
         platform: linux
         image_resource:
-          type: docker-image
+          type: registry-image
           source:
             repository: busybox
             tag: latest
@@ -93,7 +93,7 @@ jobs:
       config:
         platform: linux
         image_resource:
-          type: docker-image
+          type: registry-image
           source:
             repository: busybox
             tag: latest
@@ -117,7 +117,7 @@ jobs:
       config:
         platform: linux
         image_resource:
-          type: docker-image
+          type: registry-image
           source:
             repository: cycloid/cycloid-toolkit
             tag: latest
@@ -170,7 +170,7 @@ jobs:
       config:
         platform: linux
         image_resource:
-          type: docker-image
+          type: registry-image
           source:
             repository: cycloid/cycloid-toolkit
             tag: latest
@@ -222,7 +222,7 @@ jobs:
       config:
         platform: linux
         image_resource:
-          type: docker-image
+          type: registry-image
           source:
             repository: cycloid/cycloid-toolkit
             tag: latest

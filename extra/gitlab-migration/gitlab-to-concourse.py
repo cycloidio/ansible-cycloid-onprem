@@ -230,7 +230,7 @@ base_dind_task = yaml.safe_load("""
   config:
     platform: linux
     image_resource:
-      type: docker-image
+      type: registry-image
       source:
         repository: docker
         tag: 17.12.0-dind
@@ -249,7 +249,7 @@ base_task = yaml.safe_load("""
   config:
     platform: linux
     image_resource:
-      type: docker-image
+      type: registry-image
       source:
         repository: cycloidio/cycloid-toolkit
         tag: latest
@@ -273,7 +273,7 @@ base_pipeline = {
 # we have is too old
 resource_type_registry_image = yaml.safe_load("""
   name: registry-image
-  type: docker-image
+  type: registry-image
   #type: registry-image
   privileged: true
   source:
