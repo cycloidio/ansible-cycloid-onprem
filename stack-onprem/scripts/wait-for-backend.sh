@@ -34,17 +34,7 @@ check() {
 
 export -f check
 
-case "$ENV" in
-prod)
-  export CY_API_URL="https://http-api.cycloid.io"
-  ;;
-staging)
-  export CY_API_URL="https://api.staging.cycloid.io/status"
-  ;;
-*)
-  export CY_API_URL="https://api-${ENV}.staging.cycloid.io"
-  ;;
-esac
+export CY_API_URL=${CY_TARGET_API_URL:?This script requires the target cycloid instance API URL.}
 
 timeout "${TIMEOUT:-4}" bash -c check || {
   echo "Backend readiness for ${CY_API_URL} has timeout, check cycloid-backend ${ENV}"
