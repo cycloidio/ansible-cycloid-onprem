@@ -1,0 +1,6 @@
+kind: Changed
+body: 'vault: upgrade to 1.18.1'
+time: 2024-11-12T16:50:16.366802927+01:00
+custom:
+  Ref: Pull
+  RefID: "214"

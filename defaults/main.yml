@@ -197,7 +197,7 @@ cycloid_job_cost_estimation_injection_gcp: false
 #. cost_estimation_gcp_cred_json(optional, string): ""
 #+ GCP json credential used to reach GCP pricing datas.
 cost_estimation_gcp_cred_json: ""
-
+cost_estimation_gcp_project: ""
 #. cost_estimation_ingestion_schedule(optional, string): "Sun *-*-* 00:00:00"
 #+ Sets the schedule for CostEstimation Ingestion jobs.
 # Every sunday midnight
@@ -427,12 +427,12 @@ cycloid_frontend_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_regis
 cycloid_api_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-backend:{{ cycloid_api_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-http-api:{{ cycloid_api_version }}{% endif %}"
 
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
-concourse_db_image: postgres:14.5
-cycloid_cache_image: bitnami/redis:7.2.5
-cycloid_db_image: bitnami/mysql:8.0.36
+concourse_db_image: postgres:15.4
+cycloid_cache_image: bitnami/redis:7.4.1
+cycloid_db_image: bitnami/mysql:8.4.3
 concourse_web_image: concourse/concourse:7.9.1
-vault_image: vault:1.13.3
-cycloid_nginx_image: nginx:1.26
+vault_image: hashicorp/vault:1.18.1
+cycloid_nginx_image: nginx:1.27
 cycloid_cache_mon_image: hibiken/asynqmon:latest
 elasticsearch_image: elasticsearch:8.10.2
 kibana_image: bitnami/kibana:8.10.2
@@ -836,7 +836,7 @@ cycloid_job_cost_estimation_injection: "{% if cycloid_job_cost_estimation_inject
 # command used to create an ingest job on the queue
 cost_estimation_ingestion_aws_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers aws --pricing-ingest-aws-use-known-services --pricing-ingest-aws-minimal; "
 cost_estimation_ingestion_azure_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers azure --pricing-ingest-azure-use-known-services --pricing-ingest-azure-minimal; "
-cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers google --pricing-ingest-google-credential-json  $PRICING_INGEST_GOOGLE_CREDENTIAL_JSON --pricing-ingest-google-use-known-services --pricing-ingest-google-minimal; "
+cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers google --pricing-ingest-google-project={{ cost_estimation_gcp_project }} --pricing-ingest-google-credential-json  $PRICING_INGEST_GOOGLE_CREDENTIAL_JSON --pricing-ingest-google-use-known-services --pricing-ingest-google-minimal; "
 
 # merge cost_estimation_ingestion cmd
 cycloid_job_cost_estimation_ingestion_container_args: "{% if cycloid_job_cost_estimation_injection_aws|bool %}{{ cost_estimation_ingestion_aws_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_azure|bool %}{{ cost_estimation_ingestion_azure_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_gcp|bool %}{{ cost_estimation_ingestion_gcp_minimal }}{% endif %}"

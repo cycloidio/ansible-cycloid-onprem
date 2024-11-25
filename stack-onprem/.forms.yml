@@ -106,7 +106,7 @@ use_cases:
           key: terraform_version
           widget: simple_text
           type: string
-          default: '1.0.7'
+          default: '1.8.2'
         - name: "Config repository"
           key: config_git_repository
           type: string
@@ -209,7 +209,7 @@ use_cases:
           key: cycloid_db_image
           widget: auto_complete
           type: string
-          default: "bitnami/mysql:8.0.36"
+          default: "bitnami/mysql:8.4.3"
           values:
               - "mysql:8.0.35"
               - "mariadb:10.2.11"
