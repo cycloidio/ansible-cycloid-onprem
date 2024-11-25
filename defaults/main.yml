@@ -197,7 +197,7 @@ cycloid_job_cost_estimation_injection_gcp: false
 #. cost_estimation_gcp_cred_json(optional, string): ""
 #+ GCP json credential used to reach GCP pricing datas.
 cost_estimation_gcp_cred_json: ""
-
+cost_estimation_gcp_project: ""
 #. cost_estimation_ingestion_schedule(optional, string): "Sun *-*-* 00:00:00"
 #+ Sets the schedule for CostEstimation Ingestion jobs.
 # Every sunday midnight
@@ -836,7 +836,7 @@ cycloid_job_cost_estimation_injection: "{% if cycloid_job_cost_estimation_inject
 # command used to create an ingest job on the queue
 cost_estimation_ingestion_aws_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers aws --pricing-ingest-aws-use-known-services --pricing-ingest-aws-minimal; "
 cost_estimation_ingestion_azure_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers azure --pricing-ingest-azure-use-known-services --pricing-ingest-azure-minimal; "
-cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers google --pricing-ingest-google-credential-json  $PRICING_INGEST_GOOGLE_CREDENTIAL_JSON --pricing-ingest-google-use-known-services --pricing-ingest-google-minimal; "
+cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers google --pricing-ingest-google-project={{ cost_estimation_gcp_project }} --pricing-ingest-google-credential-json  $PRICING_INGEST_GOOGLE_CREDENTIAL_JSON --pricing-ingest-google-use-known-services --pricing-ingest-google-minimal; "
 
 # merge cost_estimation_ingestion cmd
 cycloid_job_cost_estimation_ingestion_container_args: "{% if cycloid_job_cost_estimation_injection_aws|bool %}{{ cost_estimation_ingestion_aws_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_azure|bool %}{{ cost_estimation_ingestion_azure_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_gcp|bool %}{{ cost_estimation_ingestion_gcp_minimal }}{% endif %}"
