@@ -384,3 +384,7 @@
       no_proxy: "{{ no_proxy }}"
   tags: docker-services
   when: cycloid_api_task_manager_enabled|bool
+
+- name: Force flush handlers to ensure cycloid-api-task-manager is started | cycloid-core api
+  meta: flush_handlers
+  when: cycloid_api_task_manager_enabled|bool
