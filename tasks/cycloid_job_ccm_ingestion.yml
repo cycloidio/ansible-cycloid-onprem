@@ -24,10 +24,7 @@
       EMAIL_SKIP_TLS_CHECK: "{{ cycloid_email_skip_tls_check }}"
       # if we use the default fake smtp server (mailhog), enable dev_mode to allow unencrypted connection
       EMAIL_DEV_MODE: "{{ setup_smtp_server }}"
-      REDIS_HOST: "{{ cycloid_cache_host }}"
-      REDIS_PORT: "{{ cycloid_cache_port }}"
-      REDIS_DB: "{{ cycloid_email_redis_db }}"
-      REDIS_URI: "redis://{{ cycloid_cache_host }}:{{ cycloid_cache_port }}/{{ cycloid_email_redis_db }}"
+      REDIS_URI: "{{ cycloid_cache_uri }}"
       VAULT_SKIP_VERIFY: true
       VAULT_URL: "{{ vault_url }}"
       COST_EXPLORER_ES_URL: "{{ cost_explorer_es_url }}"
