@@ -40,7 +40,7 @@ resource_types:
     type: registry-image
     source:
       repository: ljfranklin/terraform-resource
-      tag: "1.8.2"
+      tag: "1.10.3"
 
 resources:
   - name: tfstate
@@ -396,6 +396,8 @@ jobs:
                     cycloid_console_dns: "${CY_INSTANCES_RECORD_CONSOLE}"
                     cycloid_scw_registry_access_key: "${SCW_ACCESS_KEY}"
                     cycloid_scw_registry_secret_key: "${SCW_SECRET_KEY}"
+                    cycloid_api_version: ((cycloid_api_tag))
+                    cycloid_frontend_version: ((cycloid_frontend_tag))
                     cycloid_licence: "${CYCLOID_LICENCE}"
                     EOF
 

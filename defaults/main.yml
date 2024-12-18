@@ -159,9 +159,15 @@ cycloid_cache_username: default
 #. cycloid_cache_password(optional, string): "Ch4ngm3pls"
 #+ The password for authenticating with the Redis cache server. Set to empty "" to disable authentication.
 cycloid_cache_password: "Ch4ngm3pls"
-#. cycloid_cache_schema(optional, string): "redis"
+#. cycloid_cache_schema(optional, string): "rediss"
 #+ Redis URI schema. Use "rediss" for Redis connection over a secure (SSL/TLS) connection.
-cycloid_cache_schema: redis
+cycloid_cache_schema: "{%- if cycloid_cache_tls_enabled|bool -%}rediss{%- else -%}redis{%- endif -%}"
+#. cycloid_cache_insecure_skip_tls(optional, bool): "false"
+#+ Allow insecure TLS/SSL with Redis. Usefull when using local redis with selfsigned certs
+cycloid_cache_insecure_skip_tls: "false"
+
+cycloid_cache_tls_cert_file: "{{ hostvars[groups['cycloid_cache'][0]]['ansible_default_ipv4']['address'] }}"
+cycloid_cache_tls_ca_file: "{{ hostvars[groups['cycloid_cache'][0]]['ansible_default_ipv4']['address'] }}"
 
 #. cost_explorer_es_url(optional, string): "{{elasticsearch_schema}}://{{ hostvars[groups['elasticsearch'][0]]['ansible_default_ipv4']['address'] }}:{{elasticsearch_port_api}}"
 #+ Defines the URL for connecting to the Elasticsearch service used by the Cost Explorer.
@@ -557,6 +563,9 @@ cycloid_creds_ssl:
 cycloid_core_ssl:
   crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-core.crt"
   key: "{{ cycloid_local_datas_path }}/ssl/cycloid-core.key"
+cycloid_redis_ssl:
+  crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-redis.crt"
+  key: "{{ cycloid_local_datas_path }}/ssl/cycloid-redis.key"
 cycloid_third_party:
   crt: "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party.crt"
   key: "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party.key"
@@ -694,11 +703,22 @@ cycloid_email_redis_db: 0
 
 # If no user or password given, assume auth is disabled
 cycloid_cache_auth_disabled: "{% if cycloid_cache_username == '' or cycloid_cache_password == '' %}true{% else %}false{% endif %}"
+
+# Enable TLS
+cycloid_cache_tls_enabled: "true"
+
+# Generate redis uri
 cycloid_cache_uri: "{{ cycloid_cache_schema }}://{% if not cycloid_cache_auth_disabled|bool %}{{ cycloid_cache_username }}:{{ cycloid_cache_password }}@{% endif %}{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}/{{ cycloid_email_redis_db }}"
 
 # Cache allow you to define redis envvars
 cycloid_cache_env:
   REDIS_PASSWORD: "{{ cycloid_cache_password }}"
+  REDIS_TLS_ENABLED: "{{ cycloid_cache_tls_enabled }}"
+  # Use user/password authentication
+  REDIS_TLS_AUTH_CLIENTS: "no"
+  REDIS_TLS_CERT_FILE: "/bitnami/redis/ssl.crt"
+  REDIS_TLS_KEY_FILE: "/bitnami/redis/ssl.key"
+  REDIS_TLS_CA_FILE: "/bitnami/redis/ssl.crt"
 
 #cycloid_api_container_links: []
 #concourse_web_container_links: []

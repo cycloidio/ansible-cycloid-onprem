@@ -71,9 +71,35 @@
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-scheduler"
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-creds"
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-core"
+        - "{{ cycloid_local_datas_path }}/ssl/cycloid-redis"
         - "{{ cycloid_local_datas_path }}/ssl/cycloid-third-party"
   run_once: true
   when: ssl_generate_selfsigned and not ssl_key.stat.exists
+
+# this is temporary to allow legacy setup to generate ssl for redis
+# this could be removed in the future
+- name: check if redis SSL exists | ssl
+  run_once: true
+  stat:
+    path: "{{ cycloid_local_datas_path }}/ssl/cycloid-redis.crt"
+  register: redis_ssl_stat
+  delegate_to: 127.0.0.1
+  become: false
+
+- name: Copy the ssl in local data directory | ssl
+  fetch:
+    src: "{{ cycloid_install_path }}/cycloid.{{item.0}}"
+    dest: "{{item.1}}.{{item.0}}"
+    mode: 0400
+    flat: true
+  with_nested:
+    - [ 'key', 'crt' ]
+    -
+      - "{{ cycloid_local_datas_path }}/ssl/cycloid-redis"
+  run_once: true
+  when: ssl_generate_selfsigned and not redis_ssl_stat.stat.exists
+
+#####################################################
 
 
 ### SAML ###

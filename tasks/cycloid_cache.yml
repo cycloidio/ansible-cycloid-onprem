@@ -4,6 +4,25 @@
 #   set_fact:
 #    cycloid_api_container_links: "{{ cycloid_api_container_links + ['cycloid-cache'] }}"
 
+- name: Create config directory | cycloid-cache
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0777
+    recurse: yes
+  with_items:
+    - "{{ cycloid_cache_path }}"
+
+- name: Copy the ssl in service directories | cycloid-cache
+  copy:
+    src: "{{ cycloid_redis_ssl[item] }}"
+    dest: "{{ cycloid_cache_path }}/ssl.{{item}}"
+    mode: 0440
+  with_items:
+    - key
+    - crt
+  when: cycloid_cache_tls_enabled|bool
+
 - name: Define service | cycloid-cache
   include_role:
     name: mhutter.docker-systemd-service
@@ -15,7 +34,7 @@
     container_args: "{{ container_args_extra }}"
     container_env: "{{ cycloid_cache_env }}"
     container_volumes:
-      - "{{cycloid_cache_path}}:/data"
+      - "{{cycloid_cache_path}}:/bitnami/redis"
   tags: docker-services
 
 - name: Force flush handlers to ensure container is started | cycloid-cache
@@ -31,5 +50,7 @@
     container_ports:
       - '{{ cycloid_cache_mon_port }}:8080'
     container_args: "-e REDIS_URL=\"{{ cycloid_cache_uri }}\" -e PORT=8080 {{ container_args_extra }}"
+    container_env:
+      REDIS_INSECURE_TLS: "{{ cycloid_cache_insecure_skip_tls }}"
   tags: docker-services
   when: cycloid_cache_mon_install|bool
