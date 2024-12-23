@@ -24,6 +24,11 @@
       # path: "{{ cycloid_install_path }}/ssl.key"
       path: "{{ cycloid_install_path }}/cycloid.key"
 
+  - name: Collect private IPs from inventory | ssl
+    set_fact:
+      inventory_private_ips: "{{ ansible_play_hosts_all | map('extract', hostvars, 'ansible_default_ipv4') | map(attribute='address') | list }}"
+    run_once: true
+
   - name: Generate a OpenSSL certificate request | ssl
     openssl_csr:
       # path: "{{ cycloid_local_datas_path }}/ssl/cycloid.csr"
@@ -33,7 +38,7 @@
       path: "{{ cycloid_install_path }}/cycloid.csr"
       privatekey_path: "{{ cycloid_install_path }}/cycloid.key"
       common_name: "{{ cycloid_console_dns }}"
-      subject_alt_name: "{{ (default_ssl_subject_alt_name + ssl_subject_alt_name) | join(',') }}"
+      subject_alt_name: "{{ (default_ssl_subject_alt_name + ssl_subject_alt_name + (inventory_private_ips | map('regex_replace', '^', 'IP:') | list)) | join(',') }}"
       country_name: fr
       state_or_province_name: France
       organization_name: Cycloid
@@ -87,16 +92,17 @@
   become: false
 
 - name: Copy the ssl in local data directory | ssl
-  fetch:
-    src: "{{ cycloid_install_path }}/cycloid.{{item.0}}"
+  ansible.builtin.copy:
+    src: "{{ cycloid_local_datas_path }}/ssl/cycloid-core.{{item.0}}"
     dest: "{{item.1}}.{{item.0}}"
-    mode: 0400
-    flat: true
+    mode: 0777
   with_nested:
     - [ 'key', 'crt' ]
     -
       - "{{ cycloid_local_datas_path }}/ssl/cycloid-redis"
   run_once: true
+  delegate_to: 127.0.0.1
+  become: false
   when: ssl_generate_selfsigned and not redis_ssl_stat.stat.exists
 
 #####################################################
@@ -116,7 +122,6 @@
     dest: "{{item.1}}.{{item.0}}"
     mode: 0400
     flat: true
-  when:  == False
   with_nested:
     - [ 'key', 'crt' ]
     -

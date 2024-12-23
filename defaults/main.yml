@@ -162,9 +162,9 @@ cycloid_cache_password: "Ch4ngm3pls"
 #. cycloid_cache_schema(optional, string): "rediss"
 #+ Redis URI schema. Use "rediss" for Redis connection over a secure (SSL/TLS) connection.
 cycloid_cache_schema: "{%- if cycloid_cache_tls_enabled|bool -%}rediss{%- else -%}redis{%- endif -%}"
-#. cycloid_cache_insecure_skip_tls(optional, bool): "false"
+#. cycloid_cache_insecure_skip_tls(optional, bool): "true"
 #+ Allow insecure TLS/SSL with Redis. Usefull when using local redis with selfsigned certs
-cycloid_cache_insecure_skip_tls: "false"
+cycloid_cache_insecure_skip_tls: true
 
 cycloid_cache_tls_cert_file: "{{ hostvars[groups['cycloid_cache'][0]]['ansible_default_ipv4']['address'] }}"
 cycloid_cache_tls_ca_file: "{{ hostvars[groups['cycloid_cache'][0]]['ansible_default_ipv4']['address'] }}"
@@ -580,6 +580,7 @@ default_ssl_subject_alt_name:
   - DNS:concourse
   - DNS:minio
   - DNS:elasticsearch
+  - DNS:redis
 
 default_no_proxy:
   - "localhost"
@@ -619,6 +620,7 @@ concourse_config_path: "{{ cycloid_install_path }}/concourse"
 concourse_db_path: "{{ cycloid_install_path }}/concourse-db"
 cycloid_smtp_path: "{{ cycloid_install_path }}/cycloid-smtp"
 cycloid_cache_path: "{{ cycloid_install_path }}/cycloid-cache"
+cycloid_api_path: "{{ cycloid_install_path }}/cycloid-api"
 concourse_authorized_worker_keys_path: "authorized_worker_keys"
 concourse_team_authorized_worker_keys_path: "team_authorized_worker_keys.yml"
 concourse_host_key_path: "host_key"
@@ -641,6 +643,15 @@ concourse_session_signing_key: "{{lookup('file', 'keys/id_rsa')}}"
 concourse_host_key: "{{lookup('file', 'keys/id_rsa')}}"
 concourse_authorized_worker_keys:
   - "{{lookup('file', 'keys/id_rsa.pub')}}"
+
+#
+# API
+#
+
+# If redis TLS, mount redis ca certificate as volume in the api container
+container_api_volumes_redis_ca: "{%- if cycloid_cache_schema == \"rediss\" and not cycloid_cache_insecure_skip_tls|bool -%}{{ cycloid_api_path }}/redis-ca.crt:/secrets/redis-ca.crt{%- endif -%}"
+# If redis TLS, define the REDIS_CA_CERT_FILE envvar
+cycloid_api_redis_ca_cert_file: "{%- if cycloid_cache_schema == \"rediss\" and not cycloid_cache_insecure_skip_tls|bool -%}/secrets/redis-ca.crt{%- endif -%}"
 
 #
 # Vault
