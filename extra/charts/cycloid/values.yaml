@@ -491,7 +491,7 @@ backend:
           - "--config-file=/opt/config.yml"
           - "--pricing-ingest-providers"
           - "google"
-          - "--pricing-ingest-google-project=$(PRICING-INGEST-GOOGLE-PROJECT)",
+          - "--pricing-ingest-google-project=$(PRICING-INGEST-GOOGLE-PROJECT)"
           - "--pricing-ingest-google-credential-json"
           - "$(PRICING_INGEST_GOOGLE_CREDENTIAL_JSON)"
           - "--pricing-ingest-google-use-known-services"
