@@ -1,5 +1,4 @@
 ---
-
 - name: Force flush handlers to ensure all other containers like concourse web is started before running the api | cycloid-core api
   meta: flush_handlers
 
@@ -237,7 +236,7 @@
           Connection: "keep-alive"
           DNT: "1"
           Content-type: "application/vnd.cycloid.io.v1+json"
-        body:  "{{cycloid_licence_body|to_json}}"
+        body: "{{cycloid_licence_body|to_json}}"
       no_log: false
       when: cycloid_licence != ''
 
@@ -366,7 +365,7 @@
   copy:
     src: scripts/cycloid-intercept.sh
     dest: /usr/local/bin/cycloid-intercept
-    mode: '0755'
+    mode: "0755"
 
 - name: Define service | cycloid-core api-task-manager
   include_role:

@@ -12,8 +12,6 @@ cycloid_console_dns: cycloid-console
 #+ If not defined, proxypass from cycloid_console_dns will be used.
 cycloid_api_dns: cycloid-api
 
-# Set to true to uninstall cycloid
-uninstall: False
 cycloid_api_provisioning: True
 
 #. cycloid_initial_user(required, map):
@@ -93,7 +91,7 @@ concourse_auth_password: Ch4ngm3pls
 concourse_log_level: info
 #. concourse_db_host(required, string): ""
 #+ Specifies the hostname or IP address of the Concourse CI database server.
-concourse_db_host:  "{{ hostvars[groups['cycloid_scheduler_db'][0]]['ansible_default_ipv4']['address'] }}"
+concourse_db_host: "{{ hostvars[groups['cycloid_scheduler_db'][0]]['ansible_default_ipv4']['address'] }}"
 #. concourse_db_port(required, string): "5432"
 #+ Defines the port number on which the Concourse CI database server is listening.
 concourse_db_port: "5432"
@@ -114,7 +112,6 @@ concourse_db_name: concourse
 #. vault_url(required, string): "https://{{ hostvars[groups['cycloid_creds'][0]]['ansible_default_ipv4']['address'] }}:8200"
 #+ External vault url used by others services.
 vault_url: https://{{ hostvars[groups['cycloid_creds'][0]]['ansible_default_ipv4']['address'] }}:8200
-
 
 #
 # Email
@@ -166,9 +163,6 @@ cycloid_cache_schema: "{%- if cycloid_cache_tls_enabled|bool -%}rediss{%- else -
 #+ Allow insecure TLS/SSL with Redis. Usefull when using local redis with selfsigned certs
 cycloid_cache_insecure_skip_tls: true
 
-cycloid_cache_tls_cert_file: "{{ hostvars[groups['cycloid_cache'][0]]['ansible_default_ipv4']['address'] }}"
-cycloid_cache_tls_ca_file: "{{ hostvars[groups['cycloid_cache'][0]]['ansible_default_ipv4']['address'] }}"
-
 #. cost_explorer_es_url(optional, string): "{{elasticsearch_schema}}://{{ hostvars[groups['elasticsearch'][0]]['ansible_default_ipv4']['address'] }}:{{elasticsearch_port_api}}"
 #+ Defines the URL for connecting to the Elasticsearch service used by the Cost Explorer.
 cost_explorer_es_url: "{%- if use_local_elasticsearch|bool -%}{{elasticsearch_schema}}://{{ hostvars[groups['elasticsearch'][0]]['ansible_default_ipv4']['address'] }}:{{elasticsearch_port_api}}{%- endif -%}"
@@ -209,6 +203,42 @@ cost_estimation_gcp_project: ""
 # Every sunday midnight
 cost_estimation_ingestion_schedule: "Sun *-*-* 00:00:00"
 
+#
+# KPI import
+#
+
+# OnCalendar example
+# Every Minute	*-*-* *:*:00
+# Every 2 minute	*-*-* *:*/2:00
+# Every 5 minutes	*-*-* *:*/5:00
+# Every 15 minutes	*-*-* *:*/15:00
+# Every quarter hour	*-*-* *:*/15:00
+# Every 30 minutes	*-*-* *:*/30:00
+# Every half an hour	*-*-* *:*/30:00
+# Every 60 minutes	*-*-* */1:00:00
+# Every 1 hour	*-*-* *:00:00
+# Every 2 hour	*-*-* */2:00:00
+# Every 3 hour	*-*-* */3:00:00
+# Every other hour	*-*-* */2:00:00
+# Every 6 hour	*-*-* */6:00:00
+# Every 12 hour	*-*-* */12:00:00
+# Hour Range	*-*-* 9-17:00:00
+# Between certain hours	*-*-* 9-17:00:00
+# Every day at midnight	*-*-* 00:00:00
+# Every sunday	Sun *-*-* 00:00:00
+# Every friday	Fri *-*-* 01:00:00
+# Every friday at midnight	Fri *-*-* 00:00:00
+# Every saturday	Sat *-*-* 00:00:00
+# Every weekday	Mon...Fri *-*-* 00:00:00
+# weekends only	Sat,Sun *-*-* 00:00:00
+# Every month	* *-*-01 00:00:00
+# Every quarter	* *-01,04,07,10-01 00:00:00
+# Every 6 months	* *-01,07-01 00:00:00
+# Every year	* *-01-01 00:00:00
+
+# Every 1 hour
+kpi_import_schedule: "*-*-* *:00:00"
+
 #####################
 # advanced settings #
 #####################
@@ -233,30 +263,30 @@ ca_certificates_container_shared: false
 #+ List of packages to install depending of the OS
 cycloid_packages:
   debian:
-        - python3-pip
-        - default-mysql-client
-        - python3-setuptools
-        - gnupg2
-        - pass
-        - netcat
+    - python3-pip
+    - default-mysql-client
+    - python3-setuptools
+    - gnupg2
+    - pass
+    - netcat
   debian-10:
-        - python3-pip
-        - default-mysql-client
-        - python-setuptools
-        - gnupg2
-        - pass
-        - netcat
-        - python-backports.ssl-match-hostname
+    - python3-pip
+    - default-mysql-client
+    - python-setuptools
+    - gnupg2
+    - pass
+    - netcat
+    - python-backports.ssl-match-hostname
   redhat:
-        - python3-pip
-        - mysql
-        - gnupg2
-        - nmap-ncat
+    - python3-pip
+    - mysql
+    - gnupg2
+    - nmap-ncat
   centos-7:
-        - python3-pip
-        - mysql
-        - gnupg2
-        - nmap-ncat
+    - python3-pip
+    - mysql
+    - gnupg2
+    - nmap-ncat
 
 #. container_args_extra(optional, string): ""
 #+ Used to give extra argument to containers. Example to override domain server "--dns 172.17.0.1"
@@ -299,14 +329,14 @@ cycloid_cache_mon_install: false
 vault_config:
   storage:
     file:
-       path: /vault/file
+      path: /vault/file
   ui: true
   listener:
     tcp:
       address: "0.0.0.0:8200"
       tls_disable: "0"
       tls_cert_file: "/vault/config/ssl.crt"
-      tls_key_file:  "/vault/config/ssl.key"
+      tls_key_file: "/vault/config/ssl.key"
   default_lease_ttl: "168h"
   max_lease_ttl: "720h"
 
@@ -371,7 +401,6 @@ saml_sp_private_key_file: "cycloid-saml-sp.key"
 #. saml_idp_metadata_file(optional, string): "idp-metadata"
 #+ Name of your xml identity provider federation metadata file. It could also be provided as an url with saml_idp_metadata_url.
 saml_idp_metadata_file: "idp-metadata"
-
 
 ############
 # internal #
@@ -548,7 +577,7 @@ container_volumes_ca_certificates: "{% if ca_certificates_container_shared|bool 
 container_args_update_ca: "{% if ca_certificates_container_shared|bool %}--entrypoint /bin/bash{% endif %}"
 
 # If ca_certificates_container_shared, run update-ca before the /entrypoint
-cycloid_api_container_cmd: "{% if ca_certificates_container_shared|bool %}-c \"/usr/sbin/update-ca-certificates; /entrypoint\"{% endif %}"
+cycloid_api_container_cmd: '{% if ca_certificates_container_shared|bool %}-c "/usr/sbin/update-ca-certificates; /entrypoint"{% endif %}'
 # docker exec -it cycloid-api bash -c "ls -l /etc/ssl/certs/ | grep DigiCertSHA2HighAssuranceServerCA.crt"
 
 # SSL
@@ -649,9 +678,9 @@ concourse_authorized_worker_keys:
 #
 
 # If redis TLS, mount redis ca certificate as volume in the api container
-container_api_volumes_redis_ca: "{%- if cycloid_cache_schema == \"rediss\" and not cycloid_cache_insecure_skip_tls|bool -%}{{ cycloid_api_path }}/redis-ca.crt:/secrets/redis-ca.crt{%- endif -%}"
+container_api_volumes_redis_ca: '{%- if cycloid_cache_schema == "rediss" and not cycloid_cache_insecure_skip_tls|bool -%}{{ cycloid_api_path }}/redis-ca.crt:/secrets/redis-ca.crt{%- endif -%}'
 # If redis TLS, define the REDIS_CA_CERT_FILE envvar
-cycloid_api_redis_ca_cert_file: "{%- if cycloid_cache_schema == \"rediss\" and not cycloid_cache_insecure_skip_tls|bool -%}/secrets/redis-ca.crt{%- endif -%}"
+cycloid_api_redis_ca_cert_file: '{%- if cycloid_cache_schema == "rediss" and not cycloid_cache_insecure_skip_tls|bool -%}/secrets/redis-ca.crt{%- endif -%}'
 
 #
 # Vault
@@ -684,8 +713,8 @@ cycloid_nginx_console_proxy_pass: "http://cycloid-frontend"
 
 cycloid_initial_organization_canonical: "{{ cycloid_initial_organization_name|lower|regex_replace('[^a-z0-9\\-_]') }}"
 cycloid_initial_organization:
-    name: "{{ cycloid_initial_organization_name }}"
-    canonical: "{{ cycloid_initial_organization_canonical }}"
+  name: "{{ cycloid_initial_organization_name }}"
+  canonical: "{{ cycloid_initial_organization_canonical }}"
 
 #cycloid_initial_catalog_cred:
 #    name: Catalog credential
@@ -698,10 +727,10 @@ cycloid_initial_organization:
 #            -----END RSA PRIVATE KEY-----
 
 cycloid_initial_service_catalog:
-    name: Cycloid stacks
-    canonical: cycloid-stacks
-    url: https://github.com/cycloid-community-catalog/public-stacks
-    branch: master
+  name: Cycloid stacks
+  canonical: cycloid-stacks
+  url: https://github.com/cycloid-community-catalog/public-stacks
+  branch: master
 
 cycloid_db_path: "{{ cycloid_install_path }}/cycloid-db"
 
@@ -741,7 +770,6 @@ cycloid_console_base_url: "https://{{ cycloid_console_dns }}"
 # e.g, cycloid_api_cors_allowed_origins: "https://domain1.tld,http://domain2.tld"
 # By default, the {{ cycloid_console_base_url }} is already allowed.
 cycloid_api_cors_allowed_origins: "*"
-
 
 #. cycloid_api_task_manager_enabled(optional, bool): true
 #+ If true, split the Cycloid backend in 2 containers (API and task_manager/Worker)
@@ -791,11 +819,11 @@ minio_config_path: "{{ cycloid_install_path }}/minio"
 #. elasticsearch_tls(optional, bool): true
 #+ enable TLS on REST interface
 elasticsearch_tls: true
-elasticsearch_schema: '{%- if elasticsearch_tls -%}https{%- else -%}http{%- endif -%}'
+elasticsearch_schema: "{%- if elasticsearch_tls -%}https{%- else -%}http{%- endif -%}"
 
 # make sure to install mapper-murmur3 for CCM
 elasticsearch_container_args: "--entrypoint /bin/bash"
-elasticsearch_container_cmd: "-c \"/usr/share/elasticsearch/bin/elasticsearch-plugin install mapper-murmur3 && /usr/local/bin/docker-entrypoint.sh\""
+elasticsearch_container_cmd: '-c "/usr/share/elasticsearch/bin/elasticsearch-plugin install mapper-murmur3 && /usr/local/bin/docker-entrypoint.sh"'
 
 #. elasticsearch_port_node(optional, int): 9300
 #+ the node port of elasticsearch
@@ -819,12 +847,12 @@ cycloid_elasticsearch_password: "NmM5NmIwNmEwM2Q0NmYwNDYyMDgzZGFj"
 #. cycloid_elasticsearch_default(optional, string):
 #+ the default credential to access elasticsearch with 'elastic' user
 cycloid_elasticsearch_default:
-    name: elasticsearch default
-    type: elasticsearch
-    path: elasticsearch_default
-    raw:
-      username: "{{ cycloid_elasticsearch_user }}"
-      password: "{{ cycloid_elasticsearch_password }}"
+  name: elasticsearch default
+  type: elasticsearch
+  path: elasticsearch_default
+  raw:
+    username: "{{ cycloid_elasticsearch_user }}"
+    password: "{{ cycloid_elasticsearch_password }}"
 
 ###########################
 # kibana
@@ -856,7 +884,7 @@ saml_idp_metadata_path: "{%- if saml_auth_enabled|bool and saml_idp_metadata_url
 
 # Cloud Cost Management cmd
 cycloid_job_ccm_ingestion_container_args: "/entrypoint /go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml"
-cycloid_job_ccm_ingestion_container_cmd: "{% if ca_certificates_container_shared|bool %}-c \"/usr/sbin/update-ca-certificates; /entrypoint {{ cycloid_job_ccm_ingestion_container_args }}\"{% else %}{{ cycloid_job_ccm_ingestion_container_args }}{% endif %}"
+cycloid_job_ccm_ingestion_container_cmd: '{% if ca_certificates_container_shared|bool %}-c "/usr/sbin/update-ca-certificates; /entrypoint {{ cycloid_job_ccm_ingestion_container_args }}"{% else %}{{ cycloid_job_ccm_ingestion_container_args }}{% endif %}'
 
 ###########################
 # Cost Estimation         #
@@ -871,7 +899,7 @@ cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api prici
 
 # merge cost_estimation_ingestion cmd
 cycloid_job_cost_estimation_ingestion_container_args: "{% if cycloid_job_cost_estimation_injection_aws|bool %}{{ cost_estimation_ingestion_aws_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_azure|bool %}{{ cost_estimation_ingestion_azure_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_gcp|bool %}{{ cost_estimation_ingestion_gcp_minimal }}{% endif %}"
-cycloid_job_cost_estimation_ingestion_container_cmd: "-c {% if ca_certificates_container_shared|bool %}\"/usr/sbin/update-ca-certificates; {{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% else %}\"{{ cycloid_job_cost_estimation_ingestion_container_args }}\"{% endif %}"
+cycloid_job_cost_estimation_ingestion_container_cmd: '-c {% if ca_certificates_container_shared|bool %}"/usr/sbin/update-ca-certificates; {{ cycloid_job_cost_estimation_ingestion_container_args }}"{% else %}"{{ cycloid_job_cost_estimation_ingestion_container_args }}"{% endif %}'
 
 # Share host saml file with container. It shouldn't be changed.
 container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/secrets/saml{%- endif -%}"
