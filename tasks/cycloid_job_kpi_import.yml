@@ -1,0 +1,73 @@
+---
+- name: Define cycloid-job-kpi-import service | cycloid-job-kpi-import
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    name: cycloid-job-kpi-import
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{cycloid_api_image}}"
+    container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid --entrypoint /bin/bash {{ container_args_extra }}"
+    container_cmd: "{{ cycloid_job_kpi_import_container_cmd }}"
+    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
+    container_env:
+      DB_NAME: "{{ cycloid_db_name }}"
+      DB_USER: "{{ cycloid_db_user }}"
+      DB_PWD: "{{ cycloid_db_password }}"
+      DB_HOST: "{{ cycloid_db_host }}"
+      DB_PORT: "{{ cycloid_db_port }}"
+      EMAIL_SMTP_SVR_ADDR: "{{ cycloid_email_smtp_svr_addr }}"
+      EMAIL_SMTP_USERNAME: "{{ cycloid_email_smtp_username }}"
+      EMAIL_SMTP_PASSWORD: "{{ cycloid_email_smtp_password }}"
+      EMAIL_ADDR_FROM: "{{ cycloid_email_addr_from }}"
+      EMAIL_ADDR_RETURN_PATH: "{{ cycloid_email_addr_return_path }}"
+      EMAIL_SKIP_TLS_CHECK: "{{ cycloid_email_skip_tls_check }}"
+      # if we use the default fake smtp server (mailhog), enable dev_mode to allow unencrypted connection
+      EMAIL_DEV_MODE: "{{ setup_smtp_server }}"
+      REDIS_URI: "{{ cycloid_cache_uri }}"
+      REDIS_INSECURE_SKIP_TLS: "{{ cycloid_cache_insecure_skip_tls }}"
+      REDIS_CA_CERT_FILE: "{{ cycloid_api_redis_ca_cert_file }}"
+      VAULT_SKIP_VERIFY: true
+      VAULT_URL: "{{ vault_url }}"
+      LOG_LEVEL: "INFO"
+      LOG_SVC_LEVEL: "NONE"
+      RUN_MIGRATIONS: 0
+      CONCOURSE_URL: "{{ concourse_url }}"
+      CONCOURSE_PORT: "{{ concourse_port }}"
+      CONCOURSE_USER: "{{ concourse_auth_user }}"
+      CONCOURSE_PASSWORD: "{{ concourse_auth_password }}"
+      CONCOURSE_TEAM: main
+      JWT_KEY_1: "{{ cycloid_jwt_key_1 }}"
+      FRONTEND_BASE_URL: "{{ cycloid_console_base_url }}"
+      BACKEND_BASE_URL: "{{ cycloid_api_base_url }}"
+      CRYPTO_SIGNING_KEY: "{{ cycloid_crypto_signing_key }}"
+      http_proxy: "{{ http_proxy }}"
+      https_proxy: "{{ http_proxy }}"
+      no_proxy: "{{ no_proxy }}"
+
+    service_systemd_options:
+      [
+        { "key": "Restart", "value": "no" },
+        { "key": "ExecStop", "value": "" },
+        { "key": "RuntimeMaxSec", "value": "30" },
+      ]
+    service_state: stopped # start or not the service after its creation
+
+  tags: docker-services
+
+- name: Define cycloid-job-kpi-import_container timer | cycloid-job-kpi-import
+  template:
+    src: templates/systemd/timer.j2
+    dest: /lib/systemd/system/cycloid-job-kpi-import.timer
+  vars:
+    schedule: "{{ kpi_import_schedule }}"
+    service: "cycloid-job-kpi-import_container"
+
+- name: Enable timer | cycloid-job-kpi-import
+  ansible.builtin.systemd:
+    name: cycloid-job-kpi-import.timer
+    enabled: yes
+    state: started # start or not the timer after its creation
+
+- name: Force systemd to reread configs | cycloid-job-kpi-import
+  ansible.builtin.systemd:
+    daemon_reload: yes

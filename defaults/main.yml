@@ -904,6 +904,14 @@ cycloid_job_cost_estimation_ingestion_container_cmd: '-c {% if ca_certificates_c
 # Share host saml file with container. It shouldn't be changed.
 container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/secrets/saml{%- endif -%}"
 
+###########################
+# KPI Import              #
+###########################
+
+# Cloud Cost Management cmd
+cycloid_job_kpi_import_container_args: "/entrypoint /go/youdeploy-http-api kpi-import --config-file=/opt/config.yml"
+cycloid_job_kpi_import_container_cmd: '{% if ca_certificates_container_shared|bool %}-c "/usr/sbin/update-ca-certificates; /entrypoint {{ cycloid_job_kpi_import_container_args }}"{% else %}{{ cycloid_job_kpi_import_container_args }}{% endif %}'
+
 #
 # Monitoring
 #
