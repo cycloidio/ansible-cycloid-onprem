@@ -444,6 +444,10 @@ backend:
       #   cpu: 1
       #   memory: 512Mi
 
+    kpiImport:
+      enabled: true
+      schedule: "0 */1 * * *"
+
     # Injestion cronJob for Cloud Cost Management
     ccm:
       schedule: "0 0 * * *"
