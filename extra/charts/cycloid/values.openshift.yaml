@@ -26,7 +26,6 @@ frontend:
       # To use Redirect, make sure frontend.url is using https schema.
       # insecureEdgeTerminationPolicy: Redirect
 
-
 #
 # Cycloid Console API
 #
@@ -36,7 +35,6 @@ backend:
     enabled: false
   securityContext:
     enabled: false
-
 
   # OpenShift only - create a route to expose the service
   route:
@@ -116,8 +114,6 @@ concourse:
       #   runAsNonRoot: true
       #   seccompProfile:
       #     type: RuntimeDefault
-
-
 
 #
 # Vault

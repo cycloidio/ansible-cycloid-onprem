@@ -30,7 +30,6 @@ frontend:
     #    hosts:
     #      - console.cycloid.local
 
-
 #
 # Cycloid Console API
 #
@@ -85,7 +84,6 @@ backend:
 
   cryptoSigningKey: "##backend-cryptoSigningKey##"
   jwtKey1: "##backend-jwtKey1##"
-
 
 #
 # MySQL
@@ -261,7 +259,6 @@ concourse:
       storageClass:
       size: 8Gi
 
-
   secrets:
     ## User/Pass need to be specified if bringing your own PostgreSQL.
     ## Only used if `concourse.postgresql.enabled: false`
@@ -277,25 +274,25 @@ concourse:
     ## Ref: https://concourse-ci.org/install.html#generating-keys
     ##
     hostKey: |-
-        ##concourse-secrets-hostKey##
+      ##concourse-secrets-hostKey##
 
     hostKeyPub: |-
-        ##concourse-secrets-hostKeyPub##
+      ##concourse-secrets-hostKeyPub##
 
     ## Concourse Session Signing Keys.
     ## Ref: https://concourse-ci.org/concourse-generate-key.html
     ##
     sessionSigningKey: |-
-        ##concourse-secrets-sessionSigningKey##
+      ##concourse-secrets-sessionSigningKey##
 
     ## Concourse Worker Keys.
     ## Ref: https://concourse-ci.org/concourse-generate-key.html
     ##
     workerKey: |-
-        ##concourse-secrets-workerKey##
+      ##concourse-secrets-workerKey##
 
     workerKeyPub: |-
-        ##concourse-secrets-workerKeyPub##
+      ##concourse-secrets-workerKeyPub##
 
     ## vault authentication parameters
     ## Parameter to pass when logging in via the backend
@@ -304,7 +301,6 @@ concourse:
     ## Ref: https://concourse-ci.org/vault-credential-manager.html#vault-approle-auth
     ##
     vaultAuthParam: "role_id:##cycloid-ro-vault-approle-role-id##,secret_id:##cycloid-ro-vault-approle-secret-id##"
-
 
   web:
     sidecarContainers:

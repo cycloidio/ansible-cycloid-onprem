@@ -24,7 +24,7 @@ cycloidImagesRegistry:
   # AWS region of the Docker image repository.
   repositoryRegion: eu-west-1
   # Cron schedule for renewing the token.
-  refreshEvery: '0 */6 * * *'
+  refreshEvery: "0 */6 * * *"
   # Docker image used by the cronjob to renew the token.
   image: alpine/k8s:1.29.8
 
@@ -67,17 +67,20 @@ frontend:
     containerPort: 80
 
   # List of additional environment variables to set for the frontend container.
-  extraEnvVars: {}
+  extraEnvVars:
+    {}
     # MYENVVAR: VALUE
 
   # List of additional environment variables to set from existing Kubernetes Secrets.
-  extraSecretEnvVars: []
+  extraSecretEnvVars:
+    []
     # - envName: MYENVVAR
     #   secretName: secret_name
     #   secretKey: SECRET_KEY
 
   # List of additional environment variables to set from existing ConfigMaps.
-  extraConfigMapEnvVars: []
+  extraConfigMapEnvVars:
+    []
     # - envName: MYENVVAR
     #   configMapName: configmap_name
     #   configMapKey: CONFIGMAP_KEY
@@ -122,7 +125,8 @@ frontend:
     enabled: true
     # Class name for the ingress controller. Example "nginx"
     className: ""
-    annotations: {}
+    annotations:
+      {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     hosts:
@@ -136,7 +140,8 @@ frontend:
     #    hosts:
     #      - console.cycloid.local
 
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -272,20 +277,21 @@ backend:
   # extraSecretEnvVars is a list of extra environment variables to set.
   # These variables take value from existing Secret objects.
   extraSecretEnvVars:
-  - envName: REDIS_CA_CERT
-    secretName: cycloid-redis-crt
-    secretKey: ca.crt
+    - envName: REDIS_CA_CERT
+      secretName: cycloid-redis-crt
+      secretKey: ca.crt
 
-    # - envName: COST_EXPLORER_ES_CA_CERT
-    #   secretName: cost-explorer-es-http-certs-public
-    #   secretKey: ca.crt
-    # - envName: SAML_IDP_METADATA_URL
-    #   secretName: saml
-    #   secretKey: SAML_IDP_METADATA_URL
+      # - envName: COST_EXPLORER_ES_CA_CERT
+      #   secretName: cost-explorer-es-http-certs-public
+      #   secretKey: ca.crt
+      # - envName: SAML_IDP_METADATA_URL
+      #   secretName: saml
+      #   secretKey: SAML_IDP_METADATA_URL
 
   # extraConfigMapEnvVars is a list of extra environment variables to set.
   # These variables take value from existing ConfigMap objects.
-  extraConfigMapEnvVars: []
+  extraConfigMapEnvVars:
+    []
     # - envName: AWS_SECRET_ACCESS_KEY
     #   configMapName: vault
     #   configMapKey: AWS_SECRET_ACCESS_KEY
@@ -301,7 +307,8 @@ backend:
   # volumes is a list of volumes made available to all containers. These are rendered
   # via toYaml rather than pre-processed like the extraVolumes value.
   # The purpose is to make it easy to share volumes between containers.
-  volumes: []
+  volumes:
+    []
     # - name: saml
     #   secret:
     #     secretName: saml
@@ -316,7 +323,8 @@ backend:
   # volumeMounts is a list of volumeMounts for the main server container. These are rendered
   # via toYaml rather than pre-processed like the extraVolumes value.
   # The purpose is to make it easy to share volumes between containers.
-  volumeMounts: []
+  volumeMounts:
+    []
     # - name: saml
     #   mountPath: "/secrets/saml"
     #   readOnly: true
@@ -375,7 +383,8 @@ backend:
     #    hosts:
     #      - api.cycloid.local
 
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -432,7 +441,8 @@ backend:
   nodeSelector: {}
 
   cronJob:
-    resources: {}
+    resources:
+      {}
       # We usually recommend not to specify cronjob resources and to leave this as a conscious
       # choice for the user. This also increases chances charts run on environments with little
       # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -838,8 +848,8 @@ concourse:
       - name: concourse-team-authorized-key-init
         image: busybox
         env:
-        - name: YAML_KEYS_FILE
-          value: /etc/concourse-teams/tsa-team-authorized-keys.yaml
+          - name: YAML_KEYS_FILE
+            value: /etc/concourse-teams/tsa-team-authorized-keys.yaml
         command:
           - /bin/sh
           - -c
@@ -940,7 +950,8 @@ concourse:
       ##     hosts:
       ##       - concourse.domain.com
       ##
-      tls: []
+      tls:
+        []
         #  - secretName: cycloid-local-tls
         #    hosts:
         #      - concourse.cycloid.local
@@ -950,7 +961,6 @@ concourse:
   ## Concourse Workers, see https://concourse-ci.org/concourse-worker.html
   ##
   worker:
-
     ## Enable or disable the worker component.
     ## This can allow users to create web only releases by setting this to false
     ##
@@ -1068,25 +1078,25 @@ concourse:
     ## Ref: https://concourse-ci.org/install.html#generating-keys
     ##
     hostKey: |-
-        ##concourse-secrets-hostKey##
+      ##concourse-secrets-hostKey##
 
     hostKeyPub: |-
-        ##concourse-secrets-hostKeyPub##
+      ##concourse-secrets-hostKeyPub##
 
     ## Concourse Session Signing Keys.
     ## Ref: https://concourse-ci.org/concourse-generate-key.html
     ##
     sessionSigningKey: |-
-        ##concourse-secrets-sessionSigningKey##
+      ##concourse-secrets-sessionSigningKey##
 
     ## Concourse Worker Keys.
     ## Ref: https://concourse-ci.org/concourse-generate-key.html
     ##
     workerKey: |-
-        ##concourse-secrets-workerKey##
+      ##concourse-secrets-workerKey##
 
     workerKeyPub: |-
-        ##concourse-secrets-workerKeyPub##
+      ##concourse-secrets-workerKeyPub##
 
     ## vault authentication parameters
     ## Parameter to pass when logging in via the backend
@@ -1175,9 +1185,11 @@ vault:
     # from Kubernetes to access Vault pods.
     ingress:
       enabled: false
-      labels: {}
+      labels:
+        {}
         # traffic: external
-      annotations: {}
+      annotations:
+        {}
         # |
         # kubernetes.io/ingress.class: nginx
         # kubernetes.io/tls-acme: "true"
