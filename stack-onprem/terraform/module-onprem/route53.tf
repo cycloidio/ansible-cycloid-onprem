@@ -15,7 +15,7 @@ resource "aws_route53_record" "console" {
   name    = "${var.project}-${var.env}-console.${var.subdns_zone}.${data.aws_route53_zone.onprem.name}"
   type    = "A"
   ttl     = "300"
-  records = [aws_eip.cy_instances.public_ip]
+  records = [aws_eip.cy_instances[0].public_ip]
 }
 
 # resource "aws_route53_record" "api" {

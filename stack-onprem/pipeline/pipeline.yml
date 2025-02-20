@@ -344,7 +344,7 @@ jobs:
                     cp ${DIR}/config/${CONFIG_ANSIBLE_PATH}/environments/cycloid-${ENV}.yml environments/cycloid.yml
                     ### Add more Ansible vars ###
                     MAIN_INSTANCE=$(jq -r .cy_instances_public_ip[0] ${DIR}/tfstate/metadata)
-                    CY_INSTANCES_RECORD_CONSOLE=$(jq -r .cy_instances_records["console"] ${DIR}/tfstate/metadata)
+                    CY_INSTANCES_RECORD_CONSOLE=$(jq -r .cy_instances_records.console ${DIR}/tfstate/metadata)
 
                     CYCLOID_INITIAL_USER_PASSWORD=$(jq -r .password.user ${DIR}/tfstate/metadata)
                     CYCLOID_CRYPTO_SIGNING_KEY=$(jq -r .password.signing ${DIR}/tfstate/metadata)

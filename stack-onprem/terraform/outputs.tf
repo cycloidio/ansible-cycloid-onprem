@@ -14,7 +14,7 @@ output "cy_instances_private_ip" {
 }
 
 output "cy_instances_records" {
-  value       = module.onprem.cy_instances_private_ip
+  value       = module.onprem.cy_instances_records
   description = "Route53 records."
 }
 
