@@ -13,6 +13,11 @@ output "cy_instances_private_ip" {
   description = "Cycloid instances ips."
 }
 
+output "cy_instances_records" {
+  value       = module.onprem.cy_instances_private_ip
+  description = "Route53 records."
+}
+
 output "password" {
   value     = module.onprem.password
   sensitive = true
