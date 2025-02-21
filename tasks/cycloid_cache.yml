@@ -1,5 +1,4 @@
 ---
-
 # - name: Add this container to api links
 #   set_fact:
 #    cycloid_api_container_links: "{{ cycloid_api_container_links + ['cycloid-cache'] }}"
@@ -40,6 +39,7 @@
 - name: Force flush handlers to ensure container is started | cycloid-cache
   meta: flush_handlers
 
+# https://github.com/hibiken/asynqmon?tab=readme-ov-file#run-the-binary
 - name: Define service asynqmon | cycloid-cache
   include_role:
     name: mhutter.docker-systemd-service
@@ -48,9 +48,14 @@
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ cycloid_cache_mon_image }}"
     container_ports:
-      - '{{ cycloid_cache_mon_port }}:8080'
-    container_args: "-e REDIS_URL=\"{{ cycloid_cache_uri }}\" -e PORT=8080 {{ container_args_extra }}"
+      - "{{ cycloid_cache_mon_port }}:8080"
     container_env:
-      REDIS_INSECURE_TLS: "{{ cycloid_cache_insecure_skip_tls }}"
+      # REDIS_URI: "{{ cycloid_cache_uri }}"
+      REDIS_INSECURE_TLS: "{{ cycloid_cache_tls_enabled }}"
+      PORT: "8080"
+      REDIS_DB: "{{ cycloid_email_redis_db }}"
+      REDIS_PASSWORD: "{{ cycloid_cache_password }}"
+      REDIS_ADDR: "{{ cycloid_email_redis_host }}:{{ cycloid_email_redis_port }}"
+    container_args: "{{ container_args_extra }}"
   tags: docker-services
   when: cycloid_cache_mon_install|bool
