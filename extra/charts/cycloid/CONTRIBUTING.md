@@ -46,7 +46,7 @@ sed -i  -E 's/(## [0-9].*)/\n\n\1/' CHANGELOG.md
 # rebase + push --force
 ```
 
-If not already done, create a PR from the `helm-version_xxx` branch in order to merge the `CHANGELOG.md` update
+If not already done, create a PR from the `helm-version_xxx` branch in order to merge the `CHANGELOG.md` update. Merge it.
 
 Push the release to the S3 helm repository
 ```bash
@@ -76,6 +76,8 @@ helm search repo cycloid-onprem
 `--relative` is used to push https:// url instead of s3:// in the index
 If s3:// url have been pushed, please reindex it:
 `helm s3 reindex cycloid-onprem --relative`
+
+Verify if the CHANGELOG.md is updated: https://cycloid-onprem-helm-charts.s3.eu-west-1.amazonaws.com/stable/cycloid/CHANGELOG.md
 
 ### Update the external local charts (if Chart.yaml updated)
 

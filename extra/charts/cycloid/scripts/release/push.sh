@@ -2,8 +2,8 @@
 
 set -e
 
-export AWS_ACCESS_KEY_ID=$(vault read -field=access_key secret/cycloid/aws)
-export AWS_SECRET_ACCESS_KEY=$(vault read -field=secret_key secret/cycloid/aws)
+export AWS_ACCESS_KEY_ID=$(vault read -field=access_key secret/cycloid/aws/access-keys/cycloid)
+export AWS_SECRET_ACCESS_KEY=$(vault read -field=secret_key secret/cycloid/aws/access-keys/cycloid)
 export AWS_DEFAULT_REGION=eu-west-1
 
 echo -e "\e[36m# $0 > switching to master brabnch and make sure it's up-to-date\e[0m"
@@ -20,11 +20,11 @@ helm dependency build
 echo -e "\e[36m# $0 > packaging the local helm chart\e[0m"
 helm package .
 
-echo -e "\e[36m# $0 > making sure the S3 helm repo is added locally\e[0m"
-helm repo add cycloid-onprem s3://cycloid-onprem-helm-charts/stable/cycloid/ --force-update
-
 echo -e "\e[36m# $0 > copy changelog on s3\e[0m"
 aws s3 cp CHANGELOG.md s3://cycloid-onprem-helm-charts/stable/cycloid/
+
+echo -e "\e[36m# $0 > making sure the S3 helm repo is added locally\e[0m"
+helm repo add cycloid-onprem s3://cycloid-onprem-helm-charts/stable/cycloid/ --force-update
 
 echo -e "\e[36m# $0 > pushing the helm package to the S3 helm repo\e[0m"
 helm s3 push ./cycloid-$VERSION.tgz cycloid-onprem --relative
