@@ -1,0 +1,6 @@
+kind: Changed
+body: Expose KPI import schedule configuration
+time: 2025-02-12T14:50:43.526605768+01:00
+custom:
+    Ref: Pull
+    RefID: "215"

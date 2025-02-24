@@ -1,13 +1,48 @@
 ---
-
 - name: Force flush handlers to ensure all other containers like concourse web is started before running the api | cycloid-core api
   meta: flush_handlers
+
+- name: Create config directory | cycloid-core api
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0777
+    recurse: yes
+  with_items:
+    - "{{ cycloid_api_path }}"
 
 - name: Copy vault approles in service directory | cycloid-core api
   copy:
     src: "{{ cycloid_local_datas_path }}/approles/approle-cycloid"
     dest: "{{ cycloid_install_path }}/approle-cycloid"
     mode: 0400
+
+- name: check if redis SSL enabled | cycloid-core api
+  run_once: true
+  stat:
+    path: "{{ cycloid_redis_ssl['crt'] }}"
+  register: redis_ssl_stat
+  delegate_to: 127.0.0.1
+  become: false
+  when: cycloid_cache_schema == "rediss" and not cycloid_cache_insecure_skip_tls|bool
+
+- name: Copy the redis ca cert in service directories | cycloid-cache
+  copy:
+    src: "{{ cycloid_redis_ssl['crt'] }}"
+    dest: "{{ cycloid_api_path }}/redis-ca.crt"
+    mode: 0440
+  when: cycloid_cache_schema == "rediss" and not cycloid_cache_insecure_skip_tls|bool and redis_ssl_stat.stat.exists
+
+# # if needed read the Redis cert as envvar #
+# - name: Read the redis certificate | cycloid-core api
+#   run_once: true
+#   slurp:
+#     src: "{{ cycloid_redis_ssl['crt'] }}"
+#   register: redis_ssl_crt
+#   delegate_to: 127.0.0.1
+#   become: false
+#   when: cycloid_cache_schema == "rediss" and not cycloid_cache_insecure_skip_tls|bool and redis_ssl_stat.stat.exists
+# ###
 
 - name: Define service | cycloid-core api
   include_role:
@@ -19,7 +54,7 @@
     container_ports: "{{ cycloid_api_container_ports }}"
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
     container_cmd: "{{ cycloid_api_container_cmd }}"
-    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ]) | select()|list }}" # select()|list ensure to remove empty list [""]
+    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
       DB_NAME: "{{ cycloid_db_name }}"
       DB_USER: "{{ cycloid_db_user }}"
@@ -46,6 +81,10 @@
       # if we use the default fake smtp server (mailhog), enable dev_mode to allow unencrypted connection
       EMAIL_DEV_MODE: "{{ use_local_smtp_server }}"
       REDIS_URI: "{{ cycloid_cache_uri }}"
+      REDIS_INSECURE_SKIP_TLS: "{{ cycloid_cache_insecure_skip_tls }}"
+      # REDIS_CA_CERT: "{{ (redis_ssl_crt.content|b64decode|trim|replace('\n', '\\n')) | default('') }}"
+      # Only used if cycloid_cache_schema == "rediss" and not cycloid_cache_insecure_skip_tls|bool
+      REDIS_CA_CERT_FILE: "{{ cycloid_api_redis_ca_cert_file }}"
       AZURE_TENANT_ID: "{{ azure_ad_tenant_id }}"
       AZURE_CLIENT_ID: "{{ azure_ad_client_id }}"
       GOOGLE_CLIENT_ID: "{{ google_client_id }}"
@@ -197,7 +236,7 @@
           Connection: "keep-alive"
           DNT: "1"
           Content-type: "application/vnd.cycloid.io.v1+json"
-        body:  "{{cycloid_licence_body|to_json}}"
+        body: "{{cycloid_licence_body|to_json}}"
       no_log: false
       when: cycloid_licence != ''
 
@@ -326,7 +365,7 @@
   copy:
     src: scripts/cycloid-intercept.sh
     dest: /usr/local/bin/cycloid-intercept
-    mode: '0755'
+    mode: "0755"
 
 - name: Define service | cycloid-core api-task-manager
   include_role:
@@ -338,7 +377,7 @@
     container_ports: "{{ cycloid_api_task_manage_container_ports }}"
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
     container_cmd: "{{ cycloid_api_container_cmd }}"
-    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ]) | select()|list }}" # select()|list ensure to remove empty list [""]
+    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
       # Run backend as worker/task-manager
       RUN_CMD: worker
@@ -367,6 +406,8 @@
       # if we use the default fake smtp server (mailhog), enable dev_mode to allow unencrypted connection
       EMAIL_DEV_MODE: "{{ use_local_smtp_server }}"
       REDIS_URI: "{{ cycloid_cache_uri }}"
+      REDIS_INSECURE_SKIP_TLS: "{{ cycloid_cache_insecure_skip_tls }}"
+      REDIS_CA_CERT_FILE: "{{ cycloid_api_redis_ca_cert_file }}"
       CRYPTO_SIGNING_KEY: "{{ cycloid_crypto_signing_key }}"
       COST_EXPLORER_ES_URL: "{{ cost_explorer_es_url }}"
       COST_EXPLORER_ES_USERNAME: "{{ cost_explorer_es_username }}"

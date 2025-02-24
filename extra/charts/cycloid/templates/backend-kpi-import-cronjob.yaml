@@ -1,4 +1,4 @@
-{{- if .Values.backend.enabled }}
+{{- if and .Values.backend.enabled .Values.backend.cronJob.kpiImport.enabled }}
 {{- if semverCompare ">=1.21-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: batch/v1
 {{- else -}}
@@ -20,7 +20,7 @@ metadata:
 spec:
   suspend: false
   concurrencyPolicy: Replace
-  schedule: "0 */1 * * *"
+  schedule: {{ .Values.backend.cronJob.kpiImport.schedule }}
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3
   jobTemplate:

@@ -1,5 +1,4 @@
 ---
-
 - name: Define cycloid-job-ccm-ingestion_container service | cycloid-cloud-cost-management
   include_role:
     name: mhutter.docker-systemd-service
@@ -9,7 +8,7 @@
     container_image: "{{cycloid_api_image}}"
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
     container_cmd: "{{ cycloid_job_ccm_ingestion_container_cmd }}"
-    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ]) | select()|list }}" # select()|list ensure to remove empty list [""]
+    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
       DB_NAME: "{{ cycloid_db_name }}"
       DB_USER: "{{ cycloid_db_user }}"
@@ -25,6 +24,8 @@
       # if we use the default fake smtp server (mailhog), enable dev_mode to allow unencrypted connection
       EMAIL_DEV_MODE: "{{ setup_smtp_server }}"
       REDIS_URI: "{{ cycloid_cache_uri }}"
+      REDIS_INSECURE_SKIP_TLS: "{{ cycloid_cache_insecure_skip_tls }}"
+      REDIS_CA_CERT_FILE: "{{ cycloid_api_redis_ca_cert_file }}"
       VAULT_SKIP_VERIFY: true
       VAULT_URL: "{{ vault_url }}"
       COST_EXPLORER_ES_URL: "{{ cost_explorer_es_url }}"
@@ -35,7 +36,12 @@
       LOG_LEVEL: "INFO"
       LOG_SVC_LEVEL: "NONE"
       RUN_MIGRATIONS: 0
-    service_systemd_options: [ {'key':'Restart','value':'no'}, {'key':'ExecStop','value':''}, {'key':'RuntimeMaxSec','value':'30'}]
+    service_systemd_options:
+      [
+        { "key": "Restart", "value": "no" },
+        { "key": "ExecStop", "value": "" },
+        { "key": "RuntimeMaxSec", "value": "30" },
+      ]
     service_state: stopped # start or not the service after its creation
 
   tags: docker-services
