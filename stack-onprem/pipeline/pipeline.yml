@@ -39,7 +39,7 @@ resource_types:
   - name: terraform
     type: registry-image
     source:
-      repository: ljfranklin/terraform-resource
+      repository: cycloid/terraform-resource
       tag: "1.10.3"
 
 resources:

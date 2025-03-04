@@ -54,7 +54,7 @@
 
 # Wait and validate running services
 - ansible.builtin.include_tasks: validate.yml
-  when: (validate|bool or validate_only|bool) and not uninstall|bool
+  when: (validate|bool or validate_only|bool) and not uninstall|bool and not ansible_check_mode|bool
 
 - block:
     - ansible.builtin.include_tasks: cycloid_scheduler_sync_worker_keys_uninstall.yml

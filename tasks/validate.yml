@@ -1,5 +1,4 @@
 ---
-
 - name: Force flush handlers before validate that everything is working
   meta: flush_handlers
 
@@ -20,7 +19,8 @@
   ignore_errors: True
   when: setup_cycloid_creds
 
-- fail: msg='Vault service unvailable or not initialized'
+- name: Vault service unvailable | validate
+  fail: msg='Vault service unvailable or not initialized'
   when: setup_cycloid_creds and (vault_init is failed or vault_init.json.initialized == false)
 
 - name: Check if vault is unseal | validate
@@ -36,7 +36,8 @@
   ignore_errors: True
   when: setup_cycloid_creds
 
-- fail: msg='Vault service is sealed, you should unseal it'
+- name: Vault service is sealed | validate
+  fail: msg='Vault service is sealed, you should unseal it'
   when: setup_cycloid_creds and (unseal is failed or unseal.json.errors == "Vault is sealed")
 
 #
@@ -55,7 +56,8 @@
   ignore_errors: True
   when: setup_cycloid_scheduler
 
-- fail: msg='Concourse service unvailable'
+- name: Concourse service unvailable | validate
+  fail: msg='Concourse service unvailable'
   when: setup_cycloid_scheduler and concourse_info is failed
 
 #
@@ -74,7 +76,8 @@
   ignore_errors: True
   when: setup_cycloid_core
 
-- fail: msg='Cycloid api service unvailable'
+- name: Cycloid api service unvailable | validate
+  fail: msg='Cycloid api service unvailable'
   when: cycloid_api_status is failed and setup_cycloid_core
 
 - name: Check Cycloid api throught nginx ssl | validate
@@ -92,7 +95,8 @@
   ignore_errors: True
   when: setup_cycloid_core
 
-- fail: msg='Cycloid api throught nginx ssl unvailable'
+- name: Cycloid api throught nginx ssl unvailable | validate
+  fail: msg='Cycloid api throught nginx ssl unvailable'
   when: cycloid_api_status_nginx is failed and setup_cycloid_core
 
 #
@@ -110,5 +114,6 @@
   ignore_errors: True
   when: setup_cycloid_core
 
-- fail: msg='Nginx http listener unvailable'
+- name: Nginx http listener unvailable | validate
+  fail: msg='Nginx http listener unvailable'
   when: nginx_http_curl is failed and setup_cycloid_core
