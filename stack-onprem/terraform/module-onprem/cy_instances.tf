@@ -31,23 +31,6 @@ variable "cy_instances_cidr_blocks_allow" {
 }
 
 ###
-# Iam role profile
-###
-
-# Create IAM Role for cy_instances
-resource "aws_iam_role" "cy_instances" {
-  name               = "cy_instances-${var.project}-${var.env}"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
-  path               = "/${var.project}/"
-}
-
-resource "aws_iam_instance_profile" "cy_instances" {
-  name = "profile-cy_instances-${var.project}-${var.env}"
-  role = aws_iam_role.cy_instances.name
-}
-
-
-###
 
 # cy_instances
 
@@ -160,6 +143,10 @@ resource "aws_instance" "cy_instances" {
   instance_type        = var.cy_instances_type
   key_name             = var.keypair_name
   subnet_id            = tolist(var.public_subnets_ids)[count.index % length(var.public_subnets_ids)]
+
+  user_data_base64 = base64encode(templatefile(
+    "${path.module}/userdata.sh.tpl", {}
+  ))
 
   vpc_security_group_ids = compact([
     var.bastion_sg_allow,
