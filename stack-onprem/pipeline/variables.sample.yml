@@ -1,4 +1,3 @@
-
 #
 # Terraform
 #
@@ -20,10 +19,6 @@ aws_default_region: eu-west-1
 # "Amazon Scaleway access key for Terraform."
 scw_access_key: ((scaleway_machine.access_key))
 
-#. terraform_storage_bucket_name (required): ($ .organization_canonical $)-terraform-remote-state
-#+ AWS S3 bucket name to store terraform remote state file.
-terraform_storage_bucket_name: ($ .organization_canonical $)-terraform-remote-state
-
 # "Amazon Scaleway secret key for Terraform."
 scw_secret_key: ((scaleway_machine.secret_key))
 
@@ -39,14 +34,6 @@ external_backend_aws_cred_name: aws
 #. stack_git_branch (required): master
 #+ Branch to use on the public stack Git repository
 stack_git_branch: $ONPREM_STACK_BRANCH
-
-#. config_terraform_path (required): ($ .project $)/terraform/($ .environment $)
-#+ Path of Terraform files in the config git repository
-config_terraform_path: ($ .project $)/terraform/($ .environment $)
-
-config_ansible_path: ($ .project $)/ansible
-
-terraform_version: '1.5.7'
 
 ansible_params_extravars:
   cycloid_api_provisioning: true
