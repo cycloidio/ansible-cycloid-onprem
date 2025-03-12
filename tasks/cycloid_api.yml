@@ -359,6 +359,7 @@
       when: "'elasticsearch' in groups and elasticsearch_basic_auth and cycloid_licence != ''"
 
   # run_once: true
+  ignore_errors: "{{ ansible_check_mode }}"
   when: sql_query_rows|int == 0 and inventory_hostname == groups['cycloid_core'][0] and cycloid_api_provisioning | bool
 
 - name: Copy cycloid-intercept script | cycloid-core api
