@@ -577,7 +577,7 @@ container_volumes_ca_certificates: "{% if ca_certificates_container_shared|bool 
 container_args_update_ca: "{% if ca_certificates_container_shared|bool %}--entrypoint /bin/bash{% endif %}"
 
 # If ca_certificates_container_shared, run update-ca before the /entrypoint
-cycloid_api_container_cmd: '{% if ca_certificates_container_shared|bool %}-c "/usr/sbin/update-ca-certificates && /entrypoint"{% endif %}'
+cycloid_api_container_cmd: '{% if ca_certificates_container_shared|bool %}-c "apk add --update --upgrade --no-cache ca-certificates && /usr/sbin/update-ca-certificates && /entrypoint"{% endif %}'
 # docker exec -it cycloid-api bash -c "ls -l /etc/ssl/certs/ | grep DigiCertSHA2HighAssuranceServerCA.crt"
 
 # SSL
@@ -884,7 +884,7 @@ saml_idp_metadata_path: "{%- if saml_auth_enabled|bool and saml_idp_metadata_url
 
 # Cloud Cost Management cmd
 cycloid_job_ccm_ingestion_container_args: "/entrypoint /go/youdeploy-http-api ingest-cost-explorer --config-file=/opt/config.yml"
-cycloid_job_ccm_ingestion_container_cmd: '{% if ca_certificates_container_shared|bool %}-c "/usr/sbin/update-ca-certificates && /entrypoint {{ cycloid_job_ccm_ingestion_container_args }}"{% else %}{{ cycloid_job_ccm_ingestion_container_args }}{% endif %}'
+cycloid_job_ccm_ingestion_container_cmd: '{% if ca_certificates_container_shared|bool %}-c "apk add --update --upgrade --no-cache ca-certificates && /usr/sbin/update-ca-certificates && /entrypoint {{ cycloid_job_ccm_ingestion_container_args }}"{% else %}{{ cycloid_job_ccm_ingestion_container_args }}{% endif %}'
 
 ###########################
 # Cost Estimation         #
@@ -899,7 +899,7 @@ cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api prici
 
 # merge cost_estimation_ingestion cmd
 cycloid_job_cost_estimation_ingestion_container_args: "{% if cycloid_job_cost_estimation_injection_aws|bool %}{{ cost_estimation_ingestion_aws_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_azure|bool %}{{ cost_estimation_ingestion_azure_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_gcp|bool %}{{ cost_estimation_ingestion_gcp_minimal }}{% endif %}"
-cycloid_job_cost_estimation_ingestion_container_cmd: '-c {% if ca_certificates_container_shared|bool %}"/usr/sbin/update-ca-certificates && {{ cycloid_job_cost_estimation_ingestion_container_args }}"{% else %}"{{ cycloid_job_cost_estimation_ingestion_container_args }}"{% endif %}'
+cycloid_job_cost_estimation_ingestion_container_cmd: '-c {% if ca_certificates_container_shared|bool %}"apk add --update --upgrade --no-cache ca-certificates && /usr/sbin/update-ca-certificates && {{ cycloid_job_cost_estimation_ingestion_container_args }}"{% else %}"{{ cycloid_job_cost_estimation_ingestion_container_args }}"{% endif %}'
 
 # Share host saml file with container. It shouldn't be changed.
 container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/secrets/saml{%- endif -%}"
@@ -910,7 +910,7 @@ container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/sec
 
 # Cloud Cost Management cmd
 cycloid_job_kpi_import_container_args: "/entrypoint /go/youdeploy-http-api kpi-import --config-file=/opt/config.yml"
-cycloid_job_kpi_import_container_cmd: '{% if ca_certificates_container_shared|bool %}-c "/usr/sbin/update-ca-certificates && /entrypoint {{ cycloid_job_kpi_import_container_args }}"{% else %}{{ cycloid_job_kpi_import_container_args }}{% endif %}'
+cycloid_job_kpi_import_container_cmd: '{% if ca_certificates_container_shared|bool %}-c "apk add --update --upgrade --no-cache ca-certificates && /usr/sbin/update-ca-certificates && /entrypoint {{ cycloid_job_kpi_import_container_args }}"{% else %}{{ cycloid_job_kpi_import_container_args }}{% endif %}'
 
 #
 # Monitoring
