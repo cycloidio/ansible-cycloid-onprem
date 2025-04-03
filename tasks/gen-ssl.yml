@@ -80,21 +80,6 @@
   run_once: true
   when: ssl_generate_selfsigned and not ssl_key.stat.exists
 
-- name: Copy the ssl in local data directory | ssl
-  ansible.builtin.copy:
-    src: "{{ cycloid_local_datas_path }}/ssl/cycloid-core.{{item.0}}"
-    dest: "{{item.1}}.{{item.0}}"
-    mode: 0777
-  with_nested:
-    - ["key", "crt"]
-    - - "{{ cycloid_local_datas_path }}/ssl/cycloid-redis"
-  run_once: true
-  delegate_to: 127.0.0.1
-  become: false
-  when: ssl_generate_selfsigned and not redis_ssl_stat.stat.exists
-
-#####################################################
-
 ### SAML ###
 
 - name: Checking existing sp SAML cert | ssl
