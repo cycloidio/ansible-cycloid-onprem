@@ -81,7 +81,7 @@
   local_action:
     module: copy
     content: "{{vault_tokens.stdout | from_json | to_nice_json}}"
-    dest: "{{playbook_dir}}/vault.secret"
+    dest: "{{ cycloid_local_datas_path }}/vault.secret"
   become: no
   ignore_errors: "{{ ansible_check_mode }}"
   when: inventory_hostname == groups['cycloid_creds'][0] and vault_tokens is not skipped
@@ -89,7 +89,7 @@
 
 - name: Read local vault.secret | cycloid-creds
   set_fact:
-    vault_local_token: "{{(lookup('file', '{{playbook_dir}}/vault.secret')) | to_json | from_json }}"
+    vault_local_token: "{{(lookup('file', '{{ cycloid_local_datas_path }}/vault.secret')) | to_json | from_json }}"
 
 - name: Copy unseal vault keys | cycloid-creds
   lineinfile:
