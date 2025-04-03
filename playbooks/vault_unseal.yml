@@ -2,7 +2,7 @@
 - name: vault unseal
   hosts: cycloid_creds
   vars:
-    vault_tokens: "{{ lookup('file', 'vault.secret') | from_json }}"
+    vault_tokens: "{{ lookup('file', 'datas/vault.secret') | from_json }}"
 
   tasks:
   - name: Check if vault is unseal | validate
