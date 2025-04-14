@@ -386,7 +386,7 @@ jobs:
 
                     # SMTP
                     cycloid_email_addr_from: "Cycloid Onprem <noreply-${ENV}@cycloid.io>"
-                    cycloid_email_addr_return_path: "admin+onprem-${ENV}@cycloid.io"
+                    cycloid_email_addr_return_path: "admin+onprem_${ENV}@cycloid.io"
                     cycloid_email_smtp_username: "${IAM_SES_SMTP_USER_KEY}"
                     cycloid_email_smtp_password: "${IAM_SES_SMTP_USER_SECRET}"
                     cycloid_email_smtp_svr_addr: "email-smtp.eu-west-1.amazonaws.com:587"
@@ -486,7 +486,7 @@ jobs:
                     echo "" >> ${OUTPUT_FILE}
                     echo "### Onprem ready on: https://${CY_INSTANCES_RECORD_CONSOLE}" >> ${OUTPUT_FILE}
                     echo "### Admin user:" >> ${OUTPUT_FILE}
-                    echo "  email: admin+${PROJECT}-${ENV}@cycloid.io" >> ${OUTPUT_FILE}
+                    echo "  email: admin+onprem_${ENV}@cycloid.io" >> ${OUTPUT_FILE}
                     echo "  password: please check populate data" >> ${OUTPUT_FILE}
                     echo "" >> ${OUTPUT_FILE}
                     echo "### Asynqmon on: http://$(grep cycloid_cache -A1 inventory | tail -n1):5678" >> ${OUTPUT_FILE}
