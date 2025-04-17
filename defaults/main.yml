@@ -121,7 +121,7 @@ vault_url: https://{{ hostvars[groups['cycloid_creds'][0]]['ansible_default_ipv4
 #+ Specifies the address of the SMTP server used for sending emails.
 # The following example will rely on a smtp server installed locally on the host
 # cycloid_email_smtp_svr_addr: "{{ ansible_docker0['ipv4']['address'] }}:25"
-cycloid_email_smtp_svr_addr: "{{ hostvars[groups['smtp_server'][0]]['ansible_default_ipv4']['address'] }}:1025"
+cycloid_email_smtp_svr_addr: "{%- if 'smtp_server' in groups -%}{{ hostvars[groups['smtp_server'][0]]['ansible_default_ipv4']['address'] }}:1025{%- endif -%}"
 #. cycloid_email_smtp_username(required, string): "admin"
 #+ Defines the username for SMTP authentication.
 cycloid_email_smtp_username: admin
