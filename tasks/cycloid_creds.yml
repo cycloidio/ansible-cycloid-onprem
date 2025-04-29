@@ -16,6 +16,8 @@
   with_items:
     - key
     - crt
+  notify:
+    - restart vault
 
 - name: Create empty unseal_keys file | cycloid-creds
   file:

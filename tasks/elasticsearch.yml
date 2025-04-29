@@ -9,6 +9,8 @@
       with_items:
         - key
         - crt
+      notify:
+        - restart elasticsearch
 
     - name: template elasticsearch config | elasticsearch
       template:

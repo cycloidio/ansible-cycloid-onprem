@@ -32,6 +32,9 @@
     dest: "{{ cycloid_api_path }}/redis-ca.crt"
     mode: 0440
   when: cycloid_cache_schema == "rediss" and not cycloid_cache_insecure_skip_tls|bool and redis_ssl_stat.stat.exists
+  notify:
+    - restart cycloid-api
+    - restart cycloid-api-task-manager
 
 # # if needed read the Redis cert as envvar #
 # - name: Read the redis certificate | cycloid-core api

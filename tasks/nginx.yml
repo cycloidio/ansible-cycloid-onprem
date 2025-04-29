@@ -1,5 +1,4 @@
 ---
-
 - block:
     - name: Check cycloid old nginx vhost config if exist | cycloid-core nginx
       stat:
@@ -9,7 +8,6 @@
     - fail:
         msg: Legacy, we detected Cycloid legacy vhost 01-cycloid-console.conf installed on your server. Nginx is not required anymore by Cycloid. We moved to a dedicated Docker container. Please remove legacy 01-cycloid-console.conf vhost or Nginx before running the installation again ...
       when: vhost.stat.exists == True
-
 
 - name: Create config directory | cycloid-core nginx
   file:
@@ -37,6 +35,8 @@
   with_items:
     - key
     - crt
+  notify:
+    - restart nginx
 
 - name: Define service | cycloid-core nginx
   include_role:
@@ -47,8 +47,8 @@
     container_image: "{{ cycloid_nginx_image }}"
     #container_links: "{{ cycloid_api_container_links + ['cycloid-api', 'cycloid-frontend'] }}"
     container_links:
-      - 'cycloid-api'
-      - 'cycloid-frontend'
+      - "cycloid-api"
+      - "cycloid-frontend"
     container_volumes:
       - "{{ cycloid_nginx_path }}/vhosts:/etc/nginx/conf.d"
       - "{{ cycloid_nginx_path }}/ssl:/etc/nginx/ssl"
