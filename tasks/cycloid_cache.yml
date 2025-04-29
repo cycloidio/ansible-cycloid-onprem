@@ -22,6 +22,8 @@
     - crt
   when: cycloid_cache_tls_enabled|bool
   ignore_errors: "{{ ansible_check_mode }}"
+  notify:
+    - restart cycloid-cache
 
 - name: Define service | cycloid-cache
   include_role:

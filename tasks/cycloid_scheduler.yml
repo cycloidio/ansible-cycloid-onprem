@@ -8,21 +8,21 @@
   copy:
     content: "{{ concourse_host_key }}"
     dest: "{{ concourse_config_path }}/{{ concourse_host_key_path }}"
-  #  owner: "{{ concourse_user }}"
-  #  group: "{{ concourse_group }}"
+    #  owner: "{{ concourse_user }}"
+    #  group: "{{ concourse_group }}"
     mode: 0400
   notify:
-  - restart concourse web
+    - restart concourse web
 
 - name: Session signing key | cycloid-scheduler
   copy:
     content: "{{ concourse_session_signing_key }}"
     dest: "{{ concourse_config_path }}/{{ concourse_session_signing_key_path }}"
-  #  owner: "{{ concourse_user }}"
-  #  group: "{{ concourse_group }}"
+    #  owner: "{{ concourse_user }}"
+    #  group: "{{ concourse_group }}"
     mode: 0400
   notify:
-  - restart concourse web
+    - restart concourse web
 
 - name: Copy the ssl in service directories | cycloid-scheduler
   copy:
@@ -32,12 +32,14 @@
   with_items:
     - key
     - crt
+  notify:
+    - restart concourse web
 
 - name: Generate session_signing_key local directory | cycloid-scheduler
   file:
     path: "{{ cycloid_local_datas_path }}/scheduler"
     state: directory
-    mode: '0777'
+    mode: "0777"
     recurse: true
   delegate_to: 127.0.0.1
   become: false
@@ -52,7 +54,7 @@
 
 - name: Authorized worker keys | cycloid-scheduler
   copy:
-  #template:
+    #template:
     #src: authorized_worker_keys.j2
     content: "{% for key in concourse_authorized_worker_keys %}{{key}}\n{% endfor %}"
     dest: "{{ concourse_config_path }}/{{ concourse_authorized_worker_keys_path }}"
