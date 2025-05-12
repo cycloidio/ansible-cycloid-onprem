@@ -16,7 +16,7 @@ roles:
 #  scm: git
 
 - src: git@github.com:cycloidio/ansible-cycloid-onprem.git
-  version: fl-restart
+  version: master
   name: ansible-cycloid-onprem
   scm: git
 

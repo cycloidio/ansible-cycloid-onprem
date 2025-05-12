@@ -29,5 +29,11 @@
     name: concourse-web_container
     state: restarted
 
+- name: restart elasticsearch
+  service:
+    name: elasticsearch_container
+    state: restarted
+  when: cycloid_api_task_manager_enabled|bool
+
 - name: update ca-certificates
   command: "{{ ca_certificates_handler[ansible_os_family | lower] }}"
