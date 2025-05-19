@@ -1,21 +1,21 @@
 ---
-version: '3'
-name: 'On-premise'
-canonical: 'cycloid-onprem'
-status: 'private'
-description: 'Create On-premise setup of Cycloid.'
+version: "4"
+name: "On-premise"
+canonical: "cycloid-onprem"
+status: "private"
+description: "Create On-premise setup of Cycloid."
 keywords:
-  - 'cycloid'
-  - 'concourse'
-  - 'worker'
-  - 'elasticsearch'
-  - 'docker'
-  - 'ses'
-  - 'vault'
-  - 'redis'
-  - 'provider:aws'
-author: 'Cycloid'
-image: 'https://www.cycloid.io/themes/cycloid/images/owl_logo.png'
+  - "cycloid"
+  - "concourse"
+  - "worker"
+  - "elasticsearch"
+  - "docker"
+  - "ses"
+  - "vault"
+  - "redis"
+  - "provider:aws"
+author: "Cycloid"
+image: "https://www.cycloid.io/themes/cycloid/images/owl_logo.png"
 technologies:
   - technology: cycloid-core
     version: n/a
@@ -34,19 +34,19 @@ technologies:
 config:
   # define the default pipeline here
   default:
-    name: 'AWS ec2 instances'
-    description: 'Setup onprem on aws ec2 instances.'
+    name: "AWS ec2 instances"
+    description: "Setup onprem on aws ec2 instances."
     pipeline:
       pipeline:
-        path: 'pipeline/pipeline.yml'
+        path: "pipeline/pipeline.yml"
       variables:
-        path: 'pipeline/variables.sample.yml'
-        destination: '($ .project $)/pipeline/variables-($ .environment $).yml'
+        path: "pipeline/variables.sample.yml"
+        destination: "($ .config_root $)/pipeline/variables.yml"
     terraform:
       onprem:
-        path: 'terraform/main.tf.sample'
-        destination: '($ .project $)/terraform/($ .environment $)/main.tf'
+        path: "terraform/main.tf.sample"
+        destination: "($ .config_root $)/terraform/main.tf"
     ansible:
       onprem:
-        path: 'ansible/environments/cycloid.yml.sample'
-        destination: '($ .project $)/ansible/environments/cycloid-($ .environment $).yml'
+        path: "ansible/environments/cycloid.yml.sample"
+        destination: "($ .config_root $)/ansible/environments/cycloid-($ .environment $).yml"
