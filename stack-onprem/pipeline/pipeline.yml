@@ -40,28 +40,26 @@ resource_types:
     type: registry-image
     source:
       repository: cycloid/terraform-resource
-      tag: "1.10.3"
+      tag: "1.11.4"
 
 resources:
   - name: tfstate
     type: terraform
     icon: terraform
     source:
-      env_name: ($ .environment $)
-      backend_type: s3
+      # Use Cycloid Terraform HTTP backend.
+      backend_type: http
       backend_config:
-        bucket: ($ .organization_canonical $)-terraform-remote-state
-        key: ($ .project $)-($ .environment $).tfstate
-        workspace_key_prefix: ($ .project $)
-        region: ((aws_default_region))
-        access_key: ((aws_access_key))
-        secret_key: ((aws_secret_key))
+        address: "($ .api_url $)/inventory?jwt=($ .inventory_jwt $)"
+        skip_cert_verification: true
+      env_name: ($ .environment $)
       vars:
         access_key: ((aws_access_key))
         secret_key: ((aws_secret_key))
         env: ($ .environment $)
+        component: ($ .component $)
         project: ($ .project $)
-        customer: ($ .organization_canonical $)
+        customer: ($ .organization $)
         aws_region: ((aws_default_region))
       env:
         AWS_ACCESS_KEY_ID: ((aws_access_key))
@@ -111,7 +109,7 @@ resources:
       branch: ($ .cr_branch $)
       private_key: ((($ .cr_cred_path $).ssh_key))
       paths:
-        - ($ .project $)/terraform/($ .environment $)/*
+        - ($ .config_root $)/terraform/*
 
   - name: git_config-ansible
     type: git
@@ -121,7 +119,7 @@ resources:
       branch: ($ .cr_branch $)
       private_key: ((($ .cr_cred_path $).ssh_key))
       paths:
-        - ($ .project $)/ansible/environments/cycloid-($ .environment $).yml
+        - "($ .config_root $)/ansible/environments/cycloid-($ .environment $).yml"
 
   # git_terracost used by populate-datas
   # Cost estimation feature use cloudprovider pricing datas.
@@ -191,7 +189,7 @@ jobs:
                 - name: git_stack-terraform
                   path: "stack"
             params:
-              CONFIG_PATH: ($ .project $)/terraform/($ .environment $)
+              CONFIG_PATH: ($ .config_root $)/terraform
               STACK_PATH: stack-onprem/terraform
 
           - put: tfstate
@@ -232,7 +230,7 @@ jobs:
                 - name: git_stack-terraform
                   path: "stack"
             params:
-              CONFIG_PATH: ($ .project $)/terraform/($ .environment $)
+              CONFIG_PATH: ($ .config_root $)/terraform
               STACK_PATH: stack-onprem/terraform
 
           - put: tfstate
@@ -260,7 +258,7 @@ jobs:
                 - name: git_stack-terraform
                   path: "stack"
             params:
-              CONFIG_PATH: ($ .project $)/terraform/($ .environment $)
+              CONFIG_PATH: ($ .config_root $)/terraform
               STACK_PATH: stack-onprem/terraform
 
           - put: tfstate
@@ -513,7 +511,7 @@ jobs:
                 - name: access
               params:
                 ENV: ($ .environment $)
-                CONFIG_ANSIBLE_PATH: ($ .project $)/ansible
+                CONFIG_ANSIBLE_PATH: "($ .config_root $)/ansible"
                 CONCOURSE_WORKER: ((install_concourse_worker))
                 MINIO: ((install_minio))
                 ELASTICSEARCH: ((install_elasticsearch))
@@ -651,10 +649,10 @@ jobs:
                     envsubst '$STARTSTOP' < stack/stack-onprem/pipeline/start-stop-req.yml  | python -c 'import yaml; import json; import sys; print(json.dumps(yaml.safe_load(sys.stdin)));' > start-stop-req.json
 
                     # set product variables
-                    envsubst '$API_KEY $ENV $ORGANIZATION $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < start-stop-req.json > start-stop-req-generated.json
+                    envsubst '$CY_API_KEY $ENV $CY_ORG $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < start-stop-req.json > start-stop-req-generated.json
 
-                    return_code=$(curl -s -o output -w "%{http_code}" "${CY_API_URL}/organizations/$ORGANIZATION/projects/$PROJECT/pipelines" --compressed \
-                    -H "authorization: Bearer ${API_KEY}" \
+                    return_code=$(curl -s -o output -w "%{http_code}" "${CY_API_URL}/organizations/$CY_ORG/projects/$PROJECT/pipelines" --compressed \
+                    -H "authorization: Bearer ${CY_API_KEY}" \
                     -H 'content-type: application/vnd.cycloid.io.v1+json' \
                     -H 'Accept: */*' -H 'Connection: keep-alive' \
                     --data-binary "@start-stop-req-generated.json")
@@ -664,44 +662,44 @@ jobs:
                        EXIT_STATUS=1
                     fi
 
-                    cy --insecure login --org ${ORGANIZATION} --api-key ${API_KEY}
-                    cy --insecure --org ${ORGANIZATION} --project start-stop-${PROJECT} --env ${ENV} pipeline unpause
+                    cy --insecure --project start-stop-${PROJECT} --env ${ENV} pipeline unpause
                     echo ""
 
-                    # InfraView for dummy/test
-                    echo "InfraView configuration"
-                    cy --insecure --org ${ORGANIZATION} --project ${PROJECT} --env ${ENV} external-backend create infraview AWSRemoteTFState \
-                      --bucket-name ${BUCKET_NAME} \
-                      --bucket-path ${BUCKET_PATH} \
-                      --cred ${EXTERNAL_BACKEND_AWS_CRED_NAME} \
-                      --region "eu-west-1"
-                    if [ $? -ne 0 ]; then
-                      EXIT_STATUS=$?
-                    fi
+                    # # InfraView for dummy/test
+                    # echo "InfraView configuration"
+                    # cy --insecure --project ${PROJECT} --env ${ENV} external-backend create infraview AWSRemoteTFState \
+                    #   --bucket-name ${BUCKET_NAME} \
+                    #   --bucket-path ${BUCKET_PATH} \
+                    #   --cred ${EXTERNAL_BACKEND_AWS_CRED_NAME} \
+                    #   --region "eu-west-1"
+                    # if [ $? -ne 0 ]; then
+                    #   EXIT_STATUS=$?
+                    # fi
 
-                    # Logs for dummy/test
-                    echo "Logs configuration"
-                    cy --insecure --org ${ORGANIZATION} --project ${PROJECT} external-backend create logs AWSCloudWatchLogs \
-                      --cred ${EXTERNAL_BACKEND_AWS_CRED_NAME} \
-                      --region "eu-west-1"
-                    # global project config, ignore if already exist
-                    #if [ $? -ne 0 ]; then
-                    #  EXIT_STATUS=$?
-                    #fi
+                    # # Logs for dummy/test
+                    # echo "Logs configuration"
+                    # cy --insecure --project ${PROJECT} external-backend create logs AWSCloudWatchLogs \
+                    #   --cred ${EXTERNAL_BACKEND_AWS_CRED_NAME} \
+                    #   --region "eu-west-1"
+                    # # global project config, ignore if already exist
+                    # #if [ $? -ne 0 ]; then
+                    # #  EXIT_STATUS=$?
+                    # #fi
 
                     exit $EXIT_STATUS
               inputs:
                 - name: git_stack-ansible
                   path: "stack"
               params:
-                CY_API_URL: "https://http-api.cycloid.io"
-                ORGANIZATION: ($ .organization_canonical $)
-                API_KEY: ((api_key))
+                CY_API_KEY: ((api_key))
+                CY_ORG: ($ .organization $)
+                CY_VERSION: latest
+                CY_API_URL: ($ .api_url $)
                 ENV: ($ .environment $)
                 PROJECT: ($ .project $)
-                BUCKET_PATH: ($ .project $)/($ .environment $)/($ .project $)-($ .environment $).tfstate
-                BUCKET_NAME: ($ .organization_canonical $)-terraform-remote-state
-                EXTERNAL_BACKEND_AWS_CRED_NAME: ((external_backend_aws_cred_name))
+                # BUCKET_PATH: ($ .project $)/($ .environment $)/($ .project $)-($ .environment $).tfstate
+                # BUCKET_NAME: ($ .organization $)-terraform-remote-state
+                # EXTERNAL_BACKEND_AWS_CRED_NAME: ((external_backend_aws_cred_name))
                 AWS_ACCESS_KEY_ID: ((aws_access_key))
                 AWS_DEFAULT_REGION: ((aws_default_region))
                 AWS_SECRET_ACCESS_KEY: ((aws_secret_key))

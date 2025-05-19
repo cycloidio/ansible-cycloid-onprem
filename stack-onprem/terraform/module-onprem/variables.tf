@@ -7,11 +7,9 @@ variable "project" {
   default = "onprem"
 }
 
-variable "env" {
-}
-
-variable "customer" {
-}
+variable "env" {}
+variable "customer" {}
+variable "component" {}
 
 variable "extra_tags" {
   default = {}
@@ -23,6 +21,7 @@ locals {
     env          = var.env
     project      = var.project
     client       = var.customer
+    component    = var.component
   }
   merged_tags = merge(local.standard_tags, var.extra_tags)
 }
