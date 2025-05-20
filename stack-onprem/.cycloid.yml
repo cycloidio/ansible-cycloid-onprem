@@ -15,7 +15,7 @@ keywords:
   - "redis"
   - "provider:aws"
 author: "Cycloid"
-image: "https://www.cycloid.io/themes/cycloid/images/owl_logo.png"
+image: "https://static.cycloid.io/docker.svg"
 technologies:
   - technology: cycloid-core
     version: n/a
