@@ -69,7 +69,7 @@ use_cases:
                 key: cycloid_licence
                 type: string
                 widget: cy_cred
-                default: "((custom_onprem_licence.prod))"
+                default: "((cycloid-onprem-licence-prod.licence_key))"
 
           - name: Default config
             condition: advanced_opt==true
