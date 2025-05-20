@@ -44,8 +44,6 @@ install_concourse_worker: $INSTALL_CONCOURSE_WORKER
 install_minio: false
 install_elasticsearch: $INSTALL_ELASTICSEARCH
 
-cycloid_licence: ((custom_onprem_licence.($ .environment $)))
-
 cycloid_api_tag: $BACKEND_IMAGE_TAG
 cycloid_frontend_tag: $FRONTEND_IMAGE_TAG
 
