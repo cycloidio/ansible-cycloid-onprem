@@ -80,13 +80,13 @@ use_cases:
                 key: aws_access_key
                 widget: cy_cred
                 type: string
-                default: "((aws_admin.access_key))"
+                default: "((aws_cycloid_automation_admin.access_key))"
               - name: "AWS secret key"
                 description: "Amazon AWS secret key for Terraform."
                 key: aws_secret_key
                 widget: cy_cred
                 type: string
-                default: "((aws_admin.secret_key))"
+                default: "((aws_cycloid_automation_admin.secret_key))"
               - name: "Amazon AWS region"
                 description: "Amazon AWS region to use for Terraform."
                 key: aws_default_region

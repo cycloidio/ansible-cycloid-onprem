@@ -573,6 +573,9 @@ mysql:
         - ReadWriteOnce
       size: 8Gi
 
+    # Disable binlog by default
+    extraFlags: "--disable-log-bin"
+
 #
 # External MySQL Configuration
 # All of these values are only used if `mysql.enabled=false`
