@@ -1,5 +1,4 @@
 ---
-
 # - name: Add this container to api links
 #   set_fact:
 #    cycloid_api_container_links: "{{ cycloid_api_container_links + ['cycloid-db'] }}"
@@ -28,6 +27,7 @@
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
       MYSQL_PASSWORD: "{{ cycloid_db_password }}"
       MYSQL_ROOT_PASSWORD: "{{ cycloid_db_password }}"
+      MYSQL_EXTRA_FLAGS: "--disable-log-bin"
   tags: docker-services
 
 - name: Force flush handlers to ensure container is started | cycloid-db
