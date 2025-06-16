@@ -102,5 +102,4 @@ export AWS_SECRET_ACCESS_KEY=$(vault read -field=secret_key secret/cycloid/aws)
 export AWS_DEFAULT_REGION=eu-west-1
 
 aws s3 cp ../../../files/scripts/cycloid-intercept.sh s3://cycloid-onprem-helm-charts/
-
 ```

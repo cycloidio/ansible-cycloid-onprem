@@ -183,19 +183,19 @@ use_cases:
                 values:
                   - "https://samltest.id/saml/idp"
 
-          - name: Service-ansible-opt
-            condition: advanced_opt==true
-            technologies: [ansible]
-            vars:
-              - name: "Cycloid Database image"
-                description: "Cycloid Database image."
-                key: cycloid_db_image
-                widget: auto_complete
-                type: string
-                default: "bitnami/mysql:8.4.3"
-                values:
-                  - "mysql:8.0.35"
-                  - "mariadb:10.2.11"
+          # - name: Service-ansible-opt
+          #   condition: advanced_opt==true
+          #   technologies: [ansible]
+          #   vars:
+          #     - name: "Cycloid Database image"
+          #       description: "Cycloid Database image."
+          #       key: cycloid_db_image
+          #       widget: auto_complete
+          #       type: string
+          #       default: "bitnami/mysql:8.4.3"
+          #       values:
+          #         - "mysql:8.0.35"
+          #         - "mariadb:10.2.11"
 
       # Use local ES, if needed can be exposed via extra vars
       # - name: Features
