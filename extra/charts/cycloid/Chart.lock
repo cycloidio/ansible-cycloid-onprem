@@ -1,15 +1,15 @@
 dependencies:
-  - name: mysql
-    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
-    version: 13.0.2
-  - name: redis
-    repository: https://charts.bitnami.com/bitnami
-    version: 20.2.1
-  - name: concourse
-    repository: https://concourse-charts.storage.googleapis.com/
-    version: 17.3.1
-  - name: vault
-    repository: https://helm.releases.hashicorp.com
-    version: 0.29.0
-digest: sha256:bf48a179f04fa322e4640c359d52e0ff845f5e14db1c661bee30babd9e15a692
-generated: "2024-11-12T16:46:41.410155773+01:00"
+- name: mysql
+  repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
+  version: 13.0.2
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 20.2.1
+- name: concourse
+  repository: https://concourse-charts.storage.googleapis.com/
+  version: 17.3.1
+- name: vault
+  repository: https://helm.releases.hashicorp.com
+  version: 0.29.0
+digest: sha256:5cc59e18d94be6e6b48575e331274c31f12cdd30fbc82bc5e1a9d959682912d5
+generated: "2025-06-23T16:37:33.660302638+02:00"
