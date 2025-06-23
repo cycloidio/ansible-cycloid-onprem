@@ -531,10 +531,12 @@ mysql:
 
   nameOverride: "mysql"
 
-  image:
-    registry: docker.io
-    repository: bitnami/mysql
-    tag: 8.4.3
+  # Use the default MySQL image from mysql charts
+  #
+  # image:
+  #   registry: docker.io
+  #   repository: bitnami/mysql
+  #   tag: 8.4.3
 
   ## MySQL Authentication parameters
   ## @param mysql.auth.rootPassword MySQL root password
@@ -613,10 +615,12 @@ redis:
 
   nameOverride: "redis"
 
-  image:
-    registry: docker.io
-    repository: bitnami/redis
-    tag: 7.4.1-debian-12-r0
+  # Use the default Redis image from redis charts
+  #
+  # image:
+  #   registry: docker.io
+  #   repository: bitnami/redis
+  #   tag: 7.4.1-debian-12-r0
 
   ## Redis Authentication parameters
   ## ref: https://github.com/bitnami/charts/tree/main/bitnami/redis#redis-common-configuration-parameters
@@ -931,7 +935,6 @@ concourse:
 
       ## Annotations to be added to the web ingress.
       ## Example:
-      ##   kubernetes.io/ingress.class: nginx
       ##   kubernetes.io/tls-acme: 'true'
       ##
       annotations: {}

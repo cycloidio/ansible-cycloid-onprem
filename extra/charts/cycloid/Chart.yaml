@@ -42,7 +42,7 @@ dependencies:
     tags:
       - bitnami-mysql
     # https://github.com/bitnami/charts/blob/main/bitnami/mysql/Chart.yaml#L37
-    version: 11.1.19
+    version: 13.0.2
     condition: mysql.enabled
 
   - name: redis
