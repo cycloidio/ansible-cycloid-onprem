@@ -50,7 +50,7 @@ dependencies:
     tags:
       - bitnami-redis
     # https://github.com/bitnami/charts/blob/main/bitnami/redis/Chart.yaml#L39
-    version: 20.2.1
+    version: 21.2.5
     condition: redis.enabled
 
   - name: concourse
