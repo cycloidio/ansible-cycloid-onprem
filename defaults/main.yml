@@ -466,7 +466,7 @@ concourse_db_image: postgres:15.4
 cycloid_cache_image: bitnami/redis:8.0.2
 cycloid_db_image: bitnami/mysql:9.3.0
 concourse_web_image: concourse/concourse:7.9.1
-vault_image: hashicorp/vault:1.18.1
+vault_image: hashicorp/vault:1.19
 # https://hub.docker.com/_/nginx/tags
 cycloid_nginx_image: nginx:1.28
 cycloid_cache_mon_image: hibiken/asynqmon:latest
