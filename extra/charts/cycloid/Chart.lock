@@ -7,9 +7,9 @@ dependencies:
   version: 21.2.5
 - name: concourse
   repository: https://concourse-charts.storage.googleapis.com/
-  version: 17.3.1
+  version: 18.2.0
 - name: vault
   repository: https://helm.releases.hashicorp.com
-  version: 0.29.0
-digest: sha256:a0fad4dd5ff826699c914fd705921005a7e3f7e663f5436d6699c844183f99d3
-generated: "2025-06-23T17:04:21.737831379+02:00"
+  version: 0.30.0
+digest: sha256:df15d1c2129d7f5aea3391abb24850e8afa6a2de7c3be4160616e6388f68c621
+generated: "2025-06-30T12:29:44.334735086+02:00"
