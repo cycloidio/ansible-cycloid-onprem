@@ -408,8 +408,8 @@ vault_image: hashicorp/vault:1.19
 # https://hub.docker.com/_/nginx/tags
 cycloid_nginx_image: nginx:1.28
 cycloid_cache_mon_image: hibiken/asynqmon:latest
-elasticsearch_image: elasticsearch:8.10.2
-kibana_image: bitnami/kibana:8.10.2
+elasticsearch_image: elasticsearch:8.18.1
+kibana_image: bitnami/kibana:8
 minio_image: "minio/minio:latest"
 
 cycloid_cache_mon_port: 5678
