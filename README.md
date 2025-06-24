@@ -108,8 +108,6 @@ Cycloid.io
 
 |Name|Description|Type|Default|Required|
 |---|---|:---:|:---:|:---:|
-|`azure_ad_client_id`|The client ID of Azure AD|`string`|`""`|`False`|
-|`azure_ad_tenant_id`|The tenant ID of Azure AD|`string`|`""`|`False`|
 |`ca_certificates_container_shared`|Share your rootCA from the host to containers|`bool`|`false`|`False`|
 |`container_args_extra`|Used to give extra argument to containers. Example to override domain server "--dns 172.17.0.1"|`string`|`""`|`False`|
 |`cycloid_admin_apikey`|Create admin APIKEY on the first organization. APIKEY will be stored localy under ``{{playbook_dir}}/admin.apikey`. (`cycloid_licence` need to be defined)|`bool`|`false`|`False`|
@@ -117,18 +115,9 @@ Cycloid.io
 |`cycloid_packages`|List of packages to install depending of the OS|`map`|`debian`|`False`|
 |`cycloid_public_stacks`|Create a catalog repository with Cycloid Public Stacks. (`cycloid_licence` need to be defined)|`bool`|`true`|`False`|
 |`extra_no_proxy`|Specify a list of domain names, IP addresses, or network blocks that should bypass the proxy|`list`|`[]`|`False`|
-|`github_client_id`|The client ID of Github|`string`|`""`|`False`|
-|`github_client_secret`|The client secret of Github|`string`|`""`|`False`|
-|`google_client_id`|The client ID of Google|`string`|`""`|`False`|
-|`google_client_secret`|The client secret of Google|`string`|`""`|`False`|
 |`http_proxy`|Specify the proxy server for HTTP connections. When set, all HTTP requests will be routed through the specified proxy server.|`string`|`""`|`False`|
 |`https_proxy`|Specify the proxy server for HTTPS connections. When set, all HTTPS requests will be routed through the specified proxy server.|`string`|`""`|`False`|
 |`offline_setup`|Set true to not install packages automatically.|`bool`|`false`|`False`|
-|`saml_auth_enabled`|Enabled SAML auth on Cyclid API.|`bool`|`false`|`False`|
-|`saml_idp_metadata_file`|Name of your xml identity provider federation metadata file. It could also be provided as an url with saml_idp_metadata_url.|`string`|`"idp-metadata"`|`False`|
-|`saml_idp_metadata_url`|URL to get your XML Identity Provider federation metadata file. If defined, do not provide saml_idp_metadata_file.|`string`|`""`|`False`|
-|`saml_sp_certificate_file`|Name of the certificate private key stored in saml_local_path to use in cycloid|`string`|`"cycloid-saml-sp.crt"`|`False`|
-|`saml_sp_private_key_file`|Name of the certificate private key stored in saml_local_path to use in cycloid|`string`|`"cycloid-saml-sp.key"`|`False`|
 |`ssl_subject_alt_name`|Alternative common name to use in addition of the default ones for the self signed certs . Use `DNS` for a domain name and `IP` for a raw IP address.|`list`|`[]`|`False`|
 |`uninstall`|/!\ Set to true only if you want to uninstall cycloid /!\|`bool`|`false`|`False`|
 |`validate`|Wait and validate running services via validate.yml|`bool`|`true`|`False`|

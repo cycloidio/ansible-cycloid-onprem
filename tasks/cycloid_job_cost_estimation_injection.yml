@@ -8,7 +8,7 @@
     container_image: "{{cycloid_api_image}}"
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid --entrypoint /bin/bash {{ container_args_extra }}"
     container_cmd: "{{ cycloid_job_cost_estimation_ingestion_container_cmd }}"
-    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
+    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
       DB_NAME: "{{ cycloid_db_name }}"
       DB_USER: "{{ cycloid_db_user }}"

@@ -1,0 +1,6 @@
+kind: Deprecated
+body: 'sso: saml, azure, git, google removed. The configuration is now do on Cycloid Orgs'
+time: 2025-06-24T09:50:46.269765277+02:00
+custom:
+    Ref: Pull
+    RefID: "232"
