@@ -1,6 +1,0 @@
-kind: Changed
-body: 'mysql: disable binlog by default'
-time: 2025-06-10T11:07:49.081121491+02:00
-custom:
-    Ref: Pull
-    RefID: "231"
