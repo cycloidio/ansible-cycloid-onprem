@@ -1002,6 +1002,9 @@ concourse:
 
     fullnameOverride: cycloid-concourse-postgresql
 
+    primary:
+      resourcesPreset: "micro"
+
     auth:
       ### PostgreSQL User to create.
       username: concourse
