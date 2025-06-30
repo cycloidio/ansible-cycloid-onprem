@@ -42,7 +42,7 @@ dependencies:
     tags:
       - bitnami-mysql
     # https://github.com/bitnami/charts/blob/main/bitnami/mysql/Chart.yaml#L37
-    version: 11.1.19
+    version: 13.0.2
     condition: mysql.enabled
 
   - name: redis
@@ -50,7 +50,7 @@ dependencies:
     tags:
       - bitnami-redis
     # https://github.com/bitnami/charts/blob/main/bitnami/redis/Chart.yaml#L39
-    version: 20.2.1
+    version: 21.2.5
     condition: redis.enabled
 
   - name: concourse
@@ -58,7 +58,7 @@ dependencies:
     tags:
       - concourse
     # https://github.com/concourse/concourse-chart/blob/master/Chart.yaml#L4
-    version: 17.3.1
+    version: 18.2.0
     condition: concourse.enabled
 
   - name: vault
@@ -66,7 +66,7 @@ dependencies:
     tags:
       - hashicorp-vault
     # https://github.com/hashicorp/vault-helm/blob/main/Chart.yaml#L6
-    version: 0.29.0
+    version: 0.30.0
     condition: vault.enabled
 # annotations:
 #   artifacthub.io/prerelease: "{{IS_PRERELEASE}}"

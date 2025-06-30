@@ -29,7 +29,7 @@ function flylogin {
 
   if [ -f /etc/default/cycloid-api ]; then
     # Get concourse and mysql access
-    eval $(grep 'DB\|CONCOURSE' /etc/default/cycloid-api)
+    eval $(grep 'DB\|CONCOURSE' /etc/default/cycloid-api|sed -E "s/([^=]+)=(.*)/\1='\2'/")
   fi
 
   # Get the teamId from org name (mysql)

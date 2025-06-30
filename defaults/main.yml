@@ -290,7 +290,7 @@ cycloid_packages:
 
 #. container_args_extra(optional, string): ""
 #+ Used to give extra argument to containers. Example to override domain server "--dns 172.17.0.1"
-container_args_extra: ""
+container_args_extra: "--log-driver=none"
 
 #. offline_setup(optional, bool): false
 #+ Set true to not install packages automatically.
@@ -339,68 +339,6 @@ vault_config:
       tls_key_file: "/vault/config/ssl.key"
   default_lease_ttl: "168h"
   max_lease_ttl: "720h"
-
-#
-# Azure AD integration
-#
-
-#. azure_ad_tenant_id(optional, string): ""
-#+ The tenant ID of Azure AD
-azure_ad_tenant_id: ""
-
-#. azure_ad_client_id(optional, string): ""
-#+ The client ID of Azure AD
-azure_ad_client_id: ""
-
-#
-# Google Oauth integration
-#
-
-#. google_client_id(optional, string): ""
-#+ The client ID of Google
-google_client_id: ""
-
-#. google_client_secret(optional, string): ""
-#+ The client secret of Google
-google_client_secret: ""
-
-#
-# Github Oauth integration
-#
-
-#. github_client_secret(optional, string): "https://api.github.com"
-#+ Use api github by default when oauth enabled. Need to be changed if using GitHub Enterprise.
-github_host_address: "{%- if github_client_id != '' -%}https://api.github.com{%- endif -%}"
-
-#. github_client_id(optional, string): ""
-#+ The client ID of Github
-github_client_id: ""
-
-#. github_client_secret(optional, string): ""
-#+ The client secret of Github
-github_client_secret: ""
-
-###########################
-# SAML2 authentification
-###########################
-
-# By default SAML3 files should be stored under saml/{cycloid-saml-sp.crt, ycloid-saml-sp.key, idp-metadata}
-
-#. saml_auth_enabled(optional, bool): false
-#+ Enabled SAML auth on Cyclid API.
-saml_auth_enabled: false
-#. saml_idp_metadata_url(optional, string): ""
-#+ URL to get your XML Identity Provider federation metadata file. If defined, do not provide saml_idp_metadata_file.
-saml_idp_metadata_url: ""
-#. saml_sp_certificate_file(optional, string): "cycloid-saml-sp.crt"
-#+ Name of the Public certificate stored in saml_local_path to use in cycloid.
-saml_sp_certificate_file: "cycloid-saml-sp.crt"
-#. saml_sp_private_key_file(optional, string): "cycloid-saml-sp.key"
-#+ Name of the certificate private key stored in saml_local_path to use in cycloid.
-saml_sp_private_key_file: "cycloid-saml-sp.key"
-#. saml_idp_metadata_file(optional, string): "idp-metadata"
-#+ Name of your xml identity provider federation metadata file. It could also be provided as an url with saml_idp_metadata_url.
-saml_idp_metadata_file: "idp-metadata"
 
 ############
 # internal #
@@ -462,15 +400,16 @@ cycloid_frontend_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_regis
 cycloid_api_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-backend:{{ cycloid_api_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-http-api:{{ cycloid_api_version }}{% endif %}"
 
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
-concourse_db_image: postgres:15.4
-cycloid_cache_image: bitnami/redis:7.4.1
-cycloid_db_image: bitnami/mysql:8.4.3
+concourse_db_image: bitnami/postgresql:17.2.0
+cycloid_cache_image: bitnami/redis:8.0.2
+cycloid_db_image: bitnami/mysql:9.3.0
 concourse_web_image: concourse/concourse:7.9.1
-vault_image: hashicorp/vault:1.18.1
-cycloid_nginx_image: nginx:1.27
+vault_image: hashicorp/vault:1.19
+# https://hub.docker.com/_/nginx/tags
+cycloid_nginx_image: nginx:1.28
 cycloid_cache_mon_image: hibiken/asynqmon:latest
-elasticsearch_image: elasticsearch:8.10.2
-kibana_image: bitnami/kibana:8.10.2
+elasticsearch_image: elasticsearch:8.18.1
+kibana_image: bitnami/kibana:8
 minio_image: "minio/minio:latest"
 
 cycloid_cache_mon_port: 5678
@@ -737,6 +676,7 @@ cycloid_db_path: "{{ cycloid_install_path }}/cycloid-db"
 # Path used inside mysql docker image to stora data.
 # By default mysql use "/var/lib/mysql" but bitnami use "/bitnami/mysql"
 cycloid_db_container_path: "/bitnami/mysql"
+concourse_db_container_path: "/bitnami/postgresql"
 
 # default redis db
 cycloid_email_redis_db: 0
@@ -865,18 +805,6 @@ kibana_config_path: "{{ cycloid_install_path }}/kibana"
 # https://github.com/geerlingguy/ansible-role-docker/issues/189
 use_iptables_legacy: false
 
-# SAML
-# Ansible Local path where your saml certs/metadata are stored
-saml_local_path: "{{ cycloid_local_datas_path }}/saml"
-
-# Path where saml certs will be stored on the host
-saml_config_path: "{{ cycloid_install_path }}/saml"
-
-# SAML2 api internal path. It shouldn't be changed. Following path will be used when SAML enabled with saml_auth_enabled: true.
-saml_sp_certificate_path: "{%- if saml_auth_enabled|bool -%}/secrets/saml/{{ saml_sp_certificate_file }}{%- endif -%}"
-saml_sp_private_key_path: "{%- if saml_auth_enabled|bool -%}/secrets/saml/{{ saml_sp_private_key_file }}{%- endif -%}"
-saml_idp_metadata_path: "{%- if saml_auth_enabled|bool and saml_idp_metadata_url == '' -%}/secrets/saml/{{ saml_idp_metadata_file }}{%- endif -%}"
-
 ###########################
 # Cost Explorer / Cloud Cost Management feature (api params)
 ###########################
@@ -900,9 +828,6 @@ cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api prici
 # merge cost_estimation_ingestion cmd
 cycloid_job_cost_estimation_ingestion_container_args: "{% if cycloid_job_cost_estimation_injection_aws|bool %}{{ cost_estimation_ingestion_aws_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_azure|bool %}{{ cost_estimation_ingestion_azure_minimal }}{% endif %}{% if cycloid_job_cost_estimation_injection_gcp|bool %}{{ cost_estimation_ingestion_gcp_minimal }}{% endif %}"
 cycloid_job_cost_estimation_ingestion_container_cmd: '-c {% if ca_certificates_container_shared|bool %}"apk add --update --upgrade --no-cache ca-certificates && /usr/sbin/update-ca-certificates && {{ cycloid_job_cost_estimation_ingestion_container_args }}"{% else %}"{{ cycloid_job_cost_estimation_ingestion_container_args }}"{% endif %}'
-
-# Share host saml file with container. It shouldn't be changed.
-container_volumes_saml: "{%- if saml_auth_enabled -%}{{ saml_config_path }}:/secrets/saml{%- endif -%}"
 
 ###########################
 # KPI Import              #

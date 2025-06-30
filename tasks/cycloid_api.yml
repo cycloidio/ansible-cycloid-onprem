@@ -57,7 +57,7 @@
     container_ports: "{{ cycloid_api_container_ports }}"
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
     container_cmd: "{{ cycloid_api_container_cmd }}"
-    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
+    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
       DB_NAME: "{{ cycloid_db_name }}"
       DB_USER: "{{ cycloid_db_user }}"
@@ -88,22 +88,11 @@
       # REDIS_CA_CERT: "{{ (redis_ssl_crt.content|b64decode|trim|replace('\n', '\\n')) | default('') }}"
       # Only used if cycloid_cache_schema == "rediss" and not cycloid_cache_insecure_skip_tls|bool
       REDIS_CA_CERT_FILE: "{{ cycloid_api_redis_ca_cert_file }}"
-      AZURE_TENANT_ID: "{{ azure_ad_tenant_id }}"
-      AZURE_CLIENT_ID: "{{ azure_ad_client_id }}"
-      GOOGLE_CLIENT_ID: "{{ google_client_id }}"
-      GOOGLE_CLIENT_SECRET: "{{ google_client_secret }}"
-      GITHUB_HOST_ADDRESS: "{{ github_host_address }}"
-      GITHUB_CLIENT_ID: "{{ github_client_id }}"
-      GITHUB_CLIENT_SECRET: "{{ github_client_secret }}"
       JWT_KEY_1: "{{ cycloid_jwt_key_1 }}"
       FRONTEND_BASE_URL: "{{ cycloid_console_base_url }}"
       BACKEND_BASE_URL: "{{ cycloid_api_base_url }}"
       CORS_ALLOWED_ORIGINS: "{{ cycloid_api_cors_allowed_origins }}"
       CRYPTO_SIGNING_KEY: "{{ cycloid_crypto_signing_key }}"
-      SAML_SP_CERTIFICATE_PATH: "{{ saml_sp_certificate_path }}"
-      SAML_SP_PRIVATE_KEY_PATH: "{{ saml_sp_private_key_path }}"
-      SAML_IDP_METADATA_URL: "{{ saml_idp_metadata_url }}"
-      SAML_IDP_METADATA_PATH: "{{ saml_idp_metadata_path }}"
       COST_EXPLORER_ES_URL: "{{ cost_explorer_es_url }}"
       COST_EXPLORER_ES_USERNAME: "{{ cost_explorer_es_username }}"
       COST_EXPLORER_ES_PASSWORD: "{{ cost_explorer_es_password }}"
@@ -381,7 +370,7 @@
     container_ports: "{{ cycloid_api_task_manage_container_ports }}"
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
     container_cmd: "{{ cycloid_api_container_cmd }}"
-    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_volumes_saml ] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
+    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
       # Run backend as worker/task-manager
       RUN_CMD: worker

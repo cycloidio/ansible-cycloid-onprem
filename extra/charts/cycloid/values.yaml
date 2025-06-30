@@ -260,15 +260,6 @@ backend:
     LOG_SVC_LEVEL: "NONE"
     # REDIS_INSECURE_SKIP_TLS: true
     # COST_EXPLORER_ES_INSECURE_SKIP_TLS: true
-    # AZURE_TENANT_ID: "SECRET"
-    # AZURE_CLIENT_ID: "SECRET"
-    # GOOGLE_CLIENT_ID: "SECRET"
-    # GITHUB_CLIENT_ID: "SECRET"
-    # GITHUB_CLIENT_SECRET: "SECRET"
-    # SAML_SP_CERTIFICATE_PATH: "/secrets/saml/sp_cert"
-    # SAML_SP_PRIVATE_KEY_PATH: "/secrets/saml/sp_private_key"
-    # SAML_IDP_METADATA_PATH: "/secrets/saml/idp_metadata"
-
     # Allow additional Origins to request the API. Multiple Origins can be specified using a comma ','.
     # e.g, CORS_ALLOWED_ORIGINS: "https://domain1.tld,http://domain2.tld"
     # By default, the Frontend URL is already allowed.
@@ -284,9 +275,6 @@ backend:
       # - envName: COST_EXPLORER_ES_CA_CERT
       #   secretName: cost-explorer-es-http-certs-public
       #   secretKey: ca.crt
-      # - envName: SAML_IDP_METADATA_URL
-      #   secretName: saml
-      #   secretKey: SAML_IDP_METADATA_URL
 
   # extraConfigMapEnvVars is a list of extra environment variables to set.
   # These variables take value from existing ConfigMap objects.
@@ -307,27 +295,12 @@ backend:
   # volumes is a list of volumes made available to all containers. These are rendered
   # via toYaml rather than pre-processed like the extraVolumes value.
   # The purpose is to make it easy to share volumes between containers.
-  volumes:
-    []
-    # - name: saml
-    #   secret:
-    #     secretName: saml
-    #     items:
-    #       - key: "SAML_SP_CERTIFICATE"
-    #         path: "sp_cert"
-    #       - key: "SAML_SP_PRIVATE_KEY"
-    #         path: "sp_private_key"
-    #       - key: "SAML_IDP_METADATA"
-    #         path: "idp_metadata"
+  volumes: []
 
   # volumeMounts is a list of volumeMounts for the main server container. These are rendered
   # via toYaml rather than pre-processed like the extraVolumes value.
   # The purpose is to make it easy to share volumes between containers.
-  volumeMounts:
-    []
-    # - name: saml
-    #   mountPath: "/secrets/saml"
-    #   readOnly: true
+  volumeMounts: []
 
   serviceAccount:
     # Specifies whether a service account should be created
@@ -531,10 +504,12 @@ mysql:
 
   nameOverride: "mysql"
 
-  image:
-    registry: docker.io
-    repository: bitnami/mysql
-    tag: 8.4.3
+  # Use the default MySQL image from mysql charts
+  #
+  # image:
+  #   registry: docker.io
+  #   repository: bitnami/mysql
+  #   tag: 8.4.3
 
   ## MySQL Authentication parameters
   ## @param mysql.auth.rootPassword MySQL root password
@@ -613,10 +588,12 @@ redis:
 
   nameOverride: "redis"
 
-  image:
-    registry: docker.io
-    repository: bitnami/redis
-    tag: 7.4.1-debian-12-r0
+  # Use the default Redis image from redis charts
+  #
+  # image:
+  #   registry: docker.io
+  #   repository: bitnami/redis
+  #   tag: 7.4.1-debian-12-r0
 
   ## Redis Authentication parameters
   ## ref: https://github.com/bitnami/charts/tree/main/bitnami/redis#redis-common-configuration-parameters
@@ -931,7 +908,6 @@ concourse:
 
       ## Annotations to be added to the web ingress.
       ## Example:
-      ##   kubernetes.io/ingress.class: nginx
       ##   kubernetes.io/tls-acme: 'true'
       ##
       annotations: {}
@@ -1025,6 +1001,9 @@ concourse:
     enabled: true
 
     fullnameOverride: cycloid-concourse-postgresql
+
+    primary:
+      resourcesPreset: "micro"
 
     auth:
       ### PostgreSQL User to create.

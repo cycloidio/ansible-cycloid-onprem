@@ -484,7 +484,7 @@ jobs:
                     echo "" >> ${OUTPUT_FILE}
                     echo "### Onprem ready on: https://${CY_INSTANCES_RECORD_CONSOLE}" >> ${OUTPUT_FILE}
                     echo "### Admin user:" >> ${OUTPUT_FILE}
-                    echo "  email: admin+onprem_${ENV}@cycloid.io" >> ${OUTPUT_FILE}
+                    echo "  email: admin+${PROJECT}-${ENV}@cycloid.io" >> ${OUTPUT_FILE}
                     echo "  password: please check populate data" >> ${OUTPUT_FILE}
                     echo "" >> ${OUTPUT_FILE}
                     echo "### Asynqmon on: http://$(grep cycloid_cache -A1 inventory | tail -n1):5678" >> ${OUTPUT_FILE}
@@ -510,6 +510,7 @@ jobs:
                 - name: cycloid-onprem
                 - name: access
               params:
+                PROJECT: ($ .project $)
                 ENV: ($ .environment $)
                 CONFIG_ANSIBLE_PATH: "($ .config_root $)/ansible"
                 CONCOURSE_WORKER: ((install_concourse_worker))
