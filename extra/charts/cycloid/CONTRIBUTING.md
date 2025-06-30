@@ -25,7 +25,7 @@ The unreleased pool of changes will be used to generate the `CHANGELOG.md` when 
 Update the version
 ```bash
 vim Chart.yaml
-# commit/push on master ?
+# commit/push on master
 ```
 
 Open a PR preparing the version bump:
