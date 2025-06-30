@@ -290,7 +290,7 @@ cycloid_packages:
 
 #. container_args_extra(optional, string): ""
 #+ Used to give extra argument to containers. Example to override domain server "--dns 172.17.0.1"
-container_args_extra: ""
+container_args_extra: "--log-driver=none"
 
 #. offline_setup(optional, bool): false
 #+ Set true to not install packages automatically.
