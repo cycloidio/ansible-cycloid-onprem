@@ -1,19 +1,5 @@
 ---
 roles:
-#- src: https://github.com/cycloidio/ansible-prometheus.git
-#  version: master
-#  name: cycloid.prometheus
-#  scm: git
-#
-#- src: https://github.com/cycloidio/ansible-telegraf.git
-#  version: master
-#  name: cycloid.telegraf
-#  scm: git
-#
-#- src: https://github.com/dj-wasabi/ansible-telegraf
-#  version: master
-#  name: dj-wasabi.telegraf
-#  scm: git
 
 - src: git@github.com:cycloidio/ansible-cycloid-onprem.git
   version: master
@@ -36,4 +22,10 @@ collections:
   - name: community.docker
     # latest tag, can be updated
     version: 4.6.0
+    source: https://galaxy.ansible.com
+
+  # opensource collection for prometheus
+  # https://github.com/prometheus-community/ansible
+  - name: prometheus.prometheus
+    version: "0.27.3"
     source: https://galaxy.ansible.com

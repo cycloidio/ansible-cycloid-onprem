@@ -72,5 +72,11 @@
       tags:
         - cycloid
 
-#    - {role: cycloid.prometheus, path: /opt/prometheus, tags: prometheus}
-#    - {role: cycloid.telegraf, tags: telegraf}
+    - role: prometheus.prometheus.node_exporter
+      tags: node-exporter
+      when: enable_monitoring | default(true)
+      #vars:
+      # to add collectors use the var node_exporter_enabled_collectors
+      # full list of collectors at https://github.com/prometheus/node_exporter?tab=readme-ov-file#collectors
+      # role defaults at https://github.com/prometheus-community/ansible/blob/main/roles/node_exporter/defaults/main.yml
+

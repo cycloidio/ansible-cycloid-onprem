@@ -36,3 +36,7 @@ output "iam_ses_smtp_user_secret" {
   value     = module.onprem.iam_ses_smtp_user_secret
   sensitive = true
 }
+
+output "enable_monitoring" {
+  value = module.onprem.enable_monitoring
+}

@@ -10,12 +10,7 @@ roles:
   name: ansible-cycloid-onprem
   scm: git
 
-- src: https://github.com/cycloidio/ansible-telegraf
-  version: master
-  name: cycloid.telegraf
-  scm: git
-
-- src: https://github.com/dj-wasabi/ansible-telegraf
-  version: master
-  name: dj-wasabi.telegraf
-  scm: git
+collections:
+  - name: prometheus.prometheus
+    version: "0.25.0"
+    source: https://galaxy.ansible.com
