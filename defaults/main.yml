@@ -401,7 +401,7 @@ cycloid_api_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }
 
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
 concourse_db_image: bitnami/postgresql:17.2.0
-cycloid_cache_image: bitnami/redis:8.0.2
+cycloid_cache_image: redis:8.2
 cycloid_db_image: bitnami/mysql:9.3.0
 concourse_web_image: concourse/concourse:7.9.1
 vault_image: hashicorp/vault:1.19
@@ -694,11 +694,23 @@ cycloid_cache_uri: "{{ cycloid_cache_schema }}://{% if not cycloid_cache_auth_di
 cycloid_cache_env:
   REDIS_PASSWORD: "{{ cycloid_cache_password }}"
   REDIS_TLS_ENABLED: "{{ cycloid_cache_tls_enabled }}"
-  # Use user/password authentication
-  REDIS_TLS_AUTH_CLIENTS: "no"
-  REDIS_TLS_CERT_FILE: "/bitnami/redis/ssl.crt"
-  REDIS_TLS_KEY_FILE: "/bitnami/redis/ssl.key"
-  REDIS_TLS_CA_FILE: "/bitnami/redis/ssl.crt"
+  # Use user/password authentication (already cycloid default)
+  # REDIS_TLS_AUTH_CLIENTS: "no"
+  REDIS_TLS_CERT_FILE: "/ssl/ssl.crt"
+  REDIS_TLS_KEY_FILE: "/ssl/ssl.key"
+  REDIS_TLS_CA_FILE: "/ssl/ssl.crt"
+
+# Mount ssl volumes if TLS is enabled
+
+container_cache_volumes_redis_ssl_default:
+  - "{{ cycloid_cache_path }}/ssl.key:/ssl/ssl.key"
+  - "{{ cycloid_cache_path }}/ssl.crt:/ssl/ssl.crt"
+
+container_cache_volumes_redis_ssl: "{%- if cycloid_cache_tls_enabled|bool -%}{{ container_cache_volumes_redis_ssl_default }}{%- else -%}[]{%- endif -%}"
+# Mount data volume
+container_cache_volumes_redis_data: "{{ cycloid_cache_path }}/data:/data"
+# Mount redis config
+container_cache_volumes_redis_config: "{{ cycloid_cache_path }}/redis.conf:/usr/local/etc/redis/redis.conf"
 
 #cycloid_api_container_links: []
 #concourse_web_container_links: []

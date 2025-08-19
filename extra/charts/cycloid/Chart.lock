@@ -3,13 +3,13 @@ dependencies:
   repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
   version: 13.0.2
 - name: redis
-  repository: https://charts.bitnami.com/bitnami
-  version: 21.2.5
+  repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/redis/
+  version: 0.1.0
 - name: concourse
   repository: https://concourse-charts.storage.googleapis.com/
   version: 18.2.0
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.30.0
-digest: sha256:df15d1c2129d7f5aea3391abb24850e8afa6a2de7c3be4160616e6388f68c621
-generated: "2025-06-30T12:29:44.334735086+02:00"
+digest: sha256:27df674ab72ddedd6440071595a898867dd65971aa42bb94ef2859cbd44b7a7f
+generated: "2025-08-25T15:41:20.131367477+02:00"

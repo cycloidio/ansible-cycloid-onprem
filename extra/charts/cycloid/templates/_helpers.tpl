@@ -154,7 +154,7 @@ Return the Redis Hostname
 {{- define "cycloid.redisHost" -}}
 {{- if .Values.redis.enabled }}
     {{- $releaseNamespace := .Release.Namespace }}
-    {{- $clusterDomain := .Values.redis.clusterDomain }}
+    {{- $clusterDomain := "cluster.local" }}
     {{- printf "%s-master.%s.svc.%s" (include "cycloid.redis.fullname" .) $releaseNamespace $clusterDomain -}}
 {{- else -}}
     {{- printf "%s" .Values.externalRedis.host -}}

@@ -1,0 +1,13 @@
+apiVersion: v2
+name: redis
+description: A standalone Redis
+type: application
+
+maintainers:
+  - name: Cycloid DevOps team
+    email: support@cycloid.io
+
+icon: https://avatars.githubusercontent.com/u/14579210
+
+version: 0.1.1
+appVersion: "8.2"
