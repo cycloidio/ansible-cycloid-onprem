@@ -1,0 +1,23 @@
+apiVersion: v2
+name: mysql
+description: A helm chart to deploy a standalone MySQL
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.1.0
+
+# This is the version of the application that this chart deploys.
+# Corresponds to the version of the MySQL image used in the chart.
+appVersion: "9.4.0"
+
+maintainers:
+  - name: Cycloid DevOps team
+    email: support@cycloid.io
+
+icon: https://avatars.githubusercontent.com/u/14579210
+
+keywords:
+  - cycloid
+  - mysql

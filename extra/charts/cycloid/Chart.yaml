@@ -38,11 +38,10 @@ keywords:
 
 dependencies:
   - name: mysql
-    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
+    repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/mysql/
     tags:
-      - bitnami-mysql
-    # https://github.com/bitnami/charts/blob/main/bitnami/mysql/Chart.yaml#L37
-    version: 13.0.2
+      - mysql
+    version: 0.1.0
     condition: mysql.enabled
 
   - name: redis

@@ -6,10 +6,27 @@
 # NOTE: As this is a non-root container, the mounted files and directories must have the proper permissions for the UID 1001.
 - name: Allow 1001 to write data on host | cycloid-db
   file:
-    path: "{{ cycloid_db_path }}"
+    path: "{{ cycloid_db_path }}/data"
     state: directory
     mode: 0777
     recurse: yes
+
+- name: Generate my.cnf | cycloid-db
+  copy:
+    dest: "{{ cycloid_db_path }}/my.cnf"
+    mode: "0740"
+    content: |
+      [mysqld]
+      disable_log_bin
+      authentication_policy="* ,,"
+      skip-name-resolve
+      explicit_defaults_for_timestamp
+      max_allowed_packet=16M
+      bind-address=*
+      slow_query_log=0
+      long_query_time=10.0
+      character-set-server=utf8mb4
+      collation-server=utf8mb4_unicode_ci
 
 - name: Define service | cycloid-db
   include_role:
@@ -21,13 +38,13 @@
     container_ports: "{{ cycloid_db_container_ports }}"
     container_args: "{{ container_args_extra }}"
     container_volumes:
-      - "{{ cycloid_db_path }}:{{cycloid_db_container_path}}"
+      - "{{ cycloid_db_path }}/data:{{cycloid_db_container_path}}"
+      - "{{ cycloid_db_path }}/my.cnf:/etc/mysql/conf.d/my.cnf"
     container_env:
       MYSQL_USER: "{{ cycloid_db_user }}"
       MYSQL_DATABASE: "{{ cycloid_db_name }}"
       MYSQL_PASSWORD: "{{ cycloid_db_password }}"
       MYSQL_ROOT_PASSWORD: "{{ cycloid_db_password }}"
-      MYSQL_EXTRA_FLAGS: "--disable-log-bin"
   tags: docker-services
 
 - name: Force flush handlers to ensure container is started | cycloid-db

@@ -1,7 +1,7 @@
 dependencies:
 - name: mysql
-  repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
-  version: 13.0.2
+  repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/mysql/
+  version: 0.1.0
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 21.2.5
@@ -11,5 +11,5 @@ dependencies:
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.30.0
-digest: sha256:df15d1c2129d7f5aea3391abb24850e8afa6a2de7c3be4160616e6388f68c621
-generated: "2025-06-30T12:29:44.334735086+02:00"
+digest: sha256:ee1b6c2801a9d289b7878495379c7fe2200e3a70d612d270c4474ddd5b5c2db1
+generated: "2025-08-28T16:16:32.127992666+02:00"

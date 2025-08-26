@@ -527,7 +527,7 @@ mysql:
 
   ## @param architecture MySQL architecture (`standalone` or `replication`)
   ##
-  architecture: standalone
+  #architecture: standalone
 
   ## MySQL Primary configuration
   ##
@@ -549,7 +549,8 @@ mysql:
       size: 8Gi
 
     # Disable binlog by default
-    extraFlags: "--disable-log-bin"
+    #TODO
+    #extraFlags: "--disable-log-bin"
 
 #
 # External MySQL Configuration
