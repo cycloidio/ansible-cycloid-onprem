@@ -158,6 +158,8 @@ primary:
     failureThreshold: 10
     successThreshold: 1
 
+  nodeSelector: {}
+
   ## Enable persistence using Persistent Volume Claims
   ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
   ##
@@ -181,8 +183,13 @@ primary:
     ##
     size: 8Gi
 
+  automountServiceAccountToken: false
+
   service:
     ## @param primary.service.ports.mysql MySQL Primary K8s service port
     ##
     ports:
       mysql: 3306
+
+serviceAccount:
+  automountServiceAccountToken: false

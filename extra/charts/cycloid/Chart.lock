@@ -12,4 +12,4 @@ dependencies:
   repository: https://helm.releases.hashicorp.com
   version: 0.30.0
 digest: sha256:ee1b6c2801a9d289b7878495379c7fe2200e3a70d612d270c4474ddd5b5c2db1
-generated: "2025-08-28T16:16:32.127992666+02:00"
+generated: "2025-09-01T17:28:55.847517845+02:00"
