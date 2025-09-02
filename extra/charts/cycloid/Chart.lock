@@ -3,8 +3,8 @@ dependencies:
   repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/mysql/
   version: 0.1.0
 - name: redis
-  repository: https://charts.bitnami.com/bitnami
-  version: 21.2.5
+  repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/redis/
+  version: 0.1.0
 - name: concourse
   repository: https://concourse-charts.storage.googleapis.com/
   version: 18.2.0
