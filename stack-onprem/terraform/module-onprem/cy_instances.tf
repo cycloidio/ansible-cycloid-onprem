@@ -190,3 +190,8 @@ output "cy_instances_private_ip" {
   description = "List of private IP addresses assigned to the instances"
   value       = aws_eip.cy_instances.*.private_ip
 }
+
+output "cy_instances_id" {
+  description = "List of ID assigned to the instances"
+  value       = aws_instance.cy_instances.*.id
+}
