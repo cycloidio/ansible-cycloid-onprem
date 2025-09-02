@@ -25,7 +25,7 @@
         recurse: yes
       with_items:
         - "{{ elasticsearch_config_path }}/data"
-        - "{{ kibana_config_path }}"
+        - "{{ kibana_config_path }}/data"
 
     - name: create elasticsearch container | elasticsearch
       include_role:
@@ -85,7 +85,7 @@
     container_name: kibana
     container_image: "{{ kibana_image }}"
     container_volumes:
-      - "{{ kibana_config_path }}:/bitnami/kibana"
+      - "{{ kibana_config_path }}/data:/usr/share/kibana/data/"
     container_ports: "{{ kibana_container_ports }}"
     container_args: ""
     container_labels:

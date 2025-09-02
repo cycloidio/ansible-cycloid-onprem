@@ -402,14 +402,14 @@ cycloid_api_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
 concourse_db_image: bitnami/postgresql:17.2.0
 cycloid_cache_image: redis:8.2
-cycloid_db_image: bitnami/mysql:9.3.0
+cycloid_db_image: mysql:9.4
 concourse_web_image: concourse/concourse:7.9.1
 vault_image: hashicorp/vault:1.19
 # https://hub.docker.com/_/nginx/tags
 cycloid_nginx_image: nginx:1.28
 cycloid_cache_mon_image: hibiken/asynqmon:latest
 elasticsearch_image: elasticsearch:8.18.1
-kibana_image: bitnami/kibana:8
+kibana_image: kibana:8.19.2
 minio_image: "minio/minio:latest"
 
 cycloid_cache_mon_port: 5678
@@ -674,8 +674,7 @@ cycloid_initial_service_catalog:
 cycloid_db_path: "{{ cycloid_install_path }}/cycloid-db"
 
 # Path used inside mysql docker image to stora data.
-# By default mysql use "/var/lib/mysql" but bitnami use "/bitnami/mysql"
-cycloid_db_container_path: "/bitnami/mysql"
+cycloid_db_container_path: "/var/lib/mysql"
 concourse_db_container_path: "/bitnami/postgresql"
 
 # default redis db

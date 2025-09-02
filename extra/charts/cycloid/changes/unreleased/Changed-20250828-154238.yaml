@@ -1,0 +1,6 @@
+kind: Changed
+body: 'mysql: Moving away from Bitnami due to their recent announcement of changes, Cycloid now uses a local chart to manage a standalone Mysql.'
+time: 2025-08-28T15:42:38.220020294+02:00
+custom:
+    Ref: Pull
+    RefID: "236"
