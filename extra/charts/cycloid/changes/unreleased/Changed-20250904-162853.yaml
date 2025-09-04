@@ -1,0 +1,6 @@
+kind: Changed
+body: 'concourse/postgres: Moving away from Bitnami due to their recent announcement of changes, Concourse now uses a local chart to manage a standalone Postgres.'
+time: 2025-09-04T16:28:53.227738945+02:00
+custom:
+    Ref: Pull
+    RefID: "237"

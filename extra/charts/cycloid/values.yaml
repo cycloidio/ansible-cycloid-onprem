@@ -1040,6 +1040,57 @@ concourse:
       ##
       size: 8Gi
 
+    # TMP This is used to migrate from bitnami to official image. It will be removed on the next release
+    commandOverride:
+      - /bin/bash
+      - -ec
+      - |
+        if [ -d "/var/lib/postgresql/data/data" ]; then
+        echo "Migrating existing data directory..."
+        mv /var/lib/postgresql/data/data/* /var/lib/postgresql/data/ || true
+        rmdir /var/lib/postgresql/data/data || true
+        echo "listen_addresses = '*'" > /var/lib/postgresql/data/postgresql.conf
+        echo "max_connections = 100" >> /var/lib/postgresql/data/postgresql.conf
+        echo "shared_buffers = 128MB" >> /var/lib/postgresql/data/postgresql.conf
+        echo "dynamic_shared_memory_type = posix" >> /var/lib/postgresql/data/postgresql.conf
+        echo "max_wal_size = 1GB" >> /var/lib/postgresql/data/postgresql.conf
+        echo "min_wal_size = 80MB" >> /var/lib/postgresql/data/postgresql.conf
+        echo "log_timezone = 'Etc/UTC'" >> /var/lib/postgresql/data/postgresql.conf
+        echo "datestyle = 'iso, mdy'" >> /var/lib/postgresql/data/postgresql.conf
+        echo "timezone = 'Etc/UTC'" >> /var/lib/postgresql/data/postgresql.conf
+        echo "lc_messages = 'en_US.utf8'" >> /var/lib/postgresql/data/postgresql.conf
+        echo "lc_monetary = 'en_US.utf8'" >> /var/lib/postgresql/data/postgresql.conf
+        echo "lc_numeric = 'en_US.utf8'" >> /var/lib/postgresql/data/postgresql.conf
+        echo "lc_time = 'en_US.utf8'" >> /var/lib/postgresql/data/postgresql.conf
+        echo "default_text_search_config = 'pg_catalog.english'" >> /var/lib/postgresql/data/postgresql.conf
+        echo "local   all             all                                     trust" > /var/lib/postgresql/data/pg_hba.conf
+        echo "host    all             all             127.0.0.1/32            trust" >> /var/lib/postgresql/data/pg_hba.conf
+        echo "host    all             all             ::1/128                 trust" >> /var/lib/postgresql/data/pg_hba.conf
+        echo "local   replication     all                                     trust" >> /var/lib/postgresql/data/pg_hba.conf
+        echo "host    replication     all             127.0.0.1/32            trust" >> /var/lib/postgresql/data/pg_hba.conf
+        echo "host    replication     all             ::1/128                 trust" >> /var/lib/postgresql/data/pg_hba.conf
+        echo "host all all all scram-sha-256" >> /var/lib/postgresql/data/pg_hba.conf
+        fi
+        exec docker-entrypoint.sh postgres
+
+    # TMP This is used to migrate from bitnami to official image. It will be removed on the next release
+    lifecycle:
+      postStart:
+        exec:
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              for i in $(seq 1 30); do
+                pg_isready -U ${POSTGRES_USER} \
+                          -d "dbname=${POSTGRES_DB}" \
+                          -h 127.0.0.1 -p 5432 && \
+                psql -U ${POSTGRES_USER} \
+                    -d ${POSTGRES_DB} \
+                    -c "ALTER DATABASE atc REFRESH COLLATION VERSION;" && break
+                sleep 2
+              done
+
   secrets:
     ## User/Pass need to be specified if bringing your own PostgreSQL.
     postgresUser:
