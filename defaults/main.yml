@@ -400,7 +400,7 @@ cycloid_frontend_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_regis
 cycloid_api_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-backend:{{ cycloid_api_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-http-api:{{ cycloid_api_version }}{% endif %}"
 
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:latest
-concourse_db_image: bitnami/postgresql:17.2.0
+concourse_db_image: postgres:17
 cycloid_cache_image: redis:8.2
 cycloid_db_image: mysql:9.4
 concourse_web_image: concourse/concourse:7.9.1
@@ -585,7 +585,7 @@ concourse_port: 8443
 concourse_peer_address: "{{ ansible_default_ipv4.address }}"
 concourse_external_url: "{{ concourse_url }}:{{ concourse_port }}"
 concourse_config_path: "{{ cycloid_install_path }}/concourse"
-concourse_db_path: "{{ cycloid_install_path }}/concourse-db"
+concourse_db_path: "{{ cycloid_install_path }}/concourse-db/data"
 cycloid_smtp_path: "{{ cycloid_install_path }}/cycloid-smtp"
 cycloid_cache_path: "{{ cycloid_install_path }}/cycloid-cache"
 cycloid_api_path: "{{ cycloid_install_path }}/cycloid-api"
@@ -675,7 +675,12 @@ cycloid_db_path: "{{ cycloid_install_path }}/cycloid-db"
 
 # Path used inside mysql docker image to stora data.
 cycloid_db_container_path: "/var/lib/mysql"
-concourse_db_container_path: "/bitnami/postgresql"
+concourse_db_container_path: |-
+  {%- if concourse_db_image.split(":")[1] | int >= 18 -%}
+  /var/lib/postgresql/{{ concourse_db_image.split(":")[1] }}/docker
+  {%- else -%}
+  /var/lib/postgresql/data
+  {%- endif -%}
 
 # default redis db
 cycloid_email_redis_db: 0
