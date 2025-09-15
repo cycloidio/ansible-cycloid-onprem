@@ -10,7 +10,7 @@
     mode: 0777
     recurse: yes
 
-- name: Ensure postgresql config file exists
+- name: Ensure postgresql config file exists | cycloid-scheduler-db
   copy:
     dest: "{{ item.path }}"
     content: "{{ item.content }}"
@@ -18,32 +18,33 @@
     owner: "999"
     group: "999"
   with_items:
-  - path: "{{ concourse_db_path }}/postgresql.conf"
-    content: |
-      listen_addresses = '*'
-      max_connections = 100
-      shared_buffers = 128MB
-      dynamic_shared_memory_type = posix
-      max_wal_size = 1GB
-      min_wal_size = 80MB
-      log_timezone = 'Etc/UTC'
-      datestyle = 'iso, mdy'
-      timezone = 'Etc/UTC'
-      lc_messages = 'en_US.utf8'
-      lc_monetary = 'en_US.utf8'
-      lc_numeric = 'en_US.utf8'
-      lc_time = 'en_US.utf8'
-      default_text_search_config = 'pg_catalog.english'
+    - path: "{{ concourse_db_path }}/postgresql.conf"
+      content: |
+        listen_addresses = '*'
+        max_connections = 100
+        shared_buffers = 128MB
+        dynamic_shared_memory_type = posix
+        max_wal_size = 1GB
+        min_wal_size = 80MB
+        log_timezone = 'Etc/UTC'
+        datestyle = 'iso, mdy'
+        timezone = 'Etc/UTC'
+        lc_messages = 'en_US.utf8'
+        lc_monetary = 'en_US.utf8'
+        lc_numeric = 'en_US.utf8'
+        lc_time = 'en_US.utf8'
+        default_text_search_config = 'pg_catalog.english'
 
-  - path: "{{ concourse_db_path }}/pg_hba.conf"
-    content: |
-      local   all         all               trust
-      host    all         all 127.0.0.1/32  trust
-      host    all         all ::1/128       trust
-      local   replication all               trust
-      host    replication all 127.0.0.1/32  trust
-      host    replication all ::1/128       trust
-      host    all         all all           scram-sha-256
+    - name: "Ensure postgresql pg_hba file exists | cycloid-scheduler-db"
+      path: "{{ concourse_db_path }}/pg_hba.conf"
+      content: |
+        local   all         all               trust
+        host    all         all 127.0.0.1/32  trust
+        host    all         all ::1/128       trust
+        local   replication all               trust
+        host    replication all 127.0.0.1/32  trust
+        host    replication all ::1/128       trust
+        host    all         all all           scram-sha-256
 
 - name: Define service | cycloid-scheduler-db
   include_role:
@@ -65,24 +66,26 @@
 - name: Force flush handlers to ensure container is started | cycloid-scheduler-db
   meta: flush_handlers
 
-- name: "Bitnami migration: fix database collation"
+- name: "Bitnami migration: fix database collation | cycloid-scheduler-db"
   ansible.builtin.command:
     argv:
-    - /usr/bin/docker
-    - exec
-    - concourse-db
-    - bash
-    - -c
-    - |
-      for i in $(seq 1 30); do
-        pg_isready -U "{{ concourse_db_user }}" \
-          -d "dbname={{ concourse_db_name }}" \
-          -h 127.0.0.1 -p 5432 \
-          && \
-        psql -U "{{ concourse_db_user }}" \
-          -d "{{ concourse_db_name }}" \
-          -h 127.0.0.1 -p 5432 \
-          -c "ALTER DATABASE {{ concourse_db_name }} REFRESH COLLATION VERSION;" && break
-        sleep 2
-      done
-
+      - /usr/bin/docker
+      - exec
+      - concourse-db
+      - bash
+      - -c
+      - |
+        for i in $(seq 1 30); do
+          pg_isready -U "{{ concourse_db_user }}" \
+            -d "dbname={{ concourse_db_name }}" \
+            -h 127.0.0.1 -p 5432 \
+            && \
+          psql -U "{{ concourse_db_user }}" \
+            -d "{{ concourse_db_name }}" \
+            -h 127.0.0.1 -p 5432 \
+            -c "ALTER DATABASE {{ concourse_db_name }} REFRESH COLLATION VERSION;" && break
+          sleep 2
+        done
+  retries: 15
+  delay: 2
+  ignore_errors: true
