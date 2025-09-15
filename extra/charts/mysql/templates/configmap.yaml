@@ -1,3 +1,4 @@
+{{- if .Values.primary.configuration }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -12,7 +13,6 @@ metadata:
     {{- end }}
   {{- end }}
 data:
-  my.cnf: |-
-    {{- with .Values.primary.configuration }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+  my.cnf:
+    {{- toYaml .Values.primary.configuration | nindent 4 }}
+{{- end }}

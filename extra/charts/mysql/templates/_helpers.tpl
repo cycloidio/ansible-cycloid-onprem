@@ -8,6 +8,7 @@ overwrote them on metadata.labels fields.
 app.kubernetes.io/name: mysql
 app.kubernetes.io/component: primary
 app.kubernetes.io/part-of: primary
+app.kubernetes.io/instance: {{ include "mysql.primary.fullname" . | quote }}
 {{- end -}}
 
 {{/*
