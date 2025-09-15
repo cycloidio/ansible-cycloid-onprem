@@ -58,9 +58,9 @@
     container_volumes:
       - "{{ concourse_db_path }}:{{ concourse_db_container_path }}"
     container_env:
-      POSTGRESQL_DB: "{{ concourse_db_name }}"
-      POSTGRESQL_USERNAME: "{{ concourse_db_user }}"
-      POSTGRESQL_PASSWORD: "{{ concourse_db_password }}"
+      POSTGRES_DB: "{{ concourse_db_name }}"
+      POSTGRES_USER: "{{ concourse_db_user }}"
+      POSTGRES_PASSWORD: "{{ concourse_db_password }}"
   tags: docker-services
 
 - name: Force flush handlers to ensure container is started | cycloid-scheduler-db
