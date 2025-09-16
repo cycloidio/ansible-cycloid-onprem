@@ -29,6 +29,11 @@
     name: concourse-web_container
     state: restarted
 
+- name: restart concourse db
+  service:
+    name: concourse-db_container
+    state: restarted
+
 - name: restart elasticsearch
   service:
     name: elasticsearch_container
