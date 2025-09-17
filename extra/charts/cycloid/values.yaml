@@ -491,7 +491,6 @@ backend:
 # MySQL
 #
 # Configuration values for the mysql dependency.
-# Ref: https://github.com/bitnami/charts/tree/master/bitnami/mysql
 #
 mysql:
   ## Use the MySQL chart dependency.
@@ -507,8 +506,6 @@ mysql:
   # Use the default MySQL image from mysql charts
   #
   # image:
-  #   registry: docker.io
-  #   repository: bitnami/mysql
   #   tag: 8.4.3
 
   ## MySQL Authentication parameters
@@ -516,9 +513,6 @@ mysql:
   ## @param mysql.auth.database MySQL custom database
   ## @param mysql.auth.username MySQL custom user name
   ## @param mysql.auth.password MySQL custom user password
-  ## ref: https://github.com/bitnami/bitnami-docker-mysql#setting-the-root-password-on-first-run
-  ##      https://github.com/bitnami/bitnami-docker-mysql/blob/master/README.md#creating-a-database-on-first-run
-  ##      https://github.com/bitnami/bitnami-docker-mysql/blob/master/README.md#creating-a-database-user-on-first-run
   auth:
     rootPassword: "##mysql-auth-rootPassword##"
     database: cycloid

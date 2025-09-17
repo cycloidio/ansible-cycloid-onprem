@@ -89,7 +89,6 @@ backend:
 # MySQL
 #
 # Configuration values for the mysql dependency.
-# Ref: https://github.com/bitnami/charts/tree/master/bitnami/mysql
 #
 mysql:
   ## Set to false if bringing your own MySQL, and set the corresponding `secrets`
@@ -119,9 +118,6 @@ mysql:
   ## @param mysql.auth.database MySQL custom database
   ## @param mysql.auth.username MySQL custom user name
   ## @param mysql.auth.password MySQL custom user password
-  ## ref: https://github.com/bitnami/bitnami-docker-mysql#setting-the-root-password-on-first-run
-  ##      https://github.com/bitnami/bitnami-docker-mysql/blob/master/README.md#creating-a-database-on-first-run
-  ##      https://github.com/bitnami/bitnami-docker-mysql/blob/master/README.md#creating-a-database-user-on-first-run
   auth:
     rootPassword: "##mysql-auth-rootPassword##"
     database: cycloid
@@ -148,7 +144,6 @@ externalMysql:
 # Redis
 #
 # Configuration values for the redis dependency.
-# Ref: https://github.com/bitnami/charts/tree/master/bitnami/redis
 #
 redis:
   ## Use the Redis chart dependency.
@@ -165,7 +160,6 @@ redis:
       size: 8Gi
 
   ## Redis Authentication parameters
-  ## ref: https://github.com/bitnami/charts/tree/main/bitnami/redis#redis-common-configuration-parameters
   ##
   auth:
     ## @param auth.password Redis password
