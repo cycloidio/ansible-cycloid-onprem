@@ -408,9 +408,13 @@ vault_image: hashicorp/vault:1.19
 # https://hub.docker.com/_/nginx/tags
 cycloid_nginx_image: nginx:1.28
 cycloid_cache_mon_image: hibiken/asynqmon:latest
-elasticsearch_image: elasticsearch:8.18.1
-kibana_image: kibana:8.19.2
+elasticsearch_image: elasticsearch:8.19.4
+kibana_image: kibana:8.19.4
 minio_image: "minio/minio:latest"
+
+#. kibana_enabled(optional, bool): true
+#+ Install a local kibana to monitor the elasticsearch.
+kibana_enabled: true
 
 cycloid_cache_mon_port: 5678
 

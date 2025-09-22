@@ -53,6 +53,7 @@
           # password for the 'elastic' built-in user
           # not an issue to set, even if basic auth is disabled
           ELASTIC_PASSWORD: "{{ cycloid_elasticsearch_password }}"
+          # "xpack.security.http.ssl.verification_mode": "certificate"
         # systemd
         enable: true
         masked: false
@@ -107,6 +108,7 @@
     masked: false
     state: started
   tags: docker-services
+  when: kibana_enabled
 
 - name: Force flush handlers to ensure container is started | elasticsearch
   meta: flush_handlers
