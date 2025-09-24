@@ -403,7 +403,7 @@ cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-
 concourse_db_image: postgres:17
 cycloid_cache_image: redis:8.2
 cycloid_db_image: mysql:9.4
-concourse_web_image: concourse/concourse:7.9.1
+concourse_web_image: concourse/concourse:7.14.1
 vault_image: hashicorp/vault:1.19
 # https://hub.docker.com/_/nginx/tags
 cycloid_nginx_image: nginx:1.28
