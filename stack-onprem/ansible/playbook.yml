@@ -6,30 +6,39 @@
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   tasks:
 
-    - name: Update apt packages
-      apt:
-        update_cache: yes
+    - name: "Update apt packages"
+      ansible.builtin.apt:
+        update_cache: true
       when: ansible_os_family == 'Debian'
-      ignore_errors: yes
+      ignore_errors: true
 
-    - name: Update yum packages
-      yum:
-        update_cache: yes
+    - name: "Update yum packages"
+      ansible.builtin.yum:
+        update_cache: true
       when: ansible_os_family == 'RedHat'
-      ignore_errors: yes
+      ignore_errors: true
 
-    - name: Install extra packages
-      package:
+    - name: "Install extra packages"
+      ansible.builtin.package:
         name:
           - python3-pip
         state: present
 
-    - name: Force update pip to latest
-      pip:
+    - name: "Force update pip to latest"
+      ansible.builtin.pip:
         name: pip
         state: latest
 
-    - name: Install pip depends
-      pip:
-        requirements: "/home/{{ ansible_user }}/cycloid-onprem/pip-requirements.txt"
-        state: latest
+    # - name: "Install pip depends"
+    #   pip:
+    #     requirements: "/home/{{ ansible_user }}/cycloid-onprem/pip-requirements.txt"
+    #     state: latest
+
+    # Issue with debian 11 pip lib (bvcrypt). Use the one from packages
+    - name: "Install extra packages"
+      ansible.builtin.package:
+        name:
+          - python3-docker
+          - python3-passlib
+          - python3-bcrypt
+        state: present
