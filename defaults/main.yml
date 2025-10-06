@@ -300,6 +300,10 @@ offline_setup: false
 #+ Create a catalog repository with Cycloid Public Stacks. (`cycloid_licence` need to be defined)
 cycloid_public_stacks: "{% if cycloid_licence != '' %}{{ not offline_setup }}{% else %}false{% endif %}"
 
+#. cycloid_public_blueprints(optional, bool): true
+#+ Create a catalog repository with Cycloid Public Stacks. (`cycloid_licence` need to be defined)
+cycloid_public_blueprints: "{% if cycloid_licence != '' %}{{ not offline_setup }}{% else %}false{% endif %}"
+
 #. cycloid_admin_apikey(optional, bool): false
 #+ Create admin APIKEY on the first organization. APIKEY will be stored localy under ``{{playbook_dir}}/admin.apikey`. (`cycloid_licence` need to be defined)
 cycloid_admin_apikey: "false"
@@ -673,6 +677,12 @@ cycloid_initial_service_catalog:
   name: Cycloid stacks
   canonical: cycloid-stacks
   url: https://github.com/cycloid-community-catalog/public-stacks
+  branch: master
+
+cycloid_initial_service_catalog_blueprints:
+  name: Cycloid blueprints
+  canonical: cycloid-blueprints
+  url: https://github.com/cycloidio/stack-blueprints
   branch: master
 
 cycloid_db_path: "{{ cycloid_install_path }}/cycloid-db"
