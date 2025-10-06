@@ -312,6 +312,24 @@
           no_log: false
       when: cycloid_public_stacks and cycloid_licence != ''
 
+    - block:
+        # This is a temporary refresh. The refresh is needed between 2 calls but it should change soon.
+        - name: Refresh user token | cycloid-core api
+          uri:
+            url: "http://localhost:3001/user/refresh_token?organization_canonical={{ cycloid_initial_organization.canonical }}"
+            method: GET
+            validate_certs: no
+            status_code: 200
+            return_content: no
+            headers:
+              Accept: "*/*"
+              Authorization: "Bearer {{ cy_user_token.json.data.token }}"
+              Connection: "keep-alive"
+              DNT: "1"
+              Content-type: "application/vnd.cycloid.io.v1+json"
+          no_log: false
+          register: cy_org_token
+
         - name: Create initial cycloid blueprints | cycloid-core api
           uri:
             url: "http://localhost:3001/organizations/{{ cycloid_initial_organization.canonical }}/service_catalog_sources"
