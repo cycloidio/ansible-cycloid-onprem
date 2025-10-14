@@ -6,7 +6,7 @@
 #
 frontend:
   # The externally accessible FQDN for the Cycloid Console frontend.
-  # If you change this value, don't to also update the ingress declaration below.
+  # If you change this value, make sure to also update the ingress configuration below.
   url: "http://console.cycloid.local"
   # We recommend setting the replicaCount to 2 in production environments to ensure high availability (HA).
   replicaCount: 1
