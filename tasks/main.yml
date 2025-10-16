@@ -45,6 +45,9 @@
     - ansible.builtin.include_tasks: cycloid_job_kpi_import.yml
       when: inventory_hostname == groups['cycloid_core'][0]
 
+    - ansible.builtin.include_tasks: dump_dbs.yml
+      when: dbs_dump != {} and inventory_hostname == groups['cycloid_core'][0]
+
     #- ansible.builtin.include_tasks: prometheus.yml
 
     - ansible.builtin.include_tasks: minio.yml
@@ -86,4 +89,7 @@
 
     - ansible.builtin.include_tasks: elasticsearch_uninstall.yml
       when: setup_elasticsearch|bool
+
+    - ansible.builtin.include_tasks: dump_dbs_uninstall.yml
+      when: dbs_dump != {} and inventory_hostname == groups['cycloid_core'][0]
   when: uninstall|bool
