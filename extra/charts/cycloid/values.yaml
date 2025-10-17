@@ -208,7 +208,7 @@ backend:
   nameOverride: "api"
   fullnameOverride: ""
 
-  # The externally accessible FQDN for the Cycloid Console API.
+  # The externally accessible URL for the Cycloid Console API.
   # If you change this value, don't to also update the ingress declaration below.
   url: "http://api.cycloid.local"
 
@@ -256,6 +256,7 @@ backend:
     EMAIL_SMTP_PASSWORD: "##smtp-password##"
     EMAIL_ADDR_FROM: "Cycloid Console <noreply@domain.tld>"
     EMAIL_ADDR_RETURN_PATH: "admin@domain.tld"
+    # EMAIL_SKIP_TLS_CHECK: true
     LOG_LEVEL: "INFO"
     LOG_SVC_LEVEL: "NONE"
     # REDIS_INSECURE_SKIP_TLS: true
