@@ -148,6 +148,23 @@ spec:
                     secretKeyRef:
                       name: {{ template "backend.backendSecretName" . }}
                       key: jwt-key-1
+
+                # Check if user defined a custom redis cert
+                {{- $hasRedisCert := false }}
+                {{- range .Values.backend.extraSecretEnvVars }}
+                  {{- if eq .envName "REDIS_CA_CERT" }}
+                    {{- $hasRedisCert = true }}
+                  {{- end }}
+                {{- end }}
+                # If redis local and no custom redis cert, add the default
+                {{- if and .Values.redis.enabled (not $hasRedisCert) }}
+                - name: "REDIS_CA_CERT"
+                  valueFrom:
+                    secretKeyRef:
+                      name: cycloid-redis-crt
+                      key: ca.crt
+                {{- end }}
+
                 {{- include "cycloid.extraEnvVars" .Values.backend | nindent 16 }}
                 {{- include "cycloid.extraSecretEnvVars" .Values.backend | nindent 16 }}
                 {{- include "cycloid.extraConfigMapEnvVars" .Values.backend | nindent 16 }}
