@@ -1,4 +1,0 @@
-ansible==8.7.*
-docker
-passlib
-bcrypt
