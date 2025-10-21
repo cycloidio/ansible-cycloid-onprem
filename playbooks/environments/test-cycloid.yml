@@ -1,16 +1,16 @@
 ---
 
-#validate_only: True
+# validate_only: true
 # NOTE : ! Those values are not used, generated for local tests in a container !
 concourse_db_password: "Deraephoh9aay4Aide4phoS7xej1xi5m"
 concourse_session_signing_key: "{{lookup('file', '/tmp/molecule_test/id_rsa')}}"
 concourse_host_key: "{{lookup('file', '/tmp/molecule_test/id_rsa')}}"
-#concourse_host_key: |-
+# concourse_host_key: |-
 #  -----BEGIN RSA PRIVATE KEY-----
 #  -----END RSA PRIVATE KEY-----
 concourse_authorized_worker_keys:
-  - "{{lookup('file', '/tmp/molecule_test/id_rsa.pub')}}"
+- "{{lookup('file', '/tmp/molecule_test/id_rsa.pub')}}"
 
 cycloid_db_password: "chovoh6gahti5ohP0AiF6eex6evoonie"
-cycloid_console_dns: cycloid-console
-cycloid_api_dns: cycloid-api
+cycloid_console_dns: "cycloid-console"
+cycloid_api_dns: "cycloid-api"

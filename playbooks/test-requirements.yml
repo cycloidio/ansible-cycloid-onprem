@@ -1,15 +1,15 @@
 ---
 
-- src: https://github.com/geerlingguy/ansible-role-docker
-  version: master
-  name: geerlingguy.docker
-  scm: git
+- src: "https://github.com/geerlingguy/ansible-role-docker"
+  version: "master"
+  name: "geerlingguy.docker"
+  scm: "git"
 
-- src: https://github.com/cycloidio/ansible-role-nginx
-  name: cycloidio.nginx
-  scm: git
+- src: "https://github.com/cycloidio/ansible-role-nginx"
+  name: "cycloidio.nginx"
+  scm: "git"
 
-- src: https://github.com/mhutter/ansible-docker-systemd-service
-  version: master
-  name: mhutter.docker-systemd-service
-  scm: git
+- src: "https://github.com/mhutter/ansible-docker-systemd-service"
+  version: "master"
+  name: "mhutter.docker-systemd-service"
+  scm: "git"

@@ -1,30 +1,30 @@
 ---
-- name: vault unseal
-  hosts: cycloid_creds
+- name: "vault unseal"
+  hosts: "cycloid_creds"
   vars:
     vault_tokens: "{{ lookup('file', 'datas/vault.secret') | from_json }}"
 
   tasks:
-  - name: Check if vault is unseal | validate
+  - name: "Check if vault is unseal | validate"
     uri:
-      url: https://127.0.0.1:8200/v1/cycloid?list=true
-      validate_certs: no
+      url: "https://127.0.0.1:8200/v1/cycloid?list=true"
+      validate_certs: false
       status_code: 400 # "missing client token"
-      return_content: yes
-    register: unseal
+      return_content: true
+    register: "unseal"
     retries: 2
     delay: 2
-    ignore_errors: True
+    ignore_errors: true
 
-  - name: Unseal vault
+  - name: "Unseal vault"
     uri:
-      url: https://127.0.0.1:8200/v1/sys/unseal
-      method: PUT
-      validate_certs: no
+      url: "https://127.0.0.1:8200/v1/sys/unseal"
+      method: "PUT"
+      validate_certs: false
       body:
         key: "{{item}}"
       status_code: 200
-      body_format: json
+      body_format: "json"
     no_log: true
     with_items: "{{vault_tokens['unseal_keys_b64']}}"
-    when: unseal is failed or unseal.json.errors == "Vault is sealed"
+    when: "unseal is failed or unseal.json.errors == \"Vault is sealed\""

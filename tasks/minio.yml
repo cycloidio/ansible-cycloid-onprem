@@ -1,41 +1,41 @@
 ---
-- name: Install minio container | minio
+- name: "Install minio container | minio"
   block:
-    - name: Define service | minio
-      include_role:
-        name: mhutter.docker-systemd-service
-      vars:
-        container_name: minio
-        container_cmd: server /data
-        container_image: "{{ minio_image }}"
-        container_volumes:
-          - "{{ minio_config_path }}/data:/data"
-        container_ports: "{{ minio_container_ports }}"
-        container_args: "{{ container_args_extra }}"
-        container_env:
+  - name: "Define service | minio"
+    include_role:
+      name: "mhutter.docker-systemd-service"
+    vars:
+      container_name: "minio"
+      container_cmd: "server /data"
+      container_image: "{{ minio_image }}"
+      container_volumes:
+      - "{{ minio_config_path }}/data:/data"
+      container_ports: "{{ minio_container_ports }}"
+      container_args: "{{ container_args_extra }}"
+      container_env:
           # https://min.io/docs/minio/linux/reference/minio-server/minio-server.html
-          MINIO_ROOT_USER: "{{ minio_root_user }}"
-          MINIO_ROOT_PASSWORD: "{{ minio_root_password }}"
-          MINIO_BROWSER: "{{ minio_browser | default('off') }}"
-        container_labels:
-          - ansible.managed=true
-          - systemd.managed=true
-          - cycloid.io=true
+        MINIO_ROOT_USER: "{{ minio_root_user }}"
+        MINIO_ROOT_PASSWORD: "{{ minio_root_password }}"
+        MINIO_BROWSER: "{{ minio_browser | default('off') }}"
+      container_labels:
+      - ansible.managed=true
+      - systemd.managed=true
+      - cycloid.io=true
         # systemd
-        enable: true
-        masked: false
-        state: started
-      tags: docker-services
+      enable: true
+      masked: false
+      state: "started"
+    tags: "docker-services"
 
-    - name: Wait for minio availability | minio
-      uri:
-        url: "http://localhost:{{ minio_port }}/"
-        status_code:
-          - 200
-          - 403
-      register: resp
-      until: resp.status == 200 or resp.status == 403
-      delay: 5
+  - name: "Wait for minio availability | minio"
+    uri:
+      url: "http://localhost:{{ minio_port }}/"
+      status_code:
+      - 200
+      - 403
+    register: "resp"
+    until: "resp.status == 200 or resp.status == 403"
+    delay: 5
 
-- name: Force flush handlers to ensure container is started | minio
-  meta: flush_handlers
+- name: "Force flush handlers to ensure container is started | minio"
+  meta: "flush_handlers"

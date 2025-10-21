@@ -1,25 +1,25 @@
 ---
-- name: Stop services | cycloid-scheduler-sync-worker-keys
+- name: "Stop services | cycloid-scheduler-sync-worker-keys"
   service:
     name: "{{ item }}"
-    state: stopped
+    state: "stopped"
   with_items:
-    - cycloid-scheduler-sync-worker-keys_container
-    - docker
-    - docker.socket
+  - "cycloid-scheduler-sync-worker-keys_container"
+  - "docker"
+  - "docker.socket"
   failed_when: false
 
-- name: Remove files | cycloid-scheduler-sync-worker-keys
+- name: "Remove files | cycloid-scheduler-sync-worker-keys"
   file:
     path: "{{ item }}"
-    state: absent
+    state: "absent"
   with_items:
-    - /etc/systemd/system/cycloid-scheduler-sync-worker-keys_container.service
-    - /etc/default/cycloid-scheduler-sync-worker-keys
+  - "/etc/systemd/system/cycloid-scheduler-sync-worker-keys_container.service"
+  - "/etc/default/cycloid-scheduler-sync-worker-keys"
 
-- name: Force systemd to reread configs | cycloid-scheduler-sync-worker-keys
+- name: "Force systemd to reread configs | cycloid-scheduler-sync-worker-keys"
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
 
-- name: systemctl reset-failed | cycloid-scheduler-sync-worker-keys
-  shell: systemctl reset-failed
+- name: "systemctl reset-failed | cycloid-scheduler-sync-worker-keys"
+  shell: "systemctl reset-failed"

@@ -1,74 +1,73 @@
 ---
-- name: Install package depends | pre-setup
+- name: "Install package depends | pre-setup"
   package:
     name: "{{ cycloid_packages_list }}"
-    state: present
-  when: setup_packages
+    state: "present"
+  when: "setup_packages"
 
 - block:
-  - name: switch to iptables-legacy (debian 10 issue)
+  - name: "switch to iptables-legacy (debian 10 issue)"
     alternatives:
-      name: iptables
-      path: /usr/sbin/iptables-legacy
-  - name: restart docker to apply network rules
+      name: "iptables"
+      path: "/usr/sbin/iptables-legacy"
+  - name: "restart docker to apply network rules"
     service:
-      name: docker
-      state: restarted
-  when: use_iptables_legacy
+      name: "docker"
+      state: "restarted"
+  when: "use_iptables_legacy"
 
-- name: Upgrade pip | pre-setup
+- name: "Upgrade pip | pre-setup"
   pip:
-    name: pip
-    state: latest
-  when: setup_packages
+    name: "pip"
+    state: "latest"
+  when: "setup_packages"
 
 # Depends for ECR/Scaleway login
-- name: Install pip depends | pre-setup
+- name: "Install pip depends | pre-setup"
   pip:
-     name:
-      - pyOpenSSL
-      - awscli
-      - docker
-     state: latest
-  when: (not use_registry_scaleway and cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined and setup_packages) or (use_registry_scaleway and cycloid_scw_registry_access_key is defined and cycloid_scw_registry_secret_key is defined and setup_packages)
+    name:
+    - "pyOpenSSL"
+    - "awscli"
+    - "docker"
+    state: "latest"
+  when: "(not use_registry_scaleway and cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined and setup_packages) or (use_registry_scaleway and cycloid_scw_registry_access_key is defined and cycloid_scw_registry_secret_key is defined and setup_packages)"
 
-- name: ECR login | pre-setup
+- name: "ECR login | pre-setup"
   shell: "$(AWS_ACCESS_KEY_ID={{ cycloid_ecr_access_key }} AWS_SECRET_ACCESS_KEY={{ cycloid_ecr_secret_key }} aws ecr get-login --no-include-email --region eu-west-1)"
-  when: not use_registry_scaleway and cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined and not offline_setup
-- name: Log into Cycloid Scaleway registry
+  when: "not use_registry_scaleway and cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined and not offline_setup"
+- name: "Log into Cycloid Scaleway registry"
   docker_login:
     registry_url: "{{cycloid_scw_registry}}"
-    username: nologin
+    username: "nologin"
     password: "{{cycloid_scw_registry_secret_key}}"
-  when: use_registry_scaleway and cycloid_scw_registry_access_key is defined and cycloid_scw_registry_secret_key is defined and not offline_setup
+  when: "use_registry_scaleway and cycloid_scw_registry_access_key is defined and cycloid_scw_registry_secret_key is defined and not offline_setup"
 
-- name: Create config directory | pre-setup
+- name: "Create config directory | pre-setup"
   file:
     path: "{{ item }}"
-    state: directory
-    #mode: 0750
-    recurse: yes
+    state: "directory"
+    # mode: 0750
+    recurse: true
   with_items:
-    - "{{ concourse_config_path }}"
-    - "{{ vault_config_path }}/config"
-    - "{{ vault_config_path }}/file"
-    - "{{ elasticsearch_config_path }}"
-
+  - '{{ concourse_config_path }}'
+  - '{{ vault_config_path }}/config'
+  - '{{ vault_config_path }}/file'
+  - '{{ elasticsearch_config_path }}'
 
 # Copy a rootCa on the host servers
-- name: Create root certificates directory | pre-setup
+- name: "Create root certificates directory | pre-setup"
   file:
     path: "{{ ca_certificates_path[ansible_os_family | lower] }}"
-    state: directory
-    #mode: 0750
-    recurse: yes
+    state: "directory"
+    # mode: 0750
+    recurse: true
 
-- name: Copy root certificates | pre-setup
+- name: "Copy root certificates | pre-setup"
   copy:
     src: "{{ item }}"
     dest: "{{ ca_certificates_path[ansible_os_family | lower] }}/"
     owner: "root"
     mode: 0644
   with_fileglob:
-    - "{{ ca_certificates_local_path }}"
+  - "{{ ca_certificates_local_path }}"
   notify: "update ca-certificates"

@@ -1,42 +1,44 @@
 ---
 dependency:
-  name: galaxy
+  name: "galaxy"
   options:
-    #vvv: True
-    role-file: playbooks/test-requirements.yml
+    # vvv: true
+    role-file: "playbooks/test-requirements.yml"
+
 driver:
-  name: docker
+  name: "docker"
+
 # lint:
 #   name: yamllint
 platforms:
-  - name: instance
-    image: debian:stretch
+- name: "instance"
+  image: "debian:stretch"
     # Because we added systemd in Dockerfile.j2
     # We can start with it and test ansible with systemd.
     # https://medium.com/@tklo/testing-ansible-role-of-a-systemd-based-service-using-molecule-and-docker-4b3608a10ef0
-    command: "/bin/systemd"
-    published_ports:
-      - "3306:3306"
-      - "8080:8080"
-      - "3000:3000"
-      - "8200:8200"
-      - "3001:3001"
-      - "80:80"
-      - "443:443"
-      - "2222:2222"
-      - "8443:8443"
-      - "5432:5432"
-      - "6379:6379"
-      - '1025:1025'
-      - '8025:8025'
-    networks:
-    - name: molecule
-      aliases:
-        - instance
+  command: "/bin/systemd"
+  published_ports:
+  - "3306:3306"
+  - "8080:8080"
+  - "3000:3000"
+  - "8200:8200"
+  - "3001:3001"
+  - "80:80"
+  - "443:443"
+  - "2222:2222"
+  - "8443:8443"
+  - "5432:5432"
+  - "6379:6379"
+  - "1025:1025"
+  - "8025:8025"
+  networks:
+  - name: "molecule"
+    aliases:
+    - instance
       # links:
       #    - "smtp-server:smtp-server"
       #    - "cycloid-smtp:cycloid-smtp"
-    privileged: yes
+  privileged: true
     # tmpfs:
     #   - /run
     #   - /tmp
@@ -44,67 +46,68 @@ platforms:
     #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
     # capabilities:
     #   - SYS_ADMIN
-    groups:
-     - cycloid
-     - cycloid_core
-     - cycloid_scheduler
-     - cycloid_db
-     - cycloid_scheduler_db
-     - cycloid_creds
-     - smtp_server
-     - cycloid_cache
+  groups:
+  - "cycloid"
+  - "cycloid_core"
+  - "cycloid_scheduler"
+  - "cycloid_db"
+  - "cycloid_scheduler_db"
+  - "cycloid_creds"
+  - "smtp_server"
+  - "cycloid_cache"
 
-  - name: concourse_worker
-    image: concourse/concourse:7.9.1
-    privileged: yes
-    volumes:
-      - "/tmp/molecule_test:/opt:ro"
-    networks:
-    - name: molecule
-      aliases:
-        - cc_worker
-      links:
-         - "instance:instance"
-    command: "worker"
-    env:
-      CONCOURSE_EPHEMERAL: "yes"
-      CONCOURSE_TSA_HOST: instance:2222
-      CONCOURSE_TSA_PUBLIC_KEY: /opt/id_rsa.pub
-      CONCOURSE_TSA_WORKER_PRIVATE_KEY: /opt/id_rsa
-      CONCOURSE_BAGGAGECLAIM_DRIVER: overlay
-    groups:
-      - concourse_worker
+- name: "concourse_worker"
+  image: "concourse/concourse:7.9.1"
+  privileged: true
+  volumes:
+  - "/tmp/molecule_test:/opt:ro"
+  networks:
+  - name: "molecule"
+    aliases:
+    - "cc_worker"
+    links:
+    - "instance:instance"
+  command: "worker"
+  env:
+    CONCOURSE_EPHEMERAL: "yes"
+    CONCOURSE_TSA_HOST: "instance:2222"
+    CONCOURSE_TSA_PUBLIC_KEY: "/opt/id_rsa.pub"
+    CONCOURSE_TSA_WORKER_PRIVATE_KEY: "/opt/id_rsa"
+    CONCOURSE_BAGGAGECLAIM_DRIVER: "overlay"
+  groups:
+  - "concourse_worker"
 
 provisioner:
-  name: ansible
+  name: "ansible"
   playbooks:
-    converge: ../../playbooks/playbook.yml
+    converge: "../../playbooks/playbook.yml"
   options:
     extra-vars:
-      env: test
-    #vvv: "True"
+      env: "test"
+    # vvv: "True"
   env:
-   MOLECULE_DEBUG: "true"
+    MOLECULE_DEBUG: "true"
   # lint:
   #   name: ansible-lint
+
 scenario:
-  name: default
+  name: "default"
   # Override the sequance of a command
   # https://molecule.readthedocs.io/en/latest/configuration.html#scenario
   test_sequence:
     #- lint
-    - destroy
-    - dependency
-    - syntax
-    - create
-    - prepare
-    - converge
+  - destroy
+  - dependency
+  - syntax
+  - create
+  - prepare
+  - converge
     #- idempotence
-    - side_effect
-    - verify
-    - destroy
+  - side_effect
+  - verify
+  - destroy
 
 verifier:
-  name: testinfra
+  name: "testinfra"
   # lint:
   #   name: flake8

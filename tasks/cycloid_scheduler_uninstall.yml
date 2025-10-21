@@ -1,38 +1,38 @@
 ---
-- name: Stop services | cycloid-scheduler
+- name: "Stop services | cycloid-scheduler"
   service:
     name: "{{ item }}"
-    state: stopped
+    state: "stopped"
   with_items:
-    - concourse-web_container
-    - docker
-    - docker.socket
+  - "concourse-web_container"
+  - "docker"
+  - "docker.socket"
   failed_when: false
 
-- name: Remove packages | cycloid-scheduler
+- name: "Remove packages | cycloid-scheduler"
   package:
     name:
-      - docker*
-    state: absent
+    - "docker*"
+    state: "absent"
   failed_when: false
-  when: setup_packages
+  when: "setup_packages"
 
-- name: Remove files | cycloid-scheduler
+- name: "Remove files | cycloid-scheduler"
   file:
     path: "{{ item }}"
-    state: absent
+    state: "absent"
   with_items:
-    - "{{ concourse_config_path }}"
-    - "{{ cycloid_install_path }}"
-    - /etc/systemd/system/concourse-web_container.service
-    - /etc/default/concourse-web
-    - /etc/systemd/system/docker.service
-    - /var/lib/docker
-    - /opt/containerd
+  - "{{ concourse_config_path }}"
+  - "{{ cycloid_install_path }}"
+  - "/etc/systemd/system/concourse-web_container.service"
+  - "/etc/default/concourse-web"
+  - "/etc/systemd/system/docker.service"
+  - "/var/lib/docker"
+  - "/opt/containerd"
 
-- name: Force systemd to reread configs | cycloid-scheduler
+- name: "Force systemd to reread configs | cycloid-scheduler"
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
 
-- name: systemctl reset-failed | cycloid-scheduler
-  shell: systemctl reset-failed
+- name: "systemctl reset-failed | cycloid-scheduler"
+  shell: "systemctl reset-failed"

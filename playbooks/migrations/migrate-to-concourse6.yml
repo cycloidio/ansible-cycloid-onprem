@@ -1,24 +1,24 @@
-
-- name: Migrate to Concourse 6
-  hosts: cycloid_db
+---
+- name: "Migrate to Concourse 6"
+  hosts: "cycloid_db"
   vars_files:
-    - ../roles/ansible-cycloid-onprem/defaults/main.yml
-    - [ "../environments/cycloid.yml", "../environments/{{ env }}-cycloid.yml", "../environments/empty.yml" ]
+  - ../roles/ansible-cycloid-onprem/defaults/main.yml
+  - [../environments/cycloid.yml, '../environments/{{ env }}-cycloid.yml', ../environments/empty.yml]
 
   tasks:
-  - name: Generate encrypted password
+  - name: "Generate encrypted password"
     local_action: "command ../migrations/bin/gen-password generate -p '{{concourse_auth_password}}' -c '{{cycloid_crypto_signing_key}}'"
-    register: pass
+    register: "pass"
 
-  - name: Extract password
-    set_fact: cc_password="{{pass.stdout}}"
+  - name: "Extract password"
+    set_fact: "cc_password=\"{{pass.stdout}}\""
 
-  - name: Update password
+  - name: "Update password"
     command: "mysql --protocol TCP -h localhost -P {{ cycloid_db_port }} -u {{ cycloid_db_user }} -p{{ cycloid_db_password }} {{ cycloid_db_name }} -Ns -e 'UPDATE concourse_accounts SET password=\"{{cc_password}}\", username=\"{{concourse_auth_user}}\" where password is NULL;'"
     no_log: true
-    when: setup_cycloid_db
+    when: "setup_cycloid_db"
 
-  - name: Update password
+  - name: "Update password"
     command: "mysql --protocol TCP -h {{ cycloid_db_host }} -P {{ cycloid_db_port }} -u {{ cycloid_db_user }} -p{{ cycloid_db_password }} {{ cycloid_db_name }} -Ns -e 'UPDATE concourse_accounts SET password=\"{{cc_password}}\", username=\"{{concourse_auth_user}}\" where password is NULL;'"
     no_log: true
-    when: not setup_cycloid_db
+    when: "not setup_cycloid_db"

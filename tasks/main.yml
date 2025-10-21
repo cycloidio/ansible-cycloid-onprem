@@ -1,89 +1,89 @@
 ---
 - block:
-    - ansible.builtin.include_tasks: pre-setup.yml
+  - ansible.builtin.include_tasks: "pre-setup.yml"
 
-    - ansible.builtin.include_tasks: gen-ssl.yml
+  - ansible.builtin.include_tasks: "gen-ssl.yml"
       # when: not validate_only and setup_cycloid_core
 
-    - ansible.builtin.include_tasks: cycloid_creds.yml
-      when: setup_cycloid_creds|bool
+  - ansible.builtin.include_tasks: "cycloid_creds.yml"
+    when: "setup_cycloid_creds|bool"
 
-    - ansible.builtin.include_tasks: cycloid_db.yml
-      when: setup_cycloid_db|bool
+  - ansible.builtin.include_tasks: "cycloid_db.yml"
+    when: "setup_cycloid_db|bool"
 
-    - ansible.builtin.include_tasks: smtp.yml
-      when: setup_smtp_server|bool
+  - ansible.builtin.include_tasks: "smtp.yml"
+    when: "setup_smtp_server|bool"
 
-    - ansible.builtin.include_tasks: cycloid_cache.yml
-      when: setup_cycloid_cache|bool
+  - ansible.builtin.include_tasks: "cycloid_cache.yml"
+    when: "setup_cycloid_cache|bool"
 
-    - ansible.builtin.include_tasks: cycloid_scheduler_db.yml
-      when: setup_cycloid_scheduler_db|bool
+  - ansible.builtin.include_tasks: "cycloid_scheduler_db.yml"
+    when: "setup_cycloid_scheduler_db|bool"
 
-    - ansible.builtin.include_tasks: cycloid_scheduler.yml
-      when: setup_cycloid_scheduler|bool
+  - ansible.builtin.include_tasks: "cycloid_scheduler.yml"
+    when: "setup_cycloid_scheduler|bool"
 
-    - ansible.builtin.include_tasks: elasticsearch.yml
-      when: setup_elasticsearch
+  - ansible.builtin.include_tasks: "elasticsearch.yml"
+    when: "setup_elasticsearch"
 
-    - ansible.builtin.include_tasks: cycloid_api.yml
-      when: setup_cycloid_core|bool
-    - ansible.builtin.include_tasks: cycloid_frontend.yml
-      when: setup_cycloid_core|bool
-    - ansible.builtin.include_tasks: nginx.yml
-      when: setup_cycloid_core|bool
+  - ansible.builtin.include_tasks: "cycloid_api.yml"
+    when: "setup_cycloid_core|bool"
+  - ansible.builtin.include_tasks: "cycloid_frontend.yml"
+    when: "setup_cycloid_core|bool"
+  - ansible.builtin.include_tasks: "nginx.yml"
+    when: "setup_cycloid_core|bool"
 
-    - ansible.builtin.include_tasks: cycloid_job_ccm_ingestion.yml
-      when: setup_cycloid_core|bool and cost_explorer_es_url != "" and inventory_hostname == groups['cycloid_core'][0]
+  - ansible.builtin.include_tasks: "cycloid_job_ccm_ingestion.yml"
+    when: "setup_cycloid_core|bool and cost_explorer_es_url != \"\" and inventory_hostname == groups['cycloid_core'][0]"
 
-    - ansible.builtin.include_tasks: cycloid_scheduler_sync_worker_keys.yml
-      when: setup_cycloid_scheduler|bool
+  - ansible.builtin.include_tasks: "cycloid_scheduler_sync_worker_keys.yml"
+    when: "setup_cycloid_scheduler|bool"
 
-    - ansible.builtin.include_tasks: cycloid_job_cost_estimation_injection.yml
-      when: cycloid_job_cost_estimation_injection|bool and inventory_hostname == groups['cycloid_core'][0]
+  - ansible.builtin.include_tasks: "cycloid_job_cost_estimation_injection.yml"
+    when: "cycloid_job_cost_estimation_injection|bool and inventory_hostname == groups['cycloid_core'][0]"
 
-    - ansible.builtin.include_tasks: cycloid_job_kpi_import.yml
-      when: inventory_hostname == groups['cycloid_core'][0]
+  - ansible.builtin.include_tasks: "cycloid_job_kpi_import.yml"
+    when: "inventory_hostname == groups['cycloid_core'][0]"
 
     #- ansible.builtin.include_tasks: prometheus.yml
 
-    - ansible.builtin.include_tasks: minio.yml
-      when: setup_minio|bool
+  - ansible.builtin.include_tasks: "minio.yml"
+    when: "setup_minio|bool"
 
-  when: not uninstall|bool and not validate_only|bool
+  when: "not uninstall|bool and not validate_only|bool"
 
 # Wait and validate running services
-- ansible.builtin.include_tasks: validate.yml
-  when: (validate|bool or validate_only|bool) and not uninstall|bool and not ansible_check_mode|bool
+- ansible.builtin.include_tasks: "validate.yml"
+  when: "(validate|bool or validate_only|bool) and not uninstall|bool and not ansible_check_mode|bool"
 
 - block:
-    - ansible.builtin.include_tasks: cycloid_scheduler_sync_worker_keys_uninstall.yml
-      when: setup_cycloid_scheduler|bool
+  - ansible.builtin.include_tasks: "cycloid_scheduler_sync_worker_keys_uninstall.yml"
+    when: "setup_cycloid_scheduler|bool"
 
-    - ansible.builtin.include_tasks: cycloid_creds_uninstall.yml
-      when: setup_cycloid_creds|bool
+  - ansible.builtin.include_tasks: "cycloid_creds_uninstall.yml"
+    when: "setup_cycloid_creds|bool"
 
-    - ansible.builtin.include_tasks: cycloid_db_uninstall.yml
-      when: setup_cycloid_db|bool
+  - ansible.builtin.include_tasks: "cycloid_db_uninstall.yml"
+    when: "setup_cycloid_db|bool"
 
-    - ansible.builtin.include_tasks: smtp_uninstall.yml
-      when: setup_smtp_server|bool
+  - ansible.builtin.include_tasks: "smtp_uninstall.yml"
+    when: "setup_smtp_server|bool"
 
-    - ansible.builtin.include_tasks: cycloid_cache_uninstall.yml
-      when: setup_cycloid_cache|bool
+  - ansible.builtin.include_tasks: "cycloid_cache_uninstall.yml"
+    when: "setup_cycloid_cache|bool"
 
-    - ansible.builtin.include_tasks: cycloid_scheduler_db_uninstall.yml
-      when: setup_cycloid_scheduler_db|bool
+  - ansible.builtin.include_tasks: "cycloid_scheduler_db_uninstall.yml"
+    when: "setup_cycloid_scheduler_db|bool"
 
-    - ansible.builtin.include_tasks: cycloid_scheduler_uninstall.yml
-      when: setup_cycloid_scheduler|bool
+  - ansible.builtin.include_tasks: "cycloid_scheduler_uninstall.yml"
+    when: "setup_cycloid_scheduler|bool"
 
-    - ansible.builtin.include_tasks: cycloid_core_uninstall.yml
-      when: setup_cycloid_core|bool
+  - ansible.builtin.include_tasks: "cycloid_core_uninstall.yml"
+    when: "setup_cycloid_core|bool"
 
-    - ansible.builtin.include_tasks: minio_uninstall.yml
-      when: setup_minio|bool
+  - ansible.builtin.include_tasks: "minio_uninstall.yml"
+    when: "setup_minio|bool"
 
-    - ansible.builtin.include_tasks: elasticsearch_uninstall.yml
-      when: setup_elasticsearch|bool
-  when: uninstall|bool
+  - ansible.builtin.include_tasks: "elasticsearch_uninstall.yml"
+    when: "setup_elasticsearch|bool"
+  when: "uninstall|bool"

@@ -1,44 +1,45 @@
-- name: restart nginx
+---
+- name: "restart nginx"
   service:
-    name: nginx_container
-    state: restarted
+    name: "nginx_container"
+    state: "restarted"
 
-- name: restart cycloid-api
+- name: "restart cycloid-api"
   service:
-    name: cycloid-api_container
-    state: restarted
+    name: "cycloid-api_container"
+    state: "restarted"
 
-- name: restart cycloid-api-task-manager
+- name: "restart cycloid-api-task-manager"
   service:
-    name: cycloid-api-task-manager_container
-    state: restarted
-  when: cycloid_api_task_manager_enabled|bool
+    name: "cycloid-api-task-manager_container"
+    state: "restarted"
+  when: "cycloid_api_task_manager_enabled|bool"
 
-- name: restart cycloid-cache
+- name: "restart cycloid-cache"
   service:
-    name: cycloid-cache_container
-    state: restarted
+    name: "cycloid-cache_container"
+    state: "restarted"
 
-- name: restart vault
+- name: "restart vault"
   service:
-    name: vault_container
-    state: restarted
+    name: "vault_container"
+    state: "restarted"
 
-- name: restart concourse web
+- name: "restart concourse web"
   service:
-    name: concourse-web_container
-    state: restarted
+    name: "concourse-web_container"
+    state: "restarted"
 
-- name: restart concourse db
+- name: "restart concourse db"
   service:
-    name: concourse-db_container
-    state: restarted
+    name: "concourse-db_container"
+    state: "restarted"
 
-- name: restart elasticsearch
+- name: "restart elasticsearch"
   service:
-    name: elasticsearch_container
-    state: restarted
-  when: cycloid_api_task_manager_enabled|bool
+    name: "elasticsearch_container"
+    state: "restarted"
+  when: "cycloid_api_task_manager_enabled|bool"
 
-- name: update ca-certificates
+- name: "update ca-certificates"
   command: "{{ ca_certificates_handler[ansible_os_family | lower] }}"
