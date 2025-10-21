@@ -1,0 +1,11 @@
+---
+- name: "Define service database dump | {{ item['name'] }}"
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    name: "{{ item['name'] }}"
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{ item['image'] }}"
+    container_env: "{{ item['env'] }}"
+  tags: docker-services
+  with_items: "{{ dbs_dump }}"

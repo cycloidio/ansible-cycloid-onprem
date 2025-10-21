@@ -883,3 +883,43 @@ cycloid_report_path: "/tmp/cycloid-report"
 cycloid_report_local_path: "/tmp/cycloid-report-local"
 cycloid_report_sensitive: false
 cycloid_report_curl_timeout: 4
+
+#
+# Database dumps configuration
+#
+# Setup sql dump pod. Daily dump all cycloid database as sql dump to object storage
+dbs_dump: {}
+# Example
+#  - name: cycloid-db
+#    image: cycloid/mysql-dump:latest
+#    env:
+#        FILENAME: "cycloid/prod/mysql_dump"
+#        BACKUP_TIME: "0 5 * * *"
+#        MYSQL_DATABASE: "{{ cycloid_db_name }}"
+#        MYSQL_HOST: "{{ cycloid_db_host }}"
+#        MYSQL_PORT: "{{ cycloid_db_port }}"
+#        MYSQL_USER: "{{ cycloid_db_user }}"
+#        MYSQL_PASSWORD: "{{ cycloid_db_password }}"
+#        AWS_ACCESS_KEY_ID:
+#        AWS_SECRET_ACCESS_KEY:
+#        AWS_S3_BUCKET:
+#        AWS_DEFAULT_REGION:
+
+#
+#  - name: scheduler-db
+#    image: cycloid/postgres-dump:latest
+#    env:
+#        FILENAME: "concourse/prod/pgsql_dump"
+#        BACKUP_TIME: "0 5 * * *"
+#        POSTGRES_DATABASE: "{{concourse_db_name}}"
+#        POSTGRES_HOST: "{{ concourse_db_host }}"
+#        POSTGRES_PORT: "{{ concourse_db_port }}"
+#        POSTGRES_USER: "{{concourse_db_user}}"
+#        POSTGRES_PASSWORD: "{{concourse_db_password}}"
+#        SCW_BUCKET: cycloid-backup
+#        SCW_ACCESS_KEY:
+#        SCW_SECRET_KEY:
+#        SCW_DEFAULT_ORGANIZATION_ID:
+#        SCW_DEFAULT_REGION:
+
+
