@@ -1,36 +1,38 @@
 ---
 dependency:
-  name: galaxy
+  name: "galaxy"
   options:
-    #vvv: True
-    role-file: playbooks/test-requirements.yml
+    # vvv: true
+    role-file: "playbooks/test-requirements.yml"
+
 driver:
-  name: docker
+  name: "docker"
+
 # lint:
 #   name: yamllint
 platforms:
-  - name: cy-core
-    image: debian:stretch
+- name: "cy-core"
+  image: "debian:stretch"
     # Because we added systemd in Dockerfile.j2
     # We can start with it and test ansible with systemd.
     # https://medium.com/@tklo/testing-ansible-role-of-a-systemd-based-service-using-molecule-and-docker-4b3608a10ef0
-    command: "/bin/systemd"
-    published_ports:
-      - "3000:3000"
-      - "3001:3001"
-      - "80:80"
-      - "443:443"
-      - "6379:6379"
-      - '1025:1025'
-      - '8025:8025'
-    networks:
-    - name: molecule
-      aliases:
-        - cycloid-core
+  command: "/bin/systemd"
+  published_ports:
+  - "3000:3000"
+  - "3001:3001"
+  - "80:80"
+  - "443:443"
+  - "6379:6379"
+  - "1025:1025"
+  - "8025:8025"
+  networks:
+  - name: "molecule"
+    aliases:
+    - cycloid-core
       # links:
       #    - "smtp-server:smtp-server"
       #    - "cycloid-smtp:cycloid-smtp"
-    privileged: yes
+  privileged: true
     # tmpfs:
     #   - /run
     #   - /tmp
@@ -38,34 +40,34 @@ platforms:
     #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
     # capabilities:
     #   - SYS_ADMIN
-    groups:
-     - cycloid_core
-     - smtp_server
-     - cycloid_cache
+  groups:
+  - "cycloid_core"
+  - "smtp_server"
+  - "cycloid_cache"
 
-  - name: cy-db
-    image: debian:stretch
-    command: "/bin/systemd"
-    published_ports:
-      - "3306:3306"
-    networks:
-    - name: molecule
-      aliases:
-        - cycloid-db
-    privileged: yes
-    groups:
-     - cycloid_db
+- name: "cy-db"
+  image: "debian:stretch"
+  command: "/bin/systemd"
+  published_ports:
+  - "3306:3306"
+  networks:
+  - name: "molecule"
+    aliases:
+    - "cycloid-db"
+  privileged: true
+  groups:
+  - "cycloid_db"
 
-  - name: cy-creds
-    image: debian:stretch
-    command: "/bin/systemd"
-    published_ports:
-      - "8200:8200"
-    networks:
-    - name: molecule
-      aliases:
-        - cycloid-creds
-    privileged: yes
+- name: "cy-creds"
+  image: "debian:stretch"
+  command: "/bin/systemd"
+  published_ports:
+  - "8200:8200"
+  networks:
+  - name: "molecule"
+    aliases:
+    - "cycloid-creds"
+  privileged: true
     # tmpfs:
     #   - /run
     #   - /tmp
@@ -73,21 +75,21 @@ platforms:
     #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
     # capabilities:
     #   - SYS_ADMIN
-    groups:
-     - cycloid_creds
+  groups:
+  - "cycloid_creds"
 
-  - name: cy-scheduler
-    image: debian:stretch
-    command: "/bin/systemd"
-    published_ports:
-      - "2222:2222"
-      - "8080:8080"
-      - "8443:8443"
-    networks:
-    - name: molecule
-      aliases:
-        - cycloid-scheduler
-    privileged: yes
+- name: "cy-scheduler"
+  image: "debian:stretch"
+  command: "/bin/systemd"
+  published_ports:
+  - "2222:2222"
+  - "8080:8080"
+  - "8443:8443"
+  networks:
+  - name: "molecule"
+    aliases:
+    - "cycloid-scheduler"
+  privileged: true
     # tmpfs:
     #   - /run
     #   - /tmp
@@ -95,19 +97,19 @@ platforms:
     #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
     # capabilities:
     #   - SYS_ADMIN
-    groups:
-     - cycloid_scheduler
+  groups:
+  - "cycloid_scheduler"
 
-  - name: cy-scheduler-db
-    image: debian:stretch
-    command: "/bin/systemd"
-    published_ports:
-      - "5432:5432"
-    networks:
-    - name: molecule
-      aliases:
-        - cycloid-scheduler-db
-    privileged: yes
+- name: "cy-scheduler-db"
+  image: "debian:stretch"
+  command: "/bin/systemd"
+  published_ports:
+  - "5432:5432"
+  networks:
+  - name: "molecule"
+    aliases:
+    - "cycloid-scheduler-db"
+  privileged: true
     # tmpfs:
     #   - /run
     #   - /tmp
@@ -115,59 +117,59 @@ platforms:
     #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
     # capabilities:
     #   - SYS_ADMIN
-    groups:
-     - cycloid_scheduler_db
+  groups:
+  - "cycloid_scheduler_db"
 
-  - name: concourse_worker
-    image: concourse/concourse:7.9.1
-    privileged: yes
-    volumes:
-      - "/tmp/molecule_test:/opt:ro"
-    networks:
-    - name: molecule
-      aliases:
-        - cc_worker
-      links:
-         - "cycloid-scheduler:cycloid-scheduler"
-    command: "worker"
-    env:
-      CONCOURSE_EPHEMERAL: "yes"
-      CONCOURSE_TSA_HOST: cycloid-scheduler:2222
-      CONCOURSE_TSA_PUBLIC_KEY: /opt/id_rsa.pub
-      CONCOURSE_TSA_WORKER_PRIVATE_KEY: /opt/id_rsa
-      CONCOURSE_BAGGAGECLAIM_DRIVER: overlay
-    groups:
-      - concourse_worker
-
+- name: "concourse_worker"
+  image: "concourse/concourse:7.9.1"
+  privileged: true
+  volumes:
+  - "/tmp/molecule_test:/opt:ro"
+  networks:
+  - name: "molecule"
+    aliases:
+    - "cc_worker"
+    links:
+    - "cycloid-scheduler:cycloid-scheduler"
+  command: "worker"
+  env:
+    CONCOURSE_EPHEMERAL: "yes"
+    CONCOURSE_TSA_HOST: "cycloid-scheduler:2222"
+    CONCOURSE_TSA_PUBLIC_KEY: "/opt/id_rsa.pub"
+    CONCOURSE_TSA_WORKER_PRIVATE_KEY: "/opt/id_rsa"
+    CONCOURSE_BAGGAGECLAIM_DRIVER: "overlay"
+  groups:
+  - "concourse_worker"
 
 provisioner:
-  name: ansible
+  name: "ansible"
   playbooks:
-    converge: ../../playbooks/playbook.yml
+    converge: "../../playbooks/playbook.yml"
   options:
     extra-vars:
-      env: test
-    #vvv: "True"
+      env: "test"
+    # vvv: "True"
   env:
-   MOLECULE_DEBUG: "true"
+    MOLECULE_DEBUG: "true"
+
 scenario:
-  name: split
+  name: "split"
   # Override the sequance of a command
   # https://molecule.readthedocs.io/en/latest/configuration.html#scenario
   test_sequence:
     #- lint
-    - destroy
-    - dependency
-    - syntax
-    - create
-    - prepare
-    - converge
+  - destroy
+  - dependency
+  - syntax
+  - create
+  - prepare
+  - converge
     #- idempotence
-    - side_effect
-    - verify
-    - destroy
+  - side_effect
+  - verify
+  - destroy
 
 verifier:
-  name: testinfra
+  name: "testinfra"
   # lint:
   #   name: flake8

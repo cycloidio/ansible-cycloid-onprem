@@ -1,14 +1,14 @@
 ---
-- name: Define cycloid-job-kpi-import service | cycloid-job-kpi-import
+- name: "Define cycloid-job-kpi-import service | cycloid-job-kpi-import"
   include_role:
-    name: mhutter.docker-systemd-service
+    name: "mhutter.docker-systemd-service"
   vars:
-    name: cycloid-job-kpi-import
+    name: "cycloid-job-kpi-import"
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{cycloid_api_image}}"
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid --entrypoint /bin/bash {{ container_args_extra }}"
     container_cmd: "{{ cycloid_job_kpi_import_container_cmd }}"
-    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
+    container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_api_volumes_redis_ca ] ) | select()|list }}"  # select()|list ensure to remove empty list [""]
     container_env:
       DB_NAME: "{{ cycloid_db_name }}"
       DB_USER: "{{ cycloid_db_user }}"
@@ -35,7 +35,7 @@
       CONCOURSE_PORT: "{{ concourse_port }}"
       CONCOURSE_USER: "{{ concourse_auth_user }}"
       CONCOURSE_PASSWORD: "{{ concourse_auth_password }}"
-      CONCOURSE_TEAM: main
+      CONCOURSE_TEAM: "main"
       JWT_KEY_1: "{{ cycloid_jwt_key_1 }}"
       FRONTEND_BASE_URL: "{{ cycloid_console_base_url }}"
       BACKEND_BASE_URL: "{{ cycloid_api_base_url }}"
@@ -44,30 +44,25 @@
       https_proxy: "{{ http_proxy }}"
       no_proxy: "{{ no_proxy }}"
 
-    service_systemd_options:
-      [
-        { "key": "Restart", "value": "no" },
-        { "key": "ExecStop", "value": "" },
-        { "key": "RuntimeMaxSec", "value": "30" },
-      ]
-    service_state: stopped # start or not the service after its creation
+    service_systemd_options: [{key: "Restart", value: "no"}, {key: "ExecStop", value: ""}, {key: "RuntimeMaxSec", value: "30"}]
+    service_state: "stopped"  # start or not the service after its creation
 
-  tags: docker-services
+  tags: "docker-services"
 
-- name: Define cycloid-job-kpi-import_container timer | cycloid-job-kpi-import
+- name: "Define cycloid-job-kpi-import_container timer | cycloid-job-kpi-import"
   template:
-    src: templates/systemd/timer.j2
-    dest: /lib/systemd/system/cycloid-job-kpi-import.timer
+    src: "templates/systemd/timer.j2"
+    dest: "/lib/systemd/system/cycloid-job-kpi-import.timer"
   vars:
     schedule: "{{ kpi_import_schedule }}"
     service: "cycloid-job-kpi-import_container"
 
-- name: Enable timer | cycloid-job-kpi-import
+- name: "Enable timer | cycloid-job-kpi-import"
   ansible.builtin.systemd:
-    name: cycloid-job-kpi-import.timer
-    enabled: yes
-    state: started # start or not the timer after its creation
+    name: "cycloid-job-kpi-import.timer"
+    enabled: true
+    state: "started"  # start or not the timer after its creation
 
-- name: Force systemd to reread configs | cycloid-job-kpi-import
+- name: "Force systemd to reread configs | cycloid-job-kpi-import"
   ansible.builtin.systemd:
-    daemon_reload: yes
+    daemon_reload: true

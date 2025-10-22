@@ -1,8 +1,9 @@
 ---
 galaxy_info:
-  author: contact@cycloid.io
+  author: "contact@cycloid.io"
   description:
-  company: cycloid.io
-  license: cycloid.io
+  company: "cycloid.io"
+  license: "cycloid.io"
   min_ansible_version: 2.4
+
 dependencies: []

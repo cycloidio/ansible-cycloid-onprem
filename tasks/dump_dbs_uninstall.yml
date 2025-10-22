@@ -3,25 +3,25 @@
 - name: "Stop services | {{item['name']}}"
   service:
     name: "{{item['name']}}_container"
-    state: stopped
+    state: "stopped"
   failed_when: false
   with_items: "{{dbs_dump}}"
 
 - name: "Remove files | {{item['name']}} systemd"
   file:
     path: "/etc/systemd/system/{{item['name']}}_container.service"
-    state: absent
+    state: "absent"
   with_items: "{{dbs_dump}}"
 
 - name: "Remove files | {{item['name']}} etc-default"
   file:
     path: "/etc/default/{{item['name']}}"
-    state: absent
+    state: "absent"
   with_items: "{{dbs_dump}}"
 
-- name: Force systemd to reread configs | cycloid-db
+- name: "Force systemd to reread configs | cycloid-db"
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
 
-- name: systemctl reset-failed | cycloid-db
-  shell: systemctl reset-failed
+- name: "systemctl reset-failed | cycloid-db"
+  shell: "systemctl reset-failed"

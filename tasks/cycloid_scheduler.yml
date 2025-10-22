@@ -4,7 +4,7 @@
 #   set_fact:
 #    cycloid_api_container_links: "{{ cycloid_api_container_links + ['concourse-web'] }}"
 
-- name: Host key | cycloid-scheduler
+- name: "Host key | cycloid-scheduler"
   copy:
     content: "{{ concourse_host_key }}"
     dest: "{{ concourse_config_path }}/{{ concourse_host_key_path }}"
@@ -12,9 +12,9 @@
     #  group: "{{ concourse_group }}"
     mode: 0400
   notify:
-    - restart concourse web
+  - "restart concourse web"
 
-- name: Session signing key | cycloid-scheduler
+- name: "Session signing key | cycloid-scheduler"
   copy:
     content: "{{ concourse_session_signing_key }}"
     dest: "{{ concourse_config_path }}/{{ concourse_session_signing_key_path }}"
@@ -22,89 +22,89 @@
     #  group: "{{ concourse_group }}"
     mode: 0400
   notify:
-    - restart concourse web
+  - "restart concourse web"
 
-- name: Copy the ssl in service directories | cycloid-scheduler
+- name: "Copy the ssl in service directories | cycloid-scheduler"
   copy:
     src: "{{ cycloid_scheduler_ssl[item] }}"
     dest: "{{ concourse_config_path }}/ssl.{{item}}"
     mode: 0400
   with_items:
-    - key
-    - crt
+  - "key"
+  - "crt"
   notify:
-    - restart concourse web
+  - "restart concourse web"
 
-- name: Generate session_signing_key local directory | cycloid-scheduler
+- name: "Generate session_signing_key local directory | cycloid-scheduler"
   file:
     path: "{{ cycloid_local_datas_path }}/scheduler"
-    state: directory
+    state: "directory"
     mode: "0777"
     recurse: true
-  delegate_to: 127.0.0.1
+  delegate_to: "127.0.0.1"
   become: false
 
-- name: Copy session_signing_key in local data directory | cycloid-scheduler
+- name: "Copy session_signing_key in local data directory | cycloid-scheduler"
   fetch:
     src: "{{ concourse_config_path }}/{{ concourse_session_signing_key_path }}"
     dest: "{{ cycloid_local_datas_path }}/scheduler/{{ concourse_session_signing_key_path }}"
     mode: 0400
-    # remote_src: yes
+    # remote_src: true
     flat: true
 
-- name: Authorized worker keys | cycloid-scheduler
+- name: "Authorized worker keys | cycloid-scheduler"
   copy:
-    #template:
-    #src: authorized_worker_keys.j2
+    # template:
+    # src: authorized_worker_keys.j2
     content: "{% for key in concourse_authorized_worker_keys %}{{key}}\n{% endfor %}"
     dest: "{{ concourse_config_path }}/{{ concourse_authorized_worker_keys_path }}"
     mode: 0400
 
-- name: Team authorized worker keys | cycloid-scheduler
+- name: "Team authorized worker keys | cycloid-scheduler"
   file:
-    state: touch
+    state: "touch"
     path: "{{ concourse_config_path }}/{{ concourse_team_authorized_worker_keys_path }}"
     mode: 0400
 
 # Note: This block could be removed around the 2022/08/01, letting time for onprem customer to run the migration script once
 # backward compatibility. New format contain also Dedicated VAULT variable for scheduler worker sync key.
 # In case you local role file is not using the latest format, ansible try to migrate it
-- name: Check approle-concourse-ro format
+- name: "Check approle-concourse-ro format"
   shell: "cat {{ cycloid_local_datas_path }}/approles/approle-concourse-ro"
-  register: approle_cc
-  delegate_to: 127.0.0.1
+  register: "approle_cc"
+  delegate_to: "127.0.0.1"
   become: false
-- name: Migrate approle-concourse-ro format
-  when: '"VAULT_SECRET_ID" not in approle_cc.stdout'
+- name: "Migrate approle-concourse-ro format"
+  when: "\"VAULT_SECRET_ID\" not in approle_cc.stdout"
   shell: "echo {{approle_cc.stdout}} | sed -r 's/.*role_id:([^,]+),secret_id:([a-zA-Z0-9-]+).*/\\nVAULT_ROLE_ID=\\1\\nVAULT_SECRET_ID=\\2/' | tee -a {{ cycloid_local_datas_path }}/approles/approle-concourse-ro"
-  delegate_to: 127.0.0.1
+  delegate_to: "127.0.0.1"
   become: false
 # End of backward compatibility section
 
-- name: Copy vault approles in service directory | cycloid-scheduler
+- name: "Copy vault approles in service directory | cycloid-scheduler"
   copy:
     src: "{{ cycloid_local_datas_path }}/approles/approle-concourse-ro"
     dest: "{{ concourse_config_path }}/approle-concourse-ro"
     mode: 0400
 
-- name: Define service | cycloid-scheduler
+- name: "Define service | cycloid-scheduler"
   include_role:
-    name: mhutter.docker-systemd-service
+    name: "mhutter.docker-systemd-service"
   vars:
-    name: concourse-web
+    name: "concourse-web"
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{concourse_web_image}}"
     container_ports: "{{concourse_web_container_ports}}"
     container_volumes:
       # concourse-authorized-keys
-      - "{{ concourse_config_path }}:/opt/concourse"
+    - "{{ concourse_config_path }}:/opt/concourse"
     container_cmd: "web"
     # Additionnal env file for approle
     # Bind network host because of forwarded worker. CC need to know the IP of the web node cause it will use it to connect on local ssh tunnel created
     # to access to the workers. As we run in docker we don't know the IP address, so we bind host to use the one from the host
     container_args: "--network=host --env-file={{ concourse_config_path }}/approle-concourse-ro {{ container_args_extra }}"
     container_env: "{{ cycloid_scheduler_env }}"
-  tags: docker-services
+  tags: "docker-services"
 
-- name: Force flush handlers to ensure container is started | cycloid-scheduler
-  meta: flush_handlers
+- name: "Force flush handlers to ensure container is started | cycloid-scheduler"
+  meta: "flush_handlers"

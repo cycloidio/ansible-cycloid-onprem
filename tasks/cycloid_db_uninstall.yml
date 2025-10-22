@@ -1,39 +1,39 @@
 ---
 
-- name: Stop services | cycloid-db
+- name: "Stop services | cycloid-db"
   service:
     name: "{{ item }}"
-    state: stopped
+    state: "stopped"
   with_items:
-    - cycloid-db_container
-    - docker
-    - docker.socket
+  - "cycloid-db_container"
+  - "docker"
+  - "docker.socket"
   failed_when: false
 
-- name: Remove packages | cycloid-db
+- name: "Remove packages | cycloid-db"
   package:
     name:
-      - docker*
-    state: absent
+    - "docker*"
+    state: "absent"
   failed_when: false
-  when: setup_packages
+  when: "setup_packages"
 
-- name: Remove files | cycloid-db
+- name: "Remove files | cycloid-db"
   file:
     path: "{{ item }}"
-    state: absent
+    state: "absent"
   with_items:
-    - "{{ cycloid_db_path }}"
-    - "{{ cycloid_install_path }}"
-    - /etc/systemd/system/cycloid-db_container.service
-    - /etc/default/cycloid-db
-    - /etc/systemd/system/docker.service
-    - /var/lib/docker
-    - /opt/containerd
+  - "{{ cycloid_db_path }}"
+  - "{{ cycloid_install_path }}"
+  - "/etc/systemd/system/cycloid-db_container.service"
+  - "/etc/default/cycloid-db"
+  - "/etc/systemd/system/docker.service"
+  - "/var/lib/docker"
+  - "/opt/containerd"
 
-- name: Force systemd to reread configs | cycloid-db
+- name: "Force systemd to reread configs | cycloid-db"
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
 
-- name: systemctl reset-failed | cycloid-db
-  shell: systemctl reset-failed
+- name: "systemctl reset-failed | cycloid-db"
+  shell: "systemctl reset-failed"

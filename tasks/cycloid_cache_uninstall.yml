@@ -1,38 +1,38 @@
 ---
-- name: Stop services | cycloid-cache
+- name: "Stop services | cycloid-cache"
   service:
     name: "{{ item }}"
-    state: stopped
+    state: "stopped"
   with_items:
-    - cycloid-cache_container
-    - cycloid-cache-asynqmon_container
-    - docker
-    - docker.socket
+  - "cycloid-cache_container"
+  - "cycloid-cache-asynqmon_container"
+  - "docker"
+  - "docker.socket"
   failed_when: false
 
-- name: Remove packages | cycloid-cache
+- name: "Remove packages | cycloid-cache"
   package:
     name:
-      - docker*
-    state: absent
+    - "docker*"
+    state: "absent"
   failed_when: false
-  when: setup_packages
+  when: "setup_packages"
 
-- name: Remove files | cycloid-cache
+- name: "Remove files | cycloid-cache"
   file:
     path: "{{ item }}"
-    state: absent
+    state: "absent"
   with_items:
-    - "{{ cycloid_install_path }}"
-    - /etc/systemd/system/cycloid-cache_container.service
-    - /etc/systemd/system/cycloid-cache-asynqmon.service
-    - /etc/systemd/system/docker.service
-    - /var/lib/docker
-    - /opt/containerd
+  - "{{ cycloid_install_path }}"
+  - "/etc/systemd/system/cycloid-cache_container.service"
+  - "/etc/systemd/system/cycloid-cache-asynqmon.service"
+  - "/etc/systemd/system/docker.service"
+  - "/var/lib/docker"
+  - "/opt/containerd"
 
-- name: Force systemd to reread configs | cycloid-cache
+- name: "Force systemd to reread configs | cycloid-cache"
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
 
-- name: systemctl reset-failed | cycloid-cache
-  shell: systemctl reset-failed
+- name: "systemctl reset-failed | cycloid-cache"
+  shell: "systemctl reset-failed"

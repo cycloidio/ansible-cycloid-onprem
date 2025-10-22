@@ -3,18 +3,18 @@
 #   set_fact:
 #    concourse_web_container_links: "{{ concourse_web_container_links + ['concourse-db'] }}"
 
-- name: Allow 1001 to write data on host | cycloid-scheduler-db
+- name: "Allow 1001 to write data on host | cycloid-scheduler-db"
   file:
     path: "{{ concourse_db_path }}"
-    state: directory
+    state: "directory"
     mode: 0777
-    recurse: yes
+    recurse: true
 
 - name: "Bitnami migration: Check if data directory has files | cycloid-scheduler-db"
   ansible.builtin.find:
     paths: "{{ concourse_db_path }}"
-    file_type: any
-  register: data_content
+    file_type: "any"
+  register: "data_content"
 
 - name: "Bitnami migration: Ensure postgresql config file exists | cycloid-scheduler-db"
   copy:
@@ -36,7 +36,7 @@
       lc_time = 'en_US.utf8'
       default_text_search_config = 'pg_catalog.english'
   notify: "restart concourse db"
-  when: data_content.matched > 0
+  when: "data_content.matched > 0"
 
 - name: "Bitnami migration: Ensure postgresql pg_hba file exists | cycloid-scheduler-db"
   copy:
@@ -51,48 +51,48 @@
       host    replication all ::1/128       trust
       host    all         all all           scram-sha-256
   notify: "restart concourse db"
-  when: data_content.matched > 0
+  when: "data_content.matched > 0"
 
-- name: Define service | cycloid-scheduler-db
+- name: "Define service | cycloid-scheduler-db"
   include_role:
-    name: mhutter.docker-systemd-service
+    name: "mhutter.docker-systemd-service"
   vars:
-    name: concourse-db
+    name: "concourse-db"
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ concourse_db_image }}"
     container_ports: "{{ concourse_db_container_ports }}"
     container_args: "{{ container_args_extra }}"
     container_volumes:
-      - "{{ concourse_db_path }}:{{ concourse_db_container_path }}"
+    - "{{ concourse_db_path }}:{{ concourse_db_container_path }}"
     container_env:
       POSTGRES_DB: "{{ concourse_db_name }}"
       POSTGRES_USER: "{{ concourse_db_user }}"
       POSTGRES_PASSWORD: "{{ concourse_db_password }}"
-  tags: docker-services
+  tags: "docker-services"
 
-- name: Force flush handlers to ensure container is started | cycloid-scheduler-db
-  meta: flush_handlers
+- name: "Force flush handlers to ensure container is started | cycloid-scheduler-db"
+  meta: "flush_handlers"
 
 - name: "Bitnami migration: fix database collation | cycloid-scheduler-db"
   ansible.builtin.command:
     argv:
-      - /usr/bin/docker
-      - exec
-      - concourse-db
-      - bash
-      - -c
-      - |
-        for i in $(seq 1 5); do
-          pg_isready -U "{{ concourse_db_user }}" \
-            -d "dbname={{ concourse_db_name }}" \
-            -h 127.0.0.1 -p 5432 \
-            && \
-          psql -U "{{ concourse_db_user }}" \
-            -d "{{ concourse_db_name }}" \
-            -h 127.0.0.1 -p 5432 \
-            -c "ALTER DATABASE {{ concourse_db_name }} REFRESH COLLATION VERSION;" && break
-          sleep 2
-        done
+    - "/usr/bin/docker"
+    - "exec"
+    - "concourse-db"
+    - "bash"
+    - "-c"
+    - |
+      for i in $(seq 1 5); do
+        pg_isready -U "{{ concourse_db_user }}" \
+          -d "dbname={{ concourse_db_name }}" \
+          -h 127.0.0.1 -p 5432 \
+          && \
+        psql -U "{{ concourse_db_user }}" \
+          -d "{{ concourse_db_name }}" \
+          -h 127.0.0.1 -p 5432 \
+          -c "ALTER DATABASE {{ concourse_db_name }} REFRESH COLLATION VERSION;" && break
+        sleep 2
+      done
   retries: 15
   delay: 2
   ignore_errors: true

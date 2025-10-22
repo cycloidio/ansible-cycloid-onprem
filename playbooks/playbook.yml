@@ -1,76 +1,76 @@
 ---
-- name: Setup cycloid
-  hosts: all:!concourse_worker
+- name: "Setup cycloid"
+  hosts: "all:!concourse_worker"
   # centos root user don't have usr/local/bin in PATH. It need to be defined for pip+awscli
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   vars_files:
-    - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
+  - [environments/cycloid.yml, 'environments/{{ env }}-cycloid.yml', environments/empty.yml]
   pre_tasks:
 
-    - block:
-        - name: "Requirements: Packages when Offline setup"
-          debug:
-            msg: "{{ [ 'iptables', 'docker' ] + cycloid_packages_list }}"
+  - block:
+    - name: "Requirements: Packages when Offline setup"
+      debug:
+        msg: "{{ [ 'iptables', 'docker' ] + cycloid_packages_list }}"
 
-        - name: "Get installed packages"
-          package_facts:
-            manager: "auto"
+    - name: "Get installed packages"
+      package_facts:
+        manager: "auto"
 
-        - name: "Check packages installed"
-          debug:
-            msg: "{{ item }} installed"
-          failed_when: item not in ansible_facts.packages
-          with_items: "{{ [ 'iptables', 'docker' ] + cycloid_packages_list }}"
+    - name: "Check packages installed"
+      debug:
+        msg: "{{ item }} installed"
+      failed_when: "item not in ansible_facts.packages"
+      with_items: "{{ [ 'iptables', 'docker' ] + cycloid_packages_list }}"
 
-        - name: "Requirements: Pip packages when Offline setup"
-          debug:
-            msg: "{{ [ 'pip', 'awscli', 'docker' ] }}"
+    - name: "Requirements: Pip packages when Offline setup"
+      debug:
+        msg: "{{ [ 'pip', 'awscli', 'docker' ] }}"
 
-        - name: "Requirements: ECR login for cycloid docker images when Offline setup"
-          debug:
-            msg: "$(AWS_ACCESS_KEY_ID={{ cycloid_ecr_access_key }} AWS_SECRET_ACCESS_KEY={{ cycloid_ecr_secret_key }} aws ecr get-login --no-include-email --region eu-west-1)"
-          when: not use_registry_scaleway and cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined
+    - name: "Requirements: ECR login for cycloid docker images when Offline setup"
+      debug:
+        msg: "$(AWS_ACCESS_KEY_ID={{ cycloid_ecr_access_key }} AWS_SECRET_ACCESS_KEY={{ cycloid_ecr_secret_key }} aws ecr get-login --no-include-email --region eu-west-1)"
+      when: "not use_registry_scaleway and cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined"
 
-        - name: "Requirements: Scaleway registry login for cycloid docker images when Offline setup"
-          debug:
-            msg: $(SECRET_KEY_ID={{ cycloid_scw_registry_secret_key }} docker login rg.fr-par.scw.cloud/cycloidio -u nologin -p ${SECRET_KEY_ID})"
-          when: use_registry_scaleway and cycloid_scw_registry_access_key is defined and cycloid_scw_registry_secret_key is defined
+    - name: "Requirements: Scaleway registry login for cycloid docker images when Offline setup"
+      debug:
+        msg: "$(SECRET_KEY_ID={{ cycloid_scw_registry_secret_key }} docker login rg.fr-par.scw.cloud/cycloidio -u nologin -p ${SECRET_KEY_ID})\""
+      when: "use_registry_scaleway and cycloid_scw_registry_access_key is defined and cycloid_scw_registry_secret_key is defined"
 
-        - name: "Requirements: Docker images when Offline setup"
-          debug:
-            msg: "{{ [ cycloid_frontend_image, cycloid_api_image, concourse_db_image, cycloid_cache_image, cycloid_db_image, concourse_web_image, vault_image, cycloid_nginx_image ] }}"
-      when: offline_setup
+    - name: "Requirements: Docker images when Offline setup"
+      debug:
+        msg: "{{ [ cycloid_frontend_image, cycloid_api_image, concourse_db_image, cycloid_cache_image, cycloid_db_image, concourse_web_image, vault_image, cycloid_nginx_image ] }}"
+    when: "offline_setup"
 
-    - name: Update apt packages
-      apt:
-        update_cache: yes
-        cache_valid_time: 28800
-      when: ansible_os_family == 'Debian' and setup_packages
-      ignore_errors: yes
+  - name: "Update apt packages"
+    apt:
+      update_cache: true
+      cache_valid_time: 28800
+    when: "ansible_os_family == 'Debian' and setup_packages"
+    ignore_errors: true
 
-    - name: Update yum packages
-      yum:
-        update_cache: yes
-      when: ansible_os_family == 'RedHat' and setup_packages
-      ignore_errors: yes
+  - name: "Update yum packages"
+    yum:
+      update_cache: true
+    when: "ansible_os_family == 'RedHat' and setup_packages"
+    ignore_errors: true
 
     # Iptables is used by docker (not present on centos/redhat by default)
-    - name: Install extra packages | RedHat
-      package:
-        name:
-          - iptables
-        state: present
-      when: ansible_os_family == 'RedHat' and setup_packages
+  - name: "Install extra packages | RedHat"
+    package:
+      name:
+      - "iptables"
+      state: "present"
+    when: "ansible_os_family == 'RedHat' and setup_packages"
 
   roles:
-    - role: geerlingguy.docker
-      tags: docker
-      when: not validate_only and not uninstall and setup_docker
+  - role: "geerlingguy.docker"
+    tags: "docker"
+    when: "not validate_only and not uninstall and setup_docker"
 
-    - role: ansible-cycloid-onprem
-      tags:
-        - cycloid
+  - role: "ansible-cycloid-onprem"
+    tags:
+    - cycloid
 
 #    - {role: cycloid.prometheus, path: /opt/prometheus, tags: prometheus}
 #    - {role: cycloid.telegraf, tags: telegraf}
