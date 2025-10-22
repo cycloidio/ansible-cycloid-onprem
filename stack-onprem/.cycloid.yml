@@ -5,32 +5,33 @@ canonical: "cycloid-onprem"
 status: "private"
 description: "Create On-premise setup of Cycloid."
 keywords:
-  - "cycloid"
-  - "concourse"
-  - "worker"
-  - "elasticsearch"
-  - "docker"
-  - "ses"
-  - "vault"
-  - "redis"
-  - "provider:aws"
+- "cycloid"
+- "concourse"
+- "worker"
+- "elasticsearch"
+- "docker"
+- "ses"
+- "vault"
+- "redis"
+- "provider:aws"
 author: "Cycloid"
 image: "https://static.cycloid.io/docker.svg"
 technologies:
-  - technology: cycloid-core
-    version: n/a
-  - technology: redis
-    version: n/a
-  - technology: mysql
-    version: 5.7.x
-  - technology: vault
-    version: n/a
-  - technology: concourse
-    version: 7.9.1
-  - technology: postgres
-    version: n/a
-  - technology: concourse-worker
-    version: 7.9.1
+- technology: "cycloid-core"
+  version: "n/a"
+- technology: "redis"
+  version: "n/a"
+- technology: "mysql"
+  version: "5.7.x"
+- technology: "vault"
+  version: "n/a"
+- technology: "concourse"
+  version: "7.9.1"
+- technology: "postgres"
+  version: "n/a"
+- technology: "concourse-worker"
+  version: "7.9.1"
+
 config:
   # define the default pipeline here
   default:

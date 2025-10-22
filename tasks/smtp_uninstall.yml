@@ -1,39 +1,39 @@
 ---
 
-- name: Stop services | smtp-server
+- name: "Stop services | smtp-server"
   service:
     name: "{{ item }}"
-    state: stopped
+    state: "stopped"
   with_items:
-    - cycloid-smtp_container
-    - docker
-    - docker.socket
+  - "cycloid-smtp_container"
+  - "docker"
+  - "docker.socket"
   failed_when: false
 
-- name: Remove packages | smtp-server
+- name: "Remove packages | smtp-server"
   package:
     name:
-      - docker*
-    state: absent
+    - "docker*"
+    state: "absent"
   failed_when: false
-  when: setup_packages
+  when: "setup_packages"
 
-- name: Remove files | smtp-server
+- name: "Remove files | smtp-server"
   file:
     path: "{{ item }}"
-    state: absent
+    state: "absent"
   with_items:
-    - "{{ cycloid_smtp_path }}"
-    - "{{ cycloid_install_path }}"
-    - /etc/systemd/system/cycloid-smtp.service
-    - /etc/default/cycloid-smtp
-    - /etc/systemd/system/docker.service
-    - /var/lib/docker
-    - /opt/containerd
+  - "{{ cycloid_smtp_path }}"
+  - "{{ cycloid_install_path }}"
+  - "/etc/systemd/system/cycloid-smtp.service"
+  - "/etc/default/cycloid-smtp"
+  - "/etc/systemd/system/docker.service"
+  - "/var/lib/docker"
+  - "/opt/containerd"
 
-- name: Force systemd to reread configs | smtp-server
+- name: "Force systemd to reread configs | smtp-server"
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
 
-- name: systemctl reset-failed | smtp-server
-  shell: systemctl reset-failed
+- name: "systemctl reset-failed | smtp-server"
+  shell: "systemctl reset-failed"

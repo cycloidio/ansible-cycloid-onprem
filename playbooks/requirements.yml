@@ -15,25 +15,26 @@ roles:
 #  name: dj-wasabi.telegraf
 #  scm: git
 
-- src: git@github.com:cycloidio/ansible-cycloid-onprem.git
-  version: master
-  name: ansible-cycloid-onprem
-  scm: git
+- src: "git@github.com:cycloidio/ansible-cycloid-onprem.git"
+  version: "master"
+  name: "ansible-cycloid-onprem"
+  scm: "git"
 
-- src: https://github.com/geerlingguy/ansible-role-docker
-  version: master
-  name: geerlingguy.docker
-  scm: git
+- src: "https://github.com/geerlingguy/ansible-role-docker"
+  version: "master"
+  name: "geerlingguy.docker"
+  scm: "git"
 
-- src: https://github.com/mhutter/ansible-docker-systemd-service
+- src: "https://github.com/mhutter/ansible-docker-systemd-service"
   # latest commit, can be updated
-  version: v2.10.1
-  name: mhutter.docker-systemd-service
-  scm: git
+  version: "v2.10.1"
+  name: "mhutter.docker-systemd-service"
+  scm: "git"
 
 collections:
   # Install a collection from Ansible Galaxy.
-  - name: community.docker
+
+- name: "community.docker"
     # latest tag, can be updated
-    version: 4.6.0
-    source: https://galaxy.ansible.com
+  version: "4.6.0"
+  source: "https://galaxy.ansible.com"

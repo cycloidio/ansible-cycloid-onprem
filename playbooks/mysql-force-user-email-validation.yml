@@ -1,18 +1,19 @@
-- name: Validate user emails
-  hosts: cycloid_db
-  #hosts: localhost
-  #connection: local
+---
+- name: "Validate user emails"
+  hosts: "cycloid_db"
+  # hosts: localhost
+  # connection: local
   vars_files:
-    - roles/ansible-cycloid-onprem/defaults/main.yml
-    - [ "environments/cycloid.yml", "environments/{{ env }}-cycloid.yml", "environments/empty.yml" ]
+  - roles/ansible-cycloid-onprem/defaults/main.yml
+  - [environments/cycloid.yml, 'environments/{{ env }}-cycloid.yml', environments/empty.yml]
 
   tasks:
-  - name: Force user emails validation
+  - name: "Force user emails validation"
     command: "mysql --protocol TCP -h localhost -P {{ cycloid_db_port }} -u {{ cycloid_db_user }} -p{{ cycloid_db_password }} {{ cycloid_db_name }} -Ns -e 'update user_emails set verification_token=NULL;'"
     no_log: true
-    when: setup_cycloid_db
+    when: "setup_cycloid_db"
 
-  - name: Force user emails validation
+  - name: "Force user emails validation"
     command: "mysql --protocol TCP -h {{ cycloid_db_host }} -P {{ cycloid_db_port }} -u {{ cycloid_db_user }} -p{{ cycloid_db_password }} {{ cycloid_db_name }} -Ns -e 'update user_emails set verification_token=NULL;'"
     no_log: true
-    when: not setup_cycloid_db
+    when: "not setup_cycloid_db"

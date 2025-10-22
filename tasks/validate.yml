@@ -1,119 +1,119 @@
 ---
-- name: Force flush handlers before validate that everything is working
-  meta: flush_handlers
+- name: "Force flush handlers before validate that everything is working"
+  meta: "flush_handlers"
 
 #
 # Vault
 #
 
-- name: Check if vault is initialised | validate
+- name: "Check if vault is initialised | validate"
   uri:
-    url: https://127.0.0.1:8200/v1/sys/init
-    validate_certs: no
+    url: "https://127.0.0.1:8200/v1/sys/init"
+    validate_certs: false
     status_code: 200
-    return_content: yes
-  register: vault_init
-  until: '"initialized" in vault_init.content'
+    return_content: true
+  register: "vault_init"
+  until: "\"initialized\" in vault_init.content"
   retries: 30
   delay: 10
-  ignore_errors: True
-  when: setup_cycloid_creds
+  ignore_errors: true
+  when: "setup_cycloid_creds"
 
-- name: Vault service unvailable | validate
-  fail: msg='Vault service unvailable or not initialized'
-  when: setup_cycloid_creds and (vault_init is failed or vault_init.json.initialized == false)
+- name: "Vault service unvailable | validate"
+  fail: "msg='Vault service unvailable or not initialized'"
+  when: "setup_cycloid_creds and (vault_init is failed or vault_init.json.initialized == false)"
 
-- name: Check if vault is unseal | validate
+- name: "Check if vault is unseal | validate"
   uri:
-    url: https://127.0.0.1:8200/v1/cycloid?list=true
-    validate_certs: no
+    url: "https://127.0.0.1:8200/v1/cycloid?list=true"
+    validate_certs: false
     status_code: 403 # "permission denied"
-    return_content: yes
-  register: unseal
-  #until: '"Vault is sealed" not in unseal.content'
+    return_content: true
+  register: "unseal"
+  # until: '"Vault is sealed" not in unseal.content'
   retries: 2
   delay: 2
-  ignore_errors: True
-  when: setup_cycloid_creds
+  ignore_errors: true
+  when: "setup_cycloid_creds"
 
-- name: Vault service is sealed | validate
-  fail: msg='Vault service is sealed, you should unseal it'
-  when: setup_cycloid_creds and (unseal is failed or unseal.json.errors == "Vault is sealed")
+- name: "Vault service is sealed | validate"
+  fail: "msg='Vault service is sealed, you should unseal it'"
+  when: "setup_cycloid_creds and (unseal is failed or unseal.json.errors == \"Vault is sealed\")"
 
 #
 # Concourse
 #
-- name: Check Concourse | validate
+- name: "Check Concourse | validate"
   uri:
     url: "https://{{ concourse_peer_address }}:{{ concourse_port }}/api/v1/info"
-    validate_certs: no
+    validate_certs: false
     status_code: 200
-    return_content: yes
-  register: concourse_info
-  until: '"version" in concourse_info.content'
+    return_content: true
+  register: "concourse_info"
+  until: "\"version\" in concourse_info.content"
   retries: 30
   delay: 10
-  ignore_errors: True
-  when: setup_cycloid_scheduler
+  ignore_errors: true
+  when: "setup_cycloid_scheduler"
 
-- name: Concourse service unvailable | validate
-  fail: msg='Concourse service unvailable'
-  when: setup_cycloid_scheduler and concourse_info is failed
+- name: "Concourse service unvailable | validate"
+  fail: "msg='Concourse service unvailable'"
+  when: "setup_cycloid_scheduler and concourse_info is failed"
 
 #
 # Cycloid api
 #
-- name: Check Cycloid api | validate
+- name: "Check Cycloid api | validate"
   uri:
     url: "http://localhost:3001/user"
-    validate_certs: no
+    validate_certs: false
     status_code: 403
-    return_content: yes
-  register: cycloid_api_status
-  until: '"Credential was rejected from API Request" in cycloid_api_status.content'
+    return_content: true
+  register: "cycloid_api_status"
+  until: "\"Credential was rejected from API Request\" in cycloid_api_status.content"
   retries: 30
   delay: 10
-  ignore_errors: True
-  when: setup_cycloid_core
+  ignore_errors: true
+  when: "setup_cycloid_core"
 
-- name: Cycloid api service unvailable | validate
-  fail: msg='Cycloid api service unvailable'
-  when: cycloid_api_status is failed and setup_cycloid_core
+- name: "Cycloid api service unvailable | validate"
+  fail: "msg='Cycloid api service unvailable'"
+  when: "cycloid_api_status is failed and setup_cycloid_core"
 
-- name: Check Cycloid api throught nginx ssl | validate
+- name: "Check Cycloid api throught nginx ssl | validate"
   uri:
     url: "https://localhost:443/user"
-    validate_certs: no
+    validate_certs: false
     status_code: 403
-    return_content: yes
+    return_content: true
     headers:
       Host: "{{ cycloid_api_dns }}"
-  register: cycloid_api_status_nginx
-  until: '"Credential was rejected from API Request" in cycloid_api_status_nginx.content'
+  register: "cycloid_api_status_nginx"
+  until: "\"Credential was rejected from API Request\" in cycloid_api_status_nginx.content"
   retries: 30
   delay: 10
-  ignore_errors: True
-  when: setup_cycloid_core
+  ignore_errors: true
+  when: "setup_cycloid_core"
 
-- name: Cycloid api throught nginx ssl unvailable | validate
-  fail: msg='Cycloid api throught nginx ssl unvailable'
-  when: cycloid_api_status_nginx is failed and setup_cycloid_core
+- name: "Cycloid api throught nginx ssl unvailable | validate"
+  fail: "msg='Cycloid api throught nginx ssl unvailable'"
+  when: "cycloid_api_status_nginx is failed and setup_cycloid_core"
 
 #
 # Nginx force https
 #
-- name: Check nginx proxy http | validate
+- name: "Check nginx proxy http | validate"
   uri:
     url: "http://localhost"
     status_code: 301
-    follow_redirects: none
-  register: nginx_http_curl
-  until: 'nginx_http_curl.location == "https://localhost/"'
+    follow_redirects: "none"
+  register: "nginx_http_curl"
+  until: "nginx_http_curl.location == \"https://localhost/\""
   retries: 30
   delay: 10
-  ignore_errors: True
-  when: setup_cycloid_core
+  ignore_errors: true
+  when: "setup_cycloid_core"
 
-- name: Nginx http listener unvailable | validate
-  fail: msg='Nginx http listener unvailable'
-  when: nginx_http_curl is failed and setup_cycloid_core
+- name: "Nginx http listener unvailable | validate"
+  fail: "msg='Nginx http listener unvailable'"
+  when: "nginx_http_curl is failed and setup_cycloid_core"

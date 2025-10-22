@@ -1,33 +1,33 @@
 ---
-- name: Pre-requisites to run stack
-  hosts: all
+- name: "Pre-requisites to run stack"
+  hosts: "all"
   # centos root user don't have usr/local/bin in PATH. It need to be defined for pip+awscli
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   tasks:
 
-    - name: "Update apt packages"
-      ansible.builtin.apt:
-        update_cache: true
-      when: ansible_os_family == 'Debian'
-      ignore_errors: true
+  - name: "Update apt packages"
+    ansible.builtin.apt:
+      update_cache: true
+    when: "ansible_os_family == 'Debian'"
+    ignore_errors: true
 
-    - name: "Update yum packages"
-      ansible.builtin.yum:
-        update_cache: true
-      when: ansible_os_family == 'RedHat'
-      ignore_errors: true
+  - name: "Update yum packages"
+    ansible.builtin.yum:
+      update_cache: true
+    when: "ansible_os_family == 'RedHat'"
+    ignore_errors: true
 
-    - name: "Install extra packages"
-      ansible.builtin.package:
-        name:
-          - python3-pip
-        state: present
+  - name: "Install extra packages"
+    ansible.builtin.package:
+      name:
+      - "python3-pip"
+      state: "present"
 
-    - name: "Force update pip to latest"
-      ansible.builtin.pip:
-        name: pip
-        state: latest
+  - name: "Force update pip to latest"
+    ansible.builtin.pip:
+      name: "pip"
+      state: "latest"
 
     # This should be re-enabled once ansible upgraded with debian 12
     # - name: "Install pip depends"
@@ -35,15 +35,15 @@
     #     requirements: "/home/{{ ansible_user }}/cycloid-onprem/pip-requirements.txt"
     #     state: latest
 
-    - name: Install bottle python package on version 0.11
-      ansible.builtin.pip:
-        name: ansible==8.7.*
+  - name: "Install bottle python package on version 0.11"
+    ansible.builtin.pip:
+      name: "ansible==8.7.*"
 
     # Issue with debian 11 pip lib (bvcrypt). Use the one from packages
-    - name: "Install extra packages"
-      ansible.builtin.package:
-        name:
-          - python3-docker
-          - python3-passlib
-          - python3-bcrypt
-        state: present
+  - name: "Install extra packages"
+    ansible.builtin.package:
+      name:
+      - "python3-docker"
+      - "python3-passlib"
+      - "python3-bcrypt"
+      state: "present"

@@ -1,14 +1,14 @@
 ---
-- name: Define service | cycloid-scheduler-sync-worker-keys
+- name: "Define service | cycloid-scheduler-sync-worker-keys"
   include_role:
-    name: mhutter.docker-systemd-service
+    name: "mhutter.docker-systemd-service"
   vars:
-    name: cycloid-scheduler-sync-worker-keys
+    name: "cycloid-scheduler-sync-worker-keys"
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ cycloid_scheduler_sync_worker_keys_image }}"
     container_volumes:
       # team_authorized_worker_keys.yml
-      - "{{ concourse_config_path }}:/datas"
+    - '{{ concourse_config_path }}:/datas'
     # Additionnal env file for approle
     # Adding pid letting this container able to send SIGNAL to Concourse for reloading authorized key files
     container_args: "--pid=container:concourse-web --env-file={{ concourse_config_path }}/approle-concourse-ro {{ container_args_extra }}"
@@ -18,7 +18,7 @@
       VAULT_MOUNT_POINT: "cycloid"
       VAULT_INSECURE_SKIP_VERIFY: "True"
       YAML_KEYS_FILE: "/datas/{{ concourse_team_authorized_worker_keys_path }}"
-  tags: docker-services
+  tags: "docker-services"
 
-- name: Force flush handlers to ensure container is started | cycloid-scheduler-sync-worker-keys
-  meta: flush_handlers
+- name: "Force flush handlers to ensure container is started | cycloid-scheduler-sync-worker-keys"
+  meta: "flush_handlers"
