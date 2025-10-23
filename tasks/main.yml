@@ -53,6 +53,8 @@
     - ansible.builtin.include_tasks: minio.yml
       when: setup_minio|bool
 
+    - ansible.builtin.include_tasks: post-setup.yml
+
   when: not uninstall|bool and not validate_only|bool
 
 # Wait and validate running services
@@ -92,4 +94,5 @@
 
     - ansible.builtin.include_tasks: dump_dbs_uninstall.yml
       when: dbs_dump != {} and inventory_hostname == groups['cycloid_core'][0]
+
   when: uninstall|bool
