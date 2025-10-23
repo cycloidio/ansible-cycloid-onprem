@@ -31,6 +31,13 @@ variable "cy_instances_cidr_blocks_allow" {
 }
 
 ###
+# vpc data
+###
+data "aws_vpc" "main" {
+  id = var.vpc_id
+}
+
+###
 
 # cy_instances
 
@@ -105,6 +112,15 @@ resource "aws_security_group" "cy_instances" {
   ingress {
     from_port   = 2222
     to_port     = 2222
+    protocol    = "tcp"
+    self        = true
+    cidr_blocks = var.cy_instances_cidr_blocks_allow
+  }
+
+  # Allow to fetch node-exporter metrics
+  ingress {
+    from_port   = 9100
+    to_port     = 9100
     protocol    = "tcp"
     self        = true
     cidr_blocks = var.cy_instances_cidr_blocks_allow

@@ -873,7 +873,7 @@ cycloid_job_kpi_import_container_cmd: '{% if ca_certificates_container_shared|bo
 #
 # Monitoring
 #
-worker_metrics_enabled: false
+enable_monitoring: false
 
 ###########################
 # report.yml playbook     #
