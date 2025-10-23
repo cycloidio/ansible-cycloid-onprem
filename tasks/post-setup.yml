@@ -1,0 +1,11 @@
+---
+# When Cycloid or its component Docker images are updated, outdated images are not automatically cleaned up.
+# To free disk space and remove unused resources, run docker prune
+- name: docker system prune | post-setup
+  become: true
+  shell: docker system prune -af --volumes
+  args:
+    executable: /bin/bash
+  no_log: true
+  ignore_errors: true
+  when: docker_system_prune|bool

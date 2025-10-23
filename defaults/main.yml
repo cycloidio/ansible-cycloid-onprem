@@ -344,6 +344,10 @@ vault_config:
   default_lease_ttl: "168h"
   max_lease_ttl: "720h"
 
+#. docker_system_prune(optional, bool): true
+#+ Run docker prune as post command to free disk space
+docker_system_prune: true
+
 ############
 # internal #
 ############
@@ -921,5 +925,4 @@ dbs_dump: {}
 #        SCW_SECRET_KEY:
 #        SCW_DEFAULT_ORGANIZATION_ID:
 #        SCW_DEFAULT_REGION:
-
 
