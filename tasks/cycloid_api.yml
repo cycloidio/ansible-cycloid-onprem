@@ -14,7 +14,7 @@
 - name: Copy vault approles in service directory | cycloid-core api
   copy:
     src: "{{ cycloid_local_datas_path }}/approles/approle-cycloid"
-    dest: "{{ cycloid_install_path }}/approle-cycloid"
+    dest: "{{ cycloid_api_path }}/approle-cycloid"
     mode: 0400
 
 - name: check if redis SSL enabled | cycloid-core api
@@ -55,7 +55,7 @@
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ cycloid_api_image }}"
     container_ports: "{{ cycloid_api_container_ports }}"
-    container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
+    container_args: "--env-file={{ cycloid_api_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
     container_cmd: "{{ cycloid_api_container_cmd }}"
     container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
