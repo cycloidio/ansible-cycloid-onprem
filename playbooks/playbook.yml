@@ -10,7 +10,7 @@
 
     - block:
         - name: "Requirements: Packages when Offline setup"
-          debug:
+          ansible.builtin.debug:
             msg: "{{ [ 'iptables', 'docker' ] + cycloid_packages_list }}"
 
         - name: "Get installed packages"
@@ -18,27 +18,27 @@
             manager: "auto"
 
         - name: "Check packages installed"
-          debug:
+          ansible.builtin.debug:
             msg: "{{ item }} installed"
           failed_when: item not in ansible_facts.packages
           with_items: "{{ [ 'iptables', 'docker' ] + cycloid_packages_list }}"
 
         - name: "Requirements: Pip packages when Offline setup"
-          debug:
+          ansible.builtin.debug:
             msg: "{{ [ 'pip', 'awscli', 'docker' ] }}"
 
         - name: "Requirements: ECR login for cycloid docker images when Offline setup"
-          debug:
+          ansible.builtin.debug:
             msg: "$(AWS_ACCESS_KEY_ID={{ cycloid_ecr_access_key }} AWS_SECRET_ACCESS_KEY={{ cycloid_ecr_secret_key }} aws ecr get-login --no-include-email --region eu-west-1)"
           when: not use_registry_scaleway and cycloid_ecr_access_key is defined and cycloid_ecr_secret_key is defined
 
         - name: "Requirements: Scaleway registry login for cycloid docker images when Offline setup"
-          debug:
+          ansible.builtin.debug:
             msg: $(SECRET_KEY_ID={{ cycloid_scw_registry_secret_key }} docker login rg.fr-par.scw.cloud/cycloidio -u nologin -p ${SECRET_KEY_ID})"
           when: use_registry_scaleway and cycloid_scw_registry_access_key is defined and cycloid_scw_registry_secret_key is defined
 
         - name: "Requirements: Docker images when Offline setup"
-          debug:
+          ansible.builtin.debug:
             msg: "{{ [ cycloid_frontend_image, cycloid_api_image, concourse_db_image, cycloid_cache_image, cycloid_db_image, concourse_web_image, vault_image, cycloid_nginx_image ] }}"
       when: offline_setup
 

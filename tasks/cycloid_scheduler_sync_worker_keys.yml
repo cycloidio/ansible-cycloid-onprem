@@ -3,7 +3,7 @@
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: cycloid-scheduler-sync-worker-keys
+    container_name: cycloid-scheduler-sync-worker-keys
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ cycloid_scheduler_sync_worker_keys_image }}"
     container_volumes:

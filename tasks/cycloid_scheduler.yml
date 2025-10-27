@@ -91,7 +91,7 @@
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: concourse-web
+    container_name: concourse-web
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{concourse_web_image}}"
     container_ports: "{{concourse_web_container_ports}}"

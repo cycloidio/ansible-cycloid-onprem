@@ -264,6 +264,13 @@ ca_certificates_container_shared: false
 cycloid_packages:
   debian:
     - python3-pip
+    - netcat-traditional
+    - default-mysql-client
+    - python3-setuptools
+    - gnupg2
+    - pass
+  debian-11:
+    - python3-pip
     - default-mysql-client
     - python3-setuptools
     - gnupg2

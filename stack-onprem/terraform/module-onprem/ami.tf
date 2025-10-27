@@ -30,7 +30,7 @@ data "aws_ami" "search" {
   ]
 
   #"379101102735", # old debian
-  #"136693071363", # debian10 & debian11
+  #"136693071363", # debian10 & debian11 ...
   #"125523088429", # centos
   #"099720109477", # Ubuntu
   #"309956199498", # RHEL9 ami-013d87f7217614e10

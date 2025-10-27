@@ -47,7 +47,7 @@
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: cycloid-cache
+    container_name: cycloid-cache
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ cycloid_cache_image }}"
     container_ports: "{{ cycloid_cache_container_ports }}"
@@ -70,7 +70,7 @@
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: cycloid-cache-asynqmon
+    container_name: cycloid-cache-asynqmon
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ cycloid_cache_mon_image }}"
     container_ports:

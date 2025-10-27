@@ -51,12 +51,12 @@
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: cycloid-api
+    container_name: cycloid-api
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ cycloid_api_image }}"
     container_ports: "{{ cycloid_api_container_ports }}"
     container_args: "--env-file={{ cycloid_api_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
-    container_cmd: "{{ cycloid_api_container_cmd }}"
+    container_cmd: "{{ cycloid_api_container_cmd|default('', true) }}"
     container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
       DB_NAME: "{{ cycloid_db_name }}"
@@ -269,11 +269,11 @@
           register: cy_admin_apikey
 
         - name: Local save of apikey | cycloid-core api
-          local_action:
-            module: copy
+          copy:
             content: "{{ cy_admin_apikey.json.data.token }}"
-            dest: "{{playbook_dir}}/admin.apikey"
-          become: no
+            dest: "{{ playbook_dir }}/admin.apikey"
+          delegate_to: localhost
+          become: false
       when: cycloid_admin_apikey and cycloid_licence != ''
 
     - block:
@@ -400,12 +400,12 @@
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: cycloid-api-task-manager
+    container_name: cycloid-api-task-manager
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{cycloid_api_image}}"
     container_ports: "{{ cycloid_api_task_manage_container_ports }}"
     container_args: "--env-file={{ cycloid_install_path }}/approle-cycloid {{ container_args_update_ca }} {{ container_args_extra }}"
-    container_cmd: "{{ cycloid_api_container_cmd }}"
+    container_cmd: "{{ cycloid_api_container_cmd|default('', true) }}"
     container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
     container_env:
       # Run backend as worker/task-manager

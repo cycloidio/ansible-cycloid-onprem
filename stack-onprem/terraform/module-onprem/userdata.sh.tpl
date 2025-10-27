@@ -15,7 +15,7 @@ apt_wait
 
 # Debug tools
 apt-get update -y
-apt-get install net-tools jq netcat-traditional rsync vim git -y
+apt-get install net-tools jq rsync vim git -y
 
 # To install SSM Agent on Debian Server
 # https://docs.aws.amazon.com/systems-manager/latest/userguide/agent-install-deb.html

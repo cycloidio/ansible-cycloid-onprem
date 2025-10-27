@@ -1,6 +1,5 @@
 ---
 roles:
-
 - src: git@github.com:cycloidio/ansible-cycloid-onprem.git
   version: master
   name: ansible-cycloid-onprem
@@ -21,7 +20,7 @@ collections:
   # Install a collection from Ansible Galaxy.
   - name: community.docker
     # latest tag, can be updated
-    version: 4.6.0
+    version: 4.8.1
     source: https://galaxy.ansible.com
 
   # opensource collection for prometheus

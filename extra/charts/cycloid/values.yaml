@@ -9,6 +9,7 @@ commonLabels: {}
 # Common annotations to add to all Kubernetes objects created by this chart.
 commonAnnotations: {}
 
+# Deprecated: only used with legacy AWS ECR #
 # Cycloid image registry configuration.
 # To access Cycloid docker images, a docker-registry token that expires is used.
 # By default, the cronjob (via the renewToken parameter) is enabled to renew the docker-registry token
@@ -67,20 +68,17 @@ frontend:
     containerPort: 80
 
   # List of additional environment variables to set for the frontend container.
-  extraEnvVars:
-    {}
+  extraEnvVars: {}
     # MYENVVAR: VALUE
 
   # List of additional environment variables to set from existing Kubernetes Secrets.
-  extraSecretEnvVars:
-    []
+  extraSecretEnvVars: []
     # - envName: MYENVVAR
     #   secretName: secret_name
     #   secretKey: SECRET_KEY
 
   # List of additional environment variables to set from existing ConfigMaps.
-  extraConfigMapEnvVars:
-    []
+  extraConfigMapEnvVars: []
     # - envName: MYENVVAR
     #   configMapName: configmap_name
     #   configMapKey: CONFIGMAP_KEY
@@ -125,8 +123,7 @@ frontend:
     enabled: true
     # Class name for the ingress controller. Example "nginx"
     className: ""
-    annotations:
-      {}
+    annotations: {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     hosts:
@@ -140,8 +137,7 @@ frontend:
     #    hosts:
     #      - console.cycloid.local
 
-  resources:
-    {}
+  resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -279,8 +275,7 @@ backend:
 
   # extraConfigMapEnvVars is a list of extra environment variables to set.
   # These variables take value from existing ConfigMap objects.
-  extraConfigMapEnvVars:
-    []
+  extraConfigMapEnvVars: []
     # - envName: AWS_SECRET_ACCESS_KEY
     #   configMapName: vault
     #   configMapKey: AWS_SECRET_ACCESS_KEY
@@ -355,8 +350,7 @@ backend:
     #    hosts:
     #      - api.cycloid.local
 
-  resources:
-    {}
+  resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -413,8 +407,7 @@ backend:
   nodeSelector: {}
 
   cronJob:
-    resources:
-      {}
+    resources: {}
       # We usually recommend not to specify cronjob resources and to leave this as a conscious
       # choice for the user. This also increases chances charts run on environments with little
       # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -918,8 +911,7 @@ concourse:
       ##     hosts:
       ##       - concourse.domain.com
       ##
-      tls:
-        []
+      tls: []
         #  - secretName: cycloid-local-tls
         #    hosts:
         #      - concourse.cycloid.local
@@ -1207,11 +1199,9 @@ vault:
     # from Kubernetes to access Vault pods.
     ingress:
       enabled: false
-      labels:
-        {}
+      labels: {}
         # traffic: external
-      annotations:
-        {}
+      annotations: {}
         # |
         # kubernetes.io/ingress.class: nginx
         # kubernetes.io/tls-acme: "true"

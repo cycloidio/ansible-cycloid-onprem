@@ -36,7 +36,7 @@
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: vault
+    container_name: vault
     container_volumes:
       - "{{ vault_config_path }}/config:/vault/config"
       - "{{ vault_config_path }}/file:/vault/file"
@@ -80,18 +80,17 @@
   when: inventory_hostname == groups['cycloid_creds'][0] and vault_init.json.initialized == false
 
 - name: Local save of vault creds | cycloid-creds
-  local_action:
-    module: copy
-    content: "{{vault_tokens.stdout | from_json | to_nice_json}}"
+  copy:
+    content: "{{ vault_tokens.stdout | from_json | to_nice_json }}"
     dest: "{{ cycloid_local_datas_path }}/vault.secret"
-  become: no
+  delegate_to: localhost
+  become: false
   ignore_errors: "{{ ansible_check_mode }}"
   when: inventory_hostname == groups['cycloid_creds'][0] and vault_tokens is not skipped
-  # run_once: true
 
 - name: Read local vault.secret | cycloid-creds
   set_fact:
-    vault_local_token: "{{(lookup('file', '{{ cycloid_local_datas_path }}/vault.secret')) | to_json | from_json }}"
+    vault_local_token: "{{ lookup('file', cycloid_local_datas_path + '/vault.secret') | from_json }}"
 
 - name: Copy unseal vault keys | cycloid-creds
   lineinfile:
@@ -140,11 +139,11 @@
   when: vault_tokens is not skipped and inventory_hostname == groups['cycloid_creds'][0]
 
 - name: Check approles/approle-cycloid exists | cycloid-creds
-  local_action:
-    module: stat
+  stat:
     path: "{{ cycloid_local_datas_path }}/approles/approle-cycloid"
   register: stat_approles
   when: inventory_hostname == groups['cycloid_creds'][0]
+  delegate_to: localhost
   become: false
 
 - name: Create approle | cycloid-creds
