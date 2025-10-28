@@ -42,7 +42,7 @@
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: nginx
+    container_name: nginx
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ cycloid_nginx_image }}"
     #container_links: "{{ cycloid_api_container_links + ['cycloid-api', 'cycloid-frontend'] }}"

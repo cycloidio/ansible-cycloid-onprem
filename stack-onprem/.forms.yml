@@ -224,12 +224,17 @@ use_cases:
                 key: debian_ami_name
                 widget: auto_complete
                 type: string
-                default: "debian-11-amd64-*"
+                default: "debian-13-amd64-*"
                 values:
                   - "debian-11-amd64-*"
                   - "debian-12-amd64-*"
+                  - "debian-13-amd64-*"
                   - "CentOS 8.3.2011 x86_64*"
                   - "ubuntu/images/hvm-ssd/ubuntu-focal-22.04-amd64-server-*"
+                  - "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"
+              # https://cloud-images.ubuntu.com/locator/ec2/
+              # aws ec2 describe-images --filters "Name=name,Values=ubuntu/images/hvm-ssd/ubuntu-*"
+              # aws ec2 describe-images --image-ids ami-049442a6cf8319180
               - name: "Base ami ID (optional)"
                 description: "Type of Aws EC2 frontend servers."
                 key: base_ami_id

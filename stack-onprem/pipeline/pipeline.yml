@@ -497,10 +497,10 @@ jobs:
                     fi
 
                     # If centos sudo yum install python3 -y ?
+                    set -x
                     ansible-playbook -u ${REMOTE_USER} --become -i ${MAIN_INSTANCE}, ${DIR}/ansible-cycloid-onprem/stack-onprem/ansible/playbook.yml
 
                     echo "Ansible run"
-                    set -x
                     ssh -o 'ForwardAgent=yes' ${REMOTE_USER}@${MAIN_INSTANCE} "cd cycloid-onprem && ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_FORCE_COLOR=true ansible-playbook -u ${REMOTE_USER} -b -i inventory playbook.yml -e @extra_ansible_vars.json"
                     set +x
 

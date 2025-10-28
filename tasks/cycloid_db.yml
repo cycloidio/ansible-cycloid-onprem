@@ -32,7 +32,7 @@
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: cycloid-db
+    container_name: cycloid-db
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ cycloid_db_image }}"
     container_ports: "{{ cycloid_db_container_ports }}"

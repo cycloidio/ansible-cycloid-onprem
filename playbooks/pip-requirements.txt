@@ -1,4 +1,7 @@
-ansible==8.7.*
+ansible==12.1.*
 docker
 passlib
-bcrypt
+# downgrade due to https://github.com/ansible/ansible/pull/85970
+# should be remove once ansible 12.1.1 released
+# bcrypt is used to encrypt fake smtp mailhog password
+bcrypt==4.3.0

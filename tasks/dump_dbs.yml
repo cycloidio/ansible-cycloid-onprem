@@ -3,7 +3,7 @@
   include_role:
     name: mhutter.docker-systemd-service
   vars:
-    name: "dump_{{ item['name'] }}"
+    container_name: "dump_{{ item['name'] }}"
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ item['image'] }}"
     container_env: "{{ item['env'] }}"

@@ -43,7 +43,7 @@
           - "{{ elasticsearch_config_path }}/ssl.crt:/usr/share/elasticsearch/config/ssl.crt:ro"
         container_ports: "{{ elasticsearch_container_ports }}"
         container_args: "{{ elasticsearch_container_args }} {{ container_args_extra }}"
-        container_cmd: "{{ elasticsearch_container_cmd }}"
+        container_cmd: "{{ elasticsearch_container_cmd|default('', true) }}"
         container_labels:
           - ansible.managed=true
           - systemd.managed=true
