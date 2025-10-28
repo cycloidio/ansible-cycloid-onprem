@@ -113,7 +113,7 @@
   meta: flush_handlers
 
 - name: Wait and check if we have to create the first cycloid-api user | cycloid-core api
-  command: "mysql --protocol TCP -h {{ cycloid_db_host }} -P {{ cycloid_db_port }} -u {{ cycloid_db_user }} -p{{ cycloid_db_password }} {{ cycloid_db_name }} -Ns -e 'SELECT canonical FROM users;'"
+  command: "mysql --skip-ssl-verify-server-cert --protocol TCP -h {{ cycloid_db_host }} -P {{ cycloid_db_port }} -u {{ cycloid_db_user }} -p{{ cycloid_db_password }} {{ cycloid_db_name }} -Ns -e 'SELECT canonical FROM users;'"
   register: users
   retries: 30
   delay: 10
