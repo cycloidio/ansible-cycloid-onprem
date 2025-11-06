@@ -1,4 +1,4 @@
-{{- if .Values.backend.taskManager.enabled }}
+{{- if and .Values.backend.enabled .Values.backend.taskManager.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
