@@ -92,6 +92,12 @@ for i in $(ls *.tgz);do tar zxf $i;done ; rm *.tgz
 cd -
 ```
 
+###
+You might want to update the extra image such
+
+* `concourse.web.extraInitContainers` concourse-team-authorized-key-init [busybox image](https://hub.docker.com/_/busybox/tags)
+* `concourse.web.sidecarContainers` concourse-team-authorized-key-sync [cycloid/concourse-team-authorized-key-sync image](https://hub.docker.com/r/cycloid/concourse-team-authorized-key-sync/tags)
+
 ## Update cycloid-intercept script
 
 If the cycloid-intercept has been updated, make sure to push the latest version on the public s3 bucket
