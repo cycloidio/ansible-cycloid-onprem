@@ -1,0 +1,6 @@
+kind: Changed
+body: pin docker image busybox to 1.37 and concourse-team-authorized-key-sync to v1
+time: 2025-11-18T14:23:31.910050898+01:00
+custom:
+    Ref: Pull
+    RefID: "254"

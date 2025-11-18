@@ -774,7 +774,8 @@ concourse:
     ##
     sidecarContainers:
       - name: concourse-team-authorized-key-sync
-        image: cycloid/concourse-team-authorized-key-sync:latest
+        # https://hub.docker.com/r/cycloid/concourse-team-authorized-key-sync/tags
+        image: cycloid/concourse-team-authorized-key-sync:v1
         imagePullPolicy: Always
         env:
           - name: VAULT_URL
@@ -808,7 +809,8 @@ concourse:
     ##
     extraInitContainers:
       - name: concourse-team-authorized-key-init
-        image: busybox
+        # https://hub.docker.com/_/busybox/tags
+        image: busybox:1.37
         env:
           - name: YAML_KEYS_FILE
             value: /etc/concourse-teams/tsa-team-authorized-keys.yaml
