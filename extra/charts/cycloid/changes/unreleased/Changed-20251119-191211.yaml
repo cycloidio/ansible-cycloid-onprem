@@ -1,0 +1,6 @@
+kind: Changed
+body: replace cronJob by cronjob
+time: 2025-11-19T19:12:11.174388187+01:00
+custom:
+    Ref: Pull
+    RefID: "256"

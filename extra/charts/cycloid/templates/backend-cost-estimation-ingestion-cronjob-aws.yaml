@@ -1,4 +1,4 @@
-{{- if and .Values.backend.enabled .Values.backend.cronJob.costEstimation.aws.enabled }}
+{{- if and .Values.backend.enabled .Values.backend.cronjob.costEstimation.aws.enabled }}
 {{- if semverCompare ">=1.21-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: batch/v1
 {{- else -}}
@@ -20,7 +20,7 @@ metadata:
 spec:
   suspend: false
   concurrencyPolicy: Replace
-  schedule: {{ .Values.backend.cronJob.costEstimation.aws.schedule }}
+  schedule: {{ .Values.backend.cronjob.costEstimation.aws.schedule }}
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3
   jobTemplate:
@@ -59,11 +59,11 @@ spec:
               image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
               args:
-                {{- range .Values.backend.cronJob.costEstimation.aws.args }}
+                {{- range .Values.backend.cronjob.costEstimation.aws.args }}
                 - {{ . }}
                 {{- end }}
               resources:
-                {{- toYaml .Values.backend.cronJob.resources | nindent 16 }}
+                {{- toYaml .Values.backend.cronjob.resources | nindent 16 }}
               env:
                 - name: "RUN_MIGRATIONS"
                   value: "0"
