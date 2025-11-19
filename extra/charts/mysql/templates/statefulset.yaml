@@ -33,6 +33,10 @@ spec:
         {{- include "mysql.labels" . | nindent 8 }}
         {{- include "mysql.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ include "mysql.primary.fullname" . }}
       automountServiceAccountToken: {{ .Values.primary.automountServiceAccountToken }}
       {{- if .Values.primary.nodeSelector }}

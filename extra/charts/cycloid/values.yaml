@@ -265,13 +265,12 @@ backend:
   # extraSecretEnvVars is a list of extra environment variables to set.
   # These variables take value from existing Secret objects.
   extraSecretEnvVars:
-    - envName: REDIS_CA_CERT
-      secretName: cycloid-redis-crt
-      secretKey: ca.crt
-
-      # - envName: COST_EXPLORER_ES_CA_CERT
-      #   secretName: cost-explorer-es-http-certs-public
-      #   secretKey: ca.crt
+    # - envName: REDIS_CA_CERT
+    #   secretName: cycloid-redis-crt
+    #   secretKey: ca.crt
+    # - envName: COST_EXPLORER_ES_CA_CERT
+    #   secretName: cost-explorer-es-http-certs-public
+    #   secretKey: ca.crt
 
   # extraConfigMapEnvVars is a list of extra environment variables to set.
   # These variables take value from existing ConfigMap objects.
