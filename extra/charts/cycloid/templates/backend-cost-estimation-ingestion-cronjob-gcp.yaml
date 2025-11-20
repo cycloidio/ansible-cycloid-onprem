@@ -1,4 +1,4 @@
-{{- if and .Values.backend.enabled .Values.backend.cronJob.costEstimation.gcp.enabled }}
+{{- if and .Values.backend.enabled .Values.backend.cronjob.costEstimation.gcp.enabled }}
 {{- if semverCompare ">=1.21-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: batch/v1
 {{- else -}}
@@ -20,7 +20,7 @@ metadata:
 spec:
   suspend: false
   concurrencyPolicy: Replace
-  schedule: {{ .Values.backend.cronJob.costEstimation.gcp.schedule }}
+  schedule: {{ .Values.backend.cronjob.costEstimation.gcp.schedule }}
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3
   jobTemplate:
@@ -59,11 +59,11 @@ spec:
               image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
               args:
-                {{- range .Values.backend.cronJob.costEstimation.gcp.args }}
+                {{- range .Values.backend.cronjob.costEstimation.gcp.args }}
                 - {{ . }}
                 {{- end }}
               resources:
-                {{- toYaml .Values.backend.cronJob.resources | nindent 16 }}
+                {{- toYaml .Values.backend.cronjob.resources | nindent 16 }}
               env:
                 - name: "RUN_MIGRATIONS"
                   value: "0"
@@ -109,7 +109,7 @@ spec:
                 - name: "PRICING_INGEST_GOOGLE_CREDENTIAL_JSON"
                   valueFrom:
                     secretKeyRef:
-                      name: {{ .Values.backend.cronJob.costEstimation.gcp.secretName }}
+                      name: {{ .Values.backend.cronjob.costEstimation.gcp.secretName }}
                       key: gcp-credentials.json
                       optional: true
 

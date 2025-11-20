@@ -265,13 +265,12 @@ backend:
   # extraSecretEnvVars is a list of extra environment variables to set.
   # These variables take value from existing Secret objects.
   extraSecretEnvVars:
-    - envName: REDIS_CA_CERT
-      secretName: cycloid-redis-crt
-      secretKey: ca.crt
-
-      # - envName: COST_EXPLORER_ES_CA_CERT
-      #   secretName: cost-explorer-es-http-certs-public
-      #   secretKey: ca.crt
+    # - envName: REDIS_CA_CERT
+    #   secretName: cycloid-redis-crt
+    #   secretKey: ca.crt
+    # - envName: COST_EXPLORER_ES_CA_CERT
+    #   secretName: cost-explorer-es-http-certs-public
+    #   secretKey: ca.crt
 
   # extraConfigMapEnvVars is a list of extra environment variables to set.
   # These variables take value from existing ConfigMap objects.
@@ -406,7 +405,7 @@ backend:
   #   beta.kubernetes.io/arch: amd64
   nodeSelector: {}
 
-  cronJob:
+  cronjob:
     resources: {}
       # We usually recommend not to specify cronjob resources and to leave this as a conscious
       # choice for the user. This also increases chances charts run on environments with little
@@ -423,11 +422,11 @@ backend:
       enabled: true
       schedule: "0 */1 * * *"
 
-    # Injestion cronJob for Cloud Cost Management
+    # Injestion cronjob for Cloud Cost Management
     ccm:
       schedule: "0 0 * * *"
 
-    # Cloud provider price injestion cronJob for Cost Estimation
+    # Cloud provider price injestion cronjob for Cost Estimation
     costEstimation:
       # Ingest the price of the AWS cloud provider for use in the Cost Estimation feature.
       aws:

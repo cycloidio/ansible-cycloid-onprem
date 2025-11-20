@@ -38,6 +38,10 @@ spec:
       securityContext:
           fsGroup: 1001
           fsGroupChangePolicy: Always
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ template "redis.masterServiceAccountName" . }}
       automountServiceAccountToken: false
       {{- if .Values.master.nodeSelector }}

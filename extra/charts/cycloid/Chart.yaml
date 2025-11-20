@@ -41,14 +41,14 @@ dependencies:
     repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/mysql/
     tags:
       - mysql
-    version: 0.1.0
+    version: 0.1.1
     condition: mysql.enabled
 
   - name: redis
     repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/redis/
     tags:
       - redis
-    version: 0.1.0
+    version: 0.1.2
     condition: redis.enabled
 
   - name: concourse

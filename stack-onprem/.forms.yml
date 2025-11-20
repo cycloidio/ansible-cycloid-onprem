@@ -212,7 +212,7 @@ use_cases:
                 key: cy_instances_type
                 widget: auto_complete
                 type: string
-                default: "t3.small"
+                default: "t3.medium"
                 values:
                   - "t3.micro"
                   - "t3.small"
