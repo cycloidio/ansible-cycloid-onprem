@@ -1,0 +1,6 @@
+kind: Changed
+body: 'redis: upgrade to 8.4'
+time: 2025-11-24T12:09:47.567671898+01:00
+custom:
+    Ref: Pull
+    RefID: "258"
