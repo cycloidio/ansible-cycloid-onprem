@@ -48,7 +48,7 @@ dependencies:
     repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/redis/
     tags:
       - redis
-    version: 0.1.2
+    version: 0.2.0
     condition: redis.enabled
 
   - name: concourse
