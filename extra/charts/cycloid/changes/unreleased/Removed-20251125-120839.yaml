@@ -1,6 +1,0 @@
-kind: Removed
-body: remove k8s-wait-for initcontainer
-time: 2025-11-25T12:08:39.591174645+01:00
-custom:
-    Ref: Pull
-    RefID: "259"
