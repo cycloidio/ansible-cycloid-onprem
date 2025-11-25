@@ -91,7 +91,7 @@ frontend:
 
   serviceAccount:
     # Specify whether a service account should be created for the frontend.
-    create: true
+    create: false
     # Annotations to add to the service account.
     annotations: {}
     # Name of the service account to use. If not set, a name is generated.
@@ -299,7 +299,7 @@ backend:
 
   serviceAccount:
     # Specifies whether a service account should be created
-    create: true
+    create: false
     # Annotations to add to the service account
     annotations: {}
     # The name of the service account to use.
