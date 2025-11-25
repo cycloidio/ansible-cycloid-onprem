@@ -1,0 +1,6 @@
+kind: Removed
+body: do no create serviceAccount by default
+time: 2025-11-25T12:14:06.057024457+01:00
+custom:
+    Ref: Pull
+    RefID: "259"
