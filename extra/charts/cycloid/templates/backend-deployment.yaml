@@ -39,35 +39,6 @@ spec:
       {{- end }}
 
       initContainers:
-        {{- if .Values.mysql.enabled }}
-        - name: wait-for-mysql
-          image: cycloid/k8s-wait-for:v1.29.8
-          imagePullPolicy: Always
-          args:
-            - "service"
-            - "-lapp.kubernetes.io/instance=cycloid"
-            - "-lapp.kubernetes.io/name=mysql"
-            - "-lapp.kubernetes.io/component=primary"
-        {{- end }}
-        {{- if .Values.redis.enabled }}
-        - name: wait-for-redis
-          image: cycloid/k8s-wait-for:v1.29.8
-          imagePullPolicy: Always
-          args:
-            - "service"
-            - "-lapp.kubernetes.io/instance=cycloid"
-            - "-lapp.kubernetes.io/name=redis"
-            - "-lapp.kubernetes.io/component=master"
-        {{- end }}
-        {{- if .Values.vault.enabled }}
-        - name: wait-for-vault
-          image: cycloid/k8s-wait-for:v1.29.8
-          imagePullPolicy: Always
-          args:
-            - "service"
-            - "-lapp.kubernetes.io/instance=cycloid"
-            - "-lapp.kubernetes.io/name=vault"
-        {{- end }}
         - name: migrations
           {{- if .Values.backend.securityContext.enabled }}
           securityContext: {{- omit .Values.backend.securityContext "enabled" | toYaml | nindent 12 }}
