@@ -657,6 +657,7 @@ externalElasticsearch:
 # Configuration values for the concourse dependency.
 # Ref: https://github.com/concourse/concourse-chart
 #
+
 concourse:
   ## Use the Concourse chart dependency.
   ##
@@ -696,6 +697,9 @@ concourse:
       ## Example: http://ci.concourse-ci.org
       ##
       externalUrl: http://concourse.cycloid.local
+
+      encryption:
+        enabled: true
 
       # Disable the use of Kubernetes Secrets as the credential provider for concourse pipelines (true by default).
       kubernetes:
@@ -1088,6 +1092,10 @@ concourse:
     ## For details of expected format, see https://concourse-ci.org/local-auth.html
     ##
     localUsers: "cycloid:##concourse-password##"
+
+    ## Secrets for DB encryption
+    ## This need to be 16 or 32 characters long
+    encryptionKey: "##concourse-web-encryption-key##"
 
     ## Concourse Host Keys.
     ## Ref: https://concourse-ci.org/install.html#generating-keys
