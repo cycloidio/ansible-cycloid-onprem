@@ -1,0 +1,6 @@
+kind: Added
+body: 'concourse: enable encryption key'
+time: 2025-12-04T12:12:38.355914899+01:00
+custom:
+    Ref: Pull
+    RefID: "261"

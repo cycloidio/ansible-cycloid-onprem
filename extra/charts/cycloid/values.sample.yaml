@@ -264,6 +264,10 @@ concourse:
     ##
     localUsers: "cycloid:##concourse-password##"
 
+    ## Secrets for DB encryption
+    ## This need to be 16 or 32 characters long
+    encryptionKey: "##concourse-web-encryption-key##"
+
     ## Concourse Host Keys.
     ## Ref: https://concourse-ci.org/install.html#generating-keys
     ##

@@ -20,6 +20,7 @@ PATTERNS="
 ##redis-auth-password##
 ##concourse-postgresql-auth-postgresPassword##
 ##concourse-postgresql-auth-password##
+##concourse-web-encryption-key##
 "
 set +x
 if [ ! -f "$VALUES_CUSTOM_YAML" ]; then
