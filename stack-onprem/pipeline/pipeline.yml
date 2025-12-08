@@ -373,6 +373,7 @@ jobs:
                     CYCLOID_CRYPTO_SIGNING_KEY=$(jq -r .password.signing ${DIR}/tfstate/metadata)
                     CONCOURSE_AUTH_PASSWORD=$(jq -r .password.concourse ${DIR}/tfstate/metadata)
                     CONCOURSE_DB_PASSWORD=$(jq -r .password.postgres ${DIR}/tfstate/metadata)
+                    CONCOURSE_ENCRYPTION_KEY=$(jq -r .password.concourseencrypt ${DIR}/tfstate/metadata)
                     CYCLOID_DB_PASSWORD=$(jq -r .password.mysql ${DIR}/tfstate/metadata)
                     CYCLOID_ELASTICSEARCH_PASSWORD=$(jq -r .password.elasticsearch ${DIR}/tfstate/metadata)
                     CYCLOID_JWT_KEY_1=$(jq -r .password.jwt_key ${DIR}/tfstate/metadata)
@@ -406,6 +407,7 @@ jobs:
                     cycloid_crypto_signing_key: "${CYCLOID_CRYPTO_SIGNING_KEY}"
                     # Set concourse admin user password
                     concourse_auth_password: "${CONCOURSE_AUTH_PASSWORD}"
+                    concourse_encryption_key: "${CONCOURSE_ENCRYPTION_KEY}"
 
                     # SMTP
                     cycloid_email_addr_from: "Cycloid Onprem <noreply-${ENV}@cycloid.io>"
