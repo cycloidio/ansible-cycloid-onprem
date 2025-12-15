@@ -678,9 +678,9 @@ jobs:
                     envsubst '$STARTSTOP' < stack/stack-onprem/pipeline/start-stop-req.yml  | python -c 'import yaml; import json; import sys; print(json.dumps(yaml.safe_load(sys.stdin)));' > start-stop-req.json
 
                     # set product variables
-                    envsubst '$CY_API_KEY $ENV $CY_ORG $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < start-stop-req.json > start-stop-req-generated.json
+                    envsubst '$COMPONENT $CY_API_KEY $ENV $CY_ORG $PROJECT $AWS_DEFAULT_REGION $AWS_SECRET_ACCESS_KEY $AWS_ACCESS_KEY_ID' < start-stop-req.json > start-stop-req-generated.json
 
-                    return_code=$(curl -s -o output -w "%{http_code}" "${CY_API_URL}/organizations/$CY_ORG/projects/$PROJECT/pipelines" --compressed \
+                    return_code=$(curl -s -o output -w "%{http_code}" "${CY_API_URL}/organizations/$CY_ORG/projects/$PROJECT/environments/$ENV/components/$COMPONENT/pipelines" --compressed \
                     -H "authorization: Bearer ${CY_API_KEY}" \
                     -H 'content-type: application/vnd.cycloid.io.v1+json' \
                     -H 'Accept: */*' -H 'Connection: keep-alive' \
@@ -691,7 +691,14 @@ jobs:
                        EXIT_STATUS=1
                     fi
 
-                    cy --insecure --project start-stop-${PROJECT} --env ${ENV} pipeline unpause
+                    curl "${CY_API_URL}/organizations/$CY_ORG/projects/$PROJECT/environments/$ENV/components/$COMPONENT/pipelines/start-stop-$PROJECT-$ENV-$COMPONENT/unpause" \
+                      -H "authorization: Bearer ${CY_API_KEY}" \
+                      -H 'content-type: application/vnd.cycloid.io.v1+json' \
+                      -H 'Accept: */*' -H 'Connection: keep-alive' \
+                      -X 'PUT'
+                    # replace when supported
+                    # cy --insecure pipeline unpause --project "${PROJECT}" --env ${ENV} --component $COMPONENT
+
                     echo ""
 
                     # # InfraView for dummy/test
@@ -725,6 +732,7 @@ jobs:
                 CY_VERSION: latest
                 CY_API_URL: ($ .api_url $)
                 ENV: ($ .environment $)
+                COMPONENT: ($ .component $)
                 PROJECT: ($ .project $)
                 # BUCKET_PATH: ($ .project $)/($ .environment $)/($ .project $)-($ .environment $).tfstate
                 # BUCKET_NAME: ($ .organization $)-terraform-remote-state

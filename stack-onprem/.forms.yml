@@ -159,6 +159,7 @@ use_cases:
                 widget: text_area
                 type: map
                 default:
+                  # do not create first user via ansible
                   cycloid_api_provisioning: "false"
 
       # Use local ES, if needed can be exposed via extra vars
