@@ -685,7 +685,7 @@ jobs:
                     -H 'content-type: application/vnd.cycloid.io.v1+json' \
                     -H 'Accept: */*' -H 'Connection: keep-alive' \
                     --data-binary "@start-stop-req-generated.json")
-                    if [[ "$return_code" != "204" && "$return_code" != "422" ]]; then
+                    if [[ "$return_code" != "200" ]]; then
                        echo "error, return code $return_code"
                        cat output
                        EXIT_STATUS=1
