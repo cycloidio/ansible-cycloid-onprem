@@ -31,8 +31,13 @@ cycloid_scheduler_base_env:
     CONCOURSE_POSTGRES_PASSWORD: "{{concourse_db_password}}"
     CONCOURSE_LOG_LEVEL: "{{concourse_log_level}}"
     CONCOURSE_TSA_LOG_LEVEL: "{{concourse_log_level}}"
+    CONCOURSE_ENCRYPTION_KEY: "{{ concourse_encryption_key | default(omit, true) }}"
+    CONCOURSE_OLD_ENCRYPTION_KEY: "{{ concourse_old_encryption_key | default(omit, true) }}"
     http_proxy: "{{ http_proxy }}"
     https_proxy: "{{ http_proxy }}"
     no_proxy: "{{ no_proxy }}"
 
 cycloid_scheduler_env: "{{ cycloid_scheduler_base_env | combine(cycloid_scheduler_extra_env) }}"
+
+
+

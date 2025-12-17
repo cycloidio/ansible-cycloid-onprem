@@ -631,6 +631,12 @@ concourse_host_key: "{{lookup('file', 'keys/id_rsa')}}"
 concourse_authorized_worker_keys:
   - "{{lookup('file', 'keys/id_rsa.pub')}}"
 
+
+# --encryption-key=  A 16 or 32 length key used to encrypt sensitive information before storing it in the database.
+concourse_encryption_key: ""
+# --old-encryption-key=  Encryption key previously used for encrypting  sensitive information. If provided without a new key, data is encrypted. If provided with a new key, data is
+concourse_old_encryption_key: ""
+
 #
 # API
 #
