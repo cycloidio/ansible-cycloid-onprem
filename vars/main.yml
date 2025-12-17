@@ -31,13 +31,14 @@ cycloid_scheduler_base_env:
     CONCOURSE_POSTGRES_PASSWORD: "{{concourse_db_password}}"
     CONCOURSE_LOG_LEVEL: "{{concourse_log_level}}"
     CONCOURSE_TSA_LOG_LEVEL: "{{concourse_log_level}}"
-    CONCOURSE_ENCRYPTION_KEY: "{{ concourse_encryption_key | default(omit, true) }}"
-    CONCOURSE_OLD_ENCRYPTION_KEY: "{{ concourse_old_encryption_key | default(omit, true) }}"
+    # Require ansible > 2.10 uncomment this and the following cycloid_scheduler_env when we will remove ansible 2.10/10.1 compat
+    #CONCOURSE_ENCRYPTION_KEY: "{{ concourse_encryption_key | default(omit, true) }}"
+    #CONCOURSE_OLD_ENCRYPTION_KEY: "{{ concourse_old_encryption_key | default(omit, true) }}"
     http_proxy: "{{ http_proxy }}"
     https_proxy: "{{ http_proxy }}"
     no_proxy: "{{ no_proxy }}"
 
-cycloid_scheduler_env: "{{ cycloid_scheduler_base_env | combine(cycloid_scheduler_extra_env) }}"
-
-
+# Require ansible > 2.10 uncomment this and the following cycloid_scheduler_env when we will remove ansible 2.10/10.1 compat
+#cycloid_scheduler_env: "{{ cycloid_scheduler_base_env | combine(cycloid_scheduler_extra_env) }}"
+cycloid_scheduler_env: "{{ cycloid_scheduler_base_env | combine(cycloid_scheduler_extra_env) | combine({'CONCOURSE_ENCRYPTION_KEY': concourse_encryption_key} if concourse_encryption_key is defined and concourse_encryption_key != '' else {}) | combine({'CONCOURSE_OLD_ENCRYPTION_KEY': concourse_old_encryption_key} if concourse_old_encryption_key is defined and concourse_old_encryption_key != '' else {}) }}"
 
