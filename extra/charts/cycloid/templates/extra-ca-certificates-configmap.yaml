@@ -1,0 +1,21 @@
+{{- if and .Values.extraCaCertificates.enabled .Values.extraCaCertificates.certs }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-extra-ca" (include "cycloid.name" .) | trunc 63 | trimSuffix "-" }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+{{- range $name, $cert := .Values.extraCaCertificates.certs }}
+  {{ $name }}.crt: |
+{{ $cert | indent 4 }}
+{{- end }}
+{{- end }}

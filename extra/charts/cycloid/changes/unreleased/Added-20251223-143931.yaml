@@ -1,0 +1,6 @@
+kind: Added
+body: extraCaCertificates allows users to provide additional CA certificates that should be trusted by the containers at runtime
+time: 2025-12-23T14:39:31.240770533+01:00
+custom:
+    Ref: Pull
+    RefID: "263"

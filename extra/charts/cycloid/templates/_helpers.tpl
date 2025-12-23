@@ -418,19 +418,35 @@ Iterates over any
 extra volumes the user may have specified.
 */}}
 {{- define "backend.volumes" -}}
-  {{- if .Values.backend.volumes }}
+  {{- if or .Values.backend.volumes (and .Values.extraCaCertificates.enabled .Values.extraCaCertificates.certs) }}
       volumes:
+      {{- if .Values.backend.volumes }}
         {{- toYaml .Values.backend.volumes | nindent 8 }}
-  {{- end }}
+      {{- end }}
+
+      {{- if and .Values.extraCaCertificates.enabled .Values.extraCaCertificates.certs }}
+        - name: extra-ca-certificates
+          configMap:
+            name: {{ printf "%s-extra-ca" (include "cycloid.name" .) | trunc 63 | trimSuffix "-" }}
+      {{- end }}
+      {{- end }}
 {{- end -}}
 
 {{/*
 Set's which additional volumes should be mounted to the container.
 */}}
 {{- define "backend.mounts" -}}
-  {{- if .Values.backend.volumeMounts }}
+  {{- if or .Values.backend.volumeMounts (and .Values.extraCaCertificates.enabled .Values.extraCaCertificates.certs) }}
           volumeMounts:
-            {{- toYaml .Values.backend.volumeMounts | nindent 12 }}
+          {{- if .Values.backend.volumeMounts }}
+          {{- toYaml .Values.backend.volumeMounts | nindent 12 }}
+          {{- end }}
+
+          {{- if and .Values.extraCaCertificates.enabled .Values.extraCaCertificates.certs }}
+            - name: extra-ca-certificates
+              mountPath: /usr/local/share/ca-certificates
+              readOnly: true
+          {{- end }}
   {{- end }}
 {{- end -}}
 
