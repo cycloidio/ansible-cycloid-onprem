@@ -58,10 +58,24 @@ spec:
               {{- end }}
               image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+              {{- if and .Values.extraCaCertificates.enabled .Values.extraCaCertificates.certs }}
+              command:
+                - /bin/sh
+                - -c
+              args:
+                - |
+                    set -e
+                    /usr/sbin/update-ca-certificates
+                    exec /entrypoint "$0" "$@"
+                {{- range .Values.backend.cronjob.costEstimation.azure.args }}
+                - {{ . }}
+                {{- end }}
+              {{- else }}
               args:
                 {{- range .Values.backend.cronjob.costEstimation.azure.args }}
                 - {{ . }}
                 {{- end }}
+              {{- end }}
               resources:
                 {{- toYaml .Values.backend.cronjob.resources | nindent 16 }}
               env:

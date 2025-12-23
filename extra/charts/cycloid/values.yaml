@@ -1228,3 +1228,21 @@ vault:
       #  - secretName: cycloid-local-tls
       #    hosts:
       #      - vault.cycloid.local
+
+# extraCaCertificates allows users to provide additional CA certificates
+# that should be trusted by the containers at runtime.
+#
+# Each entry in `certs` is a PEM-encoded X.509 certificate.
+# The key is used as the filename (with `.crt` extension) inside the container.
+#
+# Certificates will be mounted into:
+#   /usr/local/share/ca-certificates
+# and registered in the system trust store by running:
+#   update-ca-certificates
+extraCaCertificates:
+  enabled: false
+  certs: {}
+#     my-caroot: |
+#       -----BEGIN CERTIFICATE-----
+#       MIIF...
+#       -----END CERTIFICATE-----

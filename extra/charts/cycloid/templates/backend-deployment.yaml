@@ -176,6 +176,15 @@ spec:
           {{- end }}
           image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          {{- if and .Values.extraCaCertificates.enabled .Values.extraCaCertificates.certs }}
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              /usr/sbin/update-ca-certificates
+              exec /entrypoint
+          {{- end }}
           ports:
             - name: http
               containerPort: 3001

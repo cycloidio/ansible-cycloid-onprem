@@ -59,10 +59,24 @@ spec:
               {{- end }}
               image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+              {{- if and .Values.extraCaCertificates.enabled .Values.extraCaCertificates.certs }}
+              command:
+                - /bin/sh
+                - -c
+              args:
+                - |
+                    set -e
+                    /usr/sbin/update-ca-certificates
+                    exec /entrypoint "$0" "$@"
+                - "/go/youdeploy-http-api"
+                - "kpi-import"
+                - "--config-file=/opt/config.yml"
+              {{- else }}
               args:
                 - "/go/youdeploy-http-api"
                 - "kpi-import"
                 - "--config-file=/opt/config.yml"
+              {{- end }}
               resources:
                 {{- toYaml .Values.backend.cronjob.resources | nindent 16 }}
               env:
