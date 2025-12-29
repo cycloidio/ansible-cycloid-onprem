@@ -870,7 +870,10 @@ cycloid_job_ccm_ingestion_container_cmd: '{% if ca_certificates_container_shared
 cycloid_job_cost_estimation_injection: "{% if cycloid_job_cost_estimation_injection_aws|bool or cycloid_job_cost_estimation_injection_azure or cycloid_job_cost_estimation_injection_gcp|bool %}true{% else %}false{% endif %}"
 
 # command used to create an ingest job on the queue
-cost_estimation_ingestion_aws_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers aws --pricing-ingest-aws-use-known-services --pricing-ingest-aws-minimal; "
+
+# Allow to fix aws regions to ingest.
+cost_estimation_ingestion_aws_minimal_regions: "--pricing-ingest-aws-regions us-east-1,us-east-2,us-west-1,us-west-2,ca-central-1,ca-west-1,eu-north-1,eu-west-1,eu-west-2,eu-west-3,eu-central-1,eu-central-2,eu-south-1,eu-south-2,ap-northeast-1,ap-northeast-2,ap-northeast-3,ap-southeast-1,ap-southeast-2,ap-southeast-3,ap-southeast-4,ap-southeast-5,ap-southeast-7,ap-east-1,ap-south-1,ap-south-2,sa-east-1,us-gov-west-1,us-gov-east-1,me-south-1,af-south-1,il-central-1,me-central-1"
+cost_estimation_ingestion_aws_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers aws {{ cost_estimation_ingestion_aws_minimal_regions}} --pricing-ingest-aws-use-known-services --pricing-ingest-aws-minimal; "
 cost_estimation_ingestion_azure_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers azure --pricing-ingest-azure-use-known-services --pricing-ingest-azure-minimal; "
 cost_estimation_ingestion_gcp_minimal: "/entrypoint /go/youdeploy-http-api pricing ingest --config-file=/opt/config.yml --pricing-ingest-providers google --pricing-ingest-google-project={{ cost_estimation_gcp_project }} --pricing-ingest-google-credential-json  $PRICING_INGEST_GOOGLE_CREDENTIAL_JSON --pricing-ingest-google-use-known-services --pricing-ingest-google-minimal; "
 
