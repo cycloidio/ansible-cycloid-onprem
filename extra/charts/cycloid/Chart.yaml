@@ -12,7 +12,7 @@ version: 0.15.4
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "6.5.21"
+appVersion: "6.6.15"
 
 kubeVersion: ">= 1.27.0-0"
 
@@ -56,7 +56,7 @@ dependencies:
     tags:
       - concourse
     # https://github.com/concourse/concourse-chart/blob/master/Chart.yaml#L4
-    version: 19.0.0
+    version: 20.0.0
     condition: concourse.enabled
 
   - name: vault
