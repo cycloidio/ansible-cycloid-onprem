@@ -86,6 +86,25 @@ primary:
     character-set-server=utf8mb4
     collation-server=utf8mb4_unicode_ci
 
+  ## @param primary.lifecycle Container lifecycle hooks configuration
+  ## Used to define postStart or preStop hooks on the MySQL container.
+  ## This can be used to run idempotent commands such as creating
+  ## additional databases after MySQL is ready.
+  lifecycle:
+    # postStart:
+    #   exec:
+    #     command:
+    #       - /bin/bash
+    #       - -ec
+    #       - |
+    #           echo "[postStart] Waiting for MySQL to be ready..."
+    #           until mysqladmin ping -uroot -p"${MYSQL_ROOT_PASSWORD}" --silent; do
+    #             sleep 2
+    #           done
+    #           echo "[postStart] Creating database if not exists"
+    #           mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" \
+    #             -e "CREATE DATABASE IF NOT EXISTS myextradb;"
+
   ## @param primary.containerPorts.mysql Container port for mysql
   ## @param primary.containerPorts.mysqlx Container port for mysqlx
   ##

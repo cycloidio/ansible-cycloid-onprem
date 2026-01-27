@@ -65,6 +65,10 @@ spec:
               fi
               exec docker-entrypoint.sh mysqld
           ###
+          {{- with .Values.primary.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           {{- if .Values.primary.containerSecurityContext.enabled }}
           securityContext:
