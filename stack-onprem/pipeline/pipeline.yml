@@ -400,6 +400,7 @@ jobs:
                       password: ${CYCLOID_INITIAL_USER_PASSWORD}
                       given_name: admin
                       family_name: cycloid
+                      full_name: cycloid
 
                     cycloid_jwt_key_1: "${CYCLOID_JWT_KEY_1}"
 
