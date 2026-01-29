@@ -22,6 +22,7 @@ cycloid_initial_user:
   password: "Ch4ngm3pls"
   given_name: admin
   family_name: cycloid
+  full_name: cycloid
 
 #. cycloid_initial_user(optional, string): "Cycloid"
 #+ First Cycloid organization name.
