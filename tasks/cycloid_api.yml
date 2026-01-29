@@ -127,7 +127,7 @@
         method: POST
         body_format: raw
         validate_certs: no
-        status_code: 204
+        status_code: 200
         return_content: no
         headers:
           Accept: "*/*"
@@ -139,7 +139,7 @@
       delay: 10
       no_log: false
       register: init_of_api
-      until: init_of_api.status == 204
+      until: init_of_api.status == 200
 
     - name: Login with cycloid user | cycloid-core api
       uri:
