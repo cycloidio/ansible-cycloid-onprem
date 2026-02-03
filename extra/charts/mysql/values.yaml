@@ -53,6 +53,11 @@ auth:
   ###
   #authenticationPolicy: ""
 
+## @param primary.extraEnvVars Extra environment variables to be set on the MySQL container
+extraEnvVars:
+  # MYSQL_EXTRA_DATABASES used by the default postStartScript
+  MYSQL_EXTRA_DATABASES: ""
+
 ## @section TLS/SSL parameters
 ##
 tls:
@@ -89,8 +94,14 @@ primary:
   ## @param primary.lifecycle Container lifecycle hooks configuration
   ## Used to define postStart or preStop hooks on the MySQL container.
   ## This can be used to run idempotent commands such as creating
-  ## additional databases after MySQL is ready.
+  ## additional databases after MySQL is ready via the postStartScript define in a configmap
   lifecycle:
+    postStart:
+      exec:
+        command:
+          - /bin/bash
+          - /scripts/postStartScript.sh
+
     # postStart:
     #   exec:
     #     command:
@@ -102,6 +113,22 @@ primary:
     #           done
     #           mysql -uroot -p"$${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS myextradb;"
     #           mysql -uroot -p"$${MYSQL_ROOT_PASSWORD}" -e "GRANT ALL PRIVILEGES ON myextradb.* TO '$MYSQL_USER'@'%';"
+
+  # @param primary.postStartScript
+  # Bash script used to populate the postStartScript ConfigMap.
+  # This ConfigMap provides the postStartScript.sh file, which is executed
+  # as a postStart lifecycle hook once the MySQL container has started.
+  # By default, this script relies on environment variables FOO_DBS to create extra databases in MySQL after startup.
+  # Since the commands are idempotent (CREATE DATABASE IF NOT EXISTS), the script can
+  # safely run on every container restart.
+  postStartScript: |-
+    until mysqladmin ping -uroot -p"${MYSQL_ROOT_PASSWORD}" | grep "mysqld is alive"; do
+      sleep 2
+    done
+    for db in $MYSQL_EXTRA_DATABASES; do
+      mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS $db;"
+      mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" -e "GRANT ALL PRIVILEGES ON $db.* TO '$MYSQL_USER'@'%';"
+    done
 
   ## @param primary.containerPorts.mysql Container port for mysql
   ## @param primary.containerPorts.mysqlx Container port for mysqlx

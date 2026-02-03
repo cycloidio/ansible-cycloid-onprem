@@ -79,3 +79,15 @@ Return the secret with MySQL credentials
         {{- printf "%s" (include "common.names.fullname" .) -}}
     {{- end -}}
 {{- end -}}
+
+{{/*
+Inject extra environment vars in the format key:value, if populated
+*/}}
+{{- define "cycloid.extraEnvVars" -}}
+{{- if .extraEnvVars -}}
+{{- range $key, $value := .extraEnvVars }}
+- name: {{ printf "%s" $key | replace "." "_" | upper | quote }}
+  value: {{ $value | quote }}
+{{- end }}
+{{- end -}}
+{{- end -}}
