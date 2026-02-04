@@ -108,6 +108,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "mysql.primary.fullname" . }}
                   key: mysql-password
+            {{- include "cycloid.extraEnvVars" .Values | nindent 12 }}
           ports:
             - name: mysql
               containerPort: {{ .Values.primary.containerPorts.mysql }}
@@ -164,7 +165,13 @@ spec:
             - name: config
               mountPath: /etc/mysql/conf.d/my.cnf
               subPath: my.cnf
+            - name: poststart-script
+              mountPath: /scripts/postStartScript.sh
+              subPath: postStartScript.sh
       volumes:
+        - name: poststart-script
+          configMap:
+            name: {{ include "mysql.primary.fullname" . }}-poststart-script
         {{- if .Values.primary.configuration }}
         - name: config
           configMap:

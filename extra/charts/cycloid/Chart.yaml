@@ -41,7 +41,7 @@ dependencies:
     repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/mysql/
     tags:
       - mysql
-    version: 0.1.1
+    version: 0.1.3
     condition: mysql.enabled
 
   - name: redis
