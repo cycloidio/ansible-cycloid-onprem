@@ -768,6 +768,10 @@ cycloid_api_task_manager_enabled: true
 # Disable internal worker on API container.
 cycloid_api_worker_run_internal: "{%- if cycloid_api_task_manager_enabled|bool -%}false{%- else -%}true{%- endif -%}"
 
+#. cycloid_api_task_manager_container_args_extra(optional, string): ""
+#+ Extra arguments to pass to the task manager container such cpus limitation
+cycloid_api_task_manager_container_args_extra: '--cpus="{{ ansible_facts.processor_vcpus | float / 2 }}"'
+
 # API call /user/login expect only email/pass properties.
 # If more params, it fail
 cycloid_login_user:
