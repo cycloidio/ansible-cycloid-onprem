@@ -73,7 +73,14 @@ resources:
     type: git
     source:
       uri: ($ .scs_url $)
-      branch: ((stack_git_branch))
+      ($- if eq .stack_version_type "branch" $)
+      branch: ($ .stack_version_ref $)
+      ($- end $)
+      ($- if eq .stack_version_type "tag" $)
+      tag_filter: ($ .stack_version_ref $)
+      fetch_tags: true
+      ($- end $)
+
       private_key: ((($ .cr_cred_path $).ssh_key))
       paths:
         - stack-onprem/pipeline/first-trigger
@@ -84,7 +91,13 @@ resources:
     type: git
     source:
       uri: ($ .scs_url $)
-      branch: ((stack_git_branch))
+      ($- if eq .stack_version_type "branch" $)
+      branch: ($ .stack_version_ref $)
+      ($- end $)
+      ($- if eq .stack_version_type "tag" $)
+      tag_filter: ($ .stack_version_ref $)
+      fetch_tags: true
+      ($- end $)
       private_key: ((($ .cr_cred_path $).ssh_key))
       paths:
         - stack-onprem/terraform/*
@@ -94,11 +107,20 @@ resources:
     type: git
     source:
       uri: ($ .scs_url $)
-      branch: ((stack_git_branch))
+      ($- if eq .stack_version_type "branch" $)
+      branch: ($ .stack_version_ref $)
+      ($- end $)
+      ($- if eq .stack_version_type "tag" $)
+      tag_filter: ($ .stack_version_ref $)
+      fetch_tags: true
+      ($- end $)
       private_key: ((($ .cr_cred_path $).ssh_key))
       ignore_paths:
         - stack-onprem/terraform/*
         - stack-onprem/pipeline/*
+
+
+
 
   # The Terraform config (will be merged with the stack)
   - name: git_config-terraform
