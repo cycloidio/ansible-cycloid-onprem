@@ -31,10 +31,6 @@ scw_secret_key: ((scaleway_machine.secret_key))
 api_key: ((custom_api-key-admin.key))
 external_backend_aws_cred_name: aws
 
-#. stack_git_branch (required): master
-#+ Branch to use on the public stack Git repository
-stack_git_branch: $ONPREM_STACK_BRANCH
-
 ansible_params_extravars:
   cycloid_api_provisioning: true
 

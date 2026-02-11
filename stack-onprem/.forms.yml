@@ -120,18 +120,6 @@ use_cases:
                 default: "((git_ssh_bastion.ssh_key))"
                 required: true
 
-          - name: Stack
-            # This variable need to be write when using onprem (not playground)
-            # condition: advanced_opt==true
-            technologies: [pipeline]
-            vars:
-              - name: "Stack branch"
-                description: "Branch to use on the public stack Git repository."
-                key: stack_git_branch
-                widget: simple_text
-                type: string
-                default: master
-
           - name: Service-pipeline
             technologies: [pipeline]
             vars:
