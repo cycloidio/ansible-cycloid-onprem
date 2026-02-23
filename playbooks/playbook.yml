@@ -84,3 +84,6 @@
     - role: prometheus.prometheus.cadvisor
       tags: node-exporter
       when: enable_monitoring | default(true)
+      vars:
+        cadvisor_port: 9101
+      # https://prometheus-community.github.io/ansible/branch/main/cadvisor_role.html

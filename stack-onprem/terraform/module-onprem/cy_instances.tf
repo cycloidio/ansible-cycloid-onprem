@@ -126,6 +126,15 @@ resource "aws_security_group" "cy_instances" {
     cidr_blocks = var.cy_instances_cidr_blocks_allow
   }
 
+  # Allow to fetch cadvisor metrics
+  ingress {
+    from_port   = 9101
+    to_port     = 9101
+    protocol    = "tcp"
+    self        = true
+    cidr_blocks = var.cy_instances_cidr_blocks_allow
+  }
+
   # Allow all port internaly (example for: is db splitted ...)
   ingress {
     from_port = 0
