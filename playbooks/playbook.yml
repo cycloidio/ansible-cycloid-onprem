@@ -80,3 +80,10 @@
       # full list of collectors at https://github.com/prometheus/node_exporter?tab=readme-ov-file#collectors
       # role defaults at https://github.com/prometheus-community/ansible/blob/main/roles/node_exporter/defaults/main.yml
 
+    # Used to monitor docker
+    - role: prometheus.prometheus.cadvisor
+      tags: node-exporter
+      when: enable_monitoring | default(true)
+      vars:
+        cadvisor_port: 9101
+      # https://prometheus-community.github.io/ansible/branch/main/cadvisor_role.html
