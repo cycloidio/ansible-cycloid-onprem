@@ -1,27 +1,27 @@
 ---
 
-- name: "Stop services | {{item['name']}}"
+- name: "Stop services db dump"
   service:
     name: "{{item['name']}}_container"
     state: stopped
   failed_when: false
   with_items: "{{dbs_dump}}"
 
-- name: "Remove files | {{item['name']}} systemd"
+- name: "Remove files | db dump systemd"
   file:
     path: "/etc/systemd/system/{{item['name']}}_container.service"
     state: absent
   with_items: "{{dbs_dump}}"
 
-- name: "Remove files | {{item['name']}} etc-default"
+- name: "Remove files | db dump  etc-default"
   file:
     path: "/etc/default/{{item['name']}}"
     state: absent
   with_items: "{{dbs_dump}}"
 
-- name: Force systemd to reread configs | cycloid-db
+- name: Force systemd to reread configs | db dump
   systemd:
     daemon_reload: yes
 
-- name: systemctl reset-failed | cycloid-db
+- name: systemctl reset-failed | db dump
   shell: systemctl reset-failed

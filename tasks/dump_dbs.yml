@@ -1,5 +1,5 @@
 ---
-- name: "Define service database dump | {{ item['name'] }}"
+- name: "Define service database dump"
   include_role:
     name: mhutter.docker-systemd-service
   vars:
