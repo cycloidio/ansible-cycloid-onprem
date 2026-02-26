@@ -1,6 +1,6 @@
 ---
 roles:
-- src: git@github.com:cycloidio/ansible-cycloid-onprem.git
+- src: https://github.com/cycloidio/ansible-cycloid-onprem.git
   version: master
   name: ansible-cycloid-onprem
   scm: git
