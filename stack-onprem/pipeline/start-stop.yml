@@ -257,8 +257,8 @@ jobs:
                     # Pause/Unpause install-onprem job.
                     # It ensure no deploy are done when the infra is stopped, and infra is updated on start
                     echo "${pipeline_action} install-onprem job ..."
-                    cy login --org $CY_ORG --api-key $CY_API_KEY
-                    cy --org $CY_ORG pipeline ${pipeline_action}-job --project $PROJECT --env $ENV --job install-onprem
+
+                    cy pp job ${pipeline_action} --project $PROJECT --env $ENV --component $COMPONENT --pipeline pipeline --job install-onprem
               inputs:
                 - name: trigger
             params:
@@ -266,3 +266,5 @@ jobs:
               AWS_DEFAULT_REGION: "$AWS_DEFAULT_REGION"
               AWS_SECRET_ACCESS_KEY: "$AWS_SECRET_ACCESS_KEY"
               AWS_ACCESS_KEY_ID: "$AWS_ACCESS_KEY_ID"
+              CY_ORG: $CY_ORG
+              CY_API_KEY: $CY_API_KEY

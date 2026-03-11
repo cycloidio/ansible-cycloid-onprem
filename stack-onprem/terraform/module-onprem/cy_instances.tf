@@ -159,10 +159,10 @@ resource "aws_security_group" "cy_instances" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge(local.merged_tags, {
+  tags = {
     Name = "${var.project}-cy_instances-${var.env}"
     role = "cy_instances"
-  })
+  }
 }
 
 #
@@ -193,15 +193,15 @@ resource "aws_instance" "cy_instances" {
     delete_on_termination = var.cy_instances_root_delete_on_termination
   }
 
-  tags = merge(local.merged_tags, {
+  tags = {
     Name = "${var.project}-cy_instances-${count.index}-${var.env}"
     role = "cy_instances"
-  })
+  }
 
-  volume_tags = merge(local.merged_tags, {
+  volume_tags = {
     Name = "${var.project}-cy_instances-${count.index}-${var.env}"
     role = "cy_instances"
-  })
+  }
 }
 
 resource "aws_eip" "cy_instances" {

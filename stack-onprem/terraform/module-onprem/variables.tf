@@ -11,21 +11,6 @@ variable "env" {}
 variable "customer" {}
 variable "component" {}
 
-variable "extra_tags" {
-  default = {}
-}
-
-locals {
-  standard_tags = {
-    "cycloid.io" = "true"
-    env          = var.env
-    project      = var.project
-    client       = var.customer
-    component    = var.component
-  }
-  merged_tags = merge(local.standard_tags, var.extra_tags)
-}
-
 variable "keypair_name" {
   default = "cycloid"
 }
