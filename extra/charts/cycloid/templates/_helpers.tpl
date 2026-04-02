@@ -615,3 +615,62 @@ Inject extra environment populated by configmaps, if populated
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+
+{{/*
+========
+Plugins
+========
+*/}}
+
+{{/*
+Return the Plugins Docker Registry fullname
+*/}}
+{{- define "plugins.dockerRegistry.fullname" -}}
+{{- printf "%s-docker-registry" (include "cycloid.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Return the Plugins Registry fullname
+*/}}
+{{- define "plugins.pluginRegistry.fullname" -}}
+{{- printf "%s-plugin-registry" (include "cycloid.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Return the Plugins Manager fullname
+*/}}
+{{- define "plugins.pluginManager.fullname" -}}
+{{- printf "%s-plugin-manager" (include "cycloid.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Return the Plugins Secret name
+*/}}
+{{- define "plugins.secretName" -}}
+{{- printf "%s-plugin-registry" (include "cycloid.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Docker Registry selector labels
+*/}}
+{{- define "plugins.dockerRegistry.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "plugins.dockerRegistry.fullname" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Plugin Registry selector labels
+*/}}
+{{- define "plugins.pluginRegistry.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "plugins.pluginRegistry.fullname" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Plugin Manager selector labels
+*/}}
+{{- define "plugins.pluginManager.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "plugins.pluginManager.fullname" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
