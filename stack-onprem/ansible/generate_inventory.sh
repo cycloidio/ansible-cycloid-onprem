@@ -41,6 +41,10 @@ if [ "$MINIO" = "true" ]; then
   INVENTORY_OTHER="$INVENTORY_OTHER minio"
 fi
 
+# cycloid_plugins is always co-located with cycloid_core (first instance).
+# It is appended after the main inventory blocks, not included in the
+# rotation logic, to guarantee it always maps to IPS[0].
+
 if [ "$CONCOURSE_WORKER" = "true" ]; then
   INVENTORY_WORKER="cycloid_worker"
 fi
@@ -119,4 +123,9 @@ else
       ip_count=$((ip_count+1))
     fi
   done
+fi
+
+if [ "$PLUGINS" = "true" ]; then
+  echo "[cycloid_plugins]"
+  echo "${IPS[0]}"
 fi

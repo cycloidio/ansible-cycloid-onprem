@@ -1,6 +1,6 @@
 
 resource "random_password" "cy" {
-  for_each = toset(["concourse", "concourseencrypt", "postgres", "mysql", "user", "signing", "elasticsearch"])
+  for_each = toset(["concourse", "concourseencrypt", "postgres", "mysql", "user", "signing", "elasticsearch", "docker_registry"])
   length   = 32
   special  = false
   # override_special = "!#$%*-_"

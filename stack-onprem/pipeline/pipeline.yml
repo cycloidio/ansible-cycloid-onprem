@@ -399,6 +399,7 @@ jobs:
                     CYCLOID_DB_PASSWORD=$(jq -r .password.mysql ${DIR}/tfstate/metadata)
                     CYCLOID_ELASTICSEARCH_PASSWORD=$(jq -r .password.elasticsearch ${DIR}/tfstate/metadata)
                     CYCLOID_JWT_KEY_1=$(jq -r .password.jwt_key ${DIR}/tfstate/metadata)
+                    CYCLOID_PLUGINS_DOCKER_REGISTRY_PASSWORD=$(jq -r .password.docker_registry ${DIR}/tfstate/metadata)
 
                     IAM_SES_SMTP_USER_KEY=$(jq -r .iam_ses_smtp_user_key ${DIR}/tfstate/metadata)
                     IAM_SES_SMTP_USER_SECRET=$(jq -r .iam_ses_smtp_user_secret ${DIR}/tfstate/metadata)
@@ -448,6 +449,11 @@ jobs:
                     cycloid_frontend_version: ((cycloid_frontend_tag))
                     cycloid_licence: "${CYCLOID_LICENCE}"
                     EOF
+
+                    if [ "$PLUGINS" = "true" ]; then
+                      echo "cycloid_plugins_docker_registry_password: \"${CYCLOID_PLUGINS_DOCKER_REGISTRY_PASSWORD}\"" >> environments/cycloid.yml
+                      echo "cycloid_plugins_orgs_cans: \"${CYCLOID_PLUGINS_ORGS_CANS}\"" >> environments/cycloid.yml
+                    fi
 
                     # Galaxy install for onprem
                     set -x
@@ -566,6 +572,8 @@ jobs:
                 CONCOURSE_WORKER: ((install_concourse_worker))
                 MINIO: ((install_minio))
                 ELASTICSEARCH: ((install_elasticsearch))
+                PLUGINS: ((install_plugins))
+                CYCLOID_PLUGINS_ORGS_CANS: ((cycloid_plugins_orgs_cans))
                 SSH_PRIVATE_KEY: ((instance_private_key_pair))
                 GITHUB_KEY: ((($ .cr_cred_path $).ssh_key))
                 SCW_ACCESS_KEY: ((scw_access_key))

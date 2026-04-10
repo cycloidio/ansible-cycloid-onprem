@@ -1,0 +1,121 @@
+---
+- name: Create config directory | cycloid-plugins
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0777
+    recurse: yes
+  with_items:
+    - "{{ cycloid_plugins_path }}"
+    - "{{ cycloid_plugins_path }}/docker-registry-data"
+    - "{{ cycloid_plugins_path }}/auth"
+
+- name: Create plugin databases | cycloid-plugins
+  command: >
+    mysql --skip-ssl-verify-server-cert --protocol TCP
+    -h {{ cycloid_plugins_db_host }} -P {{ cycloid_plugins_db_port }}
+    -u {{ cycloid_plugins_db_user }} -p{{ cycloid_plugins_db_password }}
+    -e "CREATE DATABASE IF NOT EXISTS \`{{ item }}\`; GRANT ALL PRIVILEGES ON \`{{ item }}\`.* TO '{{ cycloid_plugins_db_user }}'@'%';"
+  with_items:
+    - "{{ cycloid_plugins_registry_db_name }}"
+    - "{{ cycloid_plugins_manager_db_name }}"
+  retries: 5
+  delay: 5
+  no_log: true
+  ignore_errors: true
+
+- name: Validate docker registry password is set | cycloid-plugins
+  fail:
+    msg: "cycloid_plugins_docker_registry_password must be set. Generate one with: $(< /dev/urandom tr -dc _A-Za-z0-9- | head -c32)"
+  when: cycloid_plugins_docker_registry_password == ""
+
+- name: Generate htpasswd file | cycloid-plugins
+  community.general.htpasswd:
+    path: "{{ cycloid_plugins_path }}/auth/htpasswd"
+    name: "{{ cycloid_plugins_docker_registry_username }}"
+    password: "{{ cycloid_plugins_docker_registry_password }}"
+    crypt_scheme: bcrypt
+    mode: 0444
+  notify:
+    - restart cycloid-plugins-docker-registry
+
+#
+# Docker Registry
+#
+- name: Define service | cycloid-plugins docker-registry
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    container_name: cycloid-plugins-docker-registry
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{ cycloid_plugins_docker_registry_image }}"
+    container_ports: "{{ cycloid_plugins_docker_registry_container_ports }}"
+    container_args: "{{ container_args_extra }}"
+    container_volumes:
+      - "{{ cycloid_plugins_path }}/auth:/auth:ro"
+      - "{{ cycloid_plugins_path }}/docker-registry-data:/var/lib/registry"
+    container_env:
+      REGISTRY_AUTH: "htpasswd"
+      REGISTRY_AUTH_HTPASSWD_REALM: "{{ cycloid_plugins_docker_registry_username }}"
+      REGISTRY_AUTH_HTPASSWD_PATH: "/auth/htpasswd"
+  tags: docker-services
+
+#
+# Plugin Registry
+#
+- name: Define service | cycloid-plugins plugin-registry
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    container_name: cycloid-plugins-registry
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{ cycloid_plugins_registry_image }}"
+    container_ports: "{{ cycloid_plugins_registry_container_ports }}"
+    container_args: "--privileged {{ container_args_extra }}"
+    container_env:
+      PORT: "4000"
+      RUN_MIGRATIONS: "true"
+      ORGS_CANS: "{{ cycloid_plugins_orgs_cans }}"
+      CY_URL: "{{ cycloid_api_base_url }}"
+      DB_HOST: "{{ cycloid_plugins_db_host }}"
+      DB_PORT: "{{ cycloid_plugins_db_port }}"
+      DB_NAME: "{{ cycloid_plugins_registry_db_name }}"
+      DB_USER: "{{ cycloid_plugins_db_user }}"
+      DB_PASSWORD: "{{ cycloid_plugins_db_password }}"
+      REDIS_URI: "{{ cycloid_plugins_redis_uri }}"
+      REDIS_INSECURE_SKIP_TLS: "{{ cycloid_plugins_redis_insecure_skip_tls }}"
+      REGISTRY_URI: "cycloid-plugins-docker-registry:5000"
+      REGISTRY_USERNAME: "{{ cycloid_plugins_docker_registry_username }}"
+      REGISTRY_PASSWORD: "{{ cycloid_plugins_docker_registry_password }}"
+  tags: docker-services
+
+#
+# Plugin Manager
+#
+- name: Define service | cycloid-plugins plugin-manager
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    container_name: cycloid-plugins-manager
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{ cycloid_plugins_manager_image }}"
+    container_ports: "{{ cycloid_plugins_manager_container_ports }}"
+    container_args: "--privileged {{ container_args_extra }}"
+    container_env:
+      PORT: "4000"
+      RUN_MIGRATIONS: "true"
+      CONTAINERD_ADDR: "/run/containerd/containerd.sock"
+      ORGS_CANS: "{{ cycloid_plugins_orgs_cans }}"
+      CY_URL: "{{ cycloid_api_base_url }}"
+      PLUGIN_MANAGER_BASE_URL: "cycloid-plugins-manager:4000"
+      DB_HOST: "{{ cycloid_plugins_db_host }}"
+      DB_PORT: "{{ cycloid_plugins_db_port }}"
+      DB_NAME: "{{ cycloid_plugins_manager_db_name }}"
+      DB_USER: "{{ cycloid_plugins_db_user }}"
+      DB_PASSWORD: "{{ cycloid_plugins_db_password }}"
+      REDIS_URI: "{{ cycloid_plugins_redis_uri }}"
+      REDIS_INSECURE_SKIP_TLS: "{{ cycloid_plugins_redis_insecure_skip_tls }}"
+  tags: docker-services
+
+- name: Force flush handlers to ensure plugin containers are started | cycloid-plugins
+  meta: flush_handlers

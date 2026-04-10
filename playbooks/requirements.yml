@@ -10,6 +10,7 @@ roles:
   name: geerlingguy.docker
   scm: git
 
+  # https://github.com/mhutter/ansible-docker-systemd-service/tags
 - src: https://github.com/mhutter/ansible-docker-systemd-service
   # latest commit, can be updated
   version: v2.10.1
@@ -21,11 +22,17 @@ collections:
   # https://github.com/ansible-collections/community.docker/tags
   - name: community.docker
     # latest tag, can be updated
-    version: 5.0.6
+    version: 5.2.0
+    source: https://galaxy.ansible.com
+
+  # https://github.com/ansible-collections/community.general/tags
+  # Required for community.general.htpasswd (used by cycloid_plugins)
+  - name: community.general
+    version: "12.5.0"
     source: https://galaxy.ansible.com
 
   # opensource collection for prometheus
-  # https://github.com/prometheus-community/ansible
+  # https://github.com/prometheus-community/ansible/tags
   - name: prometheus.prometheus
-    version: "0.27.6"
+    version: "0.29.0"
     source: https://galaxy.ansible.com

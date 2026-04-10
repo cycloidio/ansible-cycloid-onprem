@@ -141,6 +141,12 @@ use_cases:
                 widget: switch
                 type: boolean
                 default: false
+              - name: "Plugins enabled"
+                description: "Install Cycloid plugins (Docker Registry, Plugin Registry, Plugin Manager). Runs on the first core instance."
+                key: install_plugins
+                widget: switch
+                type: boolean
+                default: false
               - name: "Ansible extra variables"
                 description: "Cycloid EXTRA_ANSIBLE_VARS"
                 key: ansible_params_extravars
@@ -149,6 +155,18 @@ use_cases:
                 default:
                   # do not create first user via ansible
                   cycloid_api_provisioning: "false"
+
+          - name: Plugins
+            condition: install_plugins==true
+            technologies: [pipeline]
+            vars:
+              - name: "Allowed organisations"
+                description: "Comma-separated list of organisation canonical names allowed to use plugins. Leave empty to allow all."
+                key: cycloid_plugins_orgs_cans
+                widget: simple_text
+                type: string
+                default: "cycloid"
+                required: false
 
       # Use local ES, if needed can be exposed via extra vars
       # - name: Features
