@@ -634,6 +634,8 @@ default_ssl_subject_alt_name:
   - DNS:minio
   - DNS:elasticsearch
   - DNS:redis
+  - "DNS:{{ cycloid_console_dns }}"
+  - "DNS:{{ cycloid_api_dns }}"
 
 default_no_proxy:
   - "localhost"
