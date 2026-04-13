@@ -143,18 +143,7 @@ spec:
                   name: {{ template "backend.backendSecretName" . }}
                   key: concourse-password
 
-            - name: "VAULT_URL"
-              value: {{ .Values.backend.vault.url | quote }}
-            - name: "VAULT_ROLE_ID"
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "backend.backendSecretName" . }}
-                  key: vault-role-id
-            - name: "VAULT_SECRET_ID"
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "backend.backendSecretName" . }}
-                  key: vault-secret-id
+            {{- include "backend.vaultEnvVars" . | nindent 12 }}
 
             - name: "FRONTEND_BASE_URL"
               value: {{ .Values.frontend.url | quote }}

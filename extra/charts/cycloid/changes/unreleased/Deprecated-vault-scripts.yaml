@@ -1,0 +1,6 @@
+kind: Deprecated
+body: 'scripts: vault-init.sh, vault-unseal.sh, and vault-config.sh are no longer needed for new installations; they remain available for operators managing pre-auto-init installations or external vault'
+time: 2026-04-11T00:00:00.000000000+00:00
+custom:
+    Ref: Pull
+    RefID: "256"

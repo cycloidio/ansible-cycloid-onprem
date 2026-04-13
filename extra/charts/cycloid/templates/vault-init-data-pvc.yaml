@@ -1,0 +1,22 @@
+{{- if .Values.vault.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "cycloid.vaultInitDataPvcName" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Mi
+  {{- with .Values.vault.server.dataStorage.storageClass }}
+  storageClassName: {{ . }}
+  {{- end }}
+{{- end }}

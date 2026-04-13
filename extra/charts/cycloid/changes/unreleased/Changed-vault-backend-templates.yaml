@@ -1,0 +1,6 @@
+kind: Changed
+body: 'vault: all backend templates (deployment, task-manager, 5 cronjobs) now read vault credentials from <release>-vault-approle via a shared backend.vaultEnvVars helper; backend.vault.roleId/secretId and concourse vaultAuthParam default to empty (auto-generated)'
+time: 2026-04-11T00:00:00.000000000+00:00
+custom:
+    Ref: Pull
+    RefID: "256"
