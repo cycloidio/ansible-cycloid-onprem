@@ -86,6 +86,54 @@ backend:
   jwtKey1: "##backend-jwtKey1##"
 
 #
+# Plugins
+#
+# The Plugins system is composed of 3 components that work together:
+# - Docker Registry: Stores plugin container images. You can use an existing registry
+#   or deploy one with this chart. Credentials are needed to pull images.
+# - Plugin Registry: Catalog service where plugins and their versions are published
+#   by the backend. Organizations with WRITE access are specified via ORGS_CANS.
+# - Plugin Manager: Linked to a single Cycloid instance, responsible for running
+#   the plugins. Additional organizations can be invited via the Plugin Manager API.
+#
+plugins:
+  # Enable the Plugins system (Docker Registry + Plugin Registry + Plugin Manager).
+  enabled: false
+
+  # Comma-separated list of Cycloid organization canonical names that have
+  # WRITE access to the Plugin Registry and are auto-invited on the Plugin Manager.
+  # Set this to your Cycloid root organization canonical to start with.
+  orgsCans: ""
+
+  # Docker Registry: stores plugin container images.
+  # An htpasswd-based auth registry is deployed. Credentials are auto-generated
+  # and shared with the Plugin Registry via a Kubernetes Secret.
+  dockerRegistry:
+    persistence:
+      # Size of the PVC used to store Docker images.
+      size: 15Gi
+
+  # Plugin Registry: catalog service for browsing and managing plugin versionauths.
+  # Plugins are published here by the Cycloid backend.
+  pluginRegistry:
+    image:
+      tag: "latest"
+
+  # Plugin Manager: runs plugin containers, linked to a single Cycloid instance.
+  # ORGS_CANS is used on startup to auto-invite organizations.
+  # Additional orgs can be invited manually via the Plugin Manager API.
+  pluginManager:
+    image:
+      tag: "latest"
+
+  # Database names used by the plugin services (on local or externalMysql).
+  # These databases must exist in MySQL before the plugin services can start.
+  # When plugins.enabled=true, make sure mysql.extraEnvVars.MYSQL_EXTRA_DATABASES or databases already created in external MySQL.
+  # includes these database names so they are automatically created at MySQL startup.
+  pluginRegistryDatabaseName: "plugin_registry"
+  pluginManagerDatabaseName: "plugin_manager"
+
+#
 # MySQL
 #
 # Configuration values for the mysql dependency.
@@ -123,6 +171,14 @@ mysql:
     database: cycloid
     username: cycloid
     password: "##mysql-auth-password##"
+
+  ## Extra environment variables passed to the MySQL container.
+  ## When plugins.enabled=true, MYSQL_EXTRA_DATABASES must list the plugin
+  ## databases (space-separated) so they are created automatically on startup.
+  ## The database names here must match plugins.pluginRegistryDatabaseName
+  ## and plugins.pluginManagerDatabaseName.
+  # extraEnvVars:
+  #   MYSQL_EXTRA_DATABASES: "plugin_registry plugin_manager"
 
 #
 # External MySQL Configuration

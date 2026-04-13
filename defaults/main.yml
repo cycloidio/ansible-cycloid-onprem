@@ -240,6 +240,69 @@ cost_estimation_ingestion_schedule: "Sun *-*-* 00:00:00"
 # Every 1 hour
 kpi_import_schedule: "*-*-* *:00:00"
 
+#
+# Plugins
+#
+
+
+#. cycloid_plugins_orgs_cans(optional, string): ""
+#+ Comma-separated list of Cycloid organization canonical names that have
+#+ WRITE access to the Plugin Registry and are auto-invited on the Plugin Manager.
+cycloid_plugins_orgs_cans: ""
+
+#. cycloid_plugins_docker_registry_image(optional, string): "registry:3.0.0"
+#+ Docker Registry image used to store plugin container images.
+cycloid_plugins_docker_registry_image: "registry:3.0.0"
+
+#. cycloid_plugins_docker_registry_username(optional, string): "cycloid"
+#+ Username for htpasswd authentication on the Docker Registry.
+cycloid_plugins_docker_registry_username: "cycloid"
+
+#. cycloid_plugins_docker_registry_password(required, string): ""
+#+ Password for htpasswd authentication on the Docker Registry.
+#+ Generate one with: $(< /dev/urandom tr -dc _A-Za-z0-9- | head -c32)
+cycloid_plugins_docker_registry_password: ""
+
+#. cycloid_plugins_registry_image(optional, string): "cycloid/plugin-registry:latest"
+#+ Plugin Registry image.
+cycloid_plugins_registry_image: "cycloid/plugin-registry:latest"
+
+#. cycloid_plugins_manager_image(optional, string): "cycloid/plugin-manager:latest"
+#+ Plugin Manager image.
+cycloid_plugins_manager_image: "cycloid/plugin-manager:latest"
+
+#. cycloid_plugins_registry_db_name(optional, string): "plugin_registry"
+#+ Database name for the Plugin Registry.
+cycloid_plugins_registry_db_name: "plugin_registry"
+
+#. cycloid_plugins_manager_db_name(optional, string): "plugin_manager"
+#+ Database name for the Plugin Manager.
+cycloid_plugins_manager_db_name: "plugin_manager"
+
+#. cycloid_plugins_db_host(optional, string): "{{ cycloid_db_host }}"
+#+ Database host for the Plugin services.
+cycloid_plugins_db_host: "{{ cycloid_db_host }}"
+
+#. cycloid_plugins_db_port(optional, string): "{{ cycloid_db_port }}"
+#+ Database port for the Plugin services.
+cycloid_plugins_db_port: "{{ cycloid_db_port }}"
+
+#. cycloid_plugins_db_user(optional, string): "{{ cycloid_db_user }}"
+#+ Database user for the Plugin services.
+cycloid_plugins_db_user: "{{ cycloid_db_user }}"
+
+#. cycloid_plugins_db_password(optional, string): "{{ cycloid_db_password }}"
+#+ Database password for the Plugin services.
+cycloid_plugins_db_password: "{{ cycloid_db_password }}"
+
+#. cycloid_plugins_redis_uri(optional, string): "{{ cycloid_cache_uri }}"
+#+ Redis URI for the Plugin services.
+cycloid_plugins_redis_uri: "{{ cycloid_cache_uri }}"
+
+#. cycloid_plugins_redis_insecure_skip_tls(optional, bool): "{{ cycloid_cache_insecure_skip_tls }}"
+#+ Skip TLS verification for Redis in Plugin services.
+cycloid_plugins_redis_insecure_skip_tls: "{{ cycloid_cache_insecure_skip_tls }}"
+
 #####################
 # advanced settings #
 #####################
@@ -377,6 +440,8 @@ setup_cycloid_creds: "{{ 'cycloid_creds' in group_names }}"
 setup_minio: "{{ 'minio' in group_names }}"
 # Setup ElasticSearch
 setup_elasticsearch: "{{ 'elasticsearch' in group_names }}"
+# Setup Plugins (Docker Registry + Plugin Registry + Plugin Manager)
+setup_cycloid_plugins: "{{ 'cycloid_plugins' in group_names }}"
 # Setup fake SMTP (it will start a mailhog smtpd server to satisfy Cycloid requirements)
 setup_smtp_server: "{{ 'smtp_server' in group_names }}"
 
@@ -893,6 +958,22 @@ cycloid_job_cost_estimation_ingestion_container_cmd: '-c {% if ca_certificates_c
 # Cloud Cost Management cmd
 cycloid_job_kpi_import_container_args: "/entrypoint /go/youdeploy-http-api kpi-import --config-file=/opt/config.yml"
 cycloid_job_kpi_import_container_cmd: '{% if ca_certificates_container_shared|bool %}-c "/usr/sbin/update-ca-certificates && /entrypoint {{ cycloid_job_kpi_import_container_args }}"{% else %}{{ cycloid_job_kpi_import_container_args }}{% endif %}'
+
+#
+# Plugins
+#
+
+cycloid_plugins_path: "{{ cycloid_install_path }}/cycloid-plugins"
+cycloid_plugins_docker_registry_port: 5000
+cycloid_plugins_registry_port: 4001
+cycloid_plugins_manager_port: 4002
+
+cycloid_plugins_docker_registry_container_ports:
+  - "0.0.0.0:{{ cycloid_plugins_docker_registry_port }}:5000"
+cycloid_plugins_registry_container_ports:
+  - "0.0.0.0:{{ cycloid_plugins_registry_port }}:4000"
+cycloid_plugins_manager_container_ports:
+  - "0.0.0.0:{{ cycloid_plugins_manager_port }}:4000"
 
 #
 # Monitoring

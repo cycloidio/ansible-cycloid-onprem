@@ -40,5 +40,23 @@
     state: restarted
   when: cycloid_api_task_manager_enabled|bool
 
+- name: restart cycloid-plugins-docker-registry
+  service:
+    name: cycloid-plugins-docker-registry_container
+    state: restarted
+  when: setup_cycloid_plugins|bool
+
+- name: restart cycloid-plugins-registry
+  service:
+    name: cycloid-plugins-registry_container
+    state: restarted
+  when: setup_cycloid_plugins|bool
+
+- name: restart cycloid-plugins-manager
+  service:
+    name: cycloid-plugins-manager_container
+    state: restarted
+  when: setup_cycloid_plugins|bool
+
 - name: update ca-certificates
   command: "{{ ca_certificates_handler[ansible_os_family | lower] }}"

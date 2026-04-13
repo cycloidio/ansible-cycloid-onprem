@@ -45,6 +45,9 @@
     - ansible.builtin.include_tasks: cycloid_job_kpi_import.yml
       when: inventory_hostname == groups['cycloid_core'][0]
 
+    - ansible.builtin.include_tasks: cycloid_plugins.yml
+      when: setup_cycloid_plugins|bool
+
     - ansible.builtin.include_tasks: dump_dbs.yml
       when: dbs_dump != {} and inventory_hostname == groups['cycloid_core'][0]
 
@@ -82,6 +85,9 @@
 
     - ansible.builtin.include_tasks: cycloid_scheduler_uninstall.yml
       when: setup_cycloid_scheduler|bool
+
+    - ansible.builtin.include_tasks: cycloid_plugins_uninstall.yml
+      when: setup_cycloid_plugins|bool
 
     - ansible.builtin.include_tasks: cycloid_core_uninstall.yml
       when: setup_cycloid_core|bool
