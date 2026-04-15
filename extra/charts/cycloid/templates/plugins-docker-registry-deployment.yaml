@@ -1,4 +1,4 @@
-{{- if .Values.plugins.enabled }}
+{{- if and .Values.plugins.enabled .Values.plugins.dockerRegistry.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,7 +38,7 @@ spec:
       volumes:
         - name: registry-auth
           secret:
-            secretName: {{ include "plugins.secretName" . }}
+            secretName: {{ include "plugins.dockerRegistry.secretName" . }}
             items:
               - key: REGISTRY_BCRYPT_PASSWORD
                 path: htpasswd

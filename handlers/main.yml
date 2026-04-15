@@ -44,7 +44,7 @@
   service:
     name: cycloid-plugins-docker-registry_container
     state: restarted
-  when: setup_cycloid_plugins|bool
+  when: setup_cycloid_plugins|bool and cycloid_plugins_docker_registry_enabled|bool
 
 - name: restart cycloid-plugins-registry
   service:

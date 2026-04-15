@@ -1,0 +1,5 @@
+kind: Changed
+body: "plugins: dockerRegistry is now optional (enabled by default), pluginRegistry supports multiple instances with flexible registry credential sources (local registry, inline credentials, or existing secret)"
+custom:
+  Ref: Pull
+  RefID: 0

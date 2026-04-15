@@ -484,15 +484,18 @@ backend:
 # Plugins
 #
 # The Plugins system is composed of 3 components that work together:
-# - Docker Registry: Stores plugin container images. You can use an existing registry
-#   or deploy one with this chart. Credentials are needed to pull images.
+# - Docker Registry: Optional in-cluster registry for plugin container images.
+#   Useful when you need a Kubernetes-local registry and don't have an external one.
+#   Enabled by default when plugins are enabled. Set dockerRegistry.enabled=false
+#   if you already have an external registry.
 # - Plugin Registry: Catalog service where plugins and their versions are published
 #   by the backend. Organizations with WRITE access are specified via ORGS_CANS.
+#   Multiple plugin-registry instances can be defined as a map under pluginRegistry.instances.
 # - Plugin Manager: Linked to a single Cycloid instance, responsible for running
 #   the plugins. Additional organizations can be invited via the Plugin Manager API.
 #
 plugins:
-  # Enable the Plugins system (Docker Registry + Plugin Registry + Plugin Manager).
+  # Enable the Plugins system.
   enabled: false
 
   # Comma-separated list of Cycloid organization canonical names that have
@@ -500,10 +503,12 @@ plugins:
   # Set this to your Cycloid root organization canonical to start with.
   orgsCans: ""
 
-  # Docker Registry: stores plugin container images.
-  # An htpasswd-based auth registry is deployed. Credentials are auto-generated
-  # and shared with the Plugin Registry via a Kubernetes Secret.
+  # Docker Registry: optional in-cluster registry for plugin container images.
+  # Useful when you need a Kubernetes-local registry and don't have an external one.
+  # When enabled, credentials are auto-generated and stored in a Kubernetes Secret.
   dockerRegistry:
+    # Set to false if you already have an external registry and don't need a local one.
+    enabled: true
     image:
       repository: registry
       tag: "3.0.0"
@@ -524,8 +529,51 @@ plugins:
       repository: cycloid/plugin-registry
       tag: "latest"
       pullPolicy: Always
-    replicaCount: 1
     resources: {}
+    # Log level for the Plugin Registry service.
+    logLevel: "error"
+    # Skip TLS verification for internal communications.
+    insecureSkipVerify: true
+
+    # Map of plugin-registry instances to deploy.
+    # Each key is a unique name for the instance.
+    # Each instance requires its own MySQL database and Redis database.
+    # Additional instances must set databaseName and redisDatabase to values
+    # that have already been provisioned.
+    #
+    # Registry credentials can be provided in 3 ways (in order of precedence):
+    #   1. use_local_registry: true (default when dockerRegistry.enabled=true)
+    #      Uses the auto-generated credentials from the in-cluster Docker Registry.
+    #   2. Inline credentials: set registry_uri, registry_username, registry_password.
+    #      A dedicated Kubernetes Secret will be created for this instance.
+    #   3. existingSecret: reference an existing Kubernetes Secret that contains
+    #      REGISTRY_URI, REGISTRY_USERNAME, and REGISTRY_PASSWORD keys.
+    #
+    # Example:
+    #   instances:
+    #     default:
+    #       use_local_registry: true
+    #     external:
+    #       use_local_registry: false
+    #       registry_uri: "my-registry.example.com:5000"
+    #       registry_username: "user"
+    #       registry_password: "pass"
+    #       # MySQL database and Redis DB must be created/reserved beforehand.
+    #       databaseName: "plugin_registry_external"
+    #       redisDatabase: "2"
+    #     from-secret:
+    #       use_local_registry: false
+    #       existingSecret: "my-registry-secret"
+    #       # MySQL database and Redis DB must be created/reserved beforehand.
+    #       databaseName: "plugin_registry_fromsecret"
+    #       redisDatabase: "3"
+    instances:
+      default:
+        use_local_registry: true
+        # MySQL database name for this instance.
+        databaseName: "plugin_registry"
+        # Redis database number for this instance.
+        redisDatabase: "0"
 
   # Plugin Manager: runs plugin containers, linked to a single Cycloid instance.
   # ORGS_CANS is used on startup to auto-invite organizations.
@@ -537,15 +585,20 @@ plugins:
       pullPolicy: Always
     replicaCount: 1
     resources: {}
+    # Log level for the Plugin Manager service.
+    logLevel: "error"
+    # Skip TLS verification for internal communications.
+    insecureSkipVerify: true
 
   nodeSelector: {}
   tolerations: []
 
-  # Database names used by the plugin services (on local or externalMysql).
-  # These databases must exist in MySQL before the plugin services can start.
-  # When plugins.enabled=true, make sure mysql.extraEnvVars.MYSQL_EXTRA_DATABASES or databases already created in external MySQL.
-  # includes these database names so they are automatically created at MySQL startup.
-  pluginRegistryDatabaseName: "plugin_registry"
+  # Database name used by the Plugin Manager (on local or externalMysql).
+  # This database must exist in MySQL before the plugin-manager can start.
+  # Plugin Registry databases are configured per instance above (databaseName).
+  # When plugins.enabled=true, make sure mysql.extraEnvVars.MYSQL_EXTRA_DATABASES
+  # or databases already created in external MySQL includes all plugin database names
+  # so they are automatically created at MySQL startup.
   pluginManagerDatabaseName: "plugin_manager"
 
 #
@@ -582,10 +635,10 @@ mysql:
     password: "##mysql-auth-password##"
 
   ## Extra environment variables passed to the MySQL container.
-  ## When plugins.enabled=true, MYSQL_EXTRA_DATABASES must list the plugin
+  ## When plugins.enabled=true, MYSQL_EXTRA_DATABASES must list all plugin
   ## databases (space-separated) so they are created automatically on startup.
-  ## The database names here must match plugins.pluginRegistryDatabaseName
-  ## and plugins.pluginManagerDatabaseName.
+  ## This includes each pluginRegistry instance's databaseName and
+  ## plugins.pluginManagerDatabaseName.
   # extraEnvVars:
   #   MYSQL_EXTRA_DATABASES: "plugin_registry plugin_manager"
 

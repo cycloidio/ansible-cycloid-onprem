@@ -7,8 +7,6 @@
     recurse: yes
   with_items:
     - "{{ cycloid_plugins_path }}"
-    - "{{ cycloid_plugins_path }}/docker-registry-data"
-    - "{{ cycloid_plugins_path }}/auth"
 
 - name: Create plugin databases | cycloid-plugins
   shell: >
@@ -24,41 +22,88 @@
   no_log: true
   ignore_errors: true
 
-- name: Validate docker registry password is set | cycloid-plugins
-  fail:
-    msg: "cycloid_plugins_docker_registry_password must be set. Generate one with: $(< /dev/urandom tr -dc _A-Za-z0-9- | head -c32)"
-  when: cycloid_plugins_docker_registry_password == ""
+#
+# Docker Registry (optional)
+#
+- block:
+    - name: Create docker-registry directories | cycloid-plugins docker-registry
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0777
+        recurse: yes
+      with_items:
+        - "{{ cycloid_plugins_path }}/docker-registry-data"
+        - "{{ cycloid_plugins_path }}/auth"
 
-- name: Generate htpasswd file | cycloid-plugins
-  community.general.htpasswd:
-    path: "{{ cycloid_plugins_path }}/auth/htpasswd"
-    name: "{{ cycloid_plugins_docker_registry_username }}"
-    password: "{{ cycloid_plugins_docker_registry_password }}"
-    crypt_scheme: bcrypt
-    mode: 0444
-  notify:
-    - restart cycloid-plugins-docker-registry
+    - name: Validate docker registry password is set | cycloid-plugins docker-registry
+      fail:
+        msg: "cycloid_plugins_docker_registry_password must be set. Generate one with: $(< /dev/urandom tr -dc _A-Za-z0-9- | head -c32)"
+      when: cycloid_plugins_docker_registry_password == ""
+
+    - name: Generate htpasswd file | cycloid-plugins docker-registry
+      community.general.htpasswd:
+        path: "{{ cycloid_plugins_path }}/auth/htpasswd"
+        name: "{{ cycloid_plugins_docker_registry_username }}"
+        password: "{{ cycloid_plugins_docker_registry_password }}"
+        crypt_scheme: bcrypt
+        mode: 0444
+      notify:
+        - restart cycloid-plugins-docker-registry
+
+    - name: Define service | cycloid-plugins docker-registry
+      include_role:
+        name: mhutter.docker-systemd-service
+      vars:
+        container_name: cycloid-plugins-docker-registry
+        container_docker_pull: "{{ docker_pull }}"
+        container_image: "{{ cycloid_plugins_docker_registry_image }}"
+        container_ports: "{{ cycloid_plugins_docker_registry_container_ports }}"
+        container_args: "{{ container_args_extra }}"
+        container_volumes:
+          - "{{ cycloid_plugins_path }}/auth:/auth:ro"
+          - "{{ cycloid_plugins_path }}/docker-registry-data:/var/lib/registry"
+        container_env:
+          REGISTRY_AUTH: "htpasswd"
+          REGISTRY_AUTH_HTPASSWD_REALM: "{{ cycloid_plugins_docker_registry_username }}"
+          REGISTRY_AUTH_HTPASSWD_PATH: "/auth/htpasswd"
+      tags: docker-services
+  when: cycloid_plugins_docker_registry_enabled|bool
 
 #
-# Docker Registry
+# Stop and remove docker-registry when disabled
 #
-- name: Define service | cycloid-plugins docker-registry
-  include_role:
-    name: mhutter.docker-systemd-service
-  vars:
-    container_name: cycloid-plugins-docker-registry
-    container_docker_pull: "{{ docker_pull }}"
-    container_image: "{{ cycloid_plugins_docker_registry_image }}"
-    container_ports: "{{ cycloid_plugins_docker_registry_container_ports }}"
-    container_args: "{{ container_args_extra }}"
-    container_volumes:
-      - "{{ cycloid_plugins_path }}/auth:/auth:ro"
-      - "{{ cycloid_plugins_path }}/docker-registry-data:/var/lib/registry"
-    container_env:
-      REGISTRY_AUTH: "htpasswd"
-      REGISTRY_AUTH_HTPASSWD_REALM: "{{ cycloid_plugins_docker_registry_username }}"
-      REGISTRY_AUTH_HTPASSWD_PATH: "/auth/htpasswd"
-  tags: docker-services
+- block:
+    - name: Stop docker-registry service | cycloid-plugins docker-registry
+      service:
+        name: cycloid-plugins-docker-registry_container
+        state: stopped
+        enabled: false
+      failed_when: false
+
+    - name: Remove docker-registry systemd unit | cycloid-plugins docker-registry
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /etc/systemd/system/cycloid-plugins-docker-registry_container.service
+        - /etc/default/cycloid-plugins-docker-registry
+
+    - name: Reload systemd | cycloid-plugins docker-registry
+      systemd:
+        daemon_reload: yes
+  when: not cycloid_plugins_docker_registry_enabled|bool
+
+#
+# Resolve registry credentials for plugin-registry:
+# - If user provided cycloid_plugins_registry_uri, use the user-provided values.
+# - Otherwise, use the local docker-registry.
+#
+- name: Set plugin registry credentials | cycloid-plugins
+  set_fact:
+    _plugins_registry_uri: "{{ cycloid_plugins_registry_uri | default('', true) | ternary(cycloid_plugins_registry_uri, 'cycloid-plugins-docker-registry:5000') }}"
+    _plugins_registry_username: "{{ cycloid_plugins_registry_username | default('', true) | ternary(cycloid_plugins_registry_username, cycloid_plugins_docker_registry_username) }}"
+    _plugins_registry_password: "{{ cycloid_plugins_registry_password | default('', true) | ternary(cycloid_plugins_registry_password, cycloid_plugins_docker_registry_password) }}"
 
 #
 # Plugin Registry
@@ -74,6 +119,8 @@
     container_args: "--privileged {{ container_args_extra }}"
     container_env:
       PORT: "4000"
+      LOG_LEVEL: "{{ cycloid_plugins_log_level }}"
+      INSECURE_SKIP_VERIFY: "{{ cycloid_plugins_insecure_skip_verify }}"
       RUN_MIGRATIONS: "true"
       ORGS_CANS: "{{ cycloid_plugins_orgs_cans }}"
       CY_URL: "{{ cycloid_api_base_url }}"
@@ -84,9 +131,9 @@
       DB_PASSWORD: "{{ cycloid_plugins_db_password }}"
       REDIS_URI: "{{ cycloid_plugins_redis_uri }}"
       REDIS_INSECURE_SKIP_TLS: "{{ cycloid_plugins_redis_insecure_skip_tls }}"
-      REGISTRY_URI: "cycloid-plugins-docker-registry:5000"
-      REGISTRY_USERNAME: "{{ cycloid_plugins_docker_registry_username }}"
-      REGISTRY_PASSWORD: "{{ cycloid_plugins_docker_registry_password }}"
+      REGISTRY_URI: "{{ _plugins_registry_uri }}"
+      REGISTRY_USERNAME: "{{ _plugins_registry_username }}"
+      REGISTRY_PASSWORD: "{{ _plugins_registry_password }}"
   tags: docker-services
 
 #
@@ -103,11 +150,13 @@
     container_args: "--privileged {{ container_args_extra }}"
     container_env:
       PORT: "4000"
+      LOG_LEVEL: "{{ cycloid_plugins_log_level }}"
+      INSECURE_SKIP_VERIFY: "{{ cycloid_plugins_insecure_skip_verify }}"
       RUN_MIGRATIONS: "true"
       CONTAINERD_ADDR: "/run/containerd/containerd.sock"
       ORGS_CANS: "{{ cycloid_plugins_orgs_cans }}"
       CY_URL: "{{ cycloid_api_base_url }}"
-      PLUGIN_MANAGER_BASE_URL: "cycloid-plugins-manager:4000"
+      PLUGIN_MANAGER_BASE_URL: "cycloid-plugins-manager:{{ cycloid_plugins_manager_port }}"
       DB_HOST: "{{ cycloid_plugins_db_host }}"
       DB_PORT: "{{ cycloid_plugins_db_port }}"
       DB_NAME: "{{ cycloid_plugins_manager_db_name }}"
