@@ -1011,6 +1011,9 @@ cycloid_plugins_host: "{%- if 'cycloid_plugins' in groups and groups['cycloid_pl
 cycloid_plugins_manager_url: "http://cycloid-plugins-manager:{{ cycloid_plugins_manager_port }}"
 cycloid_plugins_registry_url: "http://cycloid-plugins-registry:{{ cycloid_plugins_registry_port }}"
 
+# --add-host flags injected into containers so they can resolve plugin hostnames.
+container_args_plugins_hosts: "{%- if cycloid_plugins_host != '' -%}--add-host cycloid-plugins-registry:{{ cycloid_plugins_host }} --add-host cycloid-plugins-manager:{{ cycloid_plugins_host }}{% if cycloid_plugins_docker_registry_enabled|bool %} --add-host cycloid-plugins-docker-registry:{{ cycloid_plugins_host }}{% endif %}{%- endif -%}"
+
 #
 # Monitoring
 #
