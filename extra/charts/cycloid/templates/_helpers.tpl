@@ -645,10 +645,17 @@ Return the Plugins Manager fullname
 {{- end }}
 
 {{/*
-Return the Plugins Secret name
+Return the Plugins Docker Registry Secret name
+*/}}
+{{- define "plugins.dockerRegistry.secretName" -}}
+{{- printf "%s-docker-registry" (include "cycloid.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Return the Plugins Secret name (kept for backward compatibility)
 */}}
 {{- define "plugins.secretName" -}}
-{{- printf "%s-plugin-registry" (include "cycloid.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- include "plugins.dockerRegistry.secretName" . }}
 {{- end }}
 
 {{/*

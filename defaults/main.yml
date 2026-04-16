@@ -250,6 +250,11 @@ kpi_import_schedule: "*-*-* *:00:00"
 #+ WRITE access to the Plugin Registry and are auto-invited on the Plugin Manager.
 cycloid_plugins_orgs_cans: ""
 
+#. cycloid_plugins_docker_registry_enabled(optional, bool): true
+#+ Enable the local Docker Registry for plugin images.
+#+ Set to false if you already have an external registry.
+cycloid_plugins_docker_registry_enabled: true
+
 #. cycloid_plugins_docker_registry_image(optional, string): "registry:3.0.0"
 #+ Docker Registry image used to store plugin container images.
 cycloid_plugins_docker_registry_image: "registry:3.0.0"
@@ -263,6 +268,21 @@ cycloid_plugins_docker_registry_username: "cycloid"
 #+ Generate one with: $(< /dev/urandom tr -dc _A-Za-z0-9- | head -c32)
 cycloid_plugins_docker_registry_password: ""
 
+#. cycloid_plugins_registry_uri(optional, string): ""
+#+ Container registry URI used by the Plugin Registry.
+#+ Leave empty to use the local Docker Registry (cycloid-plugins-docker-registry:5000).
+cycloid_plugins_registry_uri: ""
+
+#. cycloid_plugins_registry_username(optional, string): ""
+#+ Container registry username used by the Plugin Registry.
+#+ Leave empty to use the local Docker Registry credentials.
+cycloid_plugins_registry_username: ""
+
+#. cycloid_plugins_registry_password(optional, string): ""
+#+ Container registry password used by the Plugin Registry.
+#+ Leave empty to use the local Docker Registry credentials.
+cycloid_plugins_registry_password: ""
+
 #. cycloid_plugins_registry_image(optional, string): "cycloid/plugin-registry:latest"
 #+ Plugin Registry image.
 cycloid_plugins_registry_image: "cycloid/plugin-registry:latest"
@@ -270,6 +290,14 @@ cycloid_plugins_registry_image: "cycloid/plugin-registry:latest"
 #. cycloid_plugins_manager_image(optional, string): "cycloid/plugin-manager:latest"
 #+ Plugin Manager image.
 cycloid_plugins_manager_image: "cycloid/plugin-manager:latest"
+
+#. cycloid_plugins_log_level(optional, string): "error"
+#+ Log level for Plugin Registry and Plugin Manager services.
+cycloid_plugins_log_level: "error"
+
+#. cycloid_plugins_insecure_skip_verify(optional, bool): true
+#+ Skip TLS verification for internal communications on Plugin Registry and Plugin Manager.
+cycloid_plugins_insecure_skip_verify: true
 
 #. cycloid_plugins_registry_db_name(optional, string): "plugin_registry"
 #+ Database name for the Plugin Registry.
@@ -967,8 +995,8 @@ cycloid_job_kpi_import_container_cmd: '{% if ca_certificates_container_shared|bo
 
 cycloid_plugins_path: "{{ cycloid_install_path }}/cycloid-plugins"
 cycloid_plugins_docker_registry_port: 5000
-cycloid_plugins_registry_port: 4001
-cycloid_plugins_manager_port: 4002
+cycloid_plugins_registry_port: 4000
+cycloid_plugins_manager_port: 4001
 
 cycloid_plugins_docker_registry_container_ports:
   - "0.0.0.0:{{ cycloid_plugins_docker_registry_port }}:5000"
@@ -976,6 +1004,12 @@ cycloid_plugins_registry_container_ports:
   - "0.0.0.0:{{ cycloid_plugins_registry_port }}:4000"
 cycloid_plugins_manager_container_ports:
   - "0.0.0.0:{{ cycloid_plugins_manager_port }}:4000"
+
+# URLs used by the API to reach plugin services.
+# Plugins run on the first host of the cycloid_plugins group.
+cycloid_plugins_host: "{%- if 'cycloid_plugins' in groups and groups['cycloid_plugins'] | length > 0 -%}{{ hostvars[groups['cycloid_plugins'][0]]['ansible_default_ipv4']['address'] }}{%- endif -%}"
+cycloid_plugins_manager_url: "http://cycloid-plugins-manager:{{ cycloid_plugins_manager_port }}"
+cycloid_plugins_registry_url: "http://cycloid-plugins-registry:{{ cycloid_plugins_registry_port }}"
 
 #
 # Monitoring

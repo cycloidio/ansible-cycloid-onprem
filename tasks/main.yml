@@ -26,6 +26,9 @@
     - ansible.builtin.include_tasks: elasticsearch.yml
       when: setup_elasticsearch
 
+    - ansible.builtin.include_tasks: cycloid_plugins_dns.yml
+      when: cycloid_plugins_host != ''
+
     - ansible.builtin.include_tasks: cycloid_api.yml
       when: setup_cycloid_core|bool
     - ansible.builtin.include_tasks: cycloid_frontend.yml
