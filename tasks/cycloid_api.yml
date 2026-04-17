@@ -102,6 +102,7 @@
       LOG_SVC_LEVEL: "NONE"
       # Do not use api as worker since we use a dedicated container
       WORKER_RUN_INTERNAL: "{{ cycloid_api_worker_run_internal }}"
+      ALLOW_ORG_CREATION: "{{ cycloid_api_allow_org_creation }}"
       #LOG_DEV_MODE: true
       #LOG_SVC_LEVEL: "DEBUG"
       http_proxy: "{{ http_proxy }}"
