@@ -257,6 +257,10 @@ backend:
     LOG_SVC_LEVEL: "NONE"
     # REDIS_INSECURE_SKIP_TLS: true
     # COST_EXPLORER_ES_INSECURE_SKIP_TLS: true
+    # When set to "false", only admins of a parent organization can create child organizations.
+    # Root organization creation is restricted to users with the CreateChild role.
+    # Set to "false" on multi-tenant or managed platforms to prevent uncontrolled root org creation.
+    # ALLOW_ORG_CREATION: "true"
     # Allow additional Origins to request the API. Multiple Origins can be specified using a comma ','.
     # e.g, CORS_ALLOWED_ORIGINS: "https://domain1.tld,http://domain2.tld"
     # By default, the Frontend URL is already allowed.

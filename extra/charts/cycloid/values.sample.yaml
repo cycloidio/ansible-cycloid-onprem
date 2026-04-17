@@ -67,6 +67,10 @@ backend:
     EMAIL_ADDR_RETURN_PATH: "admin@domain.tld"
     LOG_LEVEL: "INFO"
     LOG_SVC_LEVEL: "NONE"
+    # When set to "false", only admins of a parent organization can create child organizations.
+    # Root organization creation is restricted to users with the CreateChild role.
+    # Set to "false" on multi-tenant or managed platforms to prevent uncontrolled root org creation.
+    # ALLOW_ORG_CREATION: "true"
 
   # Concourse server to be used by the Cycloid Console API.
   # Defaults to the included one within the chart, but you also use a custom one if needed.

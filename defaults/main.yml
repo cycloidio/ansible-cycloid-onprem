@@ -32,6 +32,12 @@ cycloid_initial_organization_name: Cycloid
 #+ Sets the log level for Cycloid API.
 cycloid_api_log_level: "INFO"
 
+#. cycloid_api_allow_org_creation(optional, bool): true
+#+ When set to false, only admins of a parent organization can create child organizations.
+#+ Root organization creation is restricted to users with the CreateChild role.
+#+ Set to false on multi-tenant or managed platforms to prevent uncontrolled root org creation.
+cycloid_api_allow_org_creation: true
+
 #. cycloid_licence(optional, string): ""
 #+ If provided, initialize Cycloid with the licence
 cycloid_licence: ""
