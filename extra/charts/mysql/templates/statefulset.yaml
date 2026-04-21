@@ -136,7 +136,7 @@ spec:
                 - -ec
                 - |
                   mysqladmin ping -uroot -p"${MYSQL_ROOT_PASSWORD}" | grep "mysqld is alive"
-            startupProbe:
+          startupProbe:
             initialDelaySeconds: {{ .Values.primary.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.primary.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.primary.livenessProbe.timeoutSeconds }}
