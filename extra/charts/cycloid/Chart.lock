@@ -1,15 +1,15 @@
 dependencies:
 - name: mysql
   repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/mysql/
-  version: 0.1.3
+  version: 0.1.5
 - name: redis
   repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/redis/
-  version: 0.2.0
+  version: 0.2.1
 - name: concourse
   repository: https://concourse-charts.storage.googleapis.com/
   version: 20.0.0
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.30.0
-digest: sha256:0f2d06a4230f0234eb96f66e583155850a5c1c267545c4ac9f32da04716a29c3
-generated: "2026-02-04T11:10:03.261445878+01:00"
+digest: sha256:5b7fb3a45c409cd51fce2f501c3e4f7d6ccf93f1634263e3b7821e40019e11ef
+generated: "2026-04-21T23:11:09.768197265+02:00"

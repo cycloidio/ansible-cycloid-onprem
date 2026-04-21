@@ -394,7 +394,7 @@ concourse:
   web:
     sidecarContainers:
       - name: concourse-team-authorized-key-sync
-        image: cycloid/concourse-team-authorized-key-sync:latest
+        image: cycloid/concourse-team-authorized-key-sync:v1.1
         imagePullPolicy: Always
         env:
           - name: VAULT_URL
