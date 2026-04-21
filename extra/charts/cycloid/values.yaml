@@ -912,7 +912,7 @@ concourse:
     sidecarContainers:
       - name: concourse-team-authorized-key-sync
         # https://hub.docker.com/r/cycloid/concourse-team-authorized-key-sync/tags
-        image: cycloid/concourse-team-authorized-key-sync:v1
+        image: cycloid/concourse-team-authorized-key-sync:v1.1
         imagePullPolicy: Always
         env:
           - name: VAULT_URL
