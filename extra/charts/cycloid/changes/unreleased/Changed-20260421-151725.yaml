@@ -1,6 +1,0 @@
-kind: Changed
-body: update mysql chart to 0.1.5
-time: 2026-04-21T15:17:25.795647021+02:00
-custom:
-    Ref: Pull
-    RefID: "281"
