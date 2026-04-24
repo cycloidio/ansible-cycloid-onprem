@@ -68,6 +68,26 @@
           REGISTRY_AUTH_HTPASSWD_REALM: "{{ cycloid_plugins_docker_registry_username }}"
           REGISTRY_AUTH_HTPASSWD_PATH: "/auth/htpasswd"
       tags: docker-services
+
+    - name: Create containerd registry config directory | cycloid-plugins docker-registry
+      file:
+        path: "{{ cycloid_plugins_path }}/containerd-certs.d/cycloid-plugins-docker-registry:5000"
+        state: directory
+        mode: 0755
+        recurse: yes
+
+    - name: Write containerd registry config | cycloid-plugins docker-registry
+      copy:
+        dest: "{{ cycloid_plugins_path }}/containerd-certs.d/cycloid-plugins-docker-registry:5000/hosts.toml"
+        content: |
+          server = "http://cycloid-plugins-docker-registry:5000"
+
+          [host."http://cycloid-plugins-docker-registry:5000"]
+            capabilities = ["pull", "resolve"]
+            skip_verify = true
+        mode: 0444
+      notify:
+        - restart cycloid-plugins-manager
   when: cycloid_plugins_docker_registry_enabled|bool
 
 #
@@ -148,6 +168,7 @@
     container_image: "{{ cycloid_plugins_manager_image }}"
     container_ports: "{{ cycloid_plugins_manager_container_ports }}"
     container_args: "--privileged {{ container_args_plugins_hosts }} {{ container_args_extra }}"
+    container_volumes: "{{ [cycloid_plugins_path + '/containerd-certs.d:/etc/containerd/certs.d'] if cycloid_plugins_docker_registry_enabled | bool else [] }}"
     container_env:
       PORT: "4000"
       LOG_LEVEL: "{{ cycloid_plugins_log_level }}"
