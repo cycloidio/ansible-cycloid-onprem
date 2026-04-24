@@ -35,6 +35,12 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.plugins.dockerRegistry.enabled }}
+      volumes:
+        - name: registry-config
+          configMap:
+            name: {{ include "plugins.dockerRegistry.configMapName" . }}
+      {{- end }}
       containers:
         - name: plugin-manager
           image: "{{ .Values.plugins.pluginManager.image.repository }}:{{ .Values.plugins.pluginManager.image.tag }}"
@@ -100,6 +106,11 @@ spec:
               protocol: TCP
           resources:
             {{- toYaml .Values.plugins.pluginManager.resources | nindent 12 }}
+          {{- if .Values.plugins.dockerRegistry.enabled }}
+          volumeMounts:
+            - name: registry-config
+              mountPath: /etc/containerd/certs.d/{{ include "plugins.dockerRegistry.fullname" . }}:5000
+          {{- end }}
 ---
 apiVersion: v1
 kind: Service

@@ -659,6 +659,13 @@ Return the Plugins Secret name (kept for backward compatibility)
 {{- end }}
 
 {{/*
+Return the Plugins Docker Registry Config ConfigMap name
+*/}}
+{{- define "plugins.dockerRegistry.configMapName" -}}
+{{- printf "%s-registry-config" (include "cycloid.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
 Docker Registry selector labels
 */}}
 {{- define "plugins.dockerRegistry.selectorLabels" -}}
