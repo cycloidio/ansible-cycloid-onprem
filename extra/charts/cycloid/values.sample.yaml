@@ -254,7 +254,8 @@ redis:
   ##
   auth:
     ## @param auth.password Redis password
-    ## Defaults to a random 10-character alphanumeric string if not set
+    ## Must be replaced with a strong password. Use scripts/generate-random-passwords.sh
+    ## to auto-generate a 32-character random alphanumeric string.
     ##
     password: "##redis-auth-password##"
 
