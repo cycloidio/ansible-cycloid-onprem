@@ -561,8 +561,8 @@ cycloid_db_container_ports:
   # - "127.0.0.1:{{ cycloid_db_port }}:3306"
 cycloid_frontend_container_ports:
   - "0.0.0.0:3000:8080"
-  # - "{{ ansible_default_ipv4.address }}:3000:80"
-  # - "127.0.0.1:3000:80"
+  # - "{{ ansible_default_ipv4.address }}:3000:8080"
+  # - "127.0.0.1:3000:8080"
 concourse_db_container_ports:
   - "0.0.0.0:{{ concourse_db_port }}:5432"
   # - "{{ ansible_default_ipv4.address }}:5432:5432"
@@ -767,7 +767,7 @@ cycloid_nginx_path: "{{ cycloid_install_path }}/nginx"
 cycloid_nginx_api_proxy_pass: "http://cycloid-api:{{ cycloid_api_port }}"
 
 # Nginx proxy_pass url used for cycloid console/frontend vhost. Most of the case it shouldn't be changed.
-cycloid_nginx_console_proxy_pass: "http://cycloid-frontend"
+cycloid_nginx_console_proxy_pass: "http://cycloid-frontend:8080"
 
 # Enable secure header on local nginx to limite iframe
 cycloid_nginx_secure_header_enabled: false
