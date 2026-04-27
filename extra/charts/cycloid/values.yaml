@@ -65,7 +65,7 @@ frontend:
     # Tag of the Docker image to use.
     tag: "latest-public"
     # Container port to expose for the frontend service.
-    containerPort: 80
+    containerPort: 8080
 
   # List of additional environment variables to set for the frontend container.
   extraEnvVars: {}

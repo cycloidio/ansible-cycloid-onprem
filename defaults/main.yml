@@ -560,7 +560,7 @@ cycloid_db_container_ports:
   # - "{{ ansible_default_ipv4.address }}:{{ cycloid_db_port }}:3306"
   # - "127.0.0.1:{{ cycloid_db_port }}:3306"
 cycloid_frontend_container_ports:
-  - "0.0.0.0:3000:80"
+  - "0.0.0.0:3000:8080"
   # - "{{ ansible_default_ipv4.address }}:3000:80"
   # - "127.0.0.1:3000:80"
 concourse_db_container_ports:
