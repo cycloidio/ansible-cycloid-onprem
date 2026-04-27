@@ -18,7 +18,7 @@ commonAnnotations: {}
 image:
   registry: docker.io
   repository: mysql
-  tag: "9.4"
+  tag: "9.7"
   ## Specify a imagePullPolicy
   ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
   ##
