@@ -106,7 +106,7 @@ spec:
                   key: redis-password
                   optional: true
             - name: REDIS_URI
-              value: "{{ include "cycloid.redisSchema" $ | trim }}://{{ include "cycloid.redisUserAuth" $ }}$(REDIS_HOST):$(REDIS_PORT)/{{ $redisDB }}"
+              value: {{ include "cycloid.redisUri" $ | quote }}
             {{- if and $.Values.redis.enabled }}
             - name: REDIS_CA_CERT
               valueFrom:
