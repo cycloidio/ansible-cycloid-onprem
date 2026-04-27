@@ -56,5 +56,7 @@ onprem_gcp_cred_name: gcp_terraform
 onprem_azure_cred_name: azure_terraform
 onprem_azure_storage_cred_name: azure_storage_cycloidtfstate
 
+cycloid_plugins_orgs_cans: ""
+
 # forms v2 condition
 advanced_opt: false
