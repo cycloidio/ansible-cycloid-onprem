@@ -632,7 +632,7 @@ container_volumes_ca_certificates_default:
 container_volumes_ca_certificates: "{% if ca_certificates_container_shared|bool %}{{ container_volumes_ca_certificates_default[ansible_os_family | lower] }}{% endif %}"
 # If ca_certificates_container_shared, update-ca-certificates on containers
 #update_ca_start_post: "{% if ca_certificates_container_shared %}/usr/sbin/update-ca-certificates{% endif %}"
-container_args_update_ca: "{% if ca_certificates_container_shared|bool %}--entrypoint /bin/bash{% endif %}"
+container_args_update_ca: "{% if ca_certificates_container_shared|bool %}--user root --entrypoint /bin/bash{% endif %}"
 
 # If ca_certificates_container_shared, run update-ca before the /entrypoint
 cycloid_api_container_cmd: '{% if ca_certificates_container_shared|bool %}-c "/usr/sbin/update-ca-certificates && /entrypoint"{% endif %}'
