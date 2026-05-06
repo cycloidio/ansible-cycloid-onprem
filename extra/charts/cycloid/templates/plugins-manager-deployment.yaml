@@ -1,8 +1,13 @@
 {{- if .Values.plugins.enabled }}
+{{- $isK8s := eq .Values.plugins.deploymentRuntime "k8s" }}
+{{- $pmFullname := include "plugins.pluginManager.fullname" . }}
+{{- $k8sCfg := .Values.plugins.k8s }}
+{{- $pluginNs := default .Release.Namespace $k8sCfg.namespace }}
+{{- $saName := default $pmFullname $k8sCfg.serviceAccount.name }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "plugins.pluginManager.fullname" . }}
+  name: {{ $pmFullname }}
   labels:
     {{- include "cycloid.labels" . | nindent 4 }}
     {{- include "plugins.pluginManager.selectorLabels" . | nindent 4 }}
@@ -27,6 +32,9 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if $isK8s }}
+      serviceAccountName: {{ $saName }}
+      {{- end }}
       {{- with .Values.plugins.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -40,9 +48,11 @@ spec:
         - name: plugin-manager
           image: "{{ .Values.plugins.pluginManager.image.repository }}:{{ .Values.plugins.pluginManager.image.tag }}"
           imagePullPolicy: {{ .Values.plugins.pluginManager.image.pullPolicy }}
-          # Required: the Plugin Manager needs to run containers via containerd.
+          {{- if not $isK8s }}
+          # CRI runtime requires privileged access to the containerd socket.
           securityContext:
             privileged: true
+          {{- end }}
           env:
             - name: PORT
               value: "4000"
@@ -52,14 +62,57 @@ spec:
               value: {{ .Values.plugins.pluginManager.insecureSkipVerify | quote }}
             - name: RUN_MIGRATIONS
               value: "true"
-            - name: CONTAINERD_ADDR
-              value: "/run/containerd/containerd.sock"
             - name: ORGS_CANS
               value: {{ .Values.plugins.orgsCans | quote }}
             - name: CY_URL
               value: {{ .Values.backend.url | quote }}
             - name: PLUGIN_MANAGER_BASE_URL
-              value: "{{ include "plugins.pluginManager.fullname" . }}:4000"
+              value: "{{ $pmFullname }}:4000"
+            {{- if $isK8s }}
+            # Kubernetes deployment runtime
+            - name: DEPLOYMENT_RUNTIME
+              value: "k8s"
+            - name: K8S_NAMESPACE
+              value: {{ $pluginNs | quote }}
+            - name: K8S_SIDECAR_IMAGE
+              value: {{ $k8sCfg.sidecarImage | quote }}
+            - name: K8S_STORAGE_CLASS
+              value: {{ $k8sCfg.storageClass | quote }}
+            - name: K8S_STORAGE_SIZE
+              value: {{ $k8sCfg.storageSize | quote }}
+            - name: K8S_STORAGE_ACCESS_MODE
+              value: {{ $k8sCfg.storageAccessMode | quote }}
+            {{- if $k8sCfg.dns }}
+            - name: K8S_DNS
+              value: {{ $k8sCfg.dns | quote }}
+            {{- end }}
+            {{- if $k8sCfg.resources.requests.cpu }}
+            - name: K8S_RESOURCES_CPU_REQUEST
+              value: {{ $k8sCfg.resources.requests.cpu | quote }}
+            {{- end }}
+            {{- if $k8sCfg.resources.requests.memory }}
+            - name: K8S_RESOURCES_MEMORY_REQUEST
+              value: {{ $k8sCfg.resources.requests.memory | quote }}
+            {{- end }}
+            {{- if $k8sCfg.resources.limits.cpu }}
+            - name: K8S_RESOURCES_CPU_LIMIT
+              value: {{ $k8sCfg.resources.limits.cpu | quote }}
+            {{- end }}
+            {{- if $k8sCfg.resources.limits.memory }}
+            - name: K8S_RESOURCES_MEMORY_LIMIT
+              value: {{ $k8sCfg.resources.limits.memory | quote }}
+            {{- end }}
+            {{- if $k8sCfg.nodeSelector }}
+            - name: K8S_NODE_SELECTOR
+              value: {{ $k8sCfg.nodeSelector | toJson | quote }}
+            {{- end }}
+            - name: HOST_API_BASE_URL
+              value: "http://{{ $pmFullname }}.{{ .Release.Namespace }}.svc.cluster.local:4000"
+            {{- else }}
+            # CRI/containerd deployment runtime
+            - name: CONTAINERD_ADDR
+              value: "/run/containerd/containerd.sock"
+            {{- end }}
             # MySQL
             - name: DB_HOST
               value: {{ include "cycloid.mysqlHost" . | quote }}
@@ -106,7 +159,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "plugins.pluginManager.fullname" . }}
+  name: {{ $pmFullname }}
   labels:
     {{- include "cycloid.labels" . | nindent 4 }}
     {{- include "plugins.pluginManager.selectorLabels" . | nindent 4 }}
@@ -126,4 +179,60 @@ spec:
       port: 4000
       targetPort: 4000
       protocol: TCP
+
+{{- if $isK8s }}
+{{- if $k8sCfg.serviceAccount.create }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $saName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    {{- include "plugins.pluginManager.selectorLabels" . | nindent 4 }}
+{{- end }}
+
+{{- if and $k8sCfg.createNamespace (ne $pluginNs .Release.Namespace) }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ $pluginNs }}
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+{{- end }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $pmFullname }}
+  namespace: {{ $pluginNs }}
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: [pods, pods/log, pods/portforward, services, persistentvolumeclaims, secrets]
+    verbs: [get, list, watch, create, update, patch, delete]
+  - apiGroups: ["apps"]
+    resources: [deployments]
+    verbs: [get, list, watch, create, update, patch, delete]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $pmFullname }}
+  namespace: {{ $pluginNs }}
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $pmFullname }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $saName }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
 {{- end }}

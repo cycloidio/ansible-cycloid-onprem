@@ -507,6 +507,54 @@ plugins:
   # Set this to your Cycloid root organization canonical to start with.
   orgsCans: ""
 
+  # Deployment runtime for plugin containers: "cri" (containerd, requires privileged pods)
+  # or "k8s" (Kubernetes-native, no privileged pods required).
+  # Applies to both Plugin Manager (long-lived plugin pods) and Plugin Registry
+  # (short-lived expansion pods).
+  deploymentRuntime: "cri"
+
+  # Kubernetes runtime settings (only used when deploymentRuntime=k8s).
+  k8s:
+    # Namespace in which plugin pods are created.
+    # Leave empty to use the same namespace as the Helm release.
+    # WARNING: If set to a different namespace, plugin pods are reached via
+    # cross-namespace ClusterIP Service DNS. This works out of the box on
+    # standard clusters, but if your cluster enforces NetworkPolicies you
+    # must allow traffic between the release namespace and this namespace.
+    namespace: ""
+    # Image for the db-proxy sidecar injected into each plugin pod (required for GetData).
+    sidecarImage: "cycloid/plugin-manager-db-proxy:latest"
+    # StorageClass used when provisioning per-deployment PVCs.
+    storageClass: "standard"
+    # Requested storage size per PVC.
+    storageSize: "1Gi"
+    # PVC access mode: ReadWriteOnce or ReadWriteMany.
+    storageAccessMode: "ReadWriteOnce"
+    # Comma-separated custom nameserver IPs injected into plugin pod DNS config.
+    dns: ""
+    # Create the plugin namespace if it differs from the release namespace.
+    createNamespace: true
+    # ServiceAccount used by the Plugin Manager pod.
+    # When create=true, a ServiceAccount + Role + RoleBinding are created.
+    # When create=false, set name to an existing ServiceAccount (you manage RBAC).
+    serviceAccount:
+      create: true
+      # Name of the ServiceAccount. If empty and create=true, defaults to
+      # the plugin-manager fullname.
+      name: ""
+    # Resource requests and limits applied to all plugin containers.
+    # Leave empty to not set any resource constraints.
+    resources:
+      requests:
+        cpu: ""
+        memory: ""
+      limits:
+        cpu: ""
+        memory: ""
+    # NodeSelector applied to all plugin pods.
+    # Example: {"role": "plugins"}
+    nodeSelector: {}
+
   # Docker Registry: optional in-cluster registry for plugin container images.
   # Useful when you need a Kubernetes-local registry and don't have an external one.
   # When enabled, credentials are auto-generated and stored in a Kubernetes Secret.
