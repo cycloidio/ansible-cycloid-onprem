@@ -115,25 +115,4 @@ spec:
   resources:
     requests:
       storage: {{ .Values.plugins.dockerRegistry.persistence.size }}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "plugins.dockerRegistry.configMapName" . }}
-  labels:
-    {{- include "cycloid.labels" . | nindent 4 }}
-    {{- with .Values.commonLabels }}
-      {{- toYaml . | nindent 4 }}
-    {{- end }}
-  {{- with .Values.commonAnnotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
-data:
-  hosts.toml: |
-    server = "http://{{ include "plugins.dockerRegistry.fullname" . }}:5000"
-
-    [host."http://{{ include "plugins.dockerRegistry.fullname" . }}:5000"]
-      capabilities = ["pull", "resolve"]
-      skip_verify = true
 {{- end }}
