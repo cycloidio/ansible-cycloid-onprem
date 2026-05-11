@@ -158,7 +158,7 @@
       CONTAINERD_ADDR: "/run/containerd/containerd.sock"
       ORGS_CANS: "{{ cycloid_plugins_orgs_cans }}"
       CY_URL: "{{ cycloid_api_base_url }}"
-      PLUGIN_MANAGER_BASE_URL: "cycloid-plugins-manager:{{ cycloid_plugins_manager_port }}"
+      PLUGIN_MANAGER_BASE_URL: "cycloid-plugin-manager:{{ cycloid_plugins_manager_port }}"
       DB_HOST: "{{ cycloid_plugins_db_host }}"
       DB_PORT: "{{ cycloid_plugins_db_port }}"
       DB_NAME: "{{ cycloid_plugins_manager_db_name }}"
