@@ -276,7 +276,7 @@ cycloid_plugins_docker_registry_password: ""
 
 #. cycloid_plugins_registry_uri(optional, string): ""
 #+ Container registry URI used by the Plugin Registry.
-#+ Leave empty to use the local Docker Registry (cycloid-plugins-docker-registry:5000).
+#+ Leave empty to use the local Docker Registry (cycloid-plugin-docker-registry:5000).
 cycloid_plugins_registry_uri: ""
 
 #. cycloid_plugins_registry_username(optional, string): ""
@@ -1014,16 +1014,16 @@ cycloid_plugins_manager_container_ports:
 # URLs used by the API to reach plugin services.
 # Plugins run on the first host of the cycloid_plugins group.
 cycloid_plugins_host: "{%- if 'cycloid_plugins' in groups and groups['cycloid_plugins'] | length > 0 -%}{{ hostvars[groups['cycloid_plugins'][0]]['ansible_default_ipv4']['address'] | default('') }}{%- endif -%}"
-cycloid_plugins_manager_url: "http://cycloid-plugins-manager:{{ cycloid_plugins_manager_port }}"
-cycloid_plugins_registry_url: "http://cycloid-plugins-registry:{{ cycloid_plugins_registry_port }}"
+cycloid_plugins_manager_url: "http://cycloid-plugin-manager:{{ cycloid_plugins_manager_port }}"
+cycloid_plugins_registry_url: "http://cycloid-plugin-registry:{{ cycloid_plugins_registry_port }}"
 
 # --add-host flags injected into containers so they can resolve plugin hostnames.
 container_args_plugins_hosts: >-
   {%- if 'cycloid_plugins' in groups and groups['cycloid_plugins'] | length > 0 -%}
   {%- set _host = hostvars[groups['cycloid_plugins'][0]]['ansible_default_ipv4']['address'] | default('') -%}
   {%- if _host != '' -%}
-  --add-host cycloid-plugins-registry:{{ _host }} --add-host cycloid-plugins-manager:{{ _host }}
-  {%- if cycloid_plugins_docker_registry_enabled | bool %} --add-host cycloid-plugins-docker-registry:{{ _host }}{%- endif -%}
+  --add-host cycloid-plugin-registry:{{ _host }} --add-host cycloid-plugin-manager:{{ _host }}
+  {%- if cycloid_plugins_docker_registry_enabled | bool %} --add-host cycloid-plugin-docker-registry:{{ _host }}{%- endif -%}
   {%- endif -%}
   {%- endif -%}
 
