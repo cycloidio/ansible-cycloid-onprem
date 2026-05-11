@@ -2,24 +2,24 @@
 # Add /etc/hosts entries so that plugin service hostnames are resolvable
 # from any host (especially cycloid-api on core hosts).
 
-- name: Add cycloid-plugins-registry to /etc/hosts | cycloid-plugins dns
+- name: Add cycloid-plugin-registry to /etc/hosts | cycloid-plugins dns
   lineinfile:
     path: /etc/hosts
-    regexp: '.*cycloid-plugins-registry$'
-    line: "{{ cycloid_plugins_host }} cycloid-plugins-registry"
+    regexp: '.*cycloid-plugin-registry$'
+    line: "{{ cycloid_plugins_host }} cycloid-plugin-registry"
     state: present
 
-- name: Add cycloid-plugins-manager to /etc/hosts | cycloid-plugins dns
+- name: Add cycloid-plugin-manager to /etc/hosts | cycloid-plugins dns
   lineinfile:
     path: /etc/hosts
-    regexp: '.*cycloid-plugins-manager$'
-    line: "{{ cycloid_plugins_host }} cycloid-plugins-manager"
+    regexp: '.*cycloid-plugin-manager$'
+    line: "{{ cycloid_plugins_host }} cycloid-plugin-manager"
     state: present
 
-- name: Add cycloid-plugins-docker-registry to /etc/hosts | cycloid-plugins dns
+- name: Add cycloid-plugin-docker-registry to /etc/hosts | cycloid-plugins dns
   lineinfile:
     path: /etc/hosts
-    regexp: '.*cycloid-plugins-docker-registry$'
-    line: "{{ cycloid_plugins_host }} cycloid-plugins-docker-registry"
+    regexp: '.*cycloid-plugin-docker-registry$'
+    line: "{{ cycloid_plugins_host }} cycloid-plugin-docker-registry"
     state: present
   when: cycloid_plugins_docker_registry_enabled|bool
