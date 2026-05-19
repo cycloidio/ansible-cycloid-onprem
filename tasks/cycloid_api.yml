@@ -103,6 +103,7 @@
       # Do not use api as worker since we use a dedicated container
       WORKER_RUN_INTERNAL: "{{ cycloid_api_worker_run_internal }}"
       ALLOW_ORG_CREATION: "{{ cycloid_api_allow_org_creation }}"
+      GIT_CLONE_DIR: "/tmp/yd-git-clones"
       #LOG_DEV_MODE: true
       #LOG_SVC_LEVEL: "DEBUG"
       http_proxy: "{{ http_proxy }}"
@@ -448,6 +449,7 @@
       BACKEND_BASE_URL: "{{ cycloid_api_base_url }}"
       LOG_LEVEL: "{{ cycloid_api_log_level }}"
       LOG_SVC_LEVEL: "NONE"
+      GIT_CLONE_DIR: "/tmp/yd-git-clones"
       #LOG_DEV_MODE: true
       #LOG_SVC_LEVEL: "DEBUG"
       http_proxy: "{{ http_proxy }}"

@@ -160,6 +160,8 @@ spec:
               value: {{ .Values.frontend.url | quote }}
             - name: "BACKEND_BASE_URL"
               value: {{ .Values.backend.url | quote }}
+            - name: "GIT_CLONE_DIR"
+              value: "/tmp/yd-git-clones"
             - name: "CRYPTO_SIGNING_KEY"
               valueFrom:
                 secretKeyRef:
