@@ -156,7 +156,6 @@
       INSECURE_SKIP_VERIFY: "{{ cycloid_plugins_insecure_skip_verify }}"
       RUN_MIGRATIONS: "true"
       CONTAINERD_ADDR: "/run/containerd/containerd.sock"
-      CONTAINERD_REGISTRY_HTTP_MIRRORS: "{%- if cycloid_plugins_containerd_registry_mirrors != '' -%}{{ cycloid_plugins_containerd_registry_mirrors }}{%- elif _plugins_registry_uri != 'cycloid-plugins-docker-registry:5000' and _plugins_registry_username != '' -%}https://{{ _plugins_registry_username }}:{{ _plugins_registry_password }}@{{ _plugins_registry_uri }}{%- endif -%}"
       ORGS_CANS: "{{ cycloid_plugins_orgs_cans }}"
       CY_URL: "{{ cycloid_api_base_url }}"
       PLUGIN_MANAGER_BASE_URL: "cycloid-plugin-manager:{{ cycloid_plugins_manager_port }}"

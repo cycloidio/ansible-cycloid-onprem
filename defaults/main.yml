@@ -305,15 +305,6 @@ cycloid_plugins_log_level: "error"
 #+ Skip TLS verification for internal communications on Plugin Registry and Plugin Manager.
 cycloid_plugins_insecure_skip_verify: true
 
-#. cycloid_plugins_containerd_registry_mirrors(optional, string): ""
-#+ Comma-separated registry URLs for containerd to use with credentials.
-#+ Required for CRI runtime when using external registries (e.g. Docker Hub).
-#+ Credentials can be embedded in the URL: https://user:token@docker.io
-#+ For Docker Hub, all known hostnames (docker.io, registry-1.docker.io,
-#+ index.docker.io) are configured automatically.
-#+ Leave empty when using the bundled local Docker Registry (default).
-cycloid_plugins_containerd_registry_mirrors: ""
-
 #. cycloid_plugins_registry_db_name(optional, string): "plugin_registry"
 #+ Database name for the Plugin Registry.
 cycloid_plugins_registry_db_name: "plugin_registry"

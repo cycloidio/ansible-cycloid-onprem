@@ -555,14 +555,6 @@ plugins:
     # Example: {"role": "plugins"}
     nodeSelector: {}
 
-  # Containerd registry mirrors for CRI runtime (only used when deploymentRuntime=cri).
-  # Comma-separated registry URLs with embedded credentials for containerd blob auth.
-  # Required when using external registries (e.g. Docker Hub) with CRI runtime.
-  # For Docker Hub, all known hostnames are configured automatically.
-  # Leave empty when using the bundled local Docker Registry (default).
-  # Example: "https://user:token@docker.io"
-  containerdRegistryMirrors: ""
-
   # Docker Registry: optional in-cluster registry for plugin container images.
   # Useful when you need a Kubernetes-local registry and don't have an external one.
   # When enabled, credentials are auto-generated and stored in a Kubernetes Secret.
