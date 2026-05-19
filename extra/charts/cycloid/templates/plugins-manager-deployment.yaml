@@ -112,6 +112,10 @@ spec:
             # CRI/containerd deployment runtime
             - name: CONTAINERD_ADDR
               value: "/run/containerd/containerd.sock"
+            {{- if .Values.plugins.containerdRegistryMirrors }}
+            - name: CONTAINERD_REGISTRY_HTTP_MIRRORS
+              value: {{ .Values.plugins.containerdRegistryMirrors | quote }}
+            {{- end }}
             {{- end }}
             # MySQL
             - name: DB_HOST
