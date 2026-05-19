@@ -418,17 +418,16 @@ Iterates over any
 extra volumes the user may have specified.
 */}}
 {{- define "backend.volumes" -}}
-  {{- if or .Values.backend.volumes (and .Values.extraCaCertificates.enabled .Values.extraCaCertificates.certs) }}
       volumes:
+        - name: git-clone-dir
+          emptyDir: {}
       {{- if .Values.backend.volumes }}
         {{- toYaml .Values.backend.volumes | nindent 8 }}
       {{- end }}
-
       {{- if and .Values.extraCaCertificates.enabled .Values.extraCaCertificates.certs }}
         - name: extra-ca-certificates
           configMap:
             name: {{ printf "%s-extra-ca" (include "cycloid.name" .) | trunc 63 | trimSuffix "-" }}
-      {{- end }}
       {{- end }}
 {{- end -}}
 
@@ -436,18 +435,17 @@ extra volumes the user may have specified.
 Set's which additional volumes should be mounted to the container.
 */}}
 {{- define "backend.mounts" -}}
-  {{- if or .Values.backend.volumeMounts (and .Values.extraCaCertificates.enabled .Values.extraCaCertificates.certs) }}
           volumeMounts:
+            - name: git-clone-dir
+              mountPath: /tmp/yd-git-clones
           {{- if .Values.backend.volumeMounts }}
           {{- toYaml .Values.backend.volumeMounts | nindent 12 }}
           {{- end }}
-
           {{- if and .Values.extraCaCertificates.enabled .Values.extraCaCertificates.certs }}
             - name: extra-ca-certificates
               mountPath: /usr/local/share/ca-certificates
               readOnly: true
           {{- end }}
-  {{- end }}
 {{- end -}}
 
 {{/*

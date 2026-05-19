@@ -4,3 +4,4 @@ __pycache__/
 vault.secret
 roles/
 datas/
+plugins/

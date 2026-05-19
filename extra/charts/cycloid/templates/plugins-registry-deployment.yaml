@@ -1,4 +1,6 @@
 {{- if .Values.plugins.enabled }}
+{{- $isK8s := eq .Values.plugins.deploymentRuntime "k8s" }}
+{{- $pluginNs := default .Release.Namespace .Values.plugins.k8s.namespace }}
 {{- range $name, $instance := .Values.plugins.pluginRegistry.instances }}
 {{- $useLocal := true }}
 {{- if hasKey $instance "use_local_registry" }}
@@ -57,12 +59,18 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if $isK8s }}
+      serviceAccountName: {{ default (include "plugins.pluginManager.fullname" $) $.Values.plugins.k8s.serviceAccount.name }}
+      {{- end }}
       containers:
         - name: plugin-registry
           image: "{{ $.Values.plugins.pluginRegistry.image.repository }}:{{ $.Values.plugins.pluginRegistry.image.tag }}"
           imagePullPolicy: {{ $.Values.plugins.pluginRegistry.image.pullPolicy }}
+          {{- if not $isK8s }}
+          # Containerd runtime requires privileged access.
           securityContext:
             privileged: true
+          {{- end }}
           env:
             - name: ORGS_CANS
               value: {{ $.Values.plugins.orgsCans | quote }}
@@ -76,6 +84,13 @@ spec:
               value: {{ $.Values.plugins.pluginRegistry.logLevel | quote }}
             - name: INSECURE_SKIP_VERIFY
               value: {{ $.Values.plugins.pluginRegistry.insecureSkipVerify | quote }}
+            {{- if $isK8s }}
+            # Kubernetes worker runtime
+            - name: WORKER_RUNTIME
+              value: "k8s"
+            - name: K8S_NAMESPACE
+              value: {{ $pluginNs | quote }}
+            {{- end }}
             {{- $dbName := $instance.databaseName | default "plugin_registry" }}
             {{- $redisDB := $instance.redisDatabase | default (include "cycloid.redisDatabase" $) }}
             # MySQL
