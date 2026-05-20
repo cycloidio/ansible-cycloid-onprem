@@ -1,7 +1,7 @@
 dependencies:
 - name: mysql
   repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/mysql/
-  version: 0.1.6
+  version: 0.1.7
 - name: redis
   repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/redis/
   version: 0.2.2
@@ -11,5 +11,5 @@ dependencies:
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.32.0
-digest: sha256:a436f845a52c84733d6f019daadbba3098ec628ce41796b3931f4ed45074a79c
-generated: "2026-04-27T18:10:03.001755114+02:00"
+digest: sha256:4e15f9407a4e8fa62052760d6540183db768c208e5931ada01547c603cc894b0
+generated: "2026-05-20T12:39:17.802895714+02:00"
