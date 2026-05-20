@@ -1167,37 +1167,110 @@ concourse:
       ##
       size: 8Gi
 
-    # TMP This is used to migrate from bitnami to official image. It will be removed on the next release
+    # Use a subdirectory for PGDATA so the volume root (which may contain lost+found
+    # on AWS EBS / ext4 volumes) does not block initdb with "directory not empty".
+    extraEnvironment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+    # TMP Migrates data from legacy layouts (Bitnami data/ or post-Bitnami root) into
+    # the pgdata/ subdirectory used by PGDATA above. Idempotent: safe to re-run if a
+    # previous attempt was interrupted (mv is atomic at file level on a single FS, and
+    # PG_VERSION is moved last so its presence at the source signals an incomplete
+    # migration). Can be removed once all deployments are confirmed on pgdata/.
     commandOverride:
       - /bin/bash
       - -ec
       - |
-        if [ -d "/var/lib/postgresql/data/data" ]; then
-        echo "Migrating existing data directory..."
-        mv /var/lib/postgresql/data/data/* /var/lib/postgresql/data/ || true
-        rmdir /var/lib/postgresql/data/data || true
-        echo "listen_addresses = '*'" > /var/lib/postgresql/data/postgresql.conf
-        echo "max_connections = 100" >> /var/lib/postgresql/data/postgresql.conf
-        echo "shared_buffers = 128MB" >> /var/lib/postgresql/data/postgresql.conf
-        echo "dynamic_shared_memory_type = posix" >> /var/lib/postgresql/data/postgresql.conf
-        echo "max_wal_size = 1GB" >> /var/lib/postgresql/data/postgresql.conf
-        echo "min_wal_size = 80MB" >> /var/lib/postgresql/data/postgresql.conf
-        echo "log_timezone = 'Etc/UTC'" >> /var/lib/postgresql/data/postgresql.conf
-        echo "datestyle = 'iso, mdy'" >> /var/lib/postgresql/data/postgresql.conf
-        echo "timezone = 'Etc/UTC'" >> /var/lib/postgresql/data/postgresql.conf
-        echo "lc_messages = 'en_US.utf8'" >> /var/lib/postgresql/data/postgresql.conf
-        echo "lc_monetary = 'en_US.utf8'" >> /var/lib/postgresql/data/postgresql.conf
-        echo "lc_numeric = 'en_US.utf8'" >> /var/lib/postgresql/data/postgresql.conf
-        echo "lc_time = 'en_US.utf8'" >> /var/lib/postgresql/data/postgresql.conf
-        echo "default_text_search_config = 'pg_catalog.english'" >> /var/lib/postgresql/data/postgresql.conf
-        echo "local   all             all                                     trust" > /var/lib/postgresql/data/pg_hba.conf
-        echo "host    all             all             127.0.0.1/32            trust" >> /var/lib/postgresql/data/pg_hba.conf
-        echo "host    all             all             ::1/128                 trust" >> /var/lib/postgresql/data/pg_hba.conf
-        echo "local   replication     all                                     trust" >> /var/lib/postgresql/data/pg_hba.conf
-        echo "host    replication     all             127.0.0.1/32            trust" >> /var/lib/postgresql/data/pg_hba.conf
-        echo "host    replication     all             ::1/128                 trust" >> /var/lib/postgresql/data/pg_hba.conf
-        echo "host all all all scram-sha-256" >> /var/lib/postgresql/data/pg_hba.conf
+        PGDATA_TARGET=/var/lib/postgresql/data/pgdata
+
+        write_postgres_configs() {
+          echo "listen_addresses = '*'" > "$PGDATA_TARGET/postgresql.conf"
+          echo "max_connections = 100" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "shared_buffers = 128MB" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "dynamic_shared_memory_type = posix" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "max_wal_size = 1GB" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "min_wal_size = 80MB" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "log_timezone = 'Etc/UTC'" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "datestyle = 'iso, mdy'" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "timezone = 'Etc/UTC'" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "lc_messages = 'en_US.utf8'" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "lc_monetary = 'en_US.utf8'" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "lc_numeric = 'en_US.utf8'" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "lc_time = 'en_US.utf8'" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "default_text_search_config = 'pg_catalog.english'" >> "$PGDATA_TARGET/postgresql.conf"
+          echo "local   all             all                                     trust" > "$PGDATA_TARGET/pg_hba.conf"
+          echo "host    all             all             127.0.0.1/32            trust" >> "$PGDATA_TARGET/pg_hba.conf"
+          echo "host    all             all             ::1/128                 trust" >> "$PGDATA_TARGET/pg_hba.conf"
+          echo "local   replication     all                                     trust" >> "$PGDATA_TARGET/pg_hba.conf"
+          echo "host    replication     all             127.0.0.1/32            trust" >> "$PGDATA_TARGET/pg_hba.conf"
+          echo "host    replication     all             ::1/128                 trust" >> "$PGDATA_TARGET/pg_hba.conf"
+          echo "host all all all scram-sha-256" >> "$PGDATA_TARGET/pg_hba.conf"
+        }
+
+        # Drain everything in $1 (except pgdata/, lost+found, PG_VERSION) into pgdata/,
+        # then move PG_VERSION last as a completion sentinel.
+        drain_into_pgdata() {
+          local src_dir=$1
+          mkdir -p "$PGDATA_TARGET"
+          shopt -s dotglob
+          for f in "$src_dir"/*; do
+            case "$(basename "$f")" in
+              pgdata|lost+found|PG_VERSION) continue ;;
+            esac
+            mv "$f" "$PGDATA_TARGET/"
+          done
+          if [ -f "$src_dir/PG_VERSION" ]; then
+            mv "$src_dir/PG_VERSION" "$PGDATA_TARGET/"
+          fi
+        }
+
+        rm -rf /var/lib/postgresql/data/lost+found
+
+        if [ -f /var/lib/postgresql/data/PG_VERSION ] && [ -f "$PGDATA_TARGET/PG_VERSION" ]; then
+          echo "FATAL: PG_VERSION present at both root and pgdata/. Manual intervention required." >&2
+          exit 1
         fi
+
+        # Step 1: drain the Bitnami data/ subdir if it exists with content. Tracks the
+        # fact so we can rewrite the (incompatible) Bitnami configs in step 3.
+        bitnami_was_used=0
+        if [ -d /var/lib/postgresql/data/data ]; then
+          if [ -n "$(ls -A /var/lib/postgresql/data/data 2>/dev/null)" ]; then
+            echo "Draining Bitnami data/ subdir to pgdata/..."
+            drain_into_pgdata /var/lib/postgresql/data/data
+            bitnami_was_used=1
+          fi
+          rmdir /var/lib/postgresql/data/data 2>/dev/null || true
+        fi
+
+        # Step 2: drain any remaining data at the volume root. Covers both the
+        # post-Bitnami "root layout" and partial leftovers from an interrupted
+        # earlier migration.
+        needs_root_drain=0
+        if [ -f /var/lib/postgresql/data/PG_VERSION ]; then
+          needs_root_drain=1
+        else
+          shopt -s dotglob
+          for f in /var/lib/postgresql/data/*; do
+            case "$(basename "$f")" in
+              pgdata|lost+found) continue ;;
+            esac
+            needs_root_drain=1
+            break
+          done
+        fi
+        if [ "$needs_root_drain" = "1" ]; then
+          echo "Draining root layout to pgdata/..."
+          drain_into_pgdata /var/lib/postgresql/data
+        fi
+
+        # Step 3: if any Bitnami data was migrated, its postgresql.conf / pg_hba.conf
+        # were pointing at /opt/bitnami paths and are incompatible with this image —
+        # overwrite them with a clean baseline.
+        if [ "$bitnami_was_used" = "1" ]; then
+          write_postgres_configs
+        fi
+
         exec docker-entrypoint.sh postgres
 
     # TMP This is used to migrate from bitnami to official image. It will be removed on the next release
