@@ -1172,40 +1172,16 @@ concourse:
     extraEnvironment:
       PGDATA: /var/lib/postgresql/data/pgdata
 
-    # TMP Migrates data from legacy layouts (Bitnami data/ or post-Bitnami root) into
-    # the pgdata/ subdirectory used by PGDATA above. Idempotent: safe to re-run if a
-    # previous attempt was interrupted (mv is atomic at file level on a single FS, and
-    # PG_VERSION is moved last so its presence at the source signals an incomplete
-    # migration). Can be removed once all deployments are confirmed on pgdata/.
+    # TMP Migrates data from the previous root layout into the pgdata/ subdirectory
+    # used by PGDATA above. Idempotent and crash-safe: mv is atomic at file level on
+    # a single FS, and PG_VERSION is moved last so its presence at the source signals
+    # an incomplete migration. Can be removed once all deployments are confirmed on
+    # the pgdata/ layout.
     commandOverride:
       - /bin/bash
       - -ec
       - |
         PGDATA_TARGET=/var/lib/postgresql/data/pgdata
-
-        write_postgres_configs() {
-          echo "listen_addresses = '*'" > "$PGDATA_TARGET/postgresql.conf"
-          echo "max_connections = 100" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "shared_buffers = 128MB" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "dynamic_shared_memory_type = posix" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "max_wal_size = 1GB" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "min_wal_size = 80MB" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "log_timezone = 'Etc/UTC'" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "datestyle = 'iso, mdy'" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "timezone = 'Etc/UTC'" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "lc_messages = 'en_US.utf8'" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "lc_monetary = 'en_US.utf8'" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "lc_numeric = 'en_US.utf8'" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "lc_time = 'en_US.utf8'" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "default_text_search_config = 'pg_catalog.english'" >> "$PGDATA_TARGET/postgresql.conf"
-          echo "local   all             all                                     trust" > "$PGDATA_TARGET/pg_hba.conf"
-          echo "host    all             all             127.0.0.1/32            trust" >> "$PGDATA_TARGET/pg_hba.conf"
-          echo "host    all             all             ::1/128                 trust" >> "$PGDATA_TARGET/pg_hba.conf"
-          echo "local   replication     all                                     trust" >> "$PGDATA_TARGET/pg_hba.conf"
-          echo "host    replication     all             127.0.0.1/32            trust" >> "$PGDATA_TARGET/pg_hba.conf"
-          echo "host    replication     all             ::1/128                 trust" >> "$PGDATA_TARGET/pg_hba.conf"
-          echo "host all all all scram-sha-256" >> "$PGDATA_TARGET/pg_hba.conf"
-        }
 
         # Drain everything in $1 (except pgdata/, lost+found, PG_VERSION) into pgdata/,
         # then move PG_VERSION last as a completion sentinel.
@@ -1231,21 +1207,6 @@ concourse:
           exit 1
         fi
 
-        # Step 1: drain the Bitnami data/ subdir if it exists with content. Tracks the
-        # fact so we can rewrite the (incompatible) Bitnami configs in step 3.
-        bitnami_was_used=0
-        if [ -d /var/lib/postgresql/data/data ]; then
-          if [ -n "$(ls -A /var/lib/postgresql/data/data 2>/dev/null)" ]; then
-            echo "Draining Bitnami data/ subdir to pgdata/..."
-            drain_into_pgdata /var/lib/postgresql/data/data
-            bitnami_was_used=1
-          fi
-          rmdir /var/lib/postgresql/data/data 2>/dev/null || true
-        fi
-
-        # Step 2: drain any remaining data at the volume root. Covers both the
-        # post-Bitnami "root layout" and partial leftovers from an interrupted
-        # earlier migration.
         needs_root_drain=0
         if [ -f /var/lib/postgresql/data/PG_VERSION ]; then
           needs_root_drain=1
@@ -1264,32 +1225,7 @@ concourse:
           drain_into_pgdata /var/lib/postgresql/data
         fi
 
-        # Step 3: if any Bitnami data was migrated, its postgresql.conf / pg_hba.conf
-        # were pointing at /opt/bitnami paths and are incompatible with this image —
-        # overwrite them with a clean baseline.
-        if [ "$bitnami_was_used" = "1" ]; then
-          write_postgres_configs
-        fi
-
         exec docker-entrypoint.sh postgres
-
-    # TMP This is used to migrate from bitnami to official image. It will be removed on the next release
-    lifecycle:
-      postStart:
-        exec:
-          command:
-            - /bin/bash
-            - -ec
-            - |
-              for i in $(seq 1 30); do
-                pg_isready -U ${POSTGRES_USER} \
-                          -d "dbname=${POSTGRES_DB}" \
-                          -h 127.0.0.1 -p 5432 && \
-                psql -U ${POSTGRES_USER} \
-                    -d ${POSTGRES_DB} \
-                    -c "ALTER DATABASE atc REFRESH COLLATION VERSION;" && break
-                sleep 2
-              done
 
   secrets:
     ## User/Pass need to be specified if bringing your own PostgreSQL.
