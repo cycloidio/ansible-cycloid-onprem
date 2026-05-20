@@ -53,18 +53,6 @@ spec:
       containers:
         - name: mysql
           image: {{ template "mysql.image" . }}
-          # TMP This is used to migrate from bitnami to official image. It will be removed on the next release
-          command:
-            - /bin/bash
-            - -ec
-            - |
-              if [ -d "/var/lib/mysql/data" ]; then
-                echo "Migrating existing data directory..."
-                mv /var/lib/mysql/data/* /var/lib/mysql/ || true
-                rmdir /var/lib/mysql/data || true
-              fi
-              exec docker-entrypoint.sh mysqld
-          ###
           {{- with .Values.primary.lifecycle }}
           lifecycle:
             {{- toYaml . | nindent 12 }}

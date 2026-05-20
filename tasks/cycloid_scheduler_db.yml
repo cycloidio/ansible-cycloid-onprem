@@ -10,49 +10,6 @@
     mode: 0777
     recurse: yes
 
-- name: "Bitnami migration: Check if data directory has files | cycloid-scheduler-db"
-  ansible.builtin.find:
-    paths: "{{ concourse_db_path }}"
-    file_type: any
-  register: data_content
-
-- name: "Bitnami migration: Ensure postgresql config file exists | cycloid-scheduler-db"
-  copy:
-    dest: "{{ concourse_db_path }}/postgresql.conf"
-    mode: "0740"
-    content: |
-      listen_addresses = '*'
-      max_connections = 100
-      shared_buffers = 128MB
-      dynamic_shared_memory_type = posix
-      max_wal_size = 1GB
-      min_wal_size = 80MB
-      log_timezone = 'Etc/UTC'
-      datestyle = 'iso, mdy'
-      timezone = 'Etc/UTC'
-      lc_messages = 'en_US.utf8'
-      lc_monetary = 'en_US.utf8'
-      lc_numeric = 'en_US.utf8'
-      lc_time = 'en_US.utf8'
-      default_text_search_config = 'pg_catalog.english'
-  notify: "restart concourse db"
-  when: data_content.matched > 0
-
-- name: "Bitnami migration: Ensure postgresql pg_hba file exists | cycloid-scheduler-db"
-  copy:
-    dest: "{{ concourse_db_path }}/pg_hba.conf"
-    mode: "0740"
-    content: |
-      local   all         all               trust
-      host    all         all 127.0.0.1/32  trust
-      host    all         all ::1/128       trust
-      local   replication all               trust
-      host    replication all 127.0.0.1/32  trust
-      host    replication all ::1/128       trust
-      host    all         all all           scram-sha-256
-  notify: "restart concourse db"
-  when: data_content.matched > 0
-
 - name: Define service | cycloid-scheduler-db
   include_role:
     name: mhutter.docker-systemd-service
@@ -72,27 +29,3 @@
 
 - name: Force flush handlers to ensure container is started | cycloid-scheduler-db
   meta: flush_handlers
-
-- name: "Bitnami migration: fix database collation | cycloid-scheduler-db"
-  ansible.builtin.command:
-    argv:
-      - /usr/bin/docker
-      - exec
-      - concourse-db
-      - bash
-      - -c
-      - |
-        for i in $(seq 1 5); do
-          pg_isready -U "{{ concourse_db_user }}" \
-            -d "dbname={{ concourse_db_name }}" \
-            -h 127.0.0.1 -p 5432 \
-            && \
-          psql -U "{{ concourse_db_user }}" \
-            -d "{{ concourse_db_name }}" \
-            -h 127.0.0.1 -p 5432 \
-            -c "ALTER DATABASE {{ concourse_db_name }} REFRESH COLLATION VERSION;" && break
-          sleep 2
-        done
-  retries: 15
-  delay: 2
-  ignore_errors: true
