@@ -1172,33 +1172,17 @@ concourse:
     extraEnvironment:
       PGDATA: /var/lib/postgresql/data/pgdata
 
-    # TMP Migrates data from the previous root layout into the pgdata/ subdirectory
-    # used by PGDATA above. Idempotent and crash-safe: mv is atomic at file level on
-    # a single FS, and PG_VERSION is moved last so its presence at the source signals
-    # an incomplete migration. Can be removed once all deployments are confirmed on
-    # the pgdata/ layout.
+    # TMP one-shot migration from the previous root layout to pgdata/. This
+    # block must be removed once all deployments have been upgraded once with
+    # this chart -- PGDATA in extraEnvironment above is enough on its own.
+    # Idempotent and crash-safe: mv is atomic at file level on a single FS,
+    # and PG_VERSION is moved last so its presence at the source signals an
+    # incomplete migration.
     commandOverride:
       - /bin/bash
       - -ec
       - |
         PGDATA_TARGET=/var/lib/postgresql/data/pgdata
-
-        # Drain everything in $1 (except pgdata/, lost+found, PG_VERSION) into pgdata/,
-        # then move PG_VERSION last as a completion sentinel.
-        drain_into_pgdata() {
-          local src_dir=$1
-          mkdir -p "$PGDATA_TARGET"
-          shopt -s dotglob
-          for f in "$src_dir"/*; do
-            case "$(basename "$f")" in
-              pgdata|lost+found|PG_VERSION) continue ;;
-            esac
-            mv "$f" "$PGDATA_TARGET/"
-          done
-          if [ -f "$src_dir/PG_VERSION" ]; then
-            mv "$src_dir/PG_VERSION" "$PGDATA_TARGET/"
-          fi
-        }
 
         rm -rf /var/lib/postgresql/data/lost+found
 
@@ -1207,22 +1191,23 @@ concourse:
           exit 1
         fi
 
-        needs_root_drain=0
+        # PG_VERSION at the root is a reliable signal that the legacy layout is in
+        # use and needs migration. No-op on fresh deploys and already-migrated layouts.
         if [ -f /var/lib/postgresql/data/PG_VERSION ]; then
-          needs_root_drain=1
-        else
-          shopt -s dotglob
-          for f in /var/lib/postgresql/data/*; do
-            case "$(basename "$f")" in
-              pgdata|lost+found) continue ;;
-            esac
-            needs_root_drain=1
-            break
-          done
+          echo ">>> Migrating postgres data from volume root to pgdata/ subdir..."
         fi
-        if [ "$needs_root_drain" = "1" ]; then
-          echo "Draining root layout to pgdata/..."
-          drain_into_pgdata /var/lib/postgresql/data
+
+        mkdir -p "$PGDATA_TARGET"
+        shopt -s dotglob nullglob
+        for f in /var/lib/postgresql/data/*; do
+          case "$(basename "$f")" in
+            pgdata|lost+found|PG_VERSION) continue ;;
+          esac
+          mv "$f" "$PGDATA_TARGET/"
+        done
+        if [ -f /var/lib/postgresql/data/PG_VERSION ]; then
+          mv /var/lib/postgresql/data/PG_VERSION "$PGDATA_TARGET/"
+          echo ">>> Migration to pgdata/ complete."
         fi
 
         exec docker-entrypoint.sh postgres
