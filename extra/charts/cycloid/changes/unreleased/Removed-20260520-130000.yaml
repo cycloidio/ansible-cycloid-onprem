@@ -1,6 +1,0 @@
-kind: Removed
-body: 'concourse/postgres, mysql: drop the Bitnami-to-official-image migration commandOverride (postgres) and the equivalent on the mysql subchart (bumped to 0.1.7). The migration was a one-shot already applied to every existing deployment by chart 0.16.x.'
-time: 2026-05-20T13:00:00.000000000+02:00
-custom:
-    Ref: Pull
-    RefID: "290"
