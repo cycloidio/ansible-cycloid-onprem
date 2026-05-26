@@ -397,6 +397,10 @@ concourse:
       - name: concourse-team-authorized-key-sync
         image: cycloid/concourse-team-authorized-key-sync:v1.1
         imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+              - KILL
         env:
           - name: VAULT_URL
             value: http://cycloid-vault:8200
