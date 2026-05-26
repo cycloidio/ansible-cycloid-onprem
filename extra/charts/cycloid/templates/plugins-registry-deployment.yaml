@@ -90,6 +90,17 @@ spec:
               value: "k8s"
             - name: K8S_NAMESPACE
               value: {{ $pluginNs | quote }}
+            {{- if $.Values.plugins.k8s.imagePullSecrets }}
+            - name: K8S_IMAGE_PULL_SECRETS
+              value: {{ $.Values.plugins.k8s.imagePullSecrets | quote }}
+            {{- else if $.Values.plugins.dockerRegistry.enabled }}
+            - name: K8S_IMAGE_PULL_SECRETS
+              value: {{ printf "%s-docker-registry-pull" (include "cycloid.fullname" $) | trunc 63 | trimSuffix "-" | quote }}
+            {{- end }}
+            {{- if $.Values.plugins.dockerRegistry.enabled }}
+            - name: REGISTRY_INTERNAL_URI
+              value: {{ printf "%s:5000" (include "plugins.dockerRegistry.fullname" $) | quote }}
+            {{- end }}
             {{- end }}
             {{- $dbName := $instance.databaseName | default "plugin_registry" }}
             {{- $redisDB := $instance.redisDatabase | default (include "cycloid.redisDatabase" $) }}

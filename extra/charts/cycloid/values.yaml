@@ -567,6 +567,9 @@ plugins:
       pullPolicy: Always
     # Username for htpasswd authentication on the Docker Registry.
     username: "cycloid"
+    # NodePort exposes the registry on localhost:<nodePort> on every node.
+    # This allows the kubelet to pull images without TLS or DNS resolution.
+    nodePort: 30550
     persistence:
       # Size of the PVC used to store Docker images.
       size: 15Gi
