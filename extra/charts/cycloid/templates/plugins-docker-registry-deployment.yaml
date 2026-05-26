@@ -1,6 +1,5 @@
 {{- if and .Values.plugins.enabled .Values.plugins.dockerRegistry.enabled }}
 {{- $fullname := include "plugins.dockerRegistry.fullname" . }}
-{{- $nodePort := .Values.plugins.dockerRegistry.nodePort | default 30550 }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -85,14 +84,13 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     {{- include "plugins.dockerRegistry.selectorLabels" . | nindent 4 }}
   ports:
     - name: http
       port: 5000
       targetPort: 5000
-      nodePort: {{ $nodePort }}
       protocol: TCP
 ---
 apiVersion: v1

@@ -1,5 +1,5 @@
 kind: Added
-body: "plugins/docker-registry: expose as NodePort service (localhost:<port>, default 30550) with auto-generated pull secret and REGISTRY_INTERNAL_URI for k8s runtime. Kubelet pulls via localhost (no TLS/DNS needed), plugin-registry pod pulls via cluster service name."
+body: "plugins/docker-registry: expose via Ingress for k8s runtime so the kubelet can pull plugin images over HTTPS with a trusted certificate. Includes auto-generated dockerconfigjson pull secret and K8S_IMAGE_PULL_SECRETS injection. CRI runtime is unchanged (uses internal service name)."
 time: 2026-05-26T18:04:45.143592024+02:00
 custom:
     Ref: Pull

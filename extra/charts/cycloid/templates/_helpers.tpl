@@ -680,3 +680,17 @@ Plugin Manager selector labels
 app.kubernetes.io/name: {{ include "plugins.pluginManager.fullname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+
+{{/*
+Return the REGISTRY_URI for the bundled docker-registry.
+When the ingress is enabled (k8s runtime), use the ingress host.
+Otherwise, use the internal service name (CRI runtime).
+*/}}
+{{- define "plugins.dockerRegistry.registryURI" -}}
+{{- if and .Values.plugins.dockerRegistry.ingress.enabled (eq .Values.plugins.deploymentRuntime "k8s") -}}
+{{- (index .Values.plugins.dockerRegistry.ingress.hosts 0).host -}}
+{{- else -}}
+{{- printf "%s:5000" (include "plugins.dockerRegistry.fullname" .) -}}
+{{- end -}}
+{{- end }}
