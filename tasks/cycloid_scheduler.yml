@@ -64,7 +64,7 @@
   file:
     state: touch
     path: "{{ concourse_config_path }}/{{ concourse_team_authorized_worker_keys_path }}"
-    mode: 0400
+    mode: 0644
 
 # Note: This block could be removed around the 2022/08/01, letting time for onprem customer to run the migration script once
 # backward compatibility. New format contain also Dedicated VAULT variable for scheduler worker sync key.
