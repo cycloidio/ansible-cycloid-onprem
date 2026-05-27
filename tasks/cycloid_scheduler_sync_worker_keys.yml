@@ -11,7 +11,7 @@
       - "{{ concourse_config_path }}:/datas"
     # Additionnal env file for approle
     # Adding pid letting this container able to send SIGNAL to Concourse for reloading authorized key files
-    container_args: "--pid=container:concourse-web --env-file={{ concourse_config_path }}/approle-concourse-ro {{ container_args_extra }}"
+    container_args: "--cap-add KILL --pid=container:concourse-web --env-file={{ concourse_config_path }}/approle-concourse-ro {{ container_args_extra }}"
     container_env:
       # Vault integration
       VAULT_URL: "{{ vault_url }}"
