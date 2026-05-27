@@ -1,0 +1,50 @@
+{{- if and .Values.plugins.enabled .Values.plugins.dockerRegistry.enabled .Values.plugins.dockerRegistry.ingress.enabled (eq .Values.plugins.deploymentRuntime "k8s") }}
+{{- $fullname := include "plugins.dockerRegistry.fullname" . }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullname }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    {{- include "plugins.dockerRegistry.selectorLabels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.plugins.dockerRegistry.ingress.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.commonAnnotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if .Values.plugins.dockerRegistry.ingress.className }}
+  ingressClassName: {{ .Values.plugins.dockerRegistry.ingress.className | quote }}
+  {{- end }}
+  {{- if .Values.plugins.dockerRegistry.ingress.tls }}
+  tls:
+    {{- range .Values.plugins.dockerRegistry.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.plugins.dockerRegistry.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ $fullname }}
+                port:
+                  number: 5000
+          {{- end }}
+    {{- end }}
+{{- end }}

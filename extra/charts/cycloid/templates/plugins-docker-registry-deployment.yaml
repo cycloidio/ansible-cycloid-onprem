@@ -1,8 +1,9 @@
 {{- if and .Values.plugins.enabled .Values.plugins.dockerRegistry.enabled }}
+{{- $fullname := include "plugins.dockerRegistry.fullname" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "plugins.dockerRegistry.fullname" . }}
+  name: {{ $fullname }}
   labels:
     {{- include "cycloid.labels" . | nindent 4 }}
     {{- include "plugins.dockerRegistry.selectorLabels" . | nindent 4 }}
@@ -44,7 +45,7 @@ spec:
                 path: htpasswd
         - name: registry-storage
           persistentVolumeClaim:
-            claimName: {{ include "plugins.dockerRegistry.fullname" . }}
+            claimName: {{ $fullname }}
       containers:
         - name: docker-registry
           image: "{{ .Values.plugins.dockerRegistry.image.repository }}:{{ .Values.plugins.dockerRegistry.image.tag }}"
@@ -71,7 +72,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "plugins.dockerRegistry.fullname" . }}
+  name: {{ $fullname }}
   labels:
     {{- include "cycloid.labels" . | nindent 4 }}
     {{- include "plugins.dockerRegistry.selectorLabels" . | nindent 4 }}
@@ -95,7 +96,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "plugins.dockerRegistry.fullname" . }}
+  name: {{ $fullname }}
   labels:
     {{- include "cycloid.labels" . | nindent 4 }}
     {{- include "plugins.dockerRegistry.selectorLabels" . | nindent 4 }}
