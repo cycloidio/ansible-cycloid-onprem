@@ -1,0 +1,85 @@
+{{- if and .Values.ai.enabled .Values.ai.ingest.enabled }}
+{{- $fullName := printf "%s-ai" (include "cycloid.fullname" .) }}
+{{- $secretName := printf "%s-ai" (include "cycloid.fullname" .) }}
+{{- $mcpUrl := .Values.ai.mcpServerUrl }}
+{{- if and (not $mcpUrl) .Values.mcp.enabled }}
+  {{- $mcpUrl = printf "http://%s-mcp-server:%s/mcp" (include "cycloid.fullname" .) (toString (.Values.mcp.service.port | int)) }}
+{{- end }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $fullName }}-ingest
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ai-ingest
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  schedule: {{ .Values.ai.ingest.schedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/component: ai-ingest
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.ai.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.ai.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          restartPolicy: OnFailure
+          containers:
+            - name: ingest
+              image: "{{ .Values.ai.langgraph.image.repository }}:{{ .Values.ai.langgraph.image.tag }}"
+              imagePullPolicy: {{ .Values.ai.langgraph.image.pullPolicy }}
+              command: ["/ingest-cron.sh"]
+              env:
+                - name: CYCLOBOT_CHROMADB_HOST
+                  value: "{{ $fullName }}-chromadb"
+                - name: CYCLOBOT_CHROMADB_PORT
+                  value: "8000"
+                - name: CYCLOBOT_ENVIRONMENT
+                  value: "production"
+                - name: CYCLOBOT_LLM_PROVIDER
+                  value: {{ .Values.ai.llm.provider | quote }}
+                - name: CYCLOBOT_LLM_MODEL
+                  value: {{ .Values.ai.llm.model | quote }}
+                - name: CYCLOBOT_MISTRAL_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ $secretName }}
+                      key: mistral-api-key
+                - name: CYCLOBOT_EMBEDDING_PROVIDER
+                  value: {{ .Values.ai.embedding.provider | quote }}
+                - name: CYCLOBOT_EMBEDDING_MODEL
+                  value: {{ .Values.ai.embedding.model | quote }}
+                - name: CYCLOBOT_CHROMADB_AUTH_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ $secretName }}
+                      key: chromadb-auth-token
+                - name: CYCLOBOT_CHROMADB_COLLECTION_NAME
+                  value: "cycloid_docs"
+                - name: CYCLOBOT_INGEST_FORCE_REFRESH
+                  value: "true"
+                - name: CYCLOBOT_INGESTION_BASE_URL
+                  value: {{ .Values.ai.ingest.baseUrl | quote }}
+                {{- if $mcpUrl }}
+                - name: CYCLOBOT_MCP_SERVER_URL
+                  value: {{ $mcpUrl | quote }}
+                {{- end }}
+{{- end }}

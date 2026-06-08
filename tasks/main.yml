@@ -29,6 +29,12 @@
     - ansible.builtin.include_tasks: cycloid_plugins_dns.yml
       when: cycloid_plugins_host != ''
 
+    - ansible.builtin.include_tasks: cycloid_mcp_dns.yml
+      when: cycloid_mcp_host != ''
+
+    - ansible.builtin.include_tasks: cycloid_ai_dns.yml
+      when: cycloid_ai_host != ''
+
     - ansible.builtin.include_tasks: cycloid_api.yml
       when: setup_cycloid_core|bool
     - ansible.builtin.include_tasks: cycloid_frontend.yml
@@ -50,6 +56,15 @@
 
     - ansible.builtin.include_tasks: cycloid_plugins.yml
       when: setup_cycloid_plugins|bool
+
+    - ansible.builtin.include_tasks: cycloid_mcp.yml
+      when: setup_cycloid_mcp|bool
+
+    - ansible.builtin.include_tasks: cycloid_ai.yml
+      when: setup_cycloid_ai|bool
+
+    - ansible.builtin.include_tasks: cycloid_ai_ingest.yml
+      when: setup_cycloid_ai|bool and cycloid_ai_ingest_enabled|bool and inventory_hostname == groups['cycloid_ai'][0]
 
     - ansible.builtin.include_tasks: dump_dbs.yml
       when: dbs_dump != {} and inventory_hostname == groups['cycloid_core'][0]
@@ -91,6 +106,12 @@
 
     - ansible.builtin.include_tasks: cycloid_plugins_uninstall.yml
       when: setup_cycloid_plugins|bool
+
+    - ansible.builtin.include_tasks: cycloid_mcp_uninstall.yml
+      when: setup_cycloid_mcp|bool
+
+    - ansible.builtin.include_tasks: cycloid_ai_uninstall.yml
+      when: setup_cycloid_ai|bool
 
     - ansible.builtin.include_tasks: cycloid_core_uninstall.yml
       when: setup_cycloid_core|bool

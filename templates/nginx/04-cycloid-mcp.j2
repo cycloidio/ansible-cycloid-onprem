@@ -1,0 +1,22 @@
+{% if cycloid_mcp_dns is defined and cycloid_mcp_dns != "" %}
+server {
+    listen       443 ssl;
+    server_name  "{{ cycloid_mcp_dns }}";
+
+    {% if cycloid_nginx_ssl_protocols is defined and cycloid_nginx_ssl_protocols|length %}
+    ssl_protocols {{ cycloid_nginx_ssl_protocols }};
+    {% endif %}
+
+    ssl_certificate     /etc/nginx/ssl/ssl.crt;
+    ssl_certificate_key /etc/nginx/ssl/ssl.key;
+
+    location / {
+      proxy_pass                http://cycloid-mcp-server:{{ cycloid_mcp_port }};
+      proxy_set_header          X-FORWARDED_PROTO https;
+      proxy_set_header          X-FORWARDED_PORT 443;
+      proxy_connect_timeout     3600s;
+      proxy_send_timeout        3600s;
+      proxy_read_timeout        3600s;
+    }
+}
+{% endif %}

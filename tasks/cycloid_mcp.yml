@@ -1,0 +1,24 @@
+---
+- name: Create config directory | cycloid-mcp
+  file:
+    path: "{{ cycloid_mcp_path }}"
+    state: directory
+    mode: 0777
+    recurse: yes
+
+- name: Define service | cycloid-mcp
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    container_name: cycloid-mcp-server
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{ cycloid_mcp_image }}"
+    container_ports: "{{ cycloid_mcp_container_ports }}"
+    container_args: "{{ container_args_extra }}"
+    container_env:
+      CY_HTTP_API_URL: "{{ cycloid_api_base_url }}"
+      CY_HTTP_PORT: "{{ cycloid_mcp_port }}"
+  tags: docker-services
+
+- name: Force flush handlers to ensure container is started | cycloid-mcp
+  meta: flush_handlers

@@ -1,0 +1,189 @@
+{{- if .Values.ai.enabled }}
+{{- $fullName := printf "%s-ai" (include "cycloid.fullname" .) }}
+{{- $secretName := printf "%s-ai" (include "cycloid.fullname" .) }}
+{{- $mcpUrl := .Values.ai.mcpServerUrl }}
+{{- if and (not $mcpUrl) .Values.mcp.enabled }}
+  {{- $mcpUrl = printf "http://%s-mcp-server:%v/mcp" (include "cycloid.fullname" .) (.Values.mcp.service.port | toString) }}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-langgraph
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ai-langgraph
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.ai.langgraph.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: ai-langgraph
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: ai-langgraph
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ai.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ai.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: langgraph
+          image: "{{ .Values.ai.langgraph.image.repository }}:{{ .Values.ai.langgraph.image.tag }}"
+          imagePullPolicy: {{ .Values.ai.langgraph.image.pullPolicy }}
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: postgres-password
+            - name: POSTGRES_URI
+              value: "postgres://cyclobot:$(POSTGRES_PASSWORD)@{{ $fullName }}-postgres:5432/cyclobot"
+            - name: CYCLOBOT_CHROMADB_HOST
+              value: "{{ $fullName }}-chromadb"
+            - name: CYCLOBOT_CHROMADB_PORT
+              value: "8000"
+            - name: CYCLOBOT_ENVIRONMENT
+              value: "production"
+            - name: CYCLOBOT_LLM_PROVIDER
+              value: {{ .Values.ai.llm.provider | quote }}
+            - name: CYCLOBOT_LLM_MODEL
+              value: {{ .Values.ai.llm.model | quote }}
+            - name: CYCLOBOT_MISTRAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: mistral-api-key
+            - name: CYCLOBOT_EMBEDDING_PROVIDER
+              value: {{ .Values.ai.embedding.provider | quote }}
+            - name: CYCLOBOT_EMBEDDING_MODEL
+              value: {{ .Values.ai.embedding.model | quote }}
+            - name: CYCLOBOT_CHROMADB_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: chromadb-auth-token
+            - name: CYCLOBOT_CHROMADB_COLLECTION_NAME
+              value: "cycloid_docs"
+            - name: CYCLOBOT_CYCLOID_API_URL
+              value: {{ (.Values.ai.apiUrl | default .Values.backend.url) | quote }}
+            - name: CYCLOBOT_CORS_ALLOWED_ORIGINS
+              value: {{ (.Values.ai.corsAllowedOrigins | default .Values.frontend.url) | quote }}
+            {{- if $mcpUrl }}
+            - name: CYCLOBOT_MCP_SERVER_URL
+              value: {{ $mcpUrl | quote }}
+            {{- end }}
+          ports:
+            - containerPort: 2024
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /ok
+              port: 2024
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.ai.langgraph.resources | nindent 12 }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}-langgraph
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ai-langgraph
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/component: ai-langgraph
+  ports:
+    - name: http
+      port: 2024
+      targetPort: 2024
+      protocol: TCP
+
+{{- if .Values.ai.ingress.enabled }}
+---
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion }}
+apiVersion: networking.k8s.io/v1
+{{- else }}
+apiVersion: networking.k8s.io/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-langgraph
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ai-langgraph
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.ai.ingress.annotations .Values.commonAnnotations }}
+  annotations:
+    {{- with .Values.ai.ingress.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.commonAnnotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  {{- if and .Values.ai.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.ai.ingress.className }}
+  {{- end }}
+  {{- if .Values.ai.ingress.tls }}
+  tls:
+    {{- range .Values.ai.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ai.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ $fullName }}-langgraph
+                port:
+                  number: 2024
+              {{- else }}
+              serviceName: {{ $fullName }}-langgraph
+              servicePort: 2024
+              {{- end }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+{{- end }}
