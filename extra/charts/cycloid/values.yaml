@@ -542,7 +542,7 @@ plugins:
       # Name of the ServiceAccount. If empty and create=true, defaults to
       # the plugin-manager fullname.
       name: ""
-    # Resource requests and limits applied to all plugin containers.
+    # Resource requests and limits applied to plugin-manager pods (long-lived).
     # Leave empty to not set any resource constraints.
     resources:
       requests:
@@ -551,7 +551,17 @@ plugins:
       limits:
         cpu: ""
         memory: ""
-    # NodeSelector applied to all plugin pods.
+    # Resource requests and limits applied to plugin-registry expansion pods (short-lived).
+    # These pods typically need more resources for building/expanding plugin images.
+    # Leave empty to not set any resource constraints.
+    registryResources:
+      requests:
+        cpu: ""
+        memory: ""
+      limits:
+        cpu: ""
+        memory: ""
+    # NodeSelector applied to all plugin pods (manager and registry).
     # Example: {"role": "plugins"}
     nodeSelector: {}
 

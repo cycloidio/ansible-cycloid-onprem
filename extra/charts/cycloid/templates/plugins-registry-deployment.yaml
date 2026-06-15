@@ -97,6 +97,26 @@ spec:
             - name: K8S_IMAGE_PULL_SECRETS
               value: {{ printf "%s-docker-registry-pull" (include "cycloid.fullname" $) | trunc 63 | trimSuffix "-" | quote }}
             {{- end }}
+            {{- if $.Values.plugins.k8s.registryResources.requests.cpu }}
+            - name: K8S_RESOURCES_CPU_REQUEST
+              value: {{ $.Values.plugins.k8s.registryResources.requests.cpu | quote }}
+            {{- end }}
+            {{- if $.Values.plugins.k8s.registryResources.requests.memory }}
+            - name: K8S_RESOURCES_MEMORY_REQUEST
+              value: {{ $.Values.plugins.k8s.registryResources.requests.memory | quote }}
+            {{- end }}
+            {{- if $.Values.plugins.k8s.registryResources.limits.cpu }}
+            - name: K8S_RESOURCES_CPU_LIMIT
+              value: {{ $.Values.plugins.k8s.registryResources.limits.cpu | quote }}
+            {{- end }}
+            {{- if $.Values.plugins.k8s.registryResources.limits.memory }}
+            - name: K8S_RESOURCES_MEMORY_LIMIT
+              value: {{ $.Values.plugins.k8s.registryResources.limits.memory | quote }}
+            {{- end }}
+            {{- if $.Values.plugins.k8s.nodeSelector }}
+            - name: K8S_NODE_SELECTOR
+              value: {{ $.Values.plugins.k8s.nodeSelector | toJson | quote }}
+            {{- end }}
             {{- end }}
             {{- $dbName := $instance.databaseName | default "plugin_registry" }}
             {{- $redisDB := $instance.redisDatabase | default (include "cycloid.redisDatabase" $) }}
