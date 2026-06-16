@@ -7,28 +7,7 @@
     recurse: yes
   with_items:
     - "{{ cycloid_ai_path }}"
-    - "{{ cycloid_ai_path }}/postgres-data"
     - "{{ cycloid_ai_path }}/chromadb-data"
-
-- name: Define service | cycloid-ai postgres
-  include_role:
-    name: mhutter.docker-systemd-service
-  vars:
-    container_name: cycloid-ai-postgres
-    container_docker_pull: "{{ docker_pull }}"
-    container_image: "{{ cycloid_ai_postgres_image }}"
-    container_ports: "{{ cycloid_ai_postgres_container_ports }}"
-    container_args: "{{ container_args_extra }}"
-    container_volumes:
-      - "{{ cycloid_ai_path }}/postgres-data:/var/lib/postgresql"
-    container_env:
-      POSTGRES_USER: cyclobot
-      POSTGRES_PASSWORD: "{{ cycloid_ai_postgres_password }}"
-      POSTGRES_DB: cyclobot
-  tags: docker-services
-
-- name: Force flush handlers to ensure postgres is started | cycloid-ai
-  meta: flush_handlers
 
 - name: Define service | cycloid-ai chromadb
   include_role:
@@ -59,9 +38,8 @@
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{ cycloid_ai_langgraph_image }}"
     container_ports: "{{ cycloid_ai_langgraph_container_ports }}"
-    container_args: "--link cycloid-ai-postgres --link cycloid-ai-chromadb {% if setup_cycloid_mcp|bool %}--link cycloid-mcp-server{% endif %} {{ container_args_extra }}"
+    container_args: "--link cycloid-ai-chromadb {% if setup_cycloid_mcp|bool %}--link cycloid-mcp-server{% endif %} {{ container_args_extra }}"
     container_env:
-      #TODO for later  POSTGRES_URI: "postgres://cyclobot:{{ cycloid_ai_postgres_password }}@cycloid-ai-postgres:5432/cyclobot"
       CYCLOBOT_CHROMADB_HOST: cycloid-ai-chromadb
       CYCLOBOT_CHROMADB_PORT: "8000"
       CYCLOBOT_ENVIRONMENT: production

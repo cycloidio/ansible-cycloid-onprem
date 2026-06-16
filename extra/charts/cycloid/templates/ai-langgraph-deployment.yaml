@@ -46,13 +46,6 @@ spec:
           image: "{{ .Values.ai.langgraph.image.repository }}:{{ .Values.ai.langgraph.image.tag }}"
           imagePullPolicy: {{ .Values.ai.langgraph.image.pullPolicy }}
           env:
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $secretName }}
-                  key: postgres-password
-            - name: POSTGRES_URI
-              value: "postgres://cyclobot:$(POSTGRES_PASSWORD)@{{ $fullName }}-postgres:5432/cyclobot"
             - name: CYCLOBOT_CHROMADB_HOST
               value: "{{ $fullName }}-chromadb"
             - name: CYCLOBOT_CHROMADB_PORT

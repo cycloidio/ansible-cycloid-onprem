@@ -6,13 +6,6 @@
     line: "{{ cycloid_ai_host }} cycloid-ai-langgraph"
     state: present
 
-- name: Add cycloid-ai-postgres to /etc/hosts | cycloid-ai dns
-  lineinfile:
-    path: /etc/hosts
-    regexp: '.*cycloid-ai-postgres$'
-    line: "{{ cycloid_ai_host }} cycloid-ai-postgres"
-    state: present
-
 - name: Add cycloid-ai-chromadb to /etc/hosts | cycloid-ai dns
   lineinfile:
     path: /etc/hosts

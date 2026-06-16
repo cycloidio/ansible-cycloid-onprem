@@ -6,7 +6,6 @@
   with_items:
     - cycloid-ai-langgraph_container
     - cycloid-ai-chromadb_container
-    - cycloid-ai-postgres_container
     - cycloid-ai-ingest_container
   failed_when: false
 
@@ -25,12 +24,10 @@
     - "{{ cycloid_ai_path }}"
     - /etc/systemd/system/cycloid-ai-langgraph_container.service
     - /etc/systemd/system/cycloid-ai-chromadb_container.service
-    - /etc/systemd/system/cycloid-ai-postgres_container.service
     - /etc/systemd/system/cycloid-ai-ingest_container.service
     - /lib/systemd/system/cycloid-ai-ingest.timer
     - /etc/default/cycloid-ai-langgraph
     - /etc/default/cycloid-ai-chromadb
-    - /etc/default/cycloid-ai-postgres
     - /etc/default/cycloid-ai-ingest
 
 - name: Force systemd to reread configs | cycloid-ai

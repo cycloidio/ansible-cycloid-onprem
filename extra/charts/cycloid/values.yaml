@@ -1513,18 +1513,6 @@ ai:
     replicaCount: 1
     resources: {}
 
-  postgres:
-    image:
-      repository: postgres
-      tag: "18-alpine"
-      pullPolicy: IfNotPresent
-    # Password for cyclobot postgres. Auto-generated if not set.
-    password: "##ai-postgres-password##"
-    persistence:
-      enabled: true
-      size: 8Gi
-      storageClass: ""
-
   chromadb:
     image:
       repository: chromadb/chroma

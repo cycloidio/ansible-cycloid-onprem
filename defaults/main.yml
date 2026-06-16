@@ -1078,10 +1078,6 @@ cycloid_ai_dns: ""
 #+ Cyclobot AI Docker image.
 cycloid_ai_langgraph_image: "cycloid/cycloid-ai-agent:slim"
 
-#. cycloid_ai_postgres_image(optional, string): "postgres:16-alpine"
-#+ Cyclobot Postgres Docker image.
-cycloid_ai_postgres_image: "postgres:18-alpine"
-
 #. cycloid_ai_chromadb_image(optional, string): "chromadb/chroma:latest"
 #+ Cyclobot ChromaDB Docker image.
 cycloid_ai_chromadb_image: "chromadb/chroma:latest"
@@ -1089,10 +1085,6 @@ cycloid_ai_chromadb_image: "chromadb/chroma:latest"
 #. cycloid_ai_langgraph_port(optional, int): 2024
 #+ Host port for Cyclobot langgraph.
 cycloid_ai_langgraph_port: 2024
-
-#. cycloid_ai_postgres_port(optional, int): 5433
-#+ Host port for Cyclobot Postgres (5432 is used by Concourse).
-cycloid_ai_postgres_port: 5433
 
 #. cycloid_ai_chromadb_port(optional, int): 8100
 #+ Host port for Cyclobot ChromaDB.
@@ -1102,14 +1094,8 @@ cycloid_ai_path: "{{ cycloid_install_path }}/cycloid-ai"
 
 cycloid_ai_langgraph_container_ports:
   - "0.0.0.0:{{ cycloid_ai_langgraph_port }}:2024"
-cycloid_ai_postgres_container_ports:
-  - "0.0.0.0:{{ cycloid_ai_postgres_port }}:5432"
 cycloid_ai_chromadb_container_ports:
   - "0.0.0.0:{{ cycloid_ai_chromadb_port }}:8000"
-
-#. cycloid_ai_postgres_password(optional, string): "Ch4ngm3pls"
-#+ Password for the Cyclobot Postgres database.
-cycloid_ai_postgres_password: "Ch4ngm3pls"
 
 #. cycloid_ai_chromadb_auth_token(optional, string): "changeme-chromadb-token-32chars00"
 #+ ChromaDB authentication token. Change this to a secure value.
