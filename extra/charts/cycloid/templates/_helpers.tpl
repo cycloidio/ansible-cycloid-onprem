@@ -449,6 +449,143 @@ Set's which additional volumes should be mounted to the container.
 {{- end -}}
 
 {{/*
+Return the Vault AppRole Secret Name
+*/}}
+{{- define "cycloid.vaultApproleSecretName" -}}
+{{- printf "%s-vault-approle" (include "cycloid.fullname" .) -}}
+{{- end -}}
+
+{{/*
+Return the Vault Init Data PVC Name
+*/}}
+{{- define "cycloid.vaultInitDataPvcName" -}}
+{{- printf "%s-vault-init-data" (include "cycloid.fullname" .) -}}
+{{- end -}}
+
+{{/*
+Return the Vault Init Script ConfigMap Name
+*/}}
+{{- define "cycloid.vaultInitScriptConfigMapName" -}}
+{{- printf "%s-vault-init-script" (include "cycloid.fullname" .) -}}
+{{- end -}}
+
+{{/*
+Vault env vars injected into every backend container/cronjob.
+When vault.enabled=true  → reads from the auto-generated vault-approle-secret (role-id / secret-id).
+When vault.enabled=false → reads from the backend secret (vault-role-id / vault-secret-id),
+                           which is populated from values.backend.vault.roleId/secretId.
+This helper is the single place to maintain; all backend templates call it.
+*/}}
+{{- define "backend.vaultEnvVars" -}}
+- name: "VAULT_URL"
+  value: {{ .Values.backend.vault.url | quote }}
+- name: "VAULT_ROLE_ID"
+  valueFrom:
+    secretKeyRef:
+      name: {{ if .Values.vault.enabled }}{{ include "cycloid.vaultApproleSecretName" . }}{{ else }}{{ template "backend.backendSecretName" . }}{{ end }}
+      key: {{ if .Values.vault.enabled }}role-id{{ else }}vault-role-id{{ end }}
+- name: "VAULT_SECRET_ID"
+  valueFrom:
+    secretKeyRef:
+      name: {{ if .Values.vault.enabled }}{{ include "cycloid.vaultApproleSecretName" . }}{{ else }}{{ template "backend.backendSecretName" . }}{{ end }}
+      key: {{ if .Values.vault.enabled }}secret-id{{ else }}vault-secret-id{{ end }}
+{{- end -}}
+
+{{/*
+Vault init shell script — rendered into the vault-init-script ConfigMap.
+Uses vault CLI + busybox tools only (no jq, no extra images).
+*/}}
+{{- define "cycloid.vaultInitScript" -}}
+#!/bin/sh
+set -e
+INIT_DATA=/vault/init-data/init.txt
+
+# Wait for vault listener to be ready
+until vault status 2>/dev/null; do sleep 1; done
+
+# ── UPGRADE GUARD ─────────────────────────────────────────────────────
+# On upgrades from pre-auto-init installations, vault is already
+# initialised but init data does not exist on the new PVC yet.
+# Exit cleanly so the vault pod starts normally; the cluster operator
+# must unseal vault manually (same behaviour as before this chart change)
+# and can seed /vault/init-data/init.txt to enable auto-unseal going forward.
+if vault status 2>/dev/null | grep -q "Initialized.*true" && [ ! -f "$INIT_DATA" ]; then
+  echo "INFO: Vault already initialised but no init data found on PVC."
+  echo "INFO: Skipping auto-configuration. Seed $INIT_DATA to enable auto-unseal."
+  exit 0
+fi
+
+# ── INIT (idempotent) ─────────────────────────────────────────────────
+if vault status 2>/dev/null | grep -q "Initialized.*false"; then
+  vault operator init -key-shares=5 -key-threshold=3 | tee "$INIT_DATA"
+fi
+
+# ── UNSEAL (idempotent) ───────────────────────────────────────────────
+if vault status 2>/dev/null | grep -q "Sealed.*true"; then
+  grep "Unseal Key [1-3]:" "$INIT_DATA" | awk '{print $NF}' | \
+    while read -r key; do vault operator unseal "$key"; done
+fi
+
+# ── CONFIGURE (idempotent) ────────────────────────────────────────────
+ROOT_TOKEN=$(grep "Initial Root Token:" "$INIT_DATA" | awk '{print $NF}')
+vault login "$ROOT_TOKEN"
+
+vault auth list 2>/dev/null | grep -q approle \
+  || vault auth enable approle
+vault secrets list 2>/dev/null | grep -q "^cycloid" \
+  || vault secrets enable -path cycloid kv
+
+vault policy write cycloid-ro - <<'POLICYEOF'
+path "cycloid/*" { policy = "read" }
+path "auth/token/create" { policy = "write" }
+path "auth/token/renew-self" { policy = "write" }
+POLICYEOF
+
+vault policy write cycloid - <<'POLICYEOF'
+path "cycloid/*" { capabilities = ["create","read","update","delete","list"] }
+path "sys/policy/cycloid/*" { capabilities = ["create","read","update","delete","list"] }
+path "auth/approle/role/cycloid-*" { capabilities = ["create","read","update","delete","list"] }
+path "auth/token/create" { capabilities = ["create"] }
+path "auth/token/renew-self" { capabilities = ["create"] }
+POLICYEOF
+
+vault read auth/approle/role/cycloid >/dev/null 2>&1 \
+  || vault write auth/approle/role/cycloid \
+       token_max_ttl=1h policies=cycloid token_ttl=20m
+vault write auth/approle/role/cycloid/role-id   role_id="$VAULT_ROLE_ID"
+vault write auth/approle/role/cycloid/secret-id secret_id="$VAULT_SECRET_ID"
+
+vault read auth/approle/role/cycloid-ro >/dev/null 2>&1 \
+  || vault write auth/approle/role/cycloid-ro \
+       period=30m policies=cycloid-ro token_ttl=30m
+vault write auth/approle/role/cycloid-ro/role-id   role_id="$VAULT_ROLE_ID_RO"
+vault write auth/approle/role/cycloid-ro/secret-id secret_id="$VAULT_SECRET_ID_RO"
+{{ if .Values.vaultInitSecret.enabled }}
+# ── BACKUP INIT DATA TO K8S SECRET (optional, requires RBAC) ─────────
+NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+INIT_CONTENT=$(base64 < "$INIT_DATA" | tr -d '\n')
+
+curl -sSk \
+  -X PATCH \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/apply-patch+yaml" \
+  "https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/secrets/{{ .Values.vaultInitSecret.secretName }}?fieldManager=vault-init&force=true" \
+  -d @- <<CURLEOF \
+  && echo "Init data stored in secret {{ .Values.vaultInitSecret.secretName }}" \
+  || echo "WARNING: Failed to write K8s secret — check vaultInitSecret RBAC"
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.vaultInitSecret.secretName }}
+  namespace: ${NAMESPACE}
+data:
+  init.txt: ${INIT_CONTENT}
+CURLEOF
+{{- end }}
+{{- end }}
+
+{{/*
 Return the Backend Secret Name
 */}}
 {{- define "backend.backendSecretName" -}}

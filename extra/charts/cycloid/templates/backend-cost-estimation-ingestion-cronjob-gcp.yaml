@@ -108,18 +108,7 @@ spec:
                       optional: true
                 - name: "REDIS_URI"
                   value: {{ include "cycloid.redisUri" . | quote }}
-                - name: "VAULT_URL"
-                  value: {{ .Values.backend.vault.url | quote }}
-                - name: "VAULT_ROLE_ID"
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ template "backend.backendSecretName" . }}
-                      key: vault-role-id
-                - name: "VAULT_SECRET_ID"
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ template "backend.backendSecretName" . }}
-                      key: vault-secret-id
+                {{- include "backend.vaultEnvVars" . | nindent 16 }}
                 - name: "PRICING_INGEST_GOOGLE_CREDENTIAL_JSON"
                   valueFrom:
                     secretKeyRef:
