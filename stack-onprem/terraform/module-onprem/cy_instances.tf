@@ -202,6 +202,11 @@ resource "aws_instance" "cy_instances" {
     Name = "${var.project}-cy_instances-${count.index}-${var.env}"
     role = "cy_instances"
   }
+  lifecycle {
+    ignore_changes = [
+      ami
+    ]
+  }
 }
 
 resource "aws_eip" "cy_instances" {

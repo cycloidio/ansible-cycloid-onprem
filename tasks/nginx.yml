@@ -26,6 +26,8 @@
     - 00-default-force-ssl
     - 01-cycloid-console
     - 02-cycloid-api
+    - 03-cycloid-ai
+    - 04-cycloid-mcp
 
 - name: Copy the ssl in service directories | cycloid-core nginx
   copy:
@@ -53,7 +55,7 @@
       - "{{ cycloid_nginx_path }}/vhosts:/etc/nginx/conf.d"
       - "{{ cycloid_nginx_path }}/ssl:/etc/nginx/ssl"
     container_ports: "{{ cycloid_nginx_container_ports }}"
-    container_args: "{{ container_args_extra }}"
+    container_args: "{{ container_args_ai_hosts }} {{ container_args_mcp_hosts }} {{ container_args_extra }}"
     container_env:
       NGINX_ENTRYPOINT_QUIET_LOGS: 1
       http_proxy: "{{ http_proxy }}"

@@ -1,0 +1,104 @@
+{{- if .Values.ai.enabled }}
+{{- $fullName := printf "%s-ai" (include "cycloid.fullname" .) }}
+{{- $secretName := printf "%s-ai" (include "cycloid.fullname" .) }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $fullName }}-chromadb
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ai-chromadb
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  serviceName: {{ $fullName }}-chromadb
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: ai-chromadb
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: ai-chromadb
+    spec:
+      {{- with .Values.ai.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ai.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: chromadb
+          image: "{{ .Values.ai.chromadb.image.repository }}:{{ .Values.ai.chromadb.image.tag }}"
+          imagePullPolicy: {{ .Values.ai.chromadb.image.pullPolicy }}
+          env:
+            - name: IS_PERSISTENT
+              value: "TRUE"
+            - name: PERSIST_DIRECTORY
+              value: "/chroma/chroma"
+            - name: CHROMA_SERVER_AUTHN_PROVIDER
+              value: "chromadb.auth.token_authn.TokenAuthenticationServerProvider"
+            - name: CHROMA_AUTH_TOKEN_TRANSPORT_HEADER
+              value: "X-Chroma-Token"
+            - name: CHROMA_SERVER_AUTHN_CREDENTIALS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: chromadb-auth-token
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /chroma/chroma
+          livenessProbe:
+            exec:
+              command: ["bash", "-c", "exec 3<>/dev/tcp/localhost/8000 && exec 3<&-"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+  {{- if .Values.ai.chromadb.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.ai.chromadb.persistence.storageClass }}
+        storageClassName: {{ .Values.ai.chromadb.persistence.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.ai.chromadb.persistence.size }}
+  {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}-chromadb
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ai-chromadb
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/component: ai-chromadb
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+{{- end }}

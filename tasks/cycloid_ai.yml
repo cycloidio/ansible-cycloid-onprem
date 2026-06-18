@@ -1,0 +1,59 @@
+---
+- name: Create config directories | cycloid-ai
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0777
+    recurse: yes
+  with_items:
+    - "{{ cycloid_ai_path }}"
+    - "{{ cycloid_ai_path }}/chromadb-data"
+
+- name: Define service | cycloid-ai chromadb
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    container_name: cycloid-ai-chromadb
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{ cycloid_ai_chromadb_image }}"
+    container_ports: "{{ cycloid_ai_chromadb_container_ports }}"
+    container_args: "{{ container_args_extra }}"
+    container_volumes:
+      - "{{ cycloid_ai_path }}/chromadb-data:/data"
+    container_env:
+      IS_PERSISTENT: "TRUE"
+      CHROMA_SERVER_AUTHN_PROVIDER: "chromadb.auth.token_authn.TokenAuthenticationServerProvider"
+      CHROMA_SERVER_AUTHN_CREDENTIALS: "{{ cycloid_ai_chromadb_auth_token }}"
+      CHROMA_AUTH_TOKEN_TRANSPORT_HEADER: "X-Chroma-Token"
+  tags: docker-services
+
+- name: Force flush handlers to ensure chromadb is started | cycloid-ai
+  meta: flush_handlers
+
+- name: Define service | cycloid-ai langgraph
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    container_name: cycloid-ai-langgraph
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{ cycloid_ai_langgraph_image }}"
+    container_ports: "{{ cycloid_ai_langgraph_container_ports }}"
+    container_args: "--link cycloid-ai-chromadb {% if setup_cycloid_mcp|bool %}--link cycloid-mcp-server{% endif %} {{ container_args_extra }}"
+    container_env:
+      CYCLOBOT_CHROMADB_HOST: cycloid-ai-chromadb
+      CYCLOBOT_CHROMADB_PORT: "8000"
+      CYCLOBOT_ENVIRONMENT: production
+      CYCLOBOT_LLM_PROVIDER: "{{ cycloid_ai_llm_provider }}"
+      CYCLOBOT_LLM_MODEL: "{{ cycloid_ai_llm_model }}"
+      CYCLOBOT_MISTRAL_API_KEY: "{{ cycloid_ai_mistral_api_key }}"
+      CYCLOBOT_EMBEDDING_PROVIDER: "{{ cycloid_ai_embedding_provider }}"
+      CYCLOBOT_EMBEDDING_MODEL: "{{ cycloid_ai_embedding_model }}"
+      CYCLOBOT_CHROMADB_AUTH_TOKEN: "{{ cycloid_ai_chromadb_auth_token }}"
+      CYCLOBOT_CHROMADB_COLLECTION_NAME: cycloid_docs
+      CYCLOBOT_CYCLOID_API_URL: "{{ cycloid_api_base_url }}"
+      CYCLOBOT_CORS_ALLOWED_ORIGINS: "{{ cycloid_ai_cors_allowed_origins }}"
+      CYCLOBOT_MCP_SERVER_URL: "{% if setup_cycloid_mcp|bool %}http://cycloid-mcp-server:{{ cycloid_mcp_port }}/mcp{% else %}none{% endif %}"
+  tags: docker-services
+
+- name: Force flush handlers to ensure langgraph is started | cycloid-ai
+  meta: flush_handlers

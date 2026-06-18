@@ -1,0 +1,14 @@
+---
+- name: Add cycloid-ai-langgraph to /etc/hosts | cycloid-ai dns
+  lineinfile:
+    path: /etc/hosts
+    regexp: '.*cycloid-ai-langgraph$'
+    line: "{{ cycloid_ai_host }} cycloid-ai-langgraph"
+    state: present
+
+- name: Add cycloid-ai-chromadb to /etc/hosts | cycloid-ai dns
+  lineinfile:
+    path: /etc/hosts
+    regexp: '.*cycloid-ai-chromadb$'
+    line: "{{ cycloid_ai_host }} cycloid-ai-chromadb"
+    state: present

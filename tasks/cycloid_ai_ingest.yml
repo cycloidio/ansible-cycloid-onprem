@@ -1,0 +1,48 @@
+---
+- name: Define cycloid-ai-ingest_container service | cycloid-ai-ingest
+  include_role:
+    name: mhutter.docker-systemd-service
+  vars:
+    container_name: cycloid-ai-ingest
+    container_docker_pull: "{{ docker_pull }}"
+    container_image: "{{ cycloid_ai_langgraph_image }}"
+    container_args: "--link cycloid-ai-chromadb {{ container_args_extra }}"
+    container_cmd: "/ingest-cron.sh"
+    container_env:
+      CYCLOBOT_CHROMADB_HOST: cycloid-ai-chromadb
+      CYCLOBOT_CHROMADB_PORT: "8000"
+      CYCLOBOT_ENVIRONMENT: production
+      CYCLOBOT_LLM_PROVIDER: "{{ cycloid_ai_llm_provider }}"
+      CYCLOBOT_LLM_MODEL: "{{ cycloid_ai_llm_model }}"
+      CYCLOBOT_MISTRAL_API_KEY: "{{ cycloid_ai_mistral_api_key }}"
+      CYCLOBOT_EMBEDDING_PROVIDER: "{{ cycloid_ai_embedding_provider }}"
+      CYCLOBOT_EMBEDDING_MODEL: "{{ cycloid_ai_embedding_model }}"
+      CYCLOBOT_CHROMADB_AUTH_TOKEN: "{{ cycloid_ai_chromadb_auth_token }}"
+      CYCLOBOT_CHROMADB_COLLECTION_NAME: cycloid_docs
+      CYCLOBOT_INGEST_FORCE_REFRESH: "true"
+      CYCLOBOT_INGESTION_BASE_URL: "{{ cycloid_ai_ingest_base_url }}"
+    service_systemd_options:
+      [
+        { "key": "Restart", "value": "no" },
+        { "key": "ExecStop", "value": "" },
+      ]
+    service_state: stopped
+  tags: docker-services
+
+- name: Define cycloid-ai-ingest timer | cycloid-ai-ingest
+  template:
+    src: templates/systemd/timer.j2
+    dest: /lib/systemd/system/cycloid-ai-ingest.timer
+  vars:
+    schedule: "{{ cycloid_ai_ingest_schedule }}"
+    service: "cycloid-ai-ingest_container"
+
+- name: Enable timer | cycloid-ai-ingest
+  ansible.builtin.systemd:
+    name: cycloid-ai-ingest.timer
+    enabled: yes
+    state: started
+
+- name: Force systemd to reread configs | cycloid-ai-ingest
+  ansible.builtin.systemd:
+    daemon_reload: yes

@@ -28,3 +28,11 @@ cycloid
 # Must contain exactly one host from [cycloid_core].
 #[cycloid_plugins:children]
 #cycloid
+
+# Single host running the MCP Server.
+#[cycloid_mcp:children]
+#cycloid
+
+# Single host running the AI (Cyclobot) services.
+#[cycloid_ai:children]
+#cycloid

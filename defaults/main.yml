@@ -476,6 +476,10 @@ setup_minio: "{{ 'minio' in group_names }}"
 setup_elasticsearch: "{{ 'elasticsearch' in group_names }}"
 # Setup Plugins (Docker Registry + Plugin Registry + Plugin Manager)
 setup_cycloid_plugins: "{{ 'cycloid_plugins' in group_names }}"
+# Setup MCP Server
+setup_cycloid_mcp: "{{ 'cycloid_mcp' in group_names }}"
+# Setup AI (Cyclobot)
+setup_cycloid_ai: "{{ 'cycloid_ai' in group_names }}"
 # Setup fake SMTP (it will start a mailhog smtpd server to satisfy Cycloid requirements)
 setup_smtp_server: "{{ 'smtp_server' in group_names }}"
 
@@ -670,6 +674,7 @@ default_ssl_subject_alt_name:
   - DNS:redis
   - "DNS:{{ cycloid_console_dns }}"
   - "DNS:{{ cycloid_api_dns }}"
+  - "{% if cycloid_ai_dns != '' %}DNS:{{ cycloid_ai_dns }}{% endif %}"
 
 default_no_proxy:
   - "localhost"
@@ -1024,6 +1029,125 @@ container_args_plugins_hosts: >-
   {%- if _host != '' -%}
   --add-host cycloid-plugin-registry:{{ _host }} --add-host cycloid-plugin-manager:{{ _host }}
   {%- if cycloid_plugins_docker_registry_enabled | bool %} --add-host cycloid-plugin-docker-registry:{{ _host }}{%- endif -%}
+  {%- endif -%}
+  {%- endif -%}
+
+#
+# MCP Server
+#
+
+#. cycloid_mcp_image(optional, string): "cycloid/cycloid-mcp-server:latest"
+#+ MCP Server Docker image.
+cycloid_mcp_image: "cycloid/cycloid-mcp-server:latest"
+
+#. cycloid_mcp_dns(optional, string): ""
+#+ Resolvable domain name for the MCP Server. If set, nginx will expose MCP externally.
+cycloid_mcp_dns: ""
+
+#. cycloid_mcp_port(optional, int): 8010
+#+ Host port for the MCP server.
+cycloid_mcp_port: 8010
+
+cycloid_mcp_path: "{{ cycloid_install_path }}/cycloid-mcp"
+
+cycloid_mcp_container_ports:
+  - "0.0.0.0:{{ cycloid_mcp_port }}:{{ cycloid_mcp_port }}"
+
+cycloid_mcp_host: "{%- if 'cycloid_mcp' in groups and groups['cycloid_mcp'] | length > 0 -%}{{ hostvars[groups['cycloid_mcp'][0]]['ansible_default_ipv4']['address'] | default('') }}{%- endif -%}"
+cycloid_mcp_url: "http://cycloid-mcp-server:{{ cycloid_mcp_port }}"
+
+# --add-host flags for MCP
+container_args_mcp_hosts: >-
+  {%- if 'cycloid_mcp' in groups and groups['cycloid_mcp'] | length > 0 -%}
+  {%- set _host = hostvars[groups['cycloid_mcp'][0]]['ansible_default_ipv4']['address'] | default('') -%}
+  {%- if _host != '' -%}
+  --add-host cycloid-mcp-server:{{ _host }}
+  {%- endif -%}
+  {%- endif -%}
+
+#
+# AI (Cyclobot)
+#
+
+#. cycloid_ai_dns(optional, string): ""
+#+ Resolvable domain name for the Cyclobot AI service. Used by the API as CYCLOBOT_API_URL.
+#+ If not defined, will use cycloid_console_dns with /ai path via nginx.
+cycloid_ai_dns: ""
+
+#. cycloid_ai_langgraph_image(optional, string): "cycloid/cycloid-ai-agent:slim"
+#+ Cyclobot AI Docker image.
+cycloid_ai_langgraph_image: "cycloid/cycloid-ai-agent:slim"
+
+#. cycloid_ai_chromadb_image(optional, string): "chromadb/chroma:latest"
+#+ Cyclobot ChromaDB Docker image.
+cycloid_ai_chromadb_image: "chromadb/chroma:latest"
+
+#. cycloid_ai_langgraph_port(optional, int): 2024
+#+ Host port for Cyclobot langgraph.
+cycloid_ai_langgraph_port: 2024
+
+#. cycloid_ai_chromadb_port(optional, int): 8100
+#+ Host port for Cyclobot ChromaDB.
+cycloid_ai_chromadb_port: 8100
+
+cycloid_ai_path: "{{ cycloid_install_path }}/cycloid-ai"
+
+cycloid_ai_langgraph_container_ports:
+  - "0.0.0.0:{{ cycloid_ai_langgraph_port }}:2024"
+cycloid_ai_chromadb_container_ports:
+  - "0.0.0.0:{{ cycloid_ai_chromadb_port }}:8000"
+
+#. cycloid_ai_chromadb_auth_token(optional, string): "changeme-chromadb-token-32chars00"
+#+ ChromaDB authentication token. Change this to a secure value.
+cycloid_ai_chromadb_auth_token: "changeme-chromadb-token-32chars00"
+
+#. cycloid_ai_llm_provider(optional, string): "mistral"
+#+ LLM provider for Cyclobot.
+cycloid_ai_llm_provider: "mistral"
+
+#. cycloid_ai_llm_model(optional, string): "mistral-small-latest"
+#+ LLM model for Cyclobot.
+cycloid_ai_llm_model: "mistral-small-latest"
+
+#. cycloid_ai_mistral_api_key(required, string): ""
+#+ Mistral API key for Cyclobot. Required when cycloid_ai is enabled.
+cycloid_ai_mistral_api_key: ""
+
+#. cycloid_ai_embedding_provider(optional, string): "mistral"
+#+ Embedding provider for Cyclobot.
+cycloid_ai_embedding_provider: "mistral"
+
+#. cycloid_ai_embedding_model(optional, string): "mistral-embed"
+#+ Embedding model for Cyclobot.
+cycloid_ai_embedding_model: "mistral-embed"
+
+#. cycloid_ai_ingest_enabled(optional, bool): true
+#+ Enable the documentation ingest job when AI is enabled.
+cycloid_ai_ingest_enabled: true
+
+#. cycloid_ai_ingest_schedule(optional, string): "*-*-* 03:00:00"
+#+ Schedule for the AI ingest job.
+cycloid_ai_ingest_schedule: "*-*-* 03:00:00"
+
+#. cycloid_ai_ingest_base_url(optional, string): "https://docs.cycloid.io"
+#+ Base URL for documentation ingestion.
+cycloid_ai_ingest_base_url: "https://docs.cycloid.io"
+
+cycloid_ai_host: "{%- if 'cycloid_ai' in groups and groups['cycloid_ai'] | length > 0 -%}{{ hostvars[groups['cycloid_ai'][0]]['ansible_default_ipv4']['address'] | default('') }}{%- endif -%}"
+
+# CYCLOBOT_API_URL exposed to the API. If cycloid_ai_dns is set, use it. Otherwise proxy via console.
+cycloid_ai_base_url: '{%- if cycloid_ai_dns != "" -%}https://{{ cycloid_ai_dns }}{%- else -%}http://cycloid-ai-langgraph:{{ cycloid_ai_langgraph_port }}{%- endif -%}'
+
+#. cycloid_ai_cors_allowed_origins(optional, string): "{{ cycloid_console_base_url }}"
+#+ CORS allowed origins for Cyclobot. Multiple Origins can be specified using a comma ','.
+cycloid_ai_cors_allowed_origins: "{{ cycloid_console_base_url }}"
+
+# --add-host flags for AI
+container_args_ai_hosts: >-
+  {%- if 'cycloid_ai' in groups and groups['cycloid_ai'] | length > 0 -%}
+  {%- set _host = hostvars[groups['cycloid_ai'][0]]['ansible_default_ipv4']['address'] | default('') -%}
+  {%- if _host != '' -%}
+  --add-host cycloid-ai-langgraph:{{ _host }}
   {%- endif -%}
   {%- endif -%}
 

@@ -40,7 +40,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           {{- if .Values.frontend.securityContext.enabled }}
-          securityContext: {{- omit .Values.primary.securityContext "enabled" | toYaml | nindent 12 }}
+          securityContext: {{- omit .Values.frontend.securityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ tpl .Values.frontend.image.repository $ }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}

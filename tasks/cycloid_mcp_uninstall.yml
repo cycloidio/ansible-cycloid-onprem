@@ -1,0 +1,24 @@
+---
+- name: Stop services | cycloid-mcp
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - cycloid-mcp-server_container
+  failed_when: false
+
+- name: Remove files | cycloid-mcp
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ cycloid_mcp_path }}"
+    - /etc/systemd/system/cycloid-mcp-server_container.service
+    - /etc/default/cycloid-mcp-server
+
+- name: Force systemd to reread configs | cycloid-mcp
+  systemd:
+    daemon_reload: yes
+
+- name: systemctl reset-failed | cycloid-mcp
+  shell: systemctl reset-failed

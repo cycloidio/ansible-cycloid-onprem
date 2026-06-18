@@ -1,0 +1,7 @@
+---
+- name: Add cycloid-mcp-server to /etc/hosts | cycloid-mcp dns
+  lineinfile:
+    path: /etc/hosts
+    regexp: '.*cycloid-mcp-server$'
+    line: "{{ cycloid_mcp_host }} cycloid-mcp-server"
+    state: present

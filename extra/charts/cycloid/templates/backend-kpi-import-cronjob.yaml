@@ -55,7 +55,7 @@ spec:
           containers:
             - name: kpi-import
               {{- if .Values.backend.securityContext.enabled }}
-              securityContext: {{- omit .Values.backend.securityContext "enabled" | toYaml | nindent 12 }}
+              securityContext: {{- omit .Values.backend.securityContext "enabled" | toYaml | nindent 16 }}
               {{- end }}
               image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.backend.image.pullPolicy }}

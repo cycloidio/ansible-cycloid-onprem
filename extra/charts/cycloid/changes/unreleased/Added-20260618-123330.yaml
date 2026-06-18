@@ -1,0 +1,6 @@
+kind: Added
+body: Allow mcp and ai infrastructure install
+time: 2026-06-18T12:33:30.215260326+02:00
+custom:
+    Ref: Pull
+    RefID: "294"
