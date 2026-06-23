@@ -1033,7 +1033,7 @@ concourse:
           - /bin/sh
           - -c
           - |
-            touch $YAML_KEYS_FILE;
+            touch $YAML_KEYS_FILE && chmod 666 $YAML_KEYS_FILE
         volumeMounts:
           - mountPath: /etc/concourse-teams
             name: concourse-teams
