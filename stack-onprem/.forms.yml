@@ -37,7 +37,7 @@ use_cases:
                   - "staging"
           - name: Product-advanced-options
             technologies: [ansible]
-            condition: advanced_opt==true
+            condition: $advanced_opt==true
             vars:
               - name: "Cycloid API images repository"
                 description: "Cycloid API images repository."
@@ -72,7 +72,7 @@ use_cases:
                 default: "((cycloid-onprem-licence-prod.licence_key))"
 
           - name: Default config
-            condition: advanced_opt==true
+            condition: $advanced_opt==true
             technologies: [pipeline]
             vars:
               - name: "AWS access key"
@@ -157,7 +157,7 @@ use_cases:
                   cycloid_api_provisioning: "false"
 
           - name: Plugins
-            condition: install_plugins==true
+            condition: $install_plugins==true
             technologies: [pipeline]
             vars:
               - name: "Allowed organisations"
