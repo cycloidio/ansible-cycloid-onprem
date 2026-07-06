@@ -245,6 +245,17 @@ backend:
   cryptoSigningKey: "##backend-cryptoSigningKey##"
   jwtKey1: "##backend-jwtKey1##"
 
+  # Use an existing Kubernetes Secret instead of creating one from the values above.
+  # When set, backend.vault.roleId, backend.vault.secretId, backend.concourse.password,
+  # backend.cryptoSigningKey, and backend.jwtKey1 are ignored.
+  # The secret must contain the following keys:
+  #   - vault-role-id
+  #   - vault-secret-id
+  #   - concourse-password
+  #   - crypto-signing-key
+  #   - jwt-key-1
+  existingSecret: ""
+
   # extraEnvVars is a list of extra environment variables to set.
   extraEnvVars:
     EMAIL_SMTP_SVR_ADDR: "##smtp-host:smtp-port##"
@@ -577,6 +588,19 @@ plugins:
       pullPolicy: Always
     # Username for htpasswd authentication on the Docker Registry.
     username: "cycloid"
+    # Use an existing Kubernetes Secret for docker-registry credentials instead of
+    # auto-generating one. When set, the chart will not create the registry secret.
+    # The secret must contain the following keys:
+    #   - REGISTRY_URI
+    #   - REGISTRY_USERNAME
+    #   - REGISTRY_PASSWORD
+    #   - REGISTRY_BCRYPT_PASSWORD
+    existingSecret: ""
+    # Use an existing Kubernetes Secret of type kubernetes.io/dockerconfigjson for
+    # image pulling instead of auto-generating one.
+    # The secret must contain the key:
+    #   - .dockerconfigjson
+    existingPullSecret: ""
     # Ingress exposes the registry externally so the kubelet can pull images.
     # Required when deploymentRuntime=k8s. Not needed for CRI runtime.
     ingress:
@@ -995,6 +1019,20 @@ concourse:
         env:
           - name: VAULT_URL
             value: http://cycloid-vault:8200
+          # To use an existing Kubernetes Secret for VAULT_ROLE_ID and VAULT_SECRET_ID
+          # (e.g. managed by External Secrets Operator), replace the plain "value" entries
+          # below with valueFrom.secretKeyRef:
+          #   - name: VAULT_ROLE_ID
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: my-concourse-vault-secret
+          #         key: vault-role-id
+          #   - name: VAULT_SECRET_ID
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: my-concourse-vault-secret
+          #         key: vault-secret-id
+          # The referenced secret must contain the keys: vault-role-id, vault-secret-id
           - name: VAULT_ROLE_ID
             value: "##cycloid-ro-vault-approle-role-id##"
           - name: VAULT_SECRET_ID
@@ -1537,6 +1575,13 @@ ai:
 
   # API keys (sensitive)
   mistralApiKey: "##ai-mistral-api-key##"
+
+  # Use an existing Kubernetes Secret instead of creating one from the values above.
+  # When set, ai.mistralApiKey and ai.chromadb.authToken are ignored.
+  # The secret must contain the following keys:
+  #   - chromadb-auth-token
+  #   - mistral-api-key
+  existingSecret: ""
 
   # MCP Server URL used by cyclobot
   # Defaults to internal MCP service when mcp.enabled=true
