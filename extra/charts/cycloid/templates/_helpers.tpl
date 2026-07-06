@@ -452,7 +452,11 @@ Set's which additional volumes should be mounted to the container.
 Return the Backend Secret Name
 */}}
 {{- define "backend.backendSecretName" -}}
-{{ printf "%s" (include "backend.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- if .Values.backend.existingSecret -}}
+    {{- printf "%s" .Values.backend.existingSecret -}}
+{{- else -}}
+    {{- printf "%s" (include "backend.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -646,7 +650,22 @@ Return the Plugins Manager fullname
 Return the Plugins Docker Registry Secret name
 */}}
 {{- define "plugins.dockerRegistry.secretName" -}}
-{{- printf "%s-docker-registry" (include "cycloid.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- if .Values.plugins.dockerRegistry.existingSecret -}}
+    {{- printf "%s" .Values.plugins.dockerRegistry.existingSecret -}}
+{{- else -}}
+    {{- printf "%s-docker-registry" (include "cycloid.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Return the Plugins Docker Registry Pull Secret name
+*/}}
+{{- define "plugins.dockerRegistry.pullSecretName" -}}
+{{- if .Values.plugins.dockerRegistry.existingPullSecret -}}
+    {{- printf "%s" .Values.plugins.dockerRegistry.existingPullSecret -}}
+{{- else -}}
+    {{- printf "%s-docker-registry-pull" (include "cycloid.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end }}
 
 {{/*
@@ -655,6 +674,17 @@ Return the Plugins Secret name (kept for backward compatibility)
 {{- define "plugins.secretName" -}}
 {{- include "plugins.dockerRegistry.secretName" . }}
 {{- end }}
+
+{{/*
+Return the AI Secret Name
+*/}}
+{{- define "ai.secretName" -}}
+{{- if .Values.ai.existingSecret -}}
+    {{- printf "%s" .Values.ai.existingSecret -}}
+{{- else -}}
+    {{- printf "%s-ai" (include "cycloid.fullname" .) -}}
+{{- end -}}
+{{- end -}}
 
 
 {{/*

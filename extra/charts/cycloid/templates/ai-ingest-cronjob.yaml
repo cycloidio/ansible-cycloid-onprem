@@ -1,6 +1,6 @@
 {{- if and .Values.ai.enabled .Values.ai.ingest.enabled }}
 {{- $fullName := printf "%s-ai" (include "cycloid.fullname" .) }}
-{{- $secretName := printf "%s-ai" (include "cycloid.fullname" .) }}
+{{- $secretName := include "ai.secretName" . }}
 {{- $mcpUrl := .Values.ai.mcpServerUrl }}
 {{- if and (not $mcpUrl) .Values.mcp.enabled }}
   {{- $mcpUrl = printf "http://%s-mcp-server:%s/mcp" (include "cycloid.fullname" .) (toString (.Values.mcp.service.port | int)) }}

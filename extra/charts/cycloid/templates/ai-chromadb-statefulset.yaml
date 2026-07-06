@@ -1,6 +1,6 @@
 {{- if .Values.ai.enabled }}
 {{- $fullName := printf "%s-ai" (include "cycloid.fullname" .) }}
-{{- $secretName := printf "%s-ai" (include "cycloid.fullname" .) }}
+{{- $secretName := include "ai.secretName" . }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
