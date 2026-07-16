@@ -630,10 +630,6 @@ plugins:
   # Plugin Registry: catalog service for browsing and managing plugin versions.
   # Plugins are published here by the Cycloid backend.
   pluginRegistry:
-    image:
-      repository: cycloid/plugin-registry
-      tag: "latest"
-      pullPolicy: Always
     resources: {}
     # Log level for the Plugin Registry service.
     logLevel: "error"
@@ -684,10 +680,6 @@ plugins:
   # ORGS_CANS is used on startup to auto-invite organizations.
   # Additional orgs can be invited manually via the Plugin Manager API.
   pluginManager:
-    image:
-      repository: cycloid/plugin-manager
-      tag: "latest"
-      pullPolicy: Always
     replicaCount: 1
     resources: {}
     # Log level for the Plugin Manager service.

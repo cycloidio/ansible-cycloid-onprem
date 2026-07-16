@@ -46,88 +46,95 @@ spec:
 
       containers:
         - name: plugin-manager
-          image: "{{ .Values.plugins.pluginManager.image.repository }}:{{ .Values.plugins.pluginManager.image.tag }}"
-          imagePullPolicy: {{ .Values.plugins.pluginManager.image.pullPolicy }}
+          image: "{{ tpl .Values.backend.image.repository $ }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          command: ["/go/youdeploy-http-api"]
+          args: ["plugin-manager", "--config-file=/opt/config.yml"]
           {{- if not $isK8s }}
           # CRI runtime requires privileged access to the containerd socket.
           securityContext:
             privileged: true
           {{- end }}
           env:
-            - name: PORT
+            - name: PLUGIN_MANAGER_PORT
               value: "4000"
+            # LOG_LEVEL is the backend main-config key (no per-subcommand flag)
             - name: LOG_LEVEL
               value: {{ .Values.plugins.pluginManager.logLevel | quote }}
-            - name: INSECURE_SKIP_VERIFY
+            - name: PLUGIN_MANAGER_INSECURE_SKIP_VERIFY
               value: {{ .Values.plugins.pluginManager.insecureSkipVerify | quote }}
-            - name: RUN_MIGRATIONS
+            - name: PLUGIN_MANAGER_RUN_MIGRATIONS
               value: "true"
-            - name: ORGS_CANS
+            - name: PLUGIN_MANAGER_CY_ORGS
               value: {{ .Values.plugins.orgsCans | quote }}
-            - name: CY_URL
+            - name: PLUGIN_MANAGER_CY_URL
               value: {{ .Values.backend.url | quote }}
-            - name: PLUGIN_MANAGER_BASE_URL
+            # VERIFY: standalone used a single CY_URL; the subcommand splits cy-url (proxy) / backend-url (invites)
+            - name: PLUGIN_MANAGER_BACKEND_URL
+              value: {{ .Values.backend.url | quote }}
+            # VERIFY: was PLUGIN_MANAGER_BASE_URL -> maps to --plugin-manager-url (externally reachable PM URL)
+            - name: PLUGIN_MANAGER_URL
               value: "{{ $pmFullname }}:4000"
             {{- if $isK8s }}
             # Kubernetes deployment runtime
-            - name: DEPLOYMENT_RUNTIME
+            - name: PLUGIN_MANAGER_DEPLOYMENT_RUNTIME
               value: "k8s"
-            - name: K8S_NAMESPACE
+            - name: PLUGIN_MANAGER_K8S_NAMESPACE
               value: {{ $pluginNs | quote }}
-            - name: K8S_SIDECAR_IMAGE
+            - name: PLUGIN_MANAGER_K8S_SIDECAR_IMAGE
               value: {{ $k8sCfg.sidecarImage | quote }}
-            - name: K8S_STORAGE_CLASS
+            - name: PLUGIN_MANAGER_K8S_STORAGE_CLASS
               value: {{ $k8sCfg.storageClass | quote }}
-            - name: K8S_STORAGE_SIZE
+            - name: PLUGIN_MANAGER_K8S_STORAGE_SIZE
               value: {{ $k8sCfg.storageSize | quote }}
-            - name: K8S_STORAGE_ACCESS_MODE
+            - name: PLUGIN_MANAGER_K8S_STORAGE_ACCESS_MODE
               value: {{ $k8sCfg.storageAccessMode | quote }}
             {{- if $k8sCfg.dns }}
-            - name: K8S_DNS
+            - name: PLUGIN_MANAGER_K8S_DNS
               value: {{ $k8sCfg.dns | quote }}
             {{- end }}
             {{- if $k8sCfg.resources.requests.cpu }}
-            - name: K8S_RESOURCES_CPU_REQUEST
+            - name: PLUGIN_MANAGER_K8S_RESOURCES_CPU_REQUEST
               value: {{ $k8sCfg.resources.requests.cpu | quote }}
             {{- end }}
             {{- if $k8sCfg.resources.requests.memory }}
-            - name: K8S_RESOURCES_MEMORY_REQUEST
+            - name: PLUGIN_MANAGER_K8S_RESOURCES_MEMORY_REQUEST
               value: {{ $k8sCfg.resources.requests.memory | quote }}
             {{- end }}
             {{- if $k8sCfg.resources.limits.cpu }}
-            - name: K8S_RESOURCES_CPU_LIMIT
+            - name: PLUGIN_MANAGER_K8S_RESOURCES_CPU_LIMIT
               value: {{ $k8sCfg.resources.limits.cpu | quote }}
             {{- end }}
             {{- if $k8sCfg.resources.limits.memory }}
-            - name: K8S_RESOURCES_MEMORY_LIMIT
+            - name: PLUGIN_MANAGER_K8S_RESOURCES_MEMORY_LIMIT
               value: {{ $k8sCfg.resources.limits.memory | quote }}
             {{- end }}
             {{- if $k8sCfg.nodeSelector }}
-            - name: K8S_NODE_SELECTOR
-              value: {{ $k8sCfg.nodeSelector | toJson | quote }}
+            # plugin-manager parses key=value,key2=v2 (the registry subcommand uses JSON)
+            - name: PLUGIN_MANAGER_K8S_NODE_SELECTOR
+              value: {{ $p := list }}{{ range $k, $v := $k8sCfg.nodeSelector }}{{ $p = append $p (printf "%s=%s" $k $v) }}{{ end }}{{ join "," $p | quote }}
             {{- end }}
-            - name: HOST_API_BASE_URL
+            - name: PLUGIN_MANAGER_HOST_API_BASE_URL
               value: "http://{{ $pmFullname }}.{{ .Release.Namespace }}.svc.cluster.local:4000"
             {{- else }}
             # CRI/containerd deployment runtime
-            - name: CONTAINERD_ADDR
+            - name: PLUGIN_MANAGER_CONTAINERD_SOCKET
               value: "/run/containerd/containerd.sock"
             {{- end }}
             # MySQL
-            - name: DB_HOST
+            - name: PLUGIN_MANAGER_DB_HOST
               value: {{ include "cycloid.mysqlHost" . | quote }}
-            - name: DB_PORT
+            - name: PLUGIN_MANAGER_DB_PORT
               value: {{ include "cycloid.mysqlPort" . | quote }}
-            - name: DB_NAME
+            - name: PLUGIN_MANAGER_DB_NAME
               value: {{ .Values.plugins.pluginManagerDatabaseName | quote }}
-            - name: DB_USER
+            - name: PLUGIN_MANAGER_DB_USER
               value: {{ include "cycloid.mysqlUser" . | quote }}
-            - name: DB_PASSWORD
+            - name: PLUGIN_MANAGER_DB_PWD
               valueFrom:
                 secretKeyRef:
                   name: {{ template "cycloid.mysqlSecretName" . }}
                   key: mysql-password
-            # Redis
             - name: REDIS_HOST
               value: {{ include "cycloid.redisHost" . | quote }}
             - name: REDIS_PORT
@@ -140,7 +147,7 @@ spec:
                   name: {{ template "cycloid.redisSecretName" . }}
                   key: redis-password
                   optional: true
-            - name: REDIS_URI
+            - name: PLUGIN_MANAGER_REDIS_URI
               value: {{ include "cycloid.redisUri" . | quote }}
 
             # Check if user defined a custom redis cert
@@ -152,7 +159,7 @@ spec:
             {{- end }}
             # If redis local and no custom redis cert, add the default
             {{- if and .Values.redis.enabled (not $hasRedisCert) }}
-            - name: "REDIS_CA_CERT"
+            - name: "PLUGIN_MANAGER_REDIS_CA_CERT"
               valueFrom:
                 secretKeyRef:
                   name: cycloid-redis-crt
