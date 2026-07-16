@@ -121,8 +121,6 @@ plugins:
 
   # Plugin Registry: catalog service for browsing and managing plugin versions.
   pluginRegistry:
-    image:
-      tag: "latest"
 
     # Map of plugin-registry instances to deploy.
     # Each instance requires its own MySQL database and Redis database.
@@ -155,10 +153,6 @@ plugins:
       #   databaseName: "plugin_registry_fromsecret"
       #   redisDatabase: "3"
 
-  # Plugin Manager: runs plugin containers, linked to a single Cycloid instance.
-  pluginManager:
-    image:
-      tag: "latest"
 
   # Database name used by the Plugin Manager (on local or externalMysql).
   # This database must exist in MySQL before the plugin-manager can start.
