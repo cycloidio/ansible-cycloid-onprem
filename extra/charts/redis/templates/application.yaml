@@ -35,9 +35,11 @@ spec:
         checksum/health: {{ pick ( include (print $.Template.BasePath "/health-configmap.yaml") . | fromYaml ) "data" | toYaml | sha256sum }}
         checksum/secret: {{ pick ( include (print $.Template.BasePath "/secret.yaml") . | fromYaml ) "data" | toYaml | sha256sum }}
     spec:
+      {{- if .Values.master.podSecurityContext.enabled }}
       securityContext:
-          fsGroup: 1001
-          fsGroupChangePolicy: Always
+        fsGroup: 1001
+        fsGroupChangePolicy: Always
+      {{- end }}
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -55,6 +57,7 @@ spec:
           command: ["redis-server"]
           args: ["/usr/local/etc/redis/redis.conf"]
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          {{- if .Values.master.containerSecurityContext.enabled }}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -67,6 +70,7 @@ spec:
             seLinuxOptions: {}
             seccompProfile:
               type: RuntimeDefault
+          {{- end }}
           env:
             {{- if .Values.auth.enabled }}
             # used by liveness prob

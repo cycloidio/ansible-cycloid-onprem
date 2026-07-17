@@ -4,12 +4,12 @@ dependencies:
   version: 0.1.7
 - name: redis
   repository: https://cycloid-onprem-helm-charts.s3.amazonaws.com/stable/redis/
-  version: 0.2.2
+  version: 0.2.3
 - name: concourse
   repository: https://concourse-charts.storage.googleapis.com/
   version: 20.1.2
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.32.0
-digest: sha256:4e15f9407a4e8fa62052760d6540183db768c208e5931ada01547c603cc894b0
-generated: "2026-05-20T12:39:17.802895714+02:00"
+digest: sha256:a99394281cc14f7ea7c0b07996e039cb6f657e2449ab8337438c308054c957e7
+generated: "2026-07-17T13:41:15.479289233+02:00"
