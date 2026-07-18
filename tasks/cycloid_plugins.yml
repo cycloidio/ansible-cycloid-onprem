@@ -115,7 +115,7 @@
   vars:
     container_name: cycloid-plugins-registry
     container_docker_pull: "{{ docker_pull }}"
-    container_image: "{{ cycloid_plugins_registry_image }}"
+    container_image: "{{ cycloid_plugins_image }}"
     container_ports: "{{ cycloid_plugins_registry_container_ports }}"
     container_args: "--privileged {{ container_args_plugins_hosts }} {{ container_args_extra }}"
     container_cmd: "/go/youdeploy-http-api plugin-registry"
@@ -148,7 +148,7 @@
   vars:
     container_name: cycloid-plugins-manager
     container_docker_pull: "{{ docker_pull }}"
-    container_image: "{{ cycloid_plugins_manager_image }}"
+    container_image: "{{ cycloid_plugins_image }}"
     container_ports: "{{ cycloid_plugins_manager_container_ports }}"
     container_args: "--privileged {{ container_args_plugins_hosts }} {{ container_args_extra }}"
     container_cmd: "/go/youdeploy-http-api plugin-manager"
