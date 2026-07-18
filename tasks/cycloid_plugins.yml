@@ -118,23 +118,25 @@
     container_image: "{{ cycloid_plugins_registry_image }}"
     container_ports: "{{ cycloid_plugins_registry_container_ports }}"
     container_args: "--privileged {{ container_args_plugins_hosts }} {{ container_args_extra }}"
+    container_cmd: "/go/youdeploy-http-api plugin-registry"
     container_env:
-      PORT: "4000"
+      # env-key contract: subcommand viper keys, see PR body
+      PLUGIN_REGISTRY_PORT: "4000"
       LOG_LEVEL: "{{ cycloid_plugins_log_level }}"
-      INSECURE_SKIP_VERIFY: "{{ cycloid_plugins_insecure_skip_verify }}"
-      RUN_MIGRATIONS: "true"
-      ORGS_CANS: "{{ cycloid_plugins_orgs_cans }}"
-      CY_URL: "{{ cycloid_api_base_url }}"
+      PLUGIN_REGISTRY_INSECURE_SKIP_VERIFY: "{{ cycloid_plugins_insecure_skip_verify }}"
+      # RUN_MIGRATIONS dropped: registry always migrates on boot, no flag gates it
+      PLUGIN_REGISTRY_ORGANIZATIONS: "{{ cycloid_plugins_orgs_cans }}"
+      PLUGIN_REGISTRY_CYCLOID_URL: "{{ cycloid_api_base_url }}"
       DB_HOST: "{{ cycloid_plugins_db_host }}"
       DB_PORT: "{{ cycloid_plugins_db_port }}"
       DB_NAME: "{{ cycloid_plugins_registry_db_name }}"
       DB_USER: "{{ cycloid_plugins_db_user }}"
-      DB_PASSWORD: "{{ cycloid_plugins_db_password }}"
+      DB_PWD: "{{ cycloid_plugins_db_password }}"
       REDIS_URI: "{{ cycloid_plugins_redis_uri }}"
-      REDIS_INSECURE_SKIP_TLS: "{{ cycloid_plugins_redis_insecure_skip_tls }}"
-      REGISTRY_URI: "{{ _plugins_registry_uri }}"
-      REGISTRY_USERNAME: "{{ _plugins_registry_username }}"
-      REGISTRY_PASSWORD: "{{ _plugins_registry_password }}"
+      PLUGIN_REGISTRY_REDIS_INSECURE_SKIP_TLS: "{{ cycloid_plugins_redis_insecure_skip_tls }}"
+      PLUGIN_REGISTRY_DOCKER_REGISTRY_URI: "{{ _plugins_registry_uri }}"
+      PLUGIN_REGISTRY_DOCKER_REGISTRY_USERNAME: "{{ _plugins_registry_username }}"
+      PLUGIN_REGISTRY_DOCKER_REGISTRY_PASSWORD: "{{ _plugins_registry_password }}"
   tags: docker-services
 
 #
@@ -149,23 +151,28 @@
     container_image: "{{ cycloid_plugins_manager_image }}"
     container_ports: "{{ cycloid_plugins_manager_container_ports }}"
     container_args: "--privileged {{ container_args_plugins_hosts }} {{ container_args_extra }}"
+    container_cmd: "/go/youdeploy-http-api plugin-manager"
 
     container_env:
-      PORT: "4000"
+      # env-key contract: subcommand viper keys, see PR body
+      # ADMIN_USERNAME/ADMIN_PASSWORD: not set here, dead on this code path regardless
+      PLUGIN_MANAGER_PORT: "4000"
       LOG_LEVEL: "{{ cycloid_plugins_log_level }}"
-      INSECURE_SKIP_VERIFY: "{{ cycloid_plugins_insecure_skip_verify }}"
-      RUN_MIGRATIONS: "true"
-      CONTAINERD_ADDR: "/run/containerd/containerd.sock"
-      ORGS_CANS: "{{ cycloid_plugins_orgs_cans }}"
-      CY_URL: "{{ cycloid_api_base_url }}"
-      PLUGIN_MANAGER_BASE_URL: "cycloid-plugin-manager:{{ cycloid_plugins_manager_port }}"
+      PLUGIN_MANAGER_INSECURE_SKIP_VERIFY: "{{ cycloid_plugins_insecure_skip_verify }}"
+      # manager only self-migrates its DB when this flag is true
+      PLUGIN_MANAGER_RUN_MIGRATIONS: "true"
+      PLUGIN_MANAGER_CONTAINERD_SOCKET: "/run/containerd/containerd.sock"
+      PLUGIN_MANAGER_CY_ORGS: "{{ cycloid_plugins_orgs_cans }}"
+      PLUGIN_MANAGER_CY_URL: "{{ cycloid_api_base_url }}"
+      # renamed from legacy PLUGIN_MANAGER_BASE_URL, unconsumed by this binary
+      PLUGIN_MANAGER_HOST_API_BASE_URL: "cycloid-plugin-manager:{{ cycloid_plugins_manager_port }}"
       DB_HOST: "{{ cycloid_plugins_db_host }}"
       DB_PORT: "{{ cycloid_plugins_db_port }}"
       DB_NAME: "{{ cycloid_plugins_manager_db_name }}"
       DB_USER: "{{ cycloid_plugins_db_user }}"
-      DB_PASSWORD: "{{ cycloid_plugins_db_password }}"
+      DB_PWD: "{{ cycloid_plugins_db_password }}"
       REDIS_URI: "{{ cycloid_plugins_redis_uri }}"
-      REDIS_INSECURE_SKIP_TLS: "{{ cycloid_plugins_redis_insecure_skip_tls }}"
+      PLUGIN_MANAGER_REDIS_INSECURE_SKIP_TLS: "{{ cycloid_plugins_redis_insecure_skip_tls }}"
   tags: docker-services
 
 - name: Force flush handlers to ensure plugin containers are started | cycloid-plugins

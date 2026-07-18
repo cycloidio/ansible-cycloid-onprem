@@ -250,7 +250,6 @@ kpi_import_schedule: "*-*-* *:00:00"
 # Plugins
 #
 
-
 #. cycloid_plugins_orgs_cans(optional, string): ""
 #+ Comma-separated list of Cycloid organization canonical names that have
 #+ WRITE access to the Plugin Registry and are auto-invited on the Plugin Manager.
@@ -289,13 +288,13 @@ cycloid_plugins_registry_username: ""
 #+ Leave empty to use the local Docker Registry credentials.
 cycloid_plugins_registry_password: ""
 
-#. cycloid_plugins_registry_image(optional, string): "cycloid/plugin-registry:latest"
-#+ Plugin Registry image.
-cycloid_plugins_registry_image: "cycloid/plugin-registry:latest"
+#. cycloid_plugins_registry_image(optional, string): "{{ cycloid_plugins_image }}"
+#+ Plugin Registry image (runs cycloid/backend-plugins as `plugin-registry`).
+cycloid_plugins_registry_image: "{{ cycloid_plugins_image }}"
 
-#. cycloid_plugins_manager_image(optional, string): "cycloid/plugin-manager:latest"
-#+ Plugin Manager image.
-cycloid_plugins_manager_image: "cycloid/plugin-manager:latest"
+#. cycloid_plugins_manager_image(optional, string): "{{ cycloid_plugins_image }}"
+#+ Plugin Manager image (runs cycloid/backend-plugins as `plugin-manager`).
+cycloid_plugins_manager_image: "{{ cycloid_plugins_image }}"
 
 #. cycloid_plugins_log_level(optional, string): "error"
 #+ Log level for Plugin Registry and Plugin Manager services.
@@ -517,6 +516,7 @@ cycloid_scw_registry_secret_key: "{{ lookup('env','SCW_SECRET_KEY') | default(om
 
 cycloid_frontend_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-frontend:{{ cycloid_frontend_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-frontend:{{ cycloid_frontend_version }}{% endif %}"
 cycloid_api_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-backend:{{ cycloid_api_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-http-api:{{ cycloid_api_version }}{% endif %}"
+cycloid_plugins_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-backend-plugins:{{ cycloid_api_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-http-api-plugins:{{ cycloid_api_version }}{% endif %}"
 
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:v1.1
 concourse_db_image: postgres:17
