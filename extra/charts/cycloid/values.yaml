@@ -513,6 +513,13 @@ plugins:
   # Enable the Plugins system.
   enabled: false
 
+  # Dedicated image running both plugin subcommands (plugin-registry /
+  # plugin-manager, selected via args). Shared by both plugin deployments.
+  image:
+    repository: rg.fr-par.scw.cloud/cycloidio/cycloid-backend-plugins
+    pullPolicy: Always
+    tag: "latest"
+
   # Comma-separated list of Cycloid organization canonical names that have
   # WRITE access to the Plugin Registry and are auto-invited on the Plugin Manager.
   # Set this to your Cycloid root organization canonical to start with.

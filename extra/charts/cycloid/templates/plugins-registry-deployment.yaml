@@ -64,8 +64,8 @@ spec:
       {{- end }}
       containers:
         - name: plugin-registry
-          image: "{{ tpl $.Values.backend.image.repository $ }}:{{ $.Values.backend.image.tag | default $.Chart.AppVersion }}"
-          imagePullPolicy: {{ $.Values.backend.image.pullPolicy }}
+          image: "{{ tpl $.Values.plugins.image.repository $ }}:{{ $.Values.plugins.image.tag | default $.Chart.AppVersion }}"
+          imagePullPolicy: {{ $.Values.plugins.image.pullPolicy }}
           command: ["/go/youdeploy-http-api"]
           args: ["plugin-registry", "--config-file=/opt/config.yml"]
           {{- if not $isK8s }}
