@@ -48,8 +48,7 @@ spec:
         - name: plugin-manager
           image: "{{ tpl .Values.plugins.image.repository $ }}:{{ .Values.plugins.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.plugins.image.pullPolicy }}
-          command: ["/go/youdeploy-http-api"]
-          args: ["plugin-manager", "--config-file=/opt/config.yml"]
+          args: ["/go/youdeploy-http-api", "plugin-manager"]
           {{- if not $isK8s }}
           # CRI runtime requires privileged access to the containerd socket.
           securityContext:
@@ -69,10 +68,8 @@ spec:
               value: {{ .Values.plugins.orgsCans | quote }}
             - name: PLUGIN_MANAGER_CY_URL
               value: {{ .Values.backend.url | quote }}
-            # VERIFY: standalone used a single CY_URL; the subcommand splits cy-url (proxy) / backend-url (invites)
             - name: PLUGIN_MANAGER_BACKEND_URL
               value: {{ .Values.backend.url | quote }}
-            # VERIFY: was PLUGIN_MANAGER_BASE_URL -> maps to --plugin-manager-url (externally reachable PM URL)
             - name: PLUGIN_MANAGER_URL
               value: "{{ $pmFullname }}:4000"
             {{- if $isK8s }}

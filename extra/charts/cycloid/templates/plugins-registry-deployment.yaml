@@ -66,8 +66,7 @@ spec:
         - name: plugin-registry
           image: "{{ tpl $.Values.plugins.image.repository $ }}:{{ $.Values.plugins.image.tag | default $.Chart.AppVersion }}"
           imagePullPolicy: {{ $.Values.plugins.image.pullPolicy }}
-          command: ["/go/youdeploy-http-api"]
-          args: ["plugin-registry", "--config-file=/opt/config.yml"]
+          args: ["/go/youdeploy-http-api", "plugin-registry"]
           {{- if not $isK8s }}
           # Containerd runtime requires privileged access.
           securityContext:
