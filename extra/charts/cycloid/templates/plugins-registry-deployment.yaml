@@ -163,6 +163,7 @@ spec:
                   name: cycloid-redis-crt
                   key: ca.crt
             {{- end }}
+            {{- if or (not $useLocal) $.Values.plugins.dockerRegistry.enabled }}
             # Docker registry creds (was `envFrom` secretRef); subcommand reads PLUGIN_REGISTRY_DOCKER_REGISTRY_*
             - name: PLUGIN_REGISTRY_DOCKER_REGISTRY_URI
               valueFrom:
@@ -179,6 +180,7 @@ spec:
                 secretKeyRef:
                   name: {{ $registrySecretName }}
                   key: REGISTRY_PASSWORD
+            {{- end }}
           ports:
             - containerPort: 4000
               protocol: TCP
