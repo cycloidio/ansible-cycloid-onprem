@@ -1,5 +1,5 @@
 kind: Fixed
-body: 'helm: plugins deployments installable (image tag pinned to published version, entrypoint dispatch restored)'
+body: 'helm: plugins deployments installable (image tag follows the backend tag, entrypoint dispatch restored)'
 time: 2026-07-23T00:45:18.825202000+02:00
 custom:
     Ref: Pull

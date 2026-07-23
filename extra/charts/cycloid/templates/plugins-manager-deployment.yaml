@@ -46,7 +46,7 @@ spec:
 
       containers:
         - name: plugin-manager
-          image: "{{ tpl .Values.plugins.image.repository $ }}:{{ .Values.plugins.image.tag | default .Chart.AppVersion }}"
+          image: "{{ tpl .Values.plugins.image.repository $ }}:{{ .Values.plugins.image.tag | default .Values.backend.image.tag }}"
           imagePullPolicy: {{ .Values.plugins.image.pullPolicy }}
           args: ["/go/youdeploy-http-api", "plugin-manager"]
           {{- if not $isK8s }}

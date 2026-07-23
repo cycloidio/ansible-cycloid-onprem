@@ -518,9 +518,7 @@ plugins:
   image:
     repository: rg.fr-par.scw.cloud/cycloidio/cycloid-backend-plugins
     pullPolicy: Always
-    # backend-plugins is published on the backend release lanes with version
-    # tags only; no latest alias exists on the registries.
-    tag: "v6.11.3"
+    tag: ""
 
   # Comma-separated list of Cycloid organization canonical names that have
   # WRITE access to the Plugin Registry and are auto-invited on the Plugin Manager.
