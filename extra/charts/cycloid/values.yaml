@@ -241,6 +241,13 @@ backend:
     # These value have to be changed as explained in the installation documentation.
     roleId: "##cycloid-vault-approle-role-id##"
     secretId: "##cycloid-vault-approle-secret-id##"
+    # pathPrefix overrides the Vault KV engine mount path prefix (default: "cycloid").
+    # All credentials are stored under <pathPrefix>/<team-uuid>/credentials/...
+    # IMPORTANT: This value MUST match the Concourse vault path prefix configured at
+    # concourse.concourse.web.vault.pathPrefix (default: "/cycloid") below.
+    # If they diverge, Concourse pipelines won't resolve ((...)) credential interpolations.
+    # Only change this if you need to isolate multiple deployments on a shared Vault.
+    # pathPrefix: "cycloid"
 
   cryptoSigningKey: "##backend-cryptoSigningKey##"
   jwtKey1: "##backend-jwtKey1##"
@@ -953,6 +960,8 @@ concourse:
         url: http://cycloid-vault:8200
 
         ## Vault path under which to namespace credentials lookup.
+        ## IMPORTANT: Must match backend.vault.pathPrefix (with leading slash).
+        ## If backend uses "cycloid", this must be "/cycloid".
         ##
         pathPrefix: /cycloid
 
