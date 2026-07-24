@@ -7,6 +7,14 @@ OUTPUT_DIR="$DIR/.out"
 # shellcheck source=./cecho-utils.sh
 . "$DIR/cecho-utils.sh"
 
+# Vault KV engine path prefix. Default: "cycloid"
+# Change this if you need to isolate multiple deployments on a shared Vault.
+# IMPORTANT: Must match:
+#   - backend env var VAULT_PATH_PREFIX (or --vault-path-prefix flag)
+#   - Concourse env var CONCOURSE_VAULT_PATH_PREFIX (helm: concourse.concourse.web.vault.pathPrefix)
+# Example for a dev environment: VAULT_PATH_PREFIX="dev/cycloid"
+VAULT_PATH_PREFIX="${VAULT_PATH_PREFIX:-cycloid}"
+
 export VALUES_CUSTOM_YAML="${VALUES_CUSTOM_YAML:-./values.custom.yaml}"
 
 if [ -z "$NAMESPACE" ]; then
@@ -51,19 +59,19 @@ else
 fi
 
 set +e
-kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault secrets list | grep cycloid >/dev/null
+kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault secrets list | grep "$VAULT_PATH_PREFIX" >/dev/null
 VAULT_CYCLOID_KV_STATUS=$?
 set -e
-pwarning "$0 > Enabling Vault cycloid kv secrets backend"
+pwarning "$0 > Enabling Vault $VAULT_PATH_PREFIX kv secrets backend"
 if [ $VAULT_CYCLOID_KV_STATUS -ne 0 ]; then
-  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault secrets enable -path cycloid kv
+  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault secrets enable -path "$VAULT_PATH_PREFIX" kv
 else
-  perror "$0 > Vault cycloid kv secrets backend already enabled"
+  perror "$0 > Vault $VAULT_PATH_PREFIX kv secrets backend already enabled"
 fi
 
-pwarning "$0 > Writing Vault cycloid-ro policy"
-cat <<EOF | kubectl -n "$NAMESPACE" exec -i cycloid-vault-0 -- vault policy write cycloid-ro -
-path "cycloid/*" {
+pwarning "$0 > Writing Vault ${VAULT_PATH_PREFIX}-ro policy"
+cat <<EOF | kubectl -n "$NAMESPACE" exec -i cycloid-vault-0 -- vault policy write "${VAULT_PATH_PREFIX}-ro" -
+path "${VAULT_PATH_PREFIX}/*" {
   policy = "read"
 }
 
@@ -76,17 +84,17 @@ path "auth/token/renew-self" {
 }
 EOF
 
-pwarning "$0 > Writing Vault cycloid policy"
-cat <<EOF | kubectl -n "$NAMESPACE" exec -i cycloid-vault-0 -- vault policy write cycloid -
-path "cycloid/*" {
+pwarning "$0 > Writing Vault $VAULT_PATH_PREFIX policy"
+cat <<EOF | kubectl -n "$NAMESPACE" exec -i cycloid-vault-0 -- vault policy write "$VAULT_PATH_PREFIX" -
+path "${VAULT_PATH_PREFIX}/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 
-path "sys/policy/cycloid/*" {
+path "sys/policy/${VAULT_PATH_PREFIX}/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 
-path "auth/approle/role/cycloid-*" {
+path "auth/approle/role/${VAULT_PATH_PREFIX}-*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 
@@ -108,31 +116,31 @@ path "auth/token/renew-self" {
 EOF
 
 set +e
-kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault read auth/approle/role/cycloid >/dev/null 2>&1
+kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault read "auth/approle/role/$VAULT_PATH_PREFIX" >/dev/null 2>&1
 VAULT_CYCLOID_APPROLE_STATUS=$?
 set -e
-pwarning "$0 > Creating Vault cycloid approle role"
+pwarning "$0 > Creating Vault $VAULT_PATH_PREFIX approle role"
 if [ $VAULT_CYCLOID_APPROLE_STATUS -eq 2 ]; then
-  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault write auth/approle/role/cycloid token_max_ttl=1h policies=cycloid token_ttl=20m
-  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault read -format=json auth/approle/role/cycloid/role-id | tee "$OUTPUT_DIR/cycloid-role-id.json"
+  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault write "auth/approle/role/$VAULT_PATH_PREFIX" token_max_ttl=1h policies="$VAULT_PATH_PREFIX" token_ttl=20m
+  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault read -format=json "auth/approle/role/$VAULT_PATH_PREFIX/role-id" | tee "$OUTPUT_DIR/cycloid-role-id.json"
   pinfo "# ... Save this value as the cycloid role-id"
-  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault write -format=json -f auth/approle/role/cycloid/secret-id | tee "$OUTPUT_DIR/cycloid-secret-id.json"
+  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault write -format=json -f "auth/approle/role/$VAULT_PATH_PREFIX/secret-id" | tee "$OUTPUT_DIR/cycloid-secret-id.json"
   pinfo "# ... Save this value as the cycloid secret-id"
   psuccess "# /!\\ /!\\ Please make sure to backup values.custom.yaml file and the following directory $OUTPUT_DIR"
 else
-  perror "$0 > Vault cycloid approle role already exists"
+  perror "$0 > Vault $VAULT_PATH_PREFIX approle role already exists"
 fi
 
 set +e
-kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault read auth/approle/role/cycloid-ro >/dev/null 2>&1
+kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault read "auth/approle/role/${VAULT_PATH_PREFIX}-ro" >/dev/null 2>&1
 VAULT_CYCLOID_APPROLE_STATUS=$?
 set -e
-pwarning "$0 > Creating Vault cycloid-ro approle role"
+pwarning "$0 > Creating Vault ${VAULT_PATH_PREFIX}-ro approle role"
 if [ $VAULT_CYCLOID_APPROLE_STATUS -eq 2 ]; then
-  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault write auth/approle/role/cycloid-ro period=30m token_max_ttl=0m policies=cycloid-ro token_ttl=30m
-  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault read -format=json auth/approle/role/cycloid-ro/role-id | tee "$OUTPUT_DIR/cycloid-ro-role-id.json"
+  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault write "auth/approle/role/${VAULT_PATH_PREFIX}-ro" period=30m token_max_ttl=0m policies="${VAULT_PATH_PREFIX}-ro" token_ttl=30m
+  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault read -format=json "auth/approle/role/${VAULT_PATH_PREFIX}-ro/role-id" | tee "$OUTPUT_DIR/cycloid-ro-role-id.json"
   pinfo "# ...Save this value as the cycloid-ro role-id"
-  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault write -format=json -f auth/approle/role/cycloid-ro/secret-id | tee "$OUTPUT_DIR/cycloid-ro-secret-id.json"
+  kubectl -n "$NAMESPACE" exec -t -i cycloid-vault-0 -- vault write -format=json -f "auth/approle/role/${VAULT_PATH_PREFIX}-ro/secret-id" | tee "$OUTPUT_DIR/cycloid-ro-secret-id.json"
   pinfo "# ... Save this value as the cycloid-ro secret-id"
 
   pinfo "  ... Writing generated approles into $VALUES_CUSTOM_YAML"
@@ -143,7 +151,7 @@ if [ $VAULT_CYCLOID_APPROLE_STATUS -eq 2 ]; then
 
   psuccess "# /!\\ /!\\ Please make sure to backup values.custom.yaml file and the following directory $OUTPUT_DIR"
 else
-  perror "$0 > Vault cycloid-ro approle role already exists"
+  perror "$0 > Vault ${VAULT_PATH_PREFIX}-ro approle role already exists"
 fi
 
 pwarning "$0 > Vault configured for Cycloid"
