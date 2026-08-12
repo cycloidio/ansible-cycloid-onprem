@@ -147,6 +147,26 @@ spec:
             - name: PLUGIN_MANAGER_REDIS_URI
               value: {{ include "cycloid.redisUri" . | quote }}
 
+            # Polling configuration
+            {{- with .Values.plugins.pluginManager.polling }}
+            {{- if .interval }}
+            - name: PLUGIN_MANAGER_POLLING_INTERVAL
+              value: {{ .interval | quote }}
+            {{- end }}
+            {{- if .timeout }}
+            - name: PLUGIN_MANAGER_POLLING_TIMEOUT
+              value: {{ .timeout | quote }}
+            {{- end }}
+            {{- if .endpoint }}
+            - name: PLUGIN_MANAGER_POLLING_ENDPOINT
+              value: {{ .endpoint | quote }}
+            {{- end }}
+            {{- if .numWorkers }}
+            - name: PLUGIN_MANAGER_POLLING_NUM_WORKERS
+              value: {{ .numWorkers | quote }}
+            {{- end }}
+            {{- end }}
+
             # Check if user defined a custom redis cert
             {{- $hasRedisCert := false }}
             {{- range .Values.backend.extraSecretEnvVars }}

@@ -700,6 +700,17 @@ plugins:
     logLevel: "error"
     # Skip TLS verification for internal communications.
     insecureSkipVerify: true
+    # Polling configuration for plugin health checks.
+    # The plugin-manager periodically pings running plugins to detect unhealthy ones.
+    polling:
+      # How often to poll all running plugins.
+      interval: ""
+      # HTTP timeout for each individual plugin ping request.
+      timeout: ""
+      # HTTP endpoint to ping on each plugin pod.
+      endpoint: ""
+      # Number of concurrent polling workers.
+      numWorkers: ""
 
   nodeSelector: {}
   tolerations: []
