@@ -1,5 +1,5 @@
 kind: Changed
-body: 'concourse: upgrade to 8.2.5 (chart 20.2.6)'
+body: 'concourse: upgrade to 8.2.5 (helm chart 20.2.6 + ansible concourse_web_image)'
 time: 2026-08-13T11:32:57+02:00
 custom:
     Ref: Pull
