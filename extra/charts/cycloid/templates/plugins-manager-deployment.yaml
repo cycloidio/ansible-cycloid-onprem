@@ -167,6 +167,12 @@ spec:
             {{- end }}
             {{- end }}
 
+            # Deploy ready timeout
+            {{- if .Values.plugins.pluginManager.deployReadyTimeout }}
+            - name: PLUGIN_MANAGER_DEPLOY_READY_TIMEOUT
+              value: {{ .Values.plugins.pluginManager.deployReadyTimeout | quote }}
+            {{- end }}
+
             # Check if user defined a custom redis cert
             {{- $hasRedisCert := false }}
             {{- range .Values.backend.extraSecretEnvVars }}

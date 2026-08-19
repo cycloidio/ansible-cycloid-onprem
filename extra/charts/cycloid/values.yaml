@@ -700,6 +700,9 @@ plugins:
     logLevel: "error"
     # Skip TLS verification for internal communications.
     insecureSkipVerify: true
+    # How long to wait for a plugin pod to become ready during deployment.
+    # Increase for slow-starting plugins. Capped at ~30min. Default: 30s.
+    deployReadyTimeout: ""
     # Polling configuration for plugin health checks.
     # The plugin-manager periodically pings running plugins to detect unhealthy ones.
     polling:
