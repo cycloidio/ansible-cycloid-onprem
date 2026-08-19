@@ -14,6 +14,10 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.backend.taskManager.replicaCount }}
+  {{- with .Values.backend.taskManager.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "backendTaskManager.selectorLabels" . | nindent 6 }}

@@ -17,6 +17,10 @@ spec:
   {{- if not .Values.frontend.autoscaling.enabled }}
   replicas: {{ .Values.frontend.replicaCount }}
   {{- end }}
+  {{- with .Values.frontend.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "frontend.selectorLabels" . | nindent 6 }}
