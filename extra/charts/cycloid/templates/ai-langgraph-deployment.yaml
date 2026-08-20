@@ -21,6 +21,10 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.ai.langgraph.replicaCount }}
+  {{- with .Values.ai.langgraph.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/component: ai-langgraph

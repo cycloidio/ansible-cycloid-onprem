@@ -58,6 +58,10 @@ frontend:
   # Number of replicas for the frontend service.
   replicaCount: 1
 
+  # Deployment strategy. Set to {type: Recreate} for single-replica workloads.
+  # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  strategy: {}
+
   image:
     # If using AWS replace by 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-frontend
     repository: rg.fr-par.scw.cloud/cycloidio/cycloid-frontend
@@ -210,6 +214,10 @@ backend:
 
   replicaCount: 1
 
+  # Deployment strategy. Set to {type: Recreate} for single-replica workloads.
+  # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  strategy: {}
+
   image:
     # If using AWS replace by 661913936052.dkr.ecr.eu-west-1.amazonaws.com/youdeploy-http-api
     repository: rg.fr-par.scw.cloud/cycloidio/cycloid-backend
@@ -222,6 +230,9 @@ backend:
   taskManager:
     enabled: true
     replicaCount: 1
+    # Deployment strategy. Set to {type: Recreate} for single-replica workloads.
+    # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+    strategy: {}
 
   # Concourse server to be used by the Cycloid Console API.
   # Defaults to the included one within the chart, but you also use a custom one if needed.
@@ -645,6 +656,9 @@ plugins:
   # Plugins are published here by the Cycloid backend.
   pluginRegistry:
     resources: {}
+    # Deployment strategy. Set to {type: Recreate} for single-replica workloads.
+    # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+    strategy: {}
     # Log level for the Plugin Registry service.
     logLevel: "error"
     # Skip TLS verification for internal communications.
@@ -696,6 +710,9 @@ plugins:
   pluginManager:
     replicaCount: 1
     resources: {}
+    # Deployment strategy. Set to {type: Recreate} for single-replica workloads.
+    # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+    strategy: {}
     # Log level for the Plugin Manager service.
     logLevel: "error"
     # Skip TLS verification for internal communications.
@@ -1527,6 +1544,10 @@ mcp:
 
   replicaCount: 1
 
+  # Deployment strategy. Set to {type: Recreate} for single-replica workloads.
+  # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  strategy: {}
+
   service:
     type: ClusterIP
     port: 80
@@ -1572,6 +1593,9 @@ ai:
       pullPolicy: Always
     replicaCount: 1
     resources: {}
+    # Deployment strategy. Set to {type: Recreate} for single-replica workloads.
+    # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+    strategy: {}
 
   chromadb:
     image:

@@ -20,6 +20,10 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.plugins.pluginManager.replicaCount }}
+  {{- with .Values.plugins.pluginManager.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "plugins.pluginManager.selectorLabels" . | nindent 6 }}
