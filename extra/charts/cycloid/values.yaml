@@ -543,6 +543,17 @@ plugins:
   # Set this to your Cycloid root organization canonical to start with.
   orgsCans: ""
 
+  # Secret holding the JWT signing key the Plugin Manager uses when calling the
+  # Cycloid backend. The backend only accepts JWTs signed with one of its own
+  # jwt-keys entries, so by default this resolves to the backend's secret and its
+  # jwt-key-1 entry: the two sides share one key with no extra configuration, and
+  # rotating backend.jwtKey1 rotates both.
+  # Set these only when the backend is not deployed by this release — the secret
+  # you point at must then carry the same key the backend was given.
+  cyJwtKeySecret:
+    name: ""
+    key: ""
+
   # Deployment runtime for plugin containers: "cri" (containerd, requires privileged pods)
   # or "k8s" (Kubernetes-native, no privileged pods required).
   # Applies to both Plugin Manager (long-lived plugin pods) and Plugin Registry

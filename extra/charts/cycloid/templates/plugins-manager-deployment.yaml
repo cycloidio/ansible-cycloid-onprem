@@ -72,6 +72,18 @@ spec:
               value: {{ .Values.plugins.orgsCans | quote }}
             - name: PLUGIN_MANAGER_CY_URL
               value: {{ .Values.backend.url | quote }}
+            {{- $cyJwtSecret := .Values.plugins.cyJwtKeySecret | default dict }}
+            {{- $cyJwtSecretName := $cyJwtSecret.name | default (ternary (include "backend.backendSecretName" .) "" .Values.backend.enabled) }}
+            {{- if $cyJwtSecretName }}
+            # Key the Plugin Manager signs its backend calls with. The backend only
+            # accepts JWTs signed with one of its own jwt-keys entries, so this points
+            # at the backend's secret by default and both sides share a single key.
+            - name: PLUGIN_MANAGER_CY_JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $cyJwtSecretName }}
+                  key: {{ $cyJwtSecret.key | default "jwt-key-1" }}
+            {{- end }}
             - name: PLUGIN_MANAGER_BACKEND_URL
               value: {{ .Values.backend.url | quote }}
             - name: PLUGIN_MANAGER_URL

@@ -255,6 +255,13 @@ kpi_import_schedule: "*-*-* *:00:00"
 #+ WRITE access to the Plugin Registry and are auto-invited on the Plugin Manager.
 cycloid_plugins_orgs_cans: ""
 
+#. cycloid_plugins_cy_jwt_key(optional, string): "{{ cycloid_jwt_key_1 }}"
+#+ JWT signing key the Plugin Manager uses when calling the Cycloid API.
+#+ The API only accepts JWTs signed with one of its own jwt keys, so this
+#+ defaults to cycloid_jwt_key_1 and both sides share a single key.
+#+ Override only when the API is not the one deployed by this playbook.
+cycloid_plugins_cy_jwt_key: "{{ cycloid_jwt_key_1 }}"
+
 #. cycloid_plugins_docker_registry_enabled(optional, bool): true
 #+ Enable the local Docker Registry for plugin images.
 #+ Set to false if you already have an external registry.

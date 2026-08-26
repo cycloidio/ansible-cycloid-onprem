@@ -164,6 +164,8 @@
       PLUGIN_MANAGER_CONTAINERD_SOCKET: "/run/containerd/containerd.sock"
       PLUGIN_MANAGER_CY_ORGS: "{{ cycloid_plugins_orgs_cans }}"
       PLUGIN_MANAGER_CY_URL: "{{ cycloid_api_base_url }}"
+      # signed with one of the API's own jwt keys, else the API rejects the calls
+      PLUGIN_MANAGER_CY_JWT_KEY: "{{ cycloid_plugins_cy_jwt_key }}"
       PLUGIN_MANAGER_BACKEND_URL: "{{ cycloid_api_base_url }}"
       PLUGIN_MANAGER_URL: "cycloid-plugin-manager:{{ cycloid_plugins_manager_port }}"
       # CRI callback URL: plugins use this to reach the PM for proxy calls
