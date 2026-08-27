@@ -1,0 +1,5 @@
+kind: Added
+body: "plugins: give the Plugin Manager the backend's JWT signing key"
+custom:
+  Ref: Pull
+  RefID: 310

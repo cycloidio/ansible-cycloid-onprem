@@ -1,0 +1,5 @@
+kind: Added
+body: "helm: expose Deployment strategy as a chart value"
+custom:
+  Ref: Pull
+  RefID: 308
