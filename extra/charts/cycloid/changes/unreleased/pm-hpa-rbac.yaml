@@ -1,0 +1,5 @@
+kind: Fixed
+body: "plugins: grant the Plugin Manager permission on HorizontalPodAutoscalers"
+custom:
+  Ref: Pull
+  RefID: 0
