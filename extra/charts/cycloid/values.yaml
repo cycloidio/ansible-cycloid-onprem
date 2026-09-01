@@ -729,14 +729,20 @@ plugins:
     # Skip TLS verification for internal communications.
     insecureSkipVerify: true
     # How long to wait for a plugin pod to become ready during deployment.
-    # Increase for slow-starting plugins. Capped at ~30min. Default: 30s.
+    # Increase for slow-starting plugins. Capped at ~30min.
+    # Must be a Go duration string with a unit, e.g. "120s" or "2m" (NOT "120").
+    # A value without a unit is invalid and silently falls back to the default. Default: "30s".
     deployReadyTimeout: ""
     # Polling configuration for plugin health checks.
     # The plugin-manager periodically pings running plugins to detect unhealthy ones.
     polling:
       # How often to poll all running plugins.
+      # Must be a Go duration string with a unit, e.g. "5m" or "300s" (NOT "300").
+      # A value without a unit is invalid and silently falls back to the default. Default: "5m".
       interval: ""
       # HTTP timeout for each individual plugin ping request.
+      # Must be a Go duration string with a unit, e.g. "5s" or "500ms" (NOT "5").
+      # A value without a unit is invalid and silently falls back to the default. Default: "5s".
       timeout: ""
       # HTTP endpoint to ping on each plugin pod.
       endpoint: ""
