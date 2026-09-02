@@ -1,0 +1,5 @@
+kind: Removed
+body: "concourse/postgres: drop the one-shot pgdata/ layout migration commandOverride. The migration was applied to every existing deployment on first start with chart 0.17.x; PGDATA in extraEnvironment is enough on its own now."
+custom:
+  Ref: Pull
+  RefID: 0
