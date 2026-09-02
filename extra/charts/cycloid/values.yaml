@@ -824,10 +824,6 @@ mysql:
         - ReadWriteOnce
       size: 8Gi
 
-    # Disable binlog by default
-    #TODO
-    #extraFlags: "--disable-log-bin"
-
 #
 # External MySQL Configuration
 # All of these values are only used if `mysql.enabled=false`
@@ -1342,46 +1338,6 @@ concourse:
     # on AWS EBS / ext4 volumes) does not block initdb with "directory not empty".
     extraEnvironment:
       PGDATA: /var/lib/postgresql/data/pgdata
-
-    # TMP one-shot migration from the previous root layout to pgdata/. This
-    # block must be removed once all deployments have been upgraded once with
-    # this chart -- PGDATA in extraEnvironment above is enough on its own.
-    # Idempotent and crash-safe: mv is atomic at file level on a single FS,
-    # and PG_VERSION is moved last so its presence at the source signals an
-    # incomplete migration.
-    commandOverride:
-      - /bin/bash
-      - -ec
-      - |
-        PGDATA_TARGET=/var/lib/postgresql/data/pgdata
-
-        rm -rf /var/lib/postgresql/data/lost+found
-
-        if [ -f /var/lib/postgresql/data/PG_VERSION ] && [ -f "$PGDATA_TARGET/PG_VERSION" ]; then
-          echo "FATAL: PG_VERSION present at both root and pgdata/. Manual intervention required." >&2
-          exit 1
-        fi
-
-        # PG_VERSION at the root is a reliable signal that the legacy layout is in
-        # use and needs migration. No-op on fresh deploys and already-migrated layouts.
-        if [ -f /var/lib/postgresql/data/PG_VERSION ]; then
-          echo ">>> Migrating postgres data from volume root to pgdata/ subdir..."
-        fi
-
-        mkdir -p "$PGDATA_TARGET"
-        shopt -s dotglob nullglob
-        for f in /var/lib/postgresql/data/*; do
-          case "$(basename "$f")" in
-            pgdata|lost+found|PG_VERSION) continue ;;
-          esac
-          mv "$f" "$PGDATA_TARGET/"
-        done
-        if [ -f /var/lib/postgresql/data/PG_VERSION ]; then
-          mv /var/lib/postgresql/data/PG_VERSION "$PGDATA_TARGET/"
-          echo ">>> Migration to pgdata/ complete."
-        fi
-
-        exec docker-entrypoint.sh postgres
 
   secrets:
     ## User/Pass need to be specified if bringing your own PostgreSQL.
