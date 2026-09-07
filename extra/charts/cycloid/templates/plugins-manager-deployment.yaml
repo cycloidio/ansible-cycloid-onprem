@@ -38,6 +38,15 @@ spec:
       {{- end }}
       {{- if $isK8s }}
       serviceAccountName: {{ $saName }}
+      {{- else }}
+      # CRI runtime creates no ServiceAccount, so pin to "default". This must be
+      # emitted explicitly: when switching k8s -> cri Helm deletes the plugin-manager
+      # ServiceAccount, but simply dropping serviceAccountName from the template does
+      # not clear it on the live Deployment -- the API server refills it from the
+      # deprecated spec.serviceAccount alias. Every pod is then rejected by admission
+      # ("serviceaccount ... not found") and the helm upgrade hangs. Writing "default"
+      # overwrites the stale reference with an account that always exists.
+      serviceAccountName: default
       {{- end }}
       {{- with .Values.plugins.nodeSelector }}
       nodeSelector:
