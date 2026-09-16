@@ -1,0 +1,5 @@
+kind: Fixed
+body: "plugins: set the Plugin Manager callback URL on the cri runtime too, where plugins were given a relative PROXY_URL"
+custom:
+  Ref: Pull
+  RefID: 0

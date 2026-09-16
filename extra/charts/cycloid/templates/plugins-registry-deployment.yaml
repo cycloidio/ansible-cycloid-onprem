@@ -94,6 +94,10 @@ spec:
               value: "k8s"
             - name: PLUGIN_REGISTRY_K8S_NAMESPACE
               value: {{ $pluginNs | quote }}
+            {{- if $.Values.plugins.k8s.podAccessMode }}
+            - name: PLUGIN_REGISTRY_K8S_POD_ACCESS_MODE
+              value: {{ $.Values.plugins.k8s.podAccessMode | quote }}
+            {{- end }}
             {{- if $.Values.plugins.k8s.imagePullSecrets }}
             - name: PLUGIN_REGISTRY_K8S_IMAGE_PULL_SECRETS
               value: {{ $.Values.plugins.k8s.imagePullSecrets | quote }}

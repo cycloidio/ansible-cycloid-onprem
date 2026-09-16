@@ -4,6 +4,8 @@
 {{- $k8sCfg := .Values.plugins.k8s }}
 {{- $pluginNs := default .Release.Namespace $k8sCfg.namespace }}
 {{- $saName := default $pmFullname $k8sCfg.serviceAccount.name }}
+{{- /* cri: sandboxes use public DNS, so the Service name is unreachable — 10.22.0.1 is the plugin bridge gateway, inside the manager's own netns */}}
+{{- $hostAPIBaseURL := .Values.plugins.pluginManager.hostAPIBaseURL | default (ternary (printf "http://%s.%s.svc.cluster.local:4000" $pmFullname .Release.Namespace) "http://10.22.0.1:4000" $isK8s) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -127,13 +129,13 @@ spec:
             - name: PLUGIN_MANAGER_K8S_NODE_SELECTOR
               value: {{ $p := list }}{{ range $k, $v := $k8sCfg.nodeSelector }}{{ $p = append $p (printf "%s=%s" $k $v) }}{{ end }}{{ join "," $p | quote }}
             {{- end }}
-            - name: PLUGIN_MANAGER_HOST_API_BASE_URL
-              value: "http://{{ $pmFullname }}.{{ .Release.Namespace }}.svc.cluster.local:4000"
             {{- else }}
             # CRI/containerd deployment runtime
             - name: PLUGIN_MANAGER_CONTAINERD_SOCKET
               value: "/run/containerd/containerd.sock"
             {{- end }}
+            - name: PLUGIN_MANAGER_HOST_API_BASE_URL
+              value: {{ $hostAPIBaseURL | quote }}
             # MySQL
             - name: PLUGIN_MANAGER_DB_HOST
               value: {{ include "cycloid.mysqlHost" . | quote }}

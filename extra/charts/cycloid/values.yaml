@@ -569,6 +569,7 @@ plugins:
     # standard clusters, but if your cluster enforces NetworkPolicies you
     # must allow traffic between the release namespace and this namespace.
     namespace: ""
+    podAccessMode: ""
     # Image for the db-proxy sidecar injected into each plugin pod (required for GetData).
     sidecarImage: "cycloid/plugin-manager-db-proxy:latest"
     # StorageClass used when provisioning per-deployment PVCs.
@@ -728,6 +729,10 @@ plugins:
     logLevel: "error"
     # Skip TLS verification for internal communications.
     insecureSkipVerify: true
+    # Base URL plugins call back on (PROXY_URL). Empty derives it from the runtime:
+    # the plugin-manager Service on k8s, the plugin bridge gateway on cri — override
+    # only if the CRI config dir was seeded with another subnet.
+    hostAPIBaseURL: ""
     # How long to wait for a plugin pod to become ready during deployment.
     # Increase for slow-starting plugins. Capped at ~30min.
     # Must be a Go duration string with a unit, e.g. "120s" or "2m" (NOT "120").
