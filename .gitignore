@@ -5,3 +5,6 @@ vault.secret
 roles/
 datas/
 plugins/
+tests/vagrant/.work/
+tests/vagrant/.vagrant/
+tests/vagrant/**/__pycache__/

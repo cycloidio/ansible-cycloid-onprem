@@ -360,6 +360,7 @@ ca_certificates_container_shared: false
 cycloid_packages:
   debian:
     - python3-pip
+    - python3-cryptography
     - netcat-traditional
     - default-mysql-client
     - python3-setuptools
@@ -1201,4 +1202,3 @@ dbs_dump: {}
 #        SCW_SECRET_KEY:
 #        SCW_DEFAULT_ORGANIZATION_ID:
 #        SCW_DEFAULT_REGION:
-

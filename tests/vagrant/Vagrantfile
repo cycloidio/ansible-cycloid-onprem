@@ -1,0 +1,55 @@
+# frozen_string_literal: true
+
+require "json"
+
+ROOT = File.expand_path(__dir__)
+MATRIX = JSON.parse(File.read(File.join(ROOT, "matrix.json")))
+run_config_path = ENV["CYCLOID_ACCEPTANCE_CONFIG"]
+RUN = run_config_path && !run_config_path.empty? ? JSON.parse(File.read(run_config_path)) : {}
+selected = RUN.fetch("machines", MATRIX.fetch("machines").keys)
+
+Vagrant.require_version ">= 2.4.0"
+
+Vagrant.configure("2") do |config|
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.ssh.insert_key = true
+  config.vm.box_check_update = false
+
+  selected.each do |name|
+    machine = MATRIX.fetch("machines").fetch(name)
+    config.vm.define name, autostart: false do |node|
+      node.vm.box = machine.fetch("box")
+      node.vm.box_version = machine.fetch("box_version")
+      node.vm.hostname = "cycloid-acceptance-#{name}"
+
+      node.vm.provider :libvirt do |libvirt|
+        libvirt.cpus = MATRIX.fetch("resources").fetch("cpus")
+        libvirt.memory = MATRIX.fetch("resources").fetch("memory_mb")
+        libvirt.machine_virtual_size = MATRIX.fetch("resources").fetch("disk_gb")
+        if RUN["run_id"]
+          libvirt.default_prefix = "cycloid-acceptance-#{RUN.fetch("run_id")}"
+        end
+      end
+
+      next if RUN.empty?
+
+      node.vm.provision "file",
+        source: RUN.fetch("archive"),
+        destination: "/tmp/cycloid-onprem.tar"
+
+      if RUN.fetch("source") == "checkout"
+        node.vm.provision "file",
+          source: RUN.fetch("candidate_archive"),
+          destination: "/tmp/ansible-cycloid-onprem.tar.gz"
+      end
+
+      node.vm.provision "file",
+        source: File.join(ROOT, "guest"),
+        destination: "/tmp/cycloid-acceptance-guest"
+
+      node.vm.provision "shell",
+        path: File.join(ROOT, "guest", "install.sh"),
+        args: [name, RUN.fetch("source"), RUN.fetch("run_id")]
+    end
+  end
+end
