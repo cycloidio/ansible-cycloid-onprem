@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "provider": "libvirt",
+  "resources": {
+    "cpus": 4,
+    "memory_mb": 12288,
+    "disk_gb": 60
+  },
+  "machines": {
+    "debian": {
+      "distribution": "Debian",
+      "release": "13",
+      "box": "cloud-image/debian-13",
+      "box_version": "20260914.2601.0"
+    },
+    "ubuntu": {
+      "distribution": "Ubuntu",
+      "release": "26.04 LTS",
+      "box": "cloud-image/ubuntu-26.04",
+      "box_version": "20260823.0.0"
+    }
+  }
+}

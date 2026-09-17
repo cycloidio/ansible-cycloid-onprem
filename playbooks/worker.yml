@@ -8,6 +8,57 @@
 
   pre_tasks:
 
+    # The Concourse containerd runtime hard-codes /run/containerd/containerd.sock.
+    # Isolate that path from Docker's containerd socket on all-in-one hosts.
+    - name: Create private containerd runtime directory | concourse
+      file:
+        path: /run/concourse-worker/containerd
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      when: concourse_worker_runtime == "containerd"
+
+    - name: Restore private containerd runtime directory at boot | concourse
+      copy:
+        dest: /etc/tmpfiles.d/concourse-worker-containerd.conf
+        content: "d /run/concourse-worker/containerd 0755 root root -\n"
+        owner: root
+        group: root
+        mode: "0644"
+      when: concourse_worker_runtime == "containerd"
+
+    - name: Create worker service override directory | concourse
+      file:
+        path: /etc/systemd/system/concourse-worker.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      when: concourse_worker_runtime == "containerd"
+
+    - name: Isolate worker containerd socket from the host runtime | concourse
+      copy:
+        dest: /etc/systemd/system/concourse-worker.service.d/containerd-runtime.conf
+        content: |
+          [Unit]
+          After=systemd-tmpfiles-setup.service
+
+          [Service]
+          BindPaths=/run/concourse-worker/containerd:/run/containerd
+        owner: root
+        group: root
+        mode: "0644"
+      register: concourse_containerd_override
+      when: concourse_worker_runtime == "containerd"
+
+    - name: Reload systemd worker override | concourse
+      systemd:
+        daemon_reload: yes
+      when:
+        - concourse_worker_runtime == "containerd"
+        - concourse_containerd_override.changed
+
     - name: Install extra packages | pre-setup
       package:
         name:
