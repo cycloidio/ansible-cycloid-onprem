@@ -57,7 +57,9 @@ def load_matrix(path: Path = MATRIX_PATH) -> dict:
     for name, machine in machines.items():
         missing = sorted(required - set(machine))
         if missing:
-            raise HarnessError(f"matrix machine {name!r} is missing: {', '.join(missing)}")
+            raise HarnessError(
+                f"matrix machine {name!r} is missing: {', '.join(missing)}"
+            )
     return data
 
 
@@ -94,11 +96,17 @@ def create_candidate_archive(destination: Path, repo: Path = REPO_ROOT) -> None:
     with tarfile.open(destination, "w:gz", format=tarfile.PAX_FORMAT) as archive:
         for path in tracked_files(repo):
             if path.is_file() or path.is_symlink():
-                archive.add(path, arcname=Path("ansible-cycloid-onprem") / path.relative_to(repo), recursive=False)
+                archive.add(
+                    path,
+                    arcname=Path("ansible-cycloid-onprem") / path.relative_to(repo),
+                    recursive=False,
+                )
     destination.chmod(0o600)
 
 
-def vagrant_env(config: Path | None = None, run_dir: Path | None = None) -> dict[str, str]:
+def vagrant_env(
+    config: Path | None = None, run_dir: Path | None = None
+) -> dict[str, str]:
     env = os.environ.copy()
     env["VAGRANT_CWD"] = str(HARNESS_ROOT)
     if config:
@@ -166,18 +174,33 @@ def preflight(_: argparse.Namespace) -> int:
         raise HarnessError("virsh is required for the libvirt preflight")
     capture(["virsh", "-r", "-c", "qemu:///system", "list", "--all"])
     print(f"Vagrant: {version}")
-    print(f"Provider: {matrix['provider']} (vagrant-libvirt installed; system libvirt readable)")
+    print(
+        f"Provider: {matrix['provider']} (vagrant-libvirt installed; system libvirt readable)"
+    )
     for name, machine in matrix["machines"].items():
-        print(f"{name}: {machine['distribution']} {machine['release']} — {machine['box']} {machine['box_version']}")
+        print(
+            f"{name}: {machine['distribution']} {machine['release']} — {machine['box']} {machine['box_version']}"
+        )
     return 0
 
 
 def machine_names(selection: str, matrix: dict) -> list[str]:
+    known = matrix["machines"]
     if selection == "all":
-        return list(matrix["machines"])
-    if selection not in matrix["machines"]:
-        raise HarnessError(f"unknown OS {selection!r}")
-    return [selection]
+        return list(known)
+    names = [item.strip() for item in selection.split(",") if item.strip()]
+    if not names:
+        raise HarnessError("--os must name at least one machine")
+    unknown = sorted(set(names) - set(known))
+    if unknown:
+        raise HarnessError(
+            f"unknown OS in --os: {', '.join(unknown)}; known machines: {', '.join(known)}"
+        )
+    seen: list[str] = []
+    for name in names:
+        if name not in seen:
+            seen.append(name)
+    return seen
 
 
 def write_junit(path: Path, results: Iterable[Result]) -> None:
@@ -198,7 +221,9 @@ def write_junit(path: Path, results: Iterable[Result]) -> None:
             time=f"{result.seconds:.3f}",
         )
         if result.error:
-            failure = ET.SubElement(case, "failure", message=redact(result.error).splitlines()[0])
+            failure = ET.SubElement(
+                case, "failure", message=redact(result.error).splitlines()[0]
+            )
             failure.text = redact(result.error)
     ET.ElementTree(suite).write(path, encoding="utf-8", xml_declaration=True)
     path.chmod(0o600)
@@ -220,9 +245,13 @@ def ssh_config(machine: str, run_dir: Path, env: dict[str, str]) -> Path:
     output = capture(["vagrant", "ssh-config", machine], env=env)
     lines = output.splitlines()
     try:
-        start = next(index for index, line in enumerate(lines) if line.startswith("Host "))
+        start = next(
+            index for index, line in enumerate(lines) if line.startswith("Host ")
+        )
     except StopIteration as exc:
-        raise HarnessError(f"Vagrant did not return SSH configuration for {machine}") from exc
+        raise HarnessError(
+            f"Vagrant did not return SSH configuration for {machine}"
+        ) from exc
     path.parent.mkdir(parents=True, exist_ok=True)
     path.parent.chmod(0o700)
     path.write_text("\n".join(lines[start:]) + "\n")
@@ -230,7 +259,9 @@ def ssh_config(machine: str, run_dir: Path, env: dict[str, str]) -> Path:
     return path
 
 
-def remote(machine: str, config: Path, script: str, phase: str | None = None) -> list[str]:
+def remote(
+    machine: str, config: Path, script: str, phase: str | None = None
+) -> list[str]:
     command = f"sudo /usr/local/lib/cycloid-acceptance/{script}"
     if phase:
         command += f" {phase}"
@@ -258,7 +289,9 @@ def collect_machine(
     )
 
 
-def collect_private_log(machine: str, config: Path, name: str, run_dir: Path, env: dict[str, str]) -> None:
+def collect_private_log(
+    machine: str, config: Path, name: str, run_dir: Path, env: dict[str, str]
+) -> None:
     valid_identifier(name, "guest log name")
     run_logged(
         [
@@ -279,6 +312,9 @@ def test(args: argparse.Namespace) -> int:
     archive = args.archive.resolve()
     if not archive.is_file():
         raise HarnessError(f"archive does not exist: {archive}")
+    upgrade_archive = args.upgrade_archive.resolve() if args.upgrade_archive else None
+    if upgrade_archive and not upgrade_archive.is_file():
+        raise HarnessError(f"upgrade archive does not exist: {upgrade_archive}")
     run_id = args.run_id or time.strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:8]
     valid_identifier(run_id, "run id")
     WORK_ROOT.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -287,7 +323,10 @@ def test(args: argparse.Namespace) -> int:
     secure_dir(run_dir)
     machines = machine_names(args.os, matrix)
     candidate = run_dir / "ansible-cycloid-onprem.tar.gz"
-    if args.source == "checkout":
+    needs_candidate = args.source == "checkout" or (
+        upgrade_archive is not None and args.upgrade_source == "checkout"
+    )
+    if needs_candidate:
         create_candidate_archive(candidate)
     config = {
         "schema": 1,
@@ -298,6 +337,15 @@ def test(args: argparse.Namespace) -> int:
         "archive_sha256": sha256(archive),
         "source": args.source,
         "candidate_archive": str(candidate) if args.source == "checkout" else None,
+        "upgrade_archive": str(upgrade_archive) if upgrade_archive else None,
+        "upgrade_archive_sha256": sha256(upgrade_archive) if upgrade_archive else None,
+        "upgrade_source": args.upgrade_source if upgrade_archive else None,
+        "upgrade_candidate_archive": (
+            str(candidate)
+            if upgrade_archive and args.upgrade_source == "checkout"
+            else None
+        ),
+        "tolerate_initial_failure": bool(args.tolerate_initial_failure),
     }
     config_path = run_dir / "config.json"
     config_path.write_text(json.dumps(config, indent=2) + "\n")
@@ -328,10 +376,32 @@ def test(args: argparse.Namespace) -> int:
         if not machine_ok and ssh_path:
             collect_private_log(machine, ssh_path, "install", run_dir, env)
         machine_ok = machine_ok and ssh_ok
-        if machine_ok and ssh_path:
-            machine_ok = stage(
-                results,
-                machine,
+        # install+ssh must succeed for anything else to be attempted, even
+        # with --tolerate-initial-failure (there is no guest to talk to).
+        guest_reachable = machine_ok
+        # continue_phase gates whether the *next* primary phase runs; with
+        # --tolerate-initial-failure it stays true even after a phase fails,
+        # so every primary phase still gets attempted and its own junit
+        # testcase, but a failure never aborts the lane early.
+        continue_phase = machine_ok
+
+        def run_primary_phase(
+            phase: str,
+            action,
+            log_name: str | None = None,
+        ) -> bool:
+            nonlocal continue_phase
+            if not continue_phase:
+                return False
+            ok = stage(results, machine, phase, action)
+            if not ok and ssh_path:
+                collect_private_log(machine, ssh_path, log_name or phase, run_dir, env)
+            if not ok and not args.tolerate_initial_failure:
+                continue_phase = False
+            return ok
+
+        if guest_reachable and ssh_path:
+            run_primary_phase(
                 "verify-initial",
                 lambda m=machine: run_logged(
                     remote(m, ssh_path, "verify.sh", "initial"),
@@ -339,12 +409,8 @@ def test(args: argparse.Namespace) -> int:
                     env=env,
                 ),
             )
-            if not machine_ok:
-                collect_private_log(machine, ssh_path, "verify-initial", run_dir, env)
-        if machine_ok and not args.skip_rerun:
-            machine_ok = stage(
-                results,
-                machine,
+        if guest_reachable and not args.skip_rerun:
+            rerun_ok = run_primary_phase(
                 "rerun",
                 lambda m=machine: run_logged(
                     remote(m, ssh_path, "rerun.sh"),
@@ -352,12 +418,8 @@ def test(args: argparse.Namespace) -> int:
                     env=env,
                 ),
             )
-            if not machine_ok:
-                collect_private_log(machine, ssh_path, "rerun", run_dir, env)
-            if machine_ok:
-                machine_ok = stage(
-                    results,
-                    machine,
+            if rerun_ok or args.tolerate_initial_failure:
+                run_primary_phase(
                     "verify-post-rerun",
                     lambda m=machine: run_logged(
                         remote(m, ssh_path, "verify.sh", "post-rerun"),
@@ -365,12 +427,8 @@ def test(args: argparse.Namespace) -> int:
                         env=env,
                     ),
                 )
-                if not machine_ok:
-                    collect_private_log(machine, ssh_path, "verify-post-rerun", run_dir, env)
-        if machine_ok:
-            machine_ok = stage(
-                results,
-                machine,
+        if guest_reachable:
+            run_primary_phase(
                 "reboot",
                 lambda m=machine: run_logged(
                     ["vagrant", "reload", m],
@@ -378,10 +436,7 @@ def test(args: argparse.Namespace) -> int:
                     env=env,
                 ),
             )
-        if machine_ok:
-            machine_ok = stage(
-                results,
-                machine,
+            run_primary_phase(
                 "verify-post-reboot",
                 lambda m=machine: run_logged(
                     remote(m, ssh_path, "verify.sh", "post-reboot"),
@@ -389,19 +444,128 @@ def test(args: argparse.Namespace) -> int:
                     env=env,
                 ),
             )
-            if not machine_ok:
-                collect_private_log(machine, ssh_path, "verify-post-reboot", run_dir, env)
+
+        # The upgrade lane only needs a reachable guest; --tolerate-initial-failure
+        # lets it run even if earlier primary phases failed.
+        if upgrade_archive and guest_reachable and ssh_path:
+            upgrade_ok = stage(
+                results,
+                machine,
+                "upload-upgrade-archive",
+                lambda m=machine: run_logged(
+                    [
+                        "vagrant",
+                        "upload",
+                        str(upgrade_archive),
+                        "/tmp/cycloid-onprem-upgrade.tar",
+                        m,
+                    ],
+                    run_dir / "raw" / f"{m}-upload-upgrade-archive.log",
+                    env=env,
+                ),
+            )
+            if upgrade_ok and args.upgrade_source == "checkout":
+                upgrade_ok = stage(
+                    results,
+                    machine,
+                    "upload-upgrade-candidate",
+                    lambda m=machine: run_logged(
+                        [
+                            "vagrant",
+                            "upload",
+                            str(candidate),
+                            "/tmp/ansible-cycloid-onprem-upgrade.tar.gz",
+                            m,
+                        ],
+                        run_dir / "raw" / f"{m}-upload-upgrade-candidate.log",
+                        env=env,
+                    ),
+                )
+            if upgrade_ok:
+                upgrade_ok = stage(
+                    results,
+                    machine,
+                    "upgrade-install",
+                    lambda m=machine: run_logged(
+                        remote(
+                            m,
+                            ssh_path,
+                            "upgrade.sh",
+                            f"{args.upgrade_source} {run_id}",
+                        ),
+                        run_dir / "raw" / f"{m}-upgrade-install.log",
+                        env=env,
+                    ),
+                )
+                if not upgrade_ok:
+                    collect_private_log(
+                        machine, ssh_path, "upgrade-install", run_dir, env
+                    )
+            if upgrade_ok:
+                upgrade_ok = stage(
+                    results,
+                    machine,
+                    "verify-post-upgrade",
+                    lambda m=machine: run_logged(
+                        remote(m, ssh_path, "verify.sh", "post-upgrade"),
+                        run_dir / "raw" / f"{m}-verify-post-upgrade.log",
+                        env=env,
+                    ),
+                )
+                if not upgrade_ok:
+                    collect_private_log(
+                        machine, ssh_path, "verify-post-upgrade", run_dir, env
+                    )
+            if upgrade_ok:
+                stage(
+                    results,
+                    machine,
+                    "collect-post-upgrade",
+                    lambda m=machine: collect_machine(
+                        m, "post-upgrade", run_dir, env, ssh_path
+                    ),
+                )
+            if upgrade_ok:
+                upgrade_ok = stage(
+                    results,
+                    machine,
+                    "reboot-2",
+                    lambda m=machine: run_logged(
+                        ["vagrant", "reload", m],
+                        run_dir / "raw" / f"{m}-reboot-2.log",
+                        env=env,
+                    ),
+                )
+            if upgrade_ok:
+                upgrade_ok = stage(
+                    results,
+                    machine,
+                    "verify-post-upgrade-reboot",
+                    lambda m=machine: run_logged(
+                        remote(m, ssh_path, "verify.sh", "post-upgrade-reboot"),
+                        run_dir / "raw" / f"{m}-verify-post-upgrade-reboot.log",
+                        env=env,
+                    ),
+                )
+                if not upgrade_ok:
+                    collect_private_log(
+                        machine, ssh_path, "verify-post-upgrade-reboot", run_dir, env
+                    )
+            machine_ok = machine_ok and upgrade_ok
+
         if ssh_path:
             stage(
                 results,
                 machine,
                 "collect",
-                lambda m=machine, phase="final" if machine_ok else "failure": collect_machine(
-                    m, phase, run_dir, env, ssh_path
+                lambda m=machine, phase="final" if continue_phase else "failure": (
+                    collect_machine(m, phase, run_dir, env, ssh_path)
                 ),
             )
         else:
-            results.append(Result(machine, "collect", 0, "SSH configuration unavailable"))
+            results.append(
+                Result(machine, "collect", 0, "SSH configuration unavailable")
+            )
         if not args.keep:
             stage(
                 results,
@@ -420,7 +584,10 @@ def test(args: argparse.Namespace) -> int:
     print(f"Report: {run_dir / 'junit.xml'}")
     if failures:
         for failure in failures:
-            print(f"FAIL {failure.machine}/{failure.phase}: {redact(failure.error).splitlines()[0]}", file=sys.stderr)
+            print(
+                f"FAIL {failure.machine}/{failure.phase}: {redact(failure.error).splitlines()[0]}",
+                file=sys.stderr,
+            )
         return 1
     print("All selected acceptance phases passed.")
     return 0
@@ -458,21 +625,59 @@ def destroy(args: argparse.Namespace) -> int:
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(description=__doc__)
     commands = root.add_subparsers(dest="command", required=True)
-    check = commands.add_parser("preflight", help="validate local Vagrant/libvirt prerequisites")
+    check = commands.add_parser(
+        "preflight", help="validate local Vagrant/libvirt prerequisites"
+    )
     check.set_defaults(func=preflight)
     run = commands.add_parser("test", help="run the VM acceptance matrix")
-    run.add_argument("--archive", type=Path, required=True, help="generated cycloid-onprem.tar fixture")
-    run.add_argument("--os", choices=["all", "debian", "ubuntu"], default="all")
+    run.add_argument(
+        "--archive",
+        type=Path,
+        required=True,
+        help="generated cycloid-onprem.tar fixture",
+    )
+    run.add_argument(
+        "--os",
+        default="all",
+        help="'all', a single matrix key, or a comma-separated list of matrix keys",
+    )
     run.add_argument("--source", choices=["checkout", "archive"], default="checkout")
     run.add_argument("--run-id")
     run.add_argument("--keep", action="store_true", help="keep VMs after the run")
-    run.add_argument("--skip-rerun", action="store_true", help="skip the rerun/idempotence phase")
+    run.add_argument(
+        "--skip-rerun", action="store_true", help="skip the rerun/idempotence phase"
+    )
+    run.add_argument(
+        "--upgrade-archive",
+        type=Path,
+        default=None,
+        help="second cycloid-onprem.tar fixture to upgrade to after the primary lane",
+    )
+    run.add_argument(
+        "--upgrade-source",
+        choices=["archive", "checkout"],
+        default="archive",
+        help="overlay the current checkout onto the upgrade archive's role",
+    )
+    run.add_argument(
+        "--tolerate-initial-failure",
+        action="store_true",
+        help=(
+            "record verify-initial/rerun/verify-post-rerun/reboot/verify-post-reboot "
+            "failures as junit failures without aborting the lane (the upgrade lane "
+            "still runs if the guest is reachable)"
+        ),
+    )
     run.set_defaults(func=test)
-    collect_parser = commands.add_parser("collect", help="collect diagnostics from a retained run")
+    collect_parser = commands.add_parser(
+        "collect", help="collect diagnostics from a retained run"
+    )
     collect_parser.add_argument("--run", required=True)
     collect_parser.add_argument("--phase", default="manual")
     collect_parser.set_defaults(func=collect_command)
-    destroy_parser = commands.add_parser("destroy", help="destroy VMs belonging to one exact run")
+    destroy_parser = commands.add_parser(
+        "destroy", help="destroy VMs belonging to one exact run"
+    )
     destroy_parser.add_argument("--run", required=True)
     destroy_parser.set_defaults(func=destroy)
     return root
@@ -482,7 +687,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         args = parser().parse_args(argv)
         return args.func(args)
-    except (HarnessError, subprocess.CalledProcessError, OSError, json.JSONDecodeError) as exc:
+    except (
+        HarnessError,
+        subprocess.CalledProcessError,
+        OSError,
+        json.JSONDecodeError,
+    ) as exc:
         print(f"error: {redact(str(exc))}", file=sys.stderr)
         return 2
 

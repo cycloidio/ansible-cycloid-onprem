@@ -7,13 +7,25 @@
     "disk_gb": 60
   },
   "machines": {
-    "debian": {
+    "debian12": {
+      "distribution": "Debian",
+      "release": "12",
+      "box": "cloud-image/debian-12",
+      "box_version": "20260909.2596.0"
+    },
+    "debian13": {
       "distribution": "Debian",
       "release": "13",
       "box": "cloud-image/debian-13",
       "box_version": "20260914.2601.0"
     },
-    "ubuntu": {
+    "ubuntu2404": {
+      "distribution": "Ubuntu",
+      "release": "24.04 LTS",
+      "box": "cloud-image/ubuntu-24.04",
+      "box_version": "20260911.0.0"
+    },
+    "ubuntu2604": {
       "distribution": "Ubuntu",
       "release": "26.04 LTS",
       "box": "cloud-image/ubuntu-26.04",
