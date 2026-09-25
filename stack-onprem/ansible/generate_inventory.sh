@@ -10,14 +10,14 @@ TF_OUTPUT=$1
 
 #Env variables (bool) used to know if we should create
 # CONCOURSE_WORKER
-# MINIO
+# SEAWEEDFS
 # ELASTICSEARCH
 
 # This script generate an ansible inventory regarding the number of ips/instances available.
 # 4 role/groups are defined:
 #  INVENTORY_CYCLOID_CORE: cycloid API + frontend + nginx
 #  INVENTORY_CYCLOID: cycloid dependancies (DB / Vault / Smtp ...)
-#  INVENTORY_OTHER: Optional services (Concourse + DB / ES / Minio ...)
+#  INVENTORY_OTHER: Optional services (Concourse + DB / ES / SeaweedFS ...)
 #  INVENTORY_WORKER: Concourse worker
 
 # How is it splited by IPs ?
@@ -37,8 +37,8 @@ if [ "$ELASTICSEARCH" = "true" ]; then
   INVENTORY_OTHER="elasticsearch"
 fi
 
-if [ "$MINIO" = "true" ]; then
-  INVENTORY_OTHER="$INVENTORY_OTHER minio"
+if [ "$SEAWEEDFS" = "true" ]; then
+  INVENTORY_OTHER="$INVENTORY_OTHER seaweedfs"
 fi
 
 # cycloid_plugins is always co-located with cycloid_core (first instance).

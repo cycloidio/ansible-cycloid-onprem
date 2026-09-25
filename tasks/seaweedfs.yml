@@ -1,0 +1,112 @@
+---
+- name: Validate SeaweedFS S3 credentials | seaweedfs
+  assert:
+    that:
+      - seaweedfs_access_key | length > 0
+      - seaweedfs_secret_key | length > 0
+      - seaweedfs_access_key not in ['AKIEXAMPLE', 'AKIAIOSFODNN7EXAMPLE']
+      - seaweedfs_secret_key not in ['EXAMPLEKEY', 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY']
+    fail_msg: >-
+      Set non-empty, non-example seaweedfs_access_key and
+      seaweedfs_secret_key values before exposing the SeaweedFS S3 API.
+- name: Check for a legacy MinIO systemd unit | seaweedfs
+  stat:
+    path: /etc/systemd/system/minio_container.service
+  register: minio_legacy_unit
+
+- name: Check for legacy MinIO data | seaweedfs
+  stat:
+    path: "{{ (minio_config_path | default(cycloid_install_path + '/minio')) }}/data"
+  register: minio_legacy_data
+
+- name: Refuse to start SeaweedFS over an unmigrated MinIO installation | seaweedfs
+  fail:
+    msg: >-
+      Legacy MinIO service or data detected. Starting SeaweedFS here would
+      either conflict on port 9000 or expose an empty object store. Follow
+      MIGRATION_MINIO_TO_SEAWEEDFS.md, then remove the legacy service and data.
+  when: minio_legacy_unit.stat.exists or minio_legacy_data.stat.exists
+
+- name: Create SeaweedFS configuration directory | seaweedfs
+  file:
+    path: "{{ seaweedfs_config_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Create SeaweedFS data directory | seaweedfs
+  file:
+    path: "{{ seaweedfs_config_path }}/data"
+    state: directory
+    owner: "1000"
+    group: "1000"
+    mode: "0700"
+
+- name: Configure authenticated SeaweedFS S3 access | seaweedfs
+  copy:
+    dest: "{{ seaweedfs_config_path }}/s3.json"
+    owner: "1000"
+    group: "1000"
+    mode: "0600"
+    content: |
+      {
+        "identities": [
+          {
+            "name": "cycloid",
+            "credentials": [
+              {
+                "accessKey": {{ seaweedfs_access_key | to_json }},
+                "secretKey": {{ seaweedfs_secret_key | to_json }}
+              }
+            ],
+            "actions": ["Admin", "Read", "List", "Tagging", "Write"]
+          }
+        ]
+      }
+  no_log: true
+  register: seaweedfs_s3_config
+
+- name: Install SeaweedFS container | seaweedfs
+  block:
+    - name: Define service | seaweedfs
+      include_role:
+        name: mhutter.docker-systemd-service
+      vars:
+        container_name: seaweedfs
+        container_cmd: server -s3 -s3.port=9000 -s3.config=/etc/seaweedfs/s3.json -dir=/data -master.volumeSizeLimitMB=1024 -volume.max=0 -master.telemetry=false
+        container_image: "{{ seaweedfs_image }}"
+        container_volumes:
+          - "{{ seaweedfs_config_path }}/data:/data"
+          - "{{ seaweedfs_config_path }}/s3.json:/etc/seaweedfs/s3.json:ro"
+        container_ports: "{{ seaweedfs_container_ports }}"
+        container_args: "{{ container_args_extra }}"
+        container_labels:
+          - ansible.managed=true
+          - systemd.managed=true
+          - cycloid.io=true
+        # systemd
+        enable: true
+        masked: false
+        state: started
+      tags: docker-services
+
+    - name: Restart SeaweedFS after changing its S3 credentials | seaweedfs
+      service:
+        name: seaweedfs_container
+        state: restarted
+      when: seaweedfs_s3_config.changed
+
+    - name: Apply SeaweedFS service handlers | seaweedfs
+      meta: flush_handlers
+
+    - name: Wait for SeaweedFS availability | seaweedfs
+      uri:
+        url: "http://localhost:{{ seaweedfs_port }}/"
+        status_code:
+          - 200
+          - 403
+      register: resp
+      until: resp.status == 200 or resp.status == 403
+      delay: 5
+      retries: 30

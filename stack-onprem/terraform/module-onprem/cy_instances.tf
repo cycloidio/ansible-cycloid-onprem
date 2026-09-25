@@ -99,7 +99,7 @@ resource "aws_security_group" "cy_instances" {
     cidr_blocks = var.cy_instances_cidr_blocks_allow
   }
 
-  # minio
+  # SeaweedFS S3 API
   ingress {
     from_port   = 9000
     to_port     = 9000

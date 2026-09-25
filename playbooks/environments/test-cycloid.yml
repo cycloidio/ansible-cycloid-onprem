@@ -14,3 +14,6 @@ concourse_authorized_worker_keys:
 cycloid_db_password: "chovoh6gahti5ohP0AiF6eex6evoonie"
 cycloid_console_dns: cycloid-console
 cycloid_api_dns: cycloid-api
+
+seaweedfs_access_key: molecule-seaweedfs
+seaweedfs_secret_key: molecule-seaweedfs-secret

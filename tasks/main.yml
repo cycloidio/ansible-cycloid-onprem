@@ -1,4 +1,20 @@
 ---
+- ansible.builtin.include_tasks: minio_uninstall.yml
+  when:
+    - uninstall_legacy_minio|bool
+    - "'minio' in group_names"
+
+- name: Refuse legacy MinIO inventory until its data is migrated
+  fail:
+    msg: >-
+      The minio inventory group is no longer installed. Migrate its buckets to
+      SeaweedFS and rename the group before rerunning the playbook. Follow
+      MIGRATION_MINIO_TO_SEAWEEDFS.md.
+  when:
+    - not uninstall|bool
+    - not uninstall_legacy_minio|bool
+    - "'minio' in group_names"
+
 - block:
     - ansible.builtin.include_tasks: pre-setup.yml
 
@@ -71,8 +87,8 @@
 
     #- ansible.builtin.include_tasks: prometheus.yml
 
-    - ansible.builtin.include_tasks: minio.yml
-      when: setup_minio|bool
+    - ansible.builtin.include_tasks: seaweedfs.yml
+      when: setup_seaweedfs|bool
 
     - ansible.builtin.include_tasks: post-setup.yml
 
@@ -116,8 +132,8 @@
     - ansible.builtin.include_tasks: cycloid_core_uninstall.yml
       when: setup_cycloid_core|bool
 
-    - ansible.builtin.include_tasks: minio_uninstall.yml
-      when: setup_minio|bool
+    - ansible.builtin.include_tasks: seaweedfs_uninstall.yml
+      when: setup_seaweedfs|bool
 
     - ansible.builtin.include_tasks: elasticsearch_uninstall.yml
       when: setup_elasticsearch|bool
