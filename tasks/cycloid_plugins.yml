@@ -12,7 +12,7 @@
   shell: >
     mysql --skip-ssl-verify-server-cert --protocol TCP
     -h {{ cycloid_plugins_db_host }} -P {{ cycloid_plugins_db_port }}
-    -u root -p{{ cycloid_db_password }}
+    -u root -p{{ cycloid_db_password | quote }}
     -e "CREATE DATABASE IF NOT EXISTS \`{{ item }}\`; GRANT ALL PRIVILEGES ON \`{{ item }}\`.* TO '{{ cycloid_plugins_db_user }}'@'%';"
   with_items:
     - "{{ cycloid_plugins_registry_db_name }}"
