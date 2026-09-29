@@ -33,11 +33,14 @@ external_backend_aws_cred_name: aws
 
 ansible_params_extravars:
   cycloid_api_provisioning: true
+  # Use Cycloid credential references when SeaweedFS is enabled.
+  seaweedfs_access_key: "((seaweedfs_s3.access_key))"
+  seaweedfs_secret_key: "((seaweedfs_s3.secret_key))"
 
 instance_private_key_pair: ((git_ssh_bastion.ssh_key))
 
 install_concourse_worker: $INSTALL_CONCOURSE_WORKER
-install_minio: false
+install_seaweedfs: false
 install_elasticsearch: $INSTALL_ELASTICSEARCH
 install_plugins: false
 
@@ -47,8 +50,6 @@ cycloid_frontend_tag: $FRONTEND_IMAGE_TAG
 #### Datas populate on onprem setup ####
 onprem_cr_repository: git@github.com:cycloidio/onprem-test.git
 
-onprem_minio_access_key: AKIAIOSFODNN7EXAMPLE
-onprem_minio_secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 # cred name need to exist on your org
 onprem_aws_cred_name: aws_admin
 onprem_aws_sandbox_cred_name: aws_sandbox

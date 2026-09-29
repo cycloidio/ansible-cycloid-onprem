@@ -71,8 +71,8 @@
 
     #- ansible.builtin.include_tasks: prometheus.yml
 
-    - ansible.builtin.include_tasks: minio.yml
-      when: setup_minio|bool
+    - ansible.builtin.include_tasks: seaweedfs.yml
+      when: setup_seaweedfs|bool
 
     - ansible.builtin.include_tasks: post-setup.yml
 
@@ -116,8 +116,8 @@
     - ansible.builtin.include_tasks: cycloid_core_uninstall.yml
       when: setup_cycloid_core|bool
 
-    - ansible.builtin.include_tasks: minio_uninstall.yml
-      when: setup_minio|bool
+    - ansible.builtin.include_tasks: seaweedfs_uninstall.yml
+      when: setup_seaweedfs|bool
 
     - ansible.builtin.include_tasks: elasticsearch_uninstall.yml
       when: setup_elasticsearch|bool

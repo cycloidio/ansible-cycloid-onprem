@@ -1,16 +1,16 @@
 ---
 
-- name: Stop services | minio
+- name: Stop services | seaweedfs
   service:
     name: "{{ item }}"
     state: stopped
   with_items:
-    - minio_container
+    - seaweedfs_container
     - docker
     - docker.socket
   failed_when: false
 
-- name: Remove packages | minio
+- name: Remove packages | seaweedfs
   package:
     name:
       - docker*
@@ -18,22 +18,23 @@
   failed_when: false
   when: setup_packages
 
-- name: Remove files | minio
+- name: Remove files | seaweedfs
   file:
     path: "{{ item }}"
     state: absent
   with_items:
-    - "{{ minio_config_path }}"
+    - "{{ seaweedfs_config_path }}"
     - "{{ cycloid_install_path }}"
-    - /etc/systemd/system/minio.service
-    - /etc/default/minio
+    - /etc/systemd/system/seaweedfs_container.service
+    - /etc/default/seaweedfs
+    - /etc/sysconfig/seaweedfs
     - /etc/systemd/system/docker.service
     - /var/lib/docker
     - /opt/containerd
 
-- name: Force systemd to reread configs | minio
+- name: Force systemd to reread configs | seaweedfs
   systemd:
     daemon_reload: yes
 
-- name: systemctl reset-failed | minio
+- name: systemctl reset-failed | seaweedfs
   shell: systemctl reset-failed

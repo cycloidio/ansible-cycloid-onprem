@@ -53,6 +53,7 @@ platforms:
      - cycloid_creds
      - smtp_server
      - cycloid_cache
+     - seaweedfs
 
   - name: concourse_worker
     image: concourse/concourse:7.9.1

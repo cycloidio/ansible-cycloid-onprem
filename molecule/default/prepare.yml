@@ -23,6 +23,7 @@
         - net-tools
         - lsb-release
         - curl
+        - awscli
         - procps
         - python-setuptools
         - python-pip
