@@ -471,10 +471,6 @@ setup_cycloid_cache: "{{ 'cycloid_cache' in group_names }}"
 setup_cycloid_creds: "{{ 'cycloid_creds' in group_names }}"
 # Setup SeaweedFS (S3-compatible remote storage)
 setup_seaweedfs: "{{ 'seaweedfs' in group_names }}"
-# Remove only a legacy MinIO service after its objects have been exported.
-uninstall_legacy_minio: false
-# Existing, verified export directory required before legacy MinIO cleanup.
-legacy_minio_export_path: ""
 # Setup ElasticSearch
 setup_elasticsearch: "{{ 'elasticsearch' in group_names }}"
 # Setup Plugins (Docker Registry + Plugin Registry + Plugin Manager)
@@ -672,9 +668,6 @@ default_ssl_subject_alt_name:
   - DNS:localhost
   - DNS:vault
   - DNS:concourse
-  # Kept during the MinIO migration window so regenerated certificates remain
-  # valid for installations that still use the legacy hostname.
-  - DNS:minio
   - DNS:seaweedfs
   - DNS:elasticsearch
   - DNS:redis
@@ -903,13 +896,11 @@ seaweedfs_port: 9000
 
 #. seaweedfs_access_key(required): str
 #+ S3 access key used by Cycloid external backends
-#+ The legacy variable fallback keeps existing credentials valid during migration.
-seaweedfs_access_key: "{{ minio_root_user | default('') }}"
+seaweedfs_access_key: ""
 
 #. seaweedfs_secret_key(required): str
 #+ S3 secret key used by Cycloid external backends
-#+ The legacy variable fallback keeps existing credentials valid during migration.
-seaweedfs_secret_key: "{{ minio_root_password | default('') }}"
+seaweedfs_secret_key: ""
 
 #. seaweedfs_config_path(optional, string): "{{ cycloid_install_path }}/seaweedfs"
 #+ host directory used to store config/datas used by the container

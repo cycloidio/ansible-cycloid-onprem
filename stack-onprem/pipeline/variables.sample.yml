@@ -40,8 +40,7 @@ ansible_params_extravars:
 instance_private_key_pair: ((git_ssh_bastion.ssh_key))
 
 install_concourse_worker: $INSTALL_CONCOURSE_WORKER
-# Compatibility key: enabling it installs SeaweedFS.
-install_minio: false
+install_seaweedfs: false
 install_elasticsearch: $INSTALL_ELASTICSEARCH
 install_plugins: false
 

@@ -9,23 +9,6 @@
     fail_msg: >-
       Set non-empty, non-example seaweedfs_access_key and
       seaweedfs_secret_key values before exposing the SeaweedFS S3 API.
-- name: Check for a legacy MinIO systemd unit | seaweedfs
-  stat:
-    path: /etc/systemd/system/minio_container.service
-  register: minio_legacy_unit
-
-- name: Check for legacy MinIO data | seaweedfs
-  stat:
-    path: "{{ (minio_config_path | default(cycloid_install_path + '/minio')) }}/data"
-  register: minio_legacy_data
-
-- name: Refuse to start SeaweedFS over an unmigrated MinIO installation | seaweedfs
-  fail:
-    msg: >-
-      Legacy MinIO service or data detected. Starting SeaweedFS here would
-      either conflict on port 9000 or expose an empty object store. Follow
-      MIGRATION_MINIO_TO_SEAWEEDFS.md, then remove the legacy service and data.
-  when: minio_legacy_unit.stat.exists or minio_legacy_data.stat.exists
 
 - name: Create SeaweedFS configuration directory | seaweedfs
   file:

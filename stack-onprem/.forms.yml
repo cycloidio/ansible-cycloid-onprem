@@ -131,8 +131,7 @@ use_cases:
                 default: false
               - name: "SeaweedFS (S3) enabled"
                 description: "Install SeaweedFS for use as an AWS S3-compatible external backend for tfstate. Store its key pair in a Cycloid credential, then set credential references in the Ansible extra variables below."
-                # Compatibility key kept for existing project configurations.
-                key: install_minio
+                key: install_seaweedfs
                 widget: switch
                 type: boolean
                 default: false

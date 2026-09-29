@@ -574,8 +574,7 @@ jobs:
                 ENV: ($ .environment $)
                 CONFIG_ANSIBLE_PATH: "($ .config_root $)/ansible"
                 CONCOURSE_WORKER: ((install_concourse_worker))
-                # Legacy project key retained for one release; it installs SeaweedFS.
-                SEAWEEDFS: ((install_minio))
+                SEAWEEDFS: ((install_seaweedfs))
                 ELASTICSEARCH: ((install_elasticsearch))
                 PLUGINS: ((install_plugins))
                 CYCLOID_PLUGINS_ORGS_CANS: ((cycloid_plugins_orgs_cans))
