@@ -568,6 +568,28 @@ plugins:
     pullPolicy: Always
     tag: ""
 
+  # Pod-level security context applied to both the Plugin Manager and the
+  # Plugin Registry pods. Shared by both plugin deployments.
+  podSecurityContext:
+    # Enable the pod security context for plugin pods.
+    enabled: false
+    # fsGroup: 2000
+
+  # Container-level security context applied to the Plugin Manager and the
+  # Plugin Registry containers. Shared by both plugin deployments.
+  # NOTE: when plugins.deploymentRuntime="cri", the plugin containers always run
+  # with privileged=true (required to access the containerd socket) and this
+  # value is ignored. It is only applied when deploymentRuntime="k8s".
+  securityContext:
+    # Enable the container security context for plugin containers.
+    enabled: false
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
   # Comma-separated list of Cycloid organization canonical names that have
   # WRITE access to the Plugin Registry and are auto-invited on the Plugin Manager.
   # Set this to your Cycloid root organization canonical to start with.
