@@ -63,6 +63,9 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if $.Values.plugins.podSecurityContext.enabled }}
+      securityContext: {{- omit $.Values.plugins.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
       {{- if $isK8s }}
       serviceAccountName: {{ default (include "plugins.pluginManager.fullname" $) $.Values.plugins.k8s.serviceAccount.name }}
       {{- end }}
@@ -75,6 +78,8 @@ spec:
           # Containerd runtime requires privileged access.
           securityContext:
             privileged: true
+          {{- else if $.Values.plugins.securityContext.enabled }}
+          securityContext: {{- omit $.Values.plugins.securityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           env:
             - name: PLUGIN_REGISTRY_ORGANIZATIONS
