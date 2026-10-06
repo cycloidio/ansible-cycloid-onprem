@@ -101,6 +101,11 @@ frontend:
     # Name of the service account to use. If not set, a name is generated.
     name: ""
 
+  # The frontend (nginx serving the console SPA) does not call the Kubernetes
+  # API. Set to false to avoid mounting the ServiceAccount token and reduce the
+  # pod attack surface. Set to true only if you bind the ServiceAccount to RBAC.
+  automountServiceAccountToken: false
+
   podAnnotations: {}
 
   podSecurityContext:
@@ -234,6 +239,26 @@ backend:
     # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
     strategy: {}
 
+    # The task-manager does not call the Kubernetes API. Set to false to avoid
+    # mounting the ServiceAccount token and reduce the pod attack surface.
+    # Set to true only if you bind the ServiceAccount to RBAC.
+    automountServiceAccountToken: false
+
+    # Resource requests/limits for the task-manager (worker) container.
+    # Left empty by default: when unset, the container inherits backend.resources
+    # (same binary/image as the backend). Override here only if the worker needs
+    # different limits than the API, e.g. more ephemeral-storage for git clones
+    # (the worker clones repositories into /tmp/yd-git-clones, an emptyDir).
+    resources: {}
+      # limits:
+      #   cpu: 500m
+      #   memory: 256Mi
+      #   ephemeral-storage: 2Gi
+      # requests:
+      #   cpu: 1
+      #   memory: 512Mi
+      #   ephemeral-storage: 1Gi
+
   # Concourse server to be used by the Cycloid Console API.
   # Defaults to the included one within the chart, but you also use a custom one if needed.
   concourse:
@@ -338,6 +363,11 @@ backend:
     # The name of the service account to use.
     # If not set and create is true, a name is generated using the fullname template
     name: ""
+
+  # The backend (API, migrations and task-manager) does not call the Kubernetes
+  # API. Set to false to avoid mounting the ServiceAccount token and reduce the
+  # pod attack surface. Set to true only if you bind the ServiceAccount to RBAC.
+  automountServiceAccountToken: false
 
   podAnnotations: {}
 
