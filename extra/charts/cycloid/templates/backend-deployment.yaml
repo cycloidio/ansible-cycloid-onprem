@@ -38,6 +38,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "backend.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.backend.automountServiceAccountToken }}
       {{- if .Values.backend.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.backend.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}

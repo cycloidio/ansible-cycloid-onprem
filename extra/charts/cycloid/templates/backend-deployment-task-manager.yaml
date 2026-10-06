@@ -35,6 +35,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "backend.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.backend.taskManager.automountServiceAccountToken }}
       {{- if .Values.backend.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.backend.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -87,7 +88,7 @@ spec:
           #   successThreshold: 1
           #   failureThreshold: 3
           resources:
-            {{- toYaml .Values.backend.resources | nindent 12 }}
+            {{- toYaml (.Values.backend.taskManager.resources | default .Values.backend.resources) | nindent 12 }}
           env:
             - name: "RUN_CMD"
               value: "worker"

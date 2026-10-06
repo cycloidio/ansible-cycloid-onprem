@@ -1,0 +1,6 @@
+kind: Added
+body: 'backend: expose backend.taskManager.resources to set CPU/memory/ephemeral-storage requests and limits on the task-manager (worker) container independently. When left empty it falls back to backend.resources, so existing deployments are unchanged.'
+time: 2026-10-06T09:39:01.000000000+02:00
+custom:
+  Ref: Pull
+  RefID: 0
