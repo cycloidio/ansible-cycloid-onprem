@@ -1,6 +1,0 @@
-kind: Security
-body: 'backend/frontend: the backend pods (API, migrations initContainer, task-manager) and the frontend pod no longer mount their ServiceAccount token by default (automountServiceAccountToken=false), reducing the attack surface. They do not call the Kubernetes API. Set backend.automountServiceAccountToken / backend.taskManager.automountServiceAccountToken / frontend.automountServiceAccountToken to true if you bind the ServiceAccount to RBAC.'
-time: 2026-10-06T09:39:00.000000000+02:00
-custom:
-  Ref: Pull
-  RefID: 323
