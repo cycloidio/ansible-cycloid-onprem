@@ -965,6 +965,27 @@ externalRedis:
   # If enabled, use rediss schema
   tls:
     enabled: false
+  # Redis Sentinel (high availability) configuration.
+  # Sentinel mode is enabled simply by providing sentinel.nodes below. When set,
+  # REDIS_URI is generated using the "redis-sentinel://" scheme for ALL workloads
+  # (backend, plugins-manager, plugins-registry, cronjobs):
+  #   redis-sentinel://[auth@]host1:port,host2:port,...?master=<masterSet>
+  # The client queries the Sentinels, which return the current master address.
+  # TLS still applies as soon as a REDIS_CA_CERT is provided (inject it via
+  # backend.extraSecretEnvVars). The host/port/database fields above are ignored
+  # when sentinel.nodes is set.
+  sentinel:
+    # Name of the monitored master set (must match the Sentinel configuration).
+    masterSet: "mymaster"
+    # List of Sentinel nodes. Each entry is an object {host, port}; port
+    # defaults to 26379 when omitted. Leave empty to use standalone Redis.
+    nodes: []
+    #  - host: redis-node-0.redis-headless.redis.svc.cluster.local
+    #    port: 26379
+    #  - host: redis-node-1.redis-headless.redis.svc.cluster.local
+    #    port: 26379
+    #  - host: redis-node-2.redis-headless.redis.svc.cluster.local
+    #    port: 26379
 
 #
 # External Elasticsearch Configuration
