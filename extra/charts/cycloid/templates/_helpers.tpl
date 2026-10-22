@@ -224,12 +224,38 @@ Return the Redis username and password for authentication
 {{- end -}}
 
 {{/*
+Return the comma-separated list of Redis Sentinel addresses (host:port,...),
+built from externalRedis.sentinel.nodes (a list of {host, port} objects).
+Port defaults to 26379 when a node omits it.
+*/}}
+{{- define "cycloid.redisSentinelAddrs" -}}
+{{- $addrs := list -}}
+{{- range .Values.externalRedis.sentinel.nodes -}}
+  {{- $port := .port | default 26379 -}}
+  {{- $addrs = append $addrs (printf "%s:%v" .host $port) -}}
+{{- end -}}
+{{- join "," $addrs -}}
+{{- end -}}
+
+{{/*
 Return the Redis URI
+
+Two forms are generated:
+  - Sentinel (externalRedis.sentinel.nodes is non-empty):
+      redis-sentinel://[auth@]host1:port,host2:port,...?master=<masterSet>
+    The backend parses this via asynq into a RedisFailoverClientOpt. TLS is
+    applied on top as soon as a REDIS_CA_CERT is provided (the redis-sentinel
+    scheme is treated as TLS-secured by the backend).
+  - Standalone (default): rediss?://[auth@]$(REDIS_HOST):$(REDIS_PORT)/$(REDIS_DB)
 */}}
 {{- define "cycloid.redisUri" -}}
-{{- $redisSchema := include "cycloid.redisSchema" . -}}
 {{- $redisAuth := include "cycloid.redisUserAuth" . -}}
-{{- if or .Values.redis.enabled .Values.externalRedis.enabled -}}
+{{- if and (not .Values.redis.enabled) .Values.externalRedis.enabled .Values.externalRedis.sentinel.nodes -}}
+        {{- $addrs := include "cycloid.redisSentinelAddrs" . -}}
+        {{- $master := .Values.externalRedis.sentinel.masterSet | default "mymaster" -}}
+        {{- printf "redis-sentinel://%s%s?master=%s" $redisAuth $addrs $master -}}
+{{- else if or .Values.redis.enabled .Values.externalRedis.enabled -}}
+        {{- $redisSchema := include "cycloid.redisSchema" . -}}
         {{- printf "%s://%s$(REDIS_HOST):$(REDIS_PORT)/$(REDIS_DB)" $redisSchema $redisAuth -}}
 {{- end -}}
 {{- end -}}
