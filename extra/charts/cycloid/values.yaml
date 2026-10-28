@@ -1115,6 +1115,21 @@ concourse:
         database: atc
         ## user/password defined under secrets section
 
+      ## Expose Concourse Prometheus metrics. Metrics are emitted by the web/ATC
+      ## component only (this also covers worker-related metrics such as
+      ## concourse_workers_registered/containers/volumes). Workers do not expose
+      ## their own metrics endpoint.
+      ## Uncomment to enable:
+      # prometheus:
+      #   enabled: true
+      #   bindIp: "0.0.0.0"
+      #   bindPort: 9391
+      #   ## Requires the Prometheus Operator (ServiceMonitor CRD). Set to false
+      #   ## if not available and scrape via the Service annotations instead.
+      #   serviceMonitor:
+      #     enabled: true
+      #     interval: "30s"
+
     worker:
       baggageclaim:
         driver: overlay
