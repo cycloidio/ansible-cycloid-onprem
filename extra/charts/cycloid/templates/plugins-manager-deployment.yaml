@@ -86,18 +86,16 @@ spec:
               value: {{ .Values.plugins.orgsCans | quote }}
             - name: PLUGIN_MANAGER_CY_URL
               value: {{ .Values.backend.url | quote }}
-            {{- $cyJwtSecret := .Values.plugins.cyJwtKeySecret | default dict }}
-            {{- $cyJwtSecretName := $cyJwtSecret.name | default (ternary (include "backend.backendSecretName" .) "" .Values.backend.enabled) }}
-            {{- if $cyJwtSecretName }}
             # Key the Plugin Manager signs its backend calls with. The backend only
-            # accepts JWTs signed with one of its own jwt-keys entries, so this points
-            # at the backend's secret by default and both sides share a single key.
+            # accepts JWTs signed with one of its own jwt-keys entries, and the backend
+            # is always deployed alongside the Plugin Manager in a Cycloid install, so
+            # both sides always share the backend's jwt-key-1: one key, no configuration,
+            # and rotating backend.jwtKey1 rotates both.
             - name: PLUGIN_MANAGER_CY_JWT_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ $cyJwtSecretName }}
-                  key: {{ $cyJwtSecret.key | default "jwt-key-1" }}
-            {{- end }}
+                  name: {{ template "backend.backendSecretName" . }}
+                  key: jwt-key-1
             - name: PLUGIN_MANAGER_BACKEND_URL
               value: {{ .Values.backend.url | quote }}
             - name: PLUGIN_MANAGER_URL
