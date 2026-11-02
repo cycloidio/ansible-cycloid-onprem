@@ -516,7 +516,12 @@ cycloid_scw_registry_secret_key: "{{ lookup('env','SCW_SECRET_KEY') | default(om
 
 cycloid_frontend_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-frontend:{{ cycloid_frontend_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-frontend:{{ cycloid_frontend_version }}{% endif %}"
 cycloid_api_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-backend:{{ cycloid_api_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-http-api:{{ cycloid_api_version }}{% endif %}"
-cycloid_plugins_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-backend-plugins:{{ cycloid_api_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-http-api-plugins:{{ cycloid_api_version }}{% endif %}"
+# cycloid-backend-plugins is a separate image from cycloid-backend, so it has its
+# own digest even when sharing the same tag. Pin it from its own version to avoid
+# reusing the backend digest (which causes a "manifest unknown" 404 on pull).
+# Defaults to cycloid_api_version so callers that do not set it keep working.
+cycloid_plugins_version: "{{ cycloid_api_version }}"
+cycloid_plugins_image: "{% if use_registry_scaleway|bool %}{{ cycloid_scw_registry }}/cycloid-backend-plugins:{{ cycloid_plugins_version }}{% else %}{{ cycloid_aws_registry }}/youdeploy-http-api-plugins:{{ cycloid_plugins_version }}{% endif %}"
 
 cycloid_scheduler_sync_worker_keys_image: cycloid/concourse-team-authorized-key-sync:v1.1
 concourse_db_image: postgres:17
