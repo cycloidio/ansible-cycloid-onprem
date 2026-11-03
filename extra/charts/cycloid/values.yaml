@@ -259,6 +259,33 @@ backend:
       #   memory: 512Mi
       #   ephemeral-storage: 1Gi
 
+    # Pod annotations applied ONLY to the task-manager pod (merged with
+    # backend.podAnnotations). Use this to let your monitoring scrape the
+    # Concourse business metrics without touching the API pods. Dynatrace
+    # scrapes the pod directly via its own annotations, e.g.:
+    #   podAnnotations:
+    #     metrics.dynatrace.com/scrape: "true"
+    #     metrics.dynatrace.com/port: "2113"
+    #     metrics.dynatrace.com/path: "/metrics"
+    podAnnotations: {}
+
+    # Concourse business metrics (cycloidio_concourse_*), PROD-908. OFF by
+    # default. When enabled, the task-manager collects Concourse build/pipeline/
+    # worker metrics (enriched with the Cycloid context) and serves them on a
+    # dedicated internal port, separate from the 2112 probe port. Collection
+    # runs on a single replica (leader election); every replica serves the same
+    # values. Expose the port to your monitoring via podAnnotations above.
+    metrics:
+      enabled: false
+      # Dedicated internal port for the business metrics (NOT 2112, which backs
+      # the k8s probes).
+      port: "2113"
+      # Enabled collectors; extensible by type (pipeline today, git later).
+      collectors:
+        - pipeline
+      # Interval of the background collection (Go duration). Empty = app default.
+      collectionInterval: ""
+
   # Concourse server to be used by the Cycloid Console API.
   # Defaults to the included one within the chart, but you also use a custom one if needed.
   concourse:
