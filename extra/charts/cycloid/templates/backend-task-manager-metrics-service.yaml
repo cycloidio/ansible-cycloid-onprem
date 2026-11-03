@@ -1,0 +1,25 @@
+{{- if and .Values.backend.enabled .Values.backend.taskManager.enabled .Values.backend.taskManager.metrics.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "backend.fullname" . }}-task-manager-metrics
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    {{- include "backendTaskManager.selectorLabels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.backend.taskManager.metrics.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.backend.taskManager.metrics.port | int }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "backendTaskManager.selectorLabels" . | nindent 4 }}
+{{- end }}
