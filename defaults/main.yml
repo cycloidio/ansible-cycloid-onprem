@@ -882,6 +882,39 @@ cycloid_api_worker_run_internal: "{%- if cycloid_api_task_manager_enabled|bool -
 #+ Extra arguments to pass to the task manager container such cpus limitation
 cycloid_api_task_manager_container_args_extra: '--cpus="{{ ansible_facts.processor_vcpus | float / 2 }}"'
 
+#
+# Concourse business metrics (cycloidio_concourse_*), PROD-908
+#
+# When enabled, the backend worker (the task-manager container, or the internal
+# worker of the API container when cycloid_api_task_manager_enabled is false)
+# collects Concourse build/pipeline/worker metrics enriched with the Cycloid
+# context and serves them on a dedicated internal port, separate from the 2112
+# probe port. OFF by default. Exposing/collecting is cheap and harmless when
+# unscraped; point your monitoring stack (e.g. Dynatrace, Prometheus) at the
+# metrics port to ingest them.
+#
+#. cycloid_api_metrics_enabled(optional, bool): false
+#+ Enable the collection and exposition of the Concourse business metrics.
+cycloid_api_metrics_enabled: false
+#. cycloid_api_metrics_port(optional, int): 2113
+#+ Dedicated internal port exposing the Concourse business metrics (NOT 2112, which backs the probes).
+cycloid_api_metrics_port: 2113
+#. cycloid_api_metrics_collectors(optional, list): ["pipeline"]
+#+ Enabled metrics collectors; extensible by type (pipeline today, git later).
+cycloid_api_metrics_collectors:
+  - pipeline
+#. cycloid_api_metrics_collection_interval(optional, string): ""
+#+ Interval of the background collection (Go duration, e.g. "30s"). Empty = app default.
+cycloid_api_metrics_collection_interval: ""
+# Host:container port mapping for the metrics port, added to the worker
+# container only when metrics are enabled.
+cycloid_api_metrics_container_ports:
+  - "0.0.0.0:{{ cycloid_api_metrics_port }}:{{ cycloid_api_metrics_port }}"
+# Env fragment injected into the worker container when metrics are enabled.
+# Merged into container_env below so it stays empty (no METRICS_* at all) when disabled.
+cycloid_api_metrics_env: "{{ {'METRICS_ENABLED': 'true', 'METRICS_PORT': cycloid_api_metrics_port | string, 'METRICS_COLLECTORS': cycloid_api_metrics_collectors | join(',')} | combine({'METRICS_COLLECTION_INTERVAL': cycloid_api_metrics_collection_interval} if cycloid_api_metrics_collection_interval != '' else {}) if cycloid_api_metrics_enabled | bool else {} }}"
+
+
 # API call /user/login expect only email/pass properties.
 # If more params, it fail
 cycloid_login_user:
