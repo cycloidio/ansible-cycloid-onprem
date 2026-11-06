@@ -407,11 +407,15 @@
     container_name: cycloid-api-task-manager
     container_docker_pull: "{{ docker_pull }}"
     container_image: "{{cycloid_api_image}}"
-    container_ports: "{{ cycloid_api_task_manage_container_ports }}"
+    container_ports: "{{ cycloid_api_task_manage_container_ports + (cycloid_api_metrics_container_ports if cycloid_api_metrics_enabled | bool else []) }}"
     container_args: "--env-file={{ cycloid_api_path }}/approle-cycloid {{ cycloid_api_task_manager_container_args_extra }} {{ container_args_plugins_hosts }} {{ container_args_mcp_hosts }} {{ container_args_ai_hosts }} {{ container_args_update_ca }} {{ container_args_extra }}"
     container_cmd: "{{ cycloid_api_container_cmd|default('', true) }}"
     container_volumes: "{{ ([container_volumes_ca_certificates] + [ container_api_volumes_redis_ca ] ) | select()|list }}" # select()|list ensure to remove empty list [""]
-    container_env:
+    # Concourse business metrics (cycloidio_concourse_*), PROD-908: the METRICS_*
+    # keys come from cycloid_api_metrics_env, which is empty unless
+    # cycloid_api_metrics_enabled is true.
+    container_env: "{{ cycloid_api_task_manager_base_env | combine(cycloid_api_metrics_env) }}"
+    cycloid_api_task_manager_base_env:
       # Run backend as worker/task-manager
       RUN_CMD: worker
       DB_NAME: "{{ cycloid_db_name }}"

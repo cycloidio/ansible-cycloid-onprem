@@ -111,6 +111,10 @@ Cycloid.io
 |`ca_certificates_container_shared`|Share your rootCA from the host to containers|`bool`|`false`|`False`|
 |`container_args_extra`|Used to give extra argument to containers. Example to override domain server "--dns 172.17.0.1"|`string`|`""`|`False`|
 |`cycloid_admin_apikey`|Create admin APIKEY on the first organization. APIKEY will be stored localy under ``{{playbook_dir}}/admin.apikey`. (`cycloid_licence` need to be defined)|`bool`|`false`|`False`|
+|`cycloid_api_metrics_collection_interval`|Interval of the background Concourse business metrics collection (Go duration, e.g. "30s"). Empty uses the application default.|`string`|`""`|`False`|
+|`cycloid_api_metrics_collectors`|Enabled Concourse business metrics collectors; extensible by type (pipeline today, git later).|`list`|`["pipeline"]`|`False`|
+|`cycloid_api_metrics_enabled`|Collect and expose the Concourse business metrics (`cycloidio_concourse_*`) on the backend worker (the task-manager container, or the API container's internal worker when `cycloid_api_task_manager_enabled` is false). Harmless when unscraped; point your monitoring stack (Dynatrace, Prometheus) at the metrics port to ingest them.|`bool`|`false`|`False`|
+|`cycloid_api_metrics_port`|Dedicated internal port exposing the Concourse business metrics (not 2112, which backs the probes).|`int`|`2113`|`False`|
 |`cycloid_cache_mon_install`|Asynqmon is used to debug redis worker queue. Set true to install it|`bool`|`false`|`False`|
 |`cycloid_packages`|List of packages to install depending of the OS|`map`|`debian`|`False`|
 |`cycloid_public_stacks`|Create a catalog repository with Cycloid Public Stacks. (`cycloid_licence` need to be defined)|`bool`|`true`|`False`|
