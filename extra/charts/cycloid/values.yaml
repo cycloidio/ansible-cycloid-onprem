@@ -259,49 +259,37 @@ backend:
       #   memory: 512Mi
       #   ephemeral-storage: 1Gi
 
-    # Pod annotations applied ONLY to the task-manager pod (merged with
-    # backend.podAnnotations). Use this for monitoring stacks that scrape pods
-    # directly instead of via a ServiceMonitor — e.g. Dynatrace (then set
-    # metrics.serviceMonitor.enabled: false):
+    # Extra annotations for the task-manager pod only. Use for pod-scraping
+    # setups like Dynatrace (set metrics.serviceMonitor.enabled: false):
     #   podAnnotations:
     #     metrics.dynatrace.com/scrape: "true"
     #     metrics.dynatrace.com/port: "2113"
     #     metrics.dynatrace.com/path: "/metrics"
     podAnnotations: {}
 
-    # Concourse business metrics (cycloidio_concourse_*), PROD-908. OFF by
-    # default. When enabled, the task-manager collects Concourse build/pipeline/
-    # worker metrics (enriched with the Cycloid context) and serves them on a
-    # dedicated internal port, separate from the 2112 probe port. Collection
-    # runs on a single replica (leader election); every replica serves the same
-    # values.
+    # Concourse business metrics (cycloidio_concourse_*), PROD-908.
+    # Collected by the task-manager on one replica, served by all.
     metrics:
+      # Enable collection and the metrics endpoint.
       enabled: false
-      # Dedicated internal port for the business metrics (NOT 2112, which backs
-      # the k8s probes).
+      # Metrics port (separate from the 2112 probe port).
       port: "2113"
-      # Enabled collectors; extensible by type (pipeline today, git later).
+      # Collectors to run (pipeline today, more later).
       collectors:
         - pipeline
-      # Interval of the background collection (Go duration). Empty = app default.
+      # Collection interval, Go duration with a unit (e.g. "30s", "1m").
+      # Empty = default 1m.
       collectionInterval: ""
-      # Scraping: a dedicated Service exposes the metrics port and, by default, a
-      # ServiceMonitor is created for Prometheus Operator setups. For monitoring
-      # stacks that scrape pods directly via custom annotations (e.g. Dynatrace),
-      # disable the ServiceMonitor and set service.annotations and/or
-      # podAnnotations instead.
       service:
-        # Extra annotations on the metrics Service, e.g. prometheus.io/* for
-        # annotation-based discovery. Dynatrace users typically scrape the pod
-        # via backend.taskManager.podAnnotations instead (see above).
+        # Extra annotations on the metrics Service (e.g. prometheus.io/*).
         annotations: {}
       serviceMonitor:
-        # Create a ServiceMonitor (requires the Prometheus Operator CRD). On by
-        # default; turn off for Dynatrace/annotation-based scraping.
+        # Create a ServiceMonitor (needs the Prometheus Operator CRD).
+        # Disable for Dynatrace/annotation-based scraping.
         enabled: true
         # Scrape interval.
         interval: 30s
-        # Extra labels so your Prometheus Operator selects this ServiceMonitor.
+        # Extra labels so your Prometheus Operator selects it.
         labels: {}
 
   # Concourse server to be used by the Cycloid Console API.
