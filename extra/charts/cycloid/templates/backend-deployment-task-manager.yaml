@@ -23,7 +23,8 @@ spec:
       {{- include "backendTaskManager.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.backend.podAnnotations }}
+      {{- $podAnnotations := merge (deepCopy (.Values.backend.taskManager.podAnnotations | default dict)) (.Values.backend.podAnnotations | default dict) }}
+      {{- with $podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -60,6 +61,11 @@ spec:
             - name: http
               containerPort: 2112
               protocol: TCP
+            {{- if .Values.backend.taskManager.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.backend.taskManager.metrics.port }}
+              protocol: TCP
+            {{- end }}
           startupProbe:
             httpGet:
               path: /metrics
@@ -92,6 +98,22 @@ spec:
           env:
             - name: "RUN_CMD"
               value: "worker"
+
+            {{- if .Values.backend.taskManager.metrics.enabled }}
+            # Concourse business metrics (cycloidio_concourse_*), PROD-908.
+            - name: "METRICS_ENABLED"
+              value: "true"
+            - name: "METRICS_PORT"
+              value: {{ .Values.backend.taskManager.metrics.port | quote }}
+            {{- with .Values.backend.taskManager.metrics.collectors }}
+            - name: "METRICS_COLLECTORS"
+              value: {{ join "," . | quote }}
+            {{- end }}
+            {{- with .Values.backend.taskManager.metrics.collectionInterval }}
+            - name: "METRICS_COLLECTION_INTERVAL"
+              value: {{ . | quote }}
+            {{- end }}
+            {{- end }}
 
             - name: "DB_HOST"
               value: {{ include "cycloid.mysqlHost" . | quote }}

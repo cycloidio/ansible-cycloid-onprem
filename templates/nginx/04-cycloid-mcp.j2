@@ -1,4 +1,4 @@
-{% if cycloid_mcp_dns is defined and cycloid_mcp_dns != "" %}
+{% if cycloid_mcp_dns is defined and cycloid_mcp_dns != "" and 'cycloid_mcp' in groups and groups['cycloid_mcp'] | length > 0 %}
 server {
     listen       443 ssl;
     server_name  "{{ cycloid_mcp_dns }}";

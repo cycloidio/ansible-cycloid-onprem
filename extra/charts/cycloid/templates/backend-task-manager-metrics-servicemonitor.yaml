@@ -1,0 +1,23 @@
+{{- if and .Values.backend.enabled .Values.backend.taskManager.enabled .Values.backend.taskManager.metrics.enabled .Values.backend.taskManager.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "backend.fullname" . }}-task-manager-metrics
+  labels:
+    {{- include "cycloid.labels" . | nindent 4 }}
+    {{- include "backendTaskManager.selectorLabels" . | nindent 4 }}
+    {{- with .Values.backend.taskManager.metrics.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: {{ .Values.backend.taskManager.metrics.serviceMonitor.interval }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "backendTaskManager.selectorLabels" . | nindent 6 }}
+{{- end }}

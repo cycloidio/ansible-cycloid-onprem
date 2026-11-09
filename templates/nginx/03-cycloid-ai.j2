@@ -1,4 +1,4 @@
-{% if cycloid_ai_dns is defined and cycloid_ai_dns != "" %}
+{% if cycloid_ai_dns is defined and cycloid_ai_dns != "" and 'cycloid_ai' in groups and groups['cycloid_ai'] | length > 0 %}
 server {
     listen       443 ssl;
     server_name  "{{ cycloid_ai_dns }}";
