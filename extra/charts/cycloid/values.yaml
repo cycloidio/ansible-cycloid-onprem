@@ -285,8 +285,9 @@ backend:
         annotations: {}
       serviceMonitor:
         # Create a ServiceMonitor (needs the Prometheus Operator CRD).
-        # Disable for Dynatrace/annotation-based scraping.
-        enabled: true
+        # Enable for Prometheus Operator scraping; leave disabled for
+        # Dynatrace/annotation-based scraping.
+        enabled: false
         # Scrape interval.
         interval: 30s
         # Extra labels so your Prometheus Operator selects it.
