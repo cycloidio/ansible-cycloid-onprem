@@ -274,12 +274,23 @@ backend:
       enabled: false
       # Metrics port (separate from the 2112 probe port).
       port: "2113"
-      # Collectors to run (pipeline today, more later).
+      # Collectors to run: pipeline (Concourse business metrics) and git (Git
+      # health check of the stack and configuration repositories, opt-in).
       collectors:
         - pipeline
       # Collection interval, Go duration with a unit (e.g. "30s", "1m").
       # Empty = default 1m.
       collectionInterval: ""
+      # Git health check (collector "git").
+      git:
+        # Check interval, Go duration with a unit (e.g. "2m"). Empty = default 5m.
+        # Keep it well below the age at which you alert on the last success of a
+        # repository.
+        checkInterval: ""
+        # Also check that Cycloid can write to the configuration repositories. It
+        # reads the git-receive-pack advertisement (no commit, no branch) and does
+        # not detect a branch protection rule or a server hook.
+        writeEnabled: false
       service:
         # Extra annotations on the metrics Service (e.g. prometheus.io/*).
         annotations: {}

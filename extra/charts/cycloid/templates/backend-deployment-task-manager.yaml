@@ -100,7 +100,7 @@ spec:
               value: "worker"
 
             {{- if .Values.backend.taskManager.metrics.enabled }}
-            # Concourse business metrics (cycloidio_concourse_*), PROD-908.
+            # Business metrics: Concourse (cycloidio_concourse_*, PROD-908) and Git repositories health (cycloidio_git_*, ARHS-310).
             - name: "METRICS_ENABLED"
               value: "true"
             - name: "METRICS_PORT"
@@ -112,6 +112,14 @@ spec:
             {{- with .Values.backend.taskManager.metrics.collectionInterval }}
             - name: "METRICS_COLLECTION_INTERVAL"
               value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.backend.taskManager.metrics.git.checkInterval }}
+            - name: "GIT_CHECK_INTERVAL"
+              value: {{ . | quote }}
+            {{- end }}
+            {{- if .Values.backend.taskManager.metrics.git.writeEnabled }}
+            - name: "GIT_CHECK_WRITE_ENABLED"
+              value: "true"
             {{- end }}
             {{- end }}
 
