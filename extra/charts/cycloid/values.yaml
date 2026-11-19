@@ -275,9 +275,11 @@ backend:
       # Metrics port (separate from the 2112 probe port).
       port: "2113"
       # Collectors to run: pipeline (Concourse business metrics) and git (Git
-      # health check of the stack and configuration repositories, opt-in).
+      # health check of the stack and configuration repositories). Only used
+      # when metrics.enabled is true; remove git to disable the Git check.
       collectors:
         - pipeline
+        - git
       # Collection interval, Go duration with a unit (e.g. "30s", "1m").
       # Empty = default 1m.
       collectionInterval: ""
