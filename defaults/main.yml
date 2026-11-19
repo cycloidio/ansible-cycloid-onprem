@@ -894,25 +894,32 @@ cycloid_api_task_manager_container_args_extra: '--cpus="{{ ansible_facts.process
 # metrics port to ingest them.
 #
 #. cycloid_api_metrics_enabled(optional, bool): false
-#+ Enable the collection and exposition of the Concourse business metrics.
+#+ Enable the collection and exposition of the business metrics (Concourse pipelines, and the Git repositories health check when the git collector is enabled).
 cycloid_api_metrics_enabled: false
 #. cycloid_api_metrics_port(optional, int): 2113
-#+ Dedicated internal port exposing the Concourse business metrics (NOT 2112, which backs the probes).
+#+ Dedicated internal port exposing the business metrics (NOT 2112, which backs the probes).
 cycloid_api_metrics_port: 2113
-#. cycloid_api_metrics_collectors(optional, list): ["pipeline"]
-#+ Enabled metrics collectors; extensible by type (pipeline today, git later).
+#. cycloid_api_metrics_collectors(optional, list): ["pipeline", "git"]
+#+ Enabled metrics collectors: pipeline (Concourse business metrics) and git (Git health check of the stack and configuration repositories: read access, plus write access when cycloid_api_metrics_git_check_write_enabled is true). Remove git to disable the Git health check.
 cycloid_api_metrics_collectors:
   - pipeline
+  - git
 #. cycloid_api_metrics_collection_interval(optional, string): ""
 #+ Interval of the background collection (Go duration, e.g. "30s"). Empty = app default.
 cycloid_api_metrics_collection_interval: ""
+#. cycloid_api_metrics_git_check_interval(optional, string): ""
+#+ Interval of the Git health check, when the git collector is enabled (Go duration, e.g. "2m"). Empty = app default (5m). Keep it well below the age at which you alert on the last success of a repository.
+cycloid_api_metrics_git_check_interval: ""
+#. cycloid_api_metrics_git_check_write_enabled(optional, bool): true
+#+ Also check that Cycloid can write to the configuration repositories (git collector). The check reads the git-receive-pack advertisement, it creates no commit or branch. It does not detect a branch protection rule or a server hook.
+cycloid_api_metrics_git_check_write_enabled: true
 # Host:container port mapping for the metrics port, added to the worker
 # container only when metrics are enabled.
 cycloid_api_metrics_container_ports:
   - "0.0.0.0:{{ cycloid_api_metrics_port }}:{{ cycloid_api_metrics_port }}"
 # Env fragment injected into the worker container when metrics are enabled.
 # Merged into container_env below so it stays empty (no METRICS_* at all) when disabled.
-cycloid_api_metrics_env: "{{ {'METRICS_ENABLED': 'true', 'METRICS_PORT': cycloid_api_metrics_port | string, 'METRICS_COLLECTORS': cycloid_api_metrics_collectors | join(',')} | combine({'METRICS_COLLECTION_INTERVAL': cycloid_api_metrics_collection_interval} if cycloid_api_metrics_collection_interval != '' else {}) if cycloid_api_metrics_enabled | bool else {} }}"
+cycloid_api_metrics_env: "{{ {'METRICS_ENABLED': 'true', 'METRICS_PORT': cycloid_api_metrics_port | string, 'METRICS_COLLECTORS': cycloid_api_metrics_collectors | join(',')} | combine({'METRICS_COLLECTION_INTERVAL': cycloid_api_metrics_collection_interval} if cycloid_api_metrics_collection_interval != '' else {}) | combine({'GIT_CHECK_INTERVAL': cycloid_api_metrics_git_check_interval} if cycloid_api_metrics_git_check_interval != '' else {}) | combine({'GIT_CHECK_WRITE_ENABLED': 'true'} if cycloid_api_metrics_git_check_write_enabled | bool else {}) if cycloid_api_metrics_enabled | bool else {} }}"
 
 
 # API call /user/login expect only email/pass properties.
