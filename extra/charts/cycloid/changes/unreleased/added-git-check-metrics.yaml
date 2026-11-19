@@ -1,0 +1,6 @@
+kind: Added
+body: Add the git collector to backend.taskManager.metrics, a periodic check that Cycloid can read its Git repositories (and write the configuration ones) exposed as cycloidio_git_* metrics; backend.taskManager.metrics.collectors now defaults to [pipeline, git] (only used when metrics are enabled, off by default), and backend.taskManager.metrics.git.checkInterval / writeEnabled (default true) set GIT_CHECK_INTERVAL / GIT_CHECK_WRITE_ENABLED
+time: 2026-11-18T18:30:00.000000+01:00
+custom:
+    Ref: Pull
+    RefID: "332"
