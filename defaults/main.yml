@@ -910,9 +910,9 @@ cycloid_api_metrics_collection_interval: ""
 #. cycloid_api_metrics_git_check_interval(optional, string): ""
 #+ Interval of the Git health check, when the git collector is enabled (Go duration, e.g. "2m"). Empty = app default (5m). Keep it well below the age at which you alert on the last success of a repository.
 cycloid_api_metrics_git_check_interval: ""
-#. cycloid_api_metrics_git_check_write_enabled(optional, bool): false
+#. cycloid_api_metrics_git_check_write_enabled(optional, bool): true
 #+ Also check that Cycloid can write to the configuration repositories (git collector). The check reads the git-receive-pack advertisement, it creates no commit or branch. It does not detect a branch protection rule or a server hook.
-cycloid_api_metrics_git_check_write_enabled: false
+cycloid_api_metrics_git_check_write_enabled: true
 # Host:container port mapping for the metrics port, added to the worker
 # container only when metrics are enabled.
 cycloid_api_metrics_container_ports:

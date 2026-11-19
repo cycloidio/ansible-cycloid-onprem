@@ -290,7 +290,7 @@ backend:
         # Also check that Cycloid can write to the configuration repositories. It
         # reads the git-receive-pack advertisement (no commit, no branch) and does
         # not detect a branch protection rule or a server hook.
-        writeEnabled: false
+        writeEnabled: true
       service:
         # Extra annotations on the metrics Service (e.g. prometheus.io/*).
         annotations: {}
