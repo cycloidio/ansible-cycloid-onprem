@@ -1,0 +1,6 @@
+kind: Added
+body: 'backend: add backend.api.podAnnotations to set annotations on the API pod only (for example to scrape /health_check on port 3001), merged with backend.podAnnotations and taking precedence key by key. backend.podAnnotations is unchanged and still applies to the API, the task-manager and the backend CronJob pods.'
+time: 2026-11-25T14:00:00.000000+01:00
+custom:
+    Ref: Pull
+    RefID: "334"
