@@ -416,7 +416,20 @@ backend:
   # pod attack surface. Set to true only if you bind the ServiceAccount to RBAC.
   automountServiceAccountToken: false
 
+  # Annotations for all the backend pods: API, task-manager and backend CronJobs.
   podAnnotations: {}
+
+  api:
+    # Extra annotations for the API pod only. They are merged with
+    # backend.podAnnotations and take precedence key by key. Use for
+    # pod-scraping setups like Dynatrace, to scrape the API /health_check
+    # endpoint (Prometheus format, no authentication) without also annotating
+    # the task-manager and the backend CronJob pods:
+    #   podAnnotations:
+    #     metrics.dynatrace.com/scrape: "true"
+    #     metrics.dynatrace.com/port: "3001"
+    #     metrics.dynatrace.com/path: "/health_check"
+    podAnnotations: {}
 
   podSecurityContext:
     enabled: false

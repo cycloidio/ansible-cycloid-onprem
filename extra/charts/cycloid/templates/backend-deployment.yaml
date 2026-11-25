@@ -26,7 +26,8 @@ spec:
       {{- include "backend.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.backend.podAnnotations }}
+      {{- $podAnnotations := merge (deepCopy (.Values.backend.api.podAnnotations | default dict)) (.Values.backend.podAnnotations | default dict) }}
+      {{- with $podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
