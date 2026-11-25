@@ -15,10 +15,23 @@ VERSION=$(changie latest)
 echo -e "\e[36m# $0 > preparing the helm dependencies for the packaging process\e[0m"
 # helm dep build requires to add the repository first
 helm dep list | tail -n+2 | head -n-1 | awk '{print $1","$3}' | while read repo; do helm repo add ${repo%%,*} ${repo##*,}; done < /dev/stdin
+# charts/ is gitignored and `helm dependency build` never cleans it: any stale
+# unpacked subchart left there (eg. charts/concourse/) gets packaged alongside
+# the freshly downloaded .tgz, shipping two versions of the same subchart.
+rm -rf charts/
 helm dependency build
 
 echo -e "\e[36m# $0 > packaging the local helm chart\e[0m"
 helm package .
+
+# Safety net: a file present twice in the archive means a subchart was packaged twice
+DUPLICATES=$(tar tzf ./cycloid-$VERSION.tgz | sort | uniq -d)
+if [[ -n "$DUPLICATES" ]]; then
+  echo -e "\e[31m# $0 > duplicated files in cycloid-$VERSION.tgz, aborting:\e[0m"
+  echo "$DUPLICATES" | head -n 20
+  rm -f ./cycloid-$VERSION.tgz
+  exit 1
+fi
 
 echo -e "\e[36m# $0 > copy changelog on s3\e[0m"
 aws s3 cp CHANGELOG.md s3://cycloid-onprem-helm-charts/stable/cycloid/
